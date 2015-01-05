@@ -2,6 +2,7 @@
 
 var React = require('react');
 var LoginBox = require('./LoginBox');
+var SimpleStart = require('./SimpleStart');
 
 module.exports = React.createClass({
     getInitialState: function() {
@@ -26,19 +27,26 @@ module.exports = React.createClass({
             ]))
         }
         
+        
+        var mainChildren = [];
+        if(!state.currentUser){
+            mainChildren.push(LoginBox({
+                onLogin: function(userDesc){
+                    self.setState({
+                        currentUser: userDesc
+                    })
+                }
+            }));
+        }
+        else{
+            mainChildren.push(SimpleStart());
+        }
+        
         return React.DOM.div({className: "react-wrapper"}, [
             
             React.DOM.header({}, headerChildren),
             
-            React.DOM.main({}, [
-                LoginBox({
-                    onLogin: function(userDesc){
-                        self.setState({
-                            currentUser: userDesc
-                        })
-                    }
-                })
-            ])
+            React.DOM.main({}, mainChildren)
         
         ]);
     }

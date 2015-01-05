@@ -14,8 +14,6 @@ interface LoginBoxProps{
     onLogin: (infos: LoginInfos) => void
 }
 
-
-
 */
 
 module.exports = React.createClass({
@@ -24,18 +22,6 @@ module.exports = React.createClass({
             waiting: false
         };
     },
-    
-    /*
-    <div class="login-box">
-        <div style="text-align: left; width:100%">
-            <span style="text-decoration: underline;">Login</span> <span hidden class="spinner"></span>
-        </div>
-
-        <button class="google">Google</button>
-        <button disabled class="twitter">Twitter</button>
-        <button disabled class="linkedin">Linkedin</button>
-    </div>
-    */
     
     render: function() {
         var self = this;
@@ -65,7 +51,7 @@ module.exports = React.createClass({
                             username: "Amar Lakel",
                             pictureURL: "https://pbs.twimg.com/profile_images/486464993626308608/AH-pheJB.jpeg"
                         });
-                    }, /*Math.random()*9*/5*1000)
+                    }, Math.random()*6*1000)
                 }
             }, "Google"),
             React.DOM.button({disabled: true, className: "twitter"}, "Twitter"),

@@ -24,7 +24,7 @@ module.exports = React.createClass({
         this.getDOMNode().addEventListener('transitionend', function(e){
             self.setState({
                 renderNow: true,
-                fadeIn: !this.state.fadeIn
+                fadeIn: !self.state.fadeIn
             });
         });
     },

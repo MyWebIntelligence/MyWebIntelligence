@@ -2,6 +2,8 @@
 
 var React = require('react');
 
+var TerritoireListItem = require('./TerritoireListItem');
+
 module.exports = React.createClass({
     getInitialState: function(){
         return {};
@@ -11,8 +13,6 @@ module.exports = React.createClass({
         var props = this.props;
         var state = this.state;
         var self = this;
-        
-        console.log('props', props);
 
         /*
             <ul class="territoires">
@@ -28,24 +28,10 @@ module.exports = React.createClass({
                     <button class="delete"></button>
                 <li>
             </ul>
-        
         */
         
         return React.DOM.ul({className: "territoires"}, props.territoires.map(function(t){
-            return React.DOM.li({}, [
-                React.DOM.a({
-                    href: "TODO",
-                    onClick: function(e){
-                        e.preventDefault();
-                    }
-                }, [
-                    React.DOM.div({className: "name"}, t.name),
-                    React.DOM.div({className: "description"}, t.description),
-                    React.DOM.ul({className: "queries"}, t.queries.map(function(q){
-                        return React.DOM.li({}, q.name);
-                    })),
-                ])
-            ]);
+            return TerritoireListItem({territoire: t});
         }));
     }
 });

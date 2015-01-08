@@ -13,7 +13,7 @@ module.exports = React.createClass({
     getInitialState: function() {
         return {
             currentUser: this.props.currentUser,
-            currentProject: this.props.currentProject
+            currentTerritoire: this.props.currentTerritoire
         }
     },
     
@@ -26,9 +26,20 @@ module.exports = React.createClass({
             React.DOM.span({}, "My Web Intelligence")
         ];
 
+        var mainChildren = [];
+        var mainClassName;
+        
         if(state.currentUser){
             
-            if(state.currentUser.projects){
+            if(state.currentTerritoire){
+            
+            }
+            else{
+                console.log('state.currentUser.territoires', state.currentUser.territoires, state.currentUser)
+                mainChildren.push(TerritoiresList({territoires: state.currentUser.territoires}));
+            }
+            
+            /*if(state.currentUser.territoire){
                 // TODO save last project used and pick this one
                 
                 headerChildren.push(React.DOM.select({
@@ -54,7 +65,7 @@ module.exports = React.createClass({
                         value: p.id
                     }, p.name);
                 })));
-            }
+            }*/
             
             
             
@@ -65,15 +76,14 @@ module.exports = React.createClass({
         }
         
         
-        var mainChildren = [];
-        var mainClassName;
+        
         if(!state.currentUser){
             mainChildren.push(LoginBox({
                 onLogin: function(user){
                     self.setState({
                         currentUser: user,
-                        currentProject: user.projects[0]
-                    })
+                        currentTerritoire: undefined
+                    });
                 }
             }));
             
@@ -83,9 +93,7 @@ module.exports = React.createClass({
             //mainChildren.push(SimpleStart());
         }
         
-        if(state.currentProject){
-            mainChildren.push(TerritoiresList({territoires: state.currentProject.territoires}));
-        }
+        
         
         return React.DOM.div({className: "react-wrapper"}, [
             

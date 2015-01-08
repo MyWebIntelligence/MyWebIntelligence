@@ -44,6 +44,55 @@ main.login{
 }
 
 
+/*
+    Territoires
+*/
+main ul.territoires{
+    width: 40%;
+}
+
+main ul.territoires > li{
+    padding: 0.5em;
+    margin: 0.2em 0;
+    border: outset 3px #BBB;
+}
+
+main ul.territoires > li > a{
+    width: 90%;
+    height: 100%;
+    text-decoration: none;
+    color: black;
+}
+
+/* TODO use the "responsive square" trick */
+main ul.territoires > li > button.delete{
+    width: 10%;
+    height: 100%;
+}
+
+main ul.territoires > li .name{
+    font-weight: bold;
+    margin-bottom: 0.5em;
+}
+main ul.territoires > li .description{
+    font-size: 0.8em;
+    color: #999;
+}
+main ul.territoires > li ul.queries{
+    font-size: 0.9em;
+}
+main ul.territoires > li ul.queries > li{
+    display: inline-block;
+    border: solid 1px #777;
+    border-radius: 0.5em;
+    
+    padding: 0.2em;
+    margin: 0.2em;
+    
+}
+
+
+
 
 button{
     font-family: "DejaVu Serif";

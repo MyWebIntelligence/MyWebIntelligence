@@ -31,11 +31,19 @@ header .user-infos img.avatar{
 
 main{
     display: flex;
+    min-height: 80%;
+    
+    align-items: flex-start;
+    justify-content: center;
+}
+
+main.login{
     
     align-items: center;
     justify-content: center;
-    min-height: 80%;
 }
+
+
 
 button{
     font-family: "DejaVu Serif";
@@ -106,7 +114,6 @@ button.linkedin{
     
     transition-property: background-color;
     transition-duration: 1s;
-    
 }
 
 .spinner.fadein{

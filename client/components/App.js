@@ -41,6 +41,8 @@ interface MyWIOracleId extends Number{ __MyWIOracleId: MyWIOracleId }
 
 */
 
+var nextMyWIOracleId = 1000;
+
 module.exports = React.createClass({
     getInitialState: function() {
         return {
@@ -72,6 +74,20 @@ module.exports = React.createClass({
                     territoires: state.currentUser.territoires,
                     onTerritoireListChange: function(newTerritoireList){
                         state.currentUser.territoires = newTerritoireList;
+                        self.setState({
+                            currentUser: state.currentUser,
+                            currentTerritoire: state.currentTerritoire
+                        })
+                    },
+                    createQuery: function(queryData, territoire){
+                        if(!Object.assign){
+                            throw 'add Object.assign polyfill';
+                        }
+                        
+                        var query = Object.assign({}, queryData, {id: nextMyWIOracleId++});
+                        
+                        territoire.queries.push(query);
+                        // some element of the state.currentUser.territoires array was mutated
                         self.setState({
                             currentUser: state.currentUser,
                             currentTerritoire: state.currentTerritoire

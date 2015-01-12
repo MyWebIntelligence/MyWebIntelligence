@@ -9,6 +9,7 @@ var QueryForm = require('./QueryForm');
 interface TerritoireListItemProps{
     territoire: MyWITerritoire
     onTerritoireChange : (t: MyWITerritoire) => void
+    createQuery: (q: MyWIQueryData) => void
 }
 
 */
@@ -92,7 +93,11 @@ module.exports = React.createClass({
                     }, '+'),
                     state.openQueryForms.has('+') ? QueryForm({
                         onSubmit: function(formData){
-                            throw 'TODO';
+                            props.createQuery(formData);
+                            
+                            // close the form UI in all cases
+                            state.openQueryForms.delete('+');
+                            self.setState({openQueryForms: state.openQueryForms});
                         }
                     }) : undefined
                 ])

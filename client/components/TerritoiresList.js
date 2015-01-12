@@ -10,7 +10,8 @@ interface TerritoireListProps{
     territoires: MyWITerritoire[],
     onTerritoireListChange: function(ts: MyWITerritoire[]){
     
-    }
+    },
+    createQuery: (queryData, territoire: MyWITerritoire) => void
 }
 
 
@@ -55,6 +56,9 @@ module.exports = React.createClass({
                         props.territoires[index] = newT;
                         
                         props.onTerritoireListChange(props.territoires);
+                    },
+                    createQuery: function(queryData){
+                        props.createQuery(queryData, t);
                     }
                 });
             }))

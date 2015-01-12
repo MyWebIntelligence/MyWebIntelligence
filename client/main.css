@@ -39,7 +39,6 @@ main{
 }
 
 main.login{
-    
     align-items: center;
     justify-content: center;
 }
@@ -48,7 +47,7 @@ main.login{
 /*
     Territoires
 */
-main ul.territoires{
+main > .territoires{
     width: 40%;
 }
 
@@ -81,6 +80,8 @@ main ul.territoires > li .description{
 }
 main ul.territoires > li ul.queries{
     font-size: 0.9em;
+    display: inline;
+    
 }
 main ul.territoires > li ul.queries > li{
     display: inline-block;
@@ -122,6 +123,11 @@ main ul.territoires > li ul.queries > li form{
     z-index: 1;
     
     width: 25em;
+}
+
+main ul.territoires > li ul.queries > li form button[type="submit"]{
+    padding: 0.5em 0;
+    border: 3px outset #AAA;
 }
 
 main ul.territoires > li ul.queries > li form label{

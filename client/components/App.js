@@ -1,12 +1,44 @@
 "use strict";
 
 var React = require('react');
+
 var LoginBox = require('./LoginBox');
 var SimpleStart = require('./SimpleStart');
 var TerritoiresList = require('./TerritoiresList');
 
 /*
-    
+
+interface MyWIUserId extends Number{ __MyWIUserId: MyWIUserId }
+
+interface MyWIUser{
+    id: MyWIUserId
+    username: string
+    pictureURL: string
+    territoires : MyWITerritoire[]
+}
+
+interface MyWITerritoireId extends Number{ __MyWITerritoireId: MyWITerritoireId }
+
+interface MyWITerritoire{
+    id: MyWITerritoireId
+    name: string
+    description: string 
+    queries: MyWIQuery[]
+}
+
+interface MyWIQueryId extends Number{ __MyWIQueryId: MyWIQueryId }
+
+interface MyWIQuery{
+    id: MyWIQueryId,
+    name: string
+    q: string
+    lang: string // enum
+    nbPage: number // still not convinced of this one.
+    oracle: MyWIOracleId
+}
+
+interface MyWIOracleId extends Number{ __MyWIOracleId: MyWIOracleId }
+
 */
 
 module.exports = React.createClass({
@@ -36,7 +68,16 @@ module.exports = React.createClass({
             }
             else{
                 console.log('state.currentUser.territoires', state.currentUser.territoires, state.currentUser)
-                mainChildren.push(TerritoiresList({territoires: state.currentUser.territoires}));
+                mainChildren.push(TerritoiresList({
+                    territoires: state.currentUser.territoires,
+                    onTerritoireListChange: function(newTerritoireList){
+                        state.currentUser.territoires = newTerritoireList;
+                        self.setState({
+                            currentUser: state.currentUser,
+                            currentTerritoire: state.currentTerritoire
+                        })
+                    }
+                }));
             }
             
             /*if(state.currentUser.territoire){
@@ -97,9 +138,9 @@ module.exports = React.createClass({
         
         return React.DOM.div({className: "react-wrapper"}, [
             
-            React.DOM.header({className: mainClassName}, headerChildren),
+            React.DOM.header({}, headerChildren),
             
-            React.DOM.main({}, mainChildren)
+            React.DOM.main({className: mainClassName}, mainChildren)
         
         ]);
     }

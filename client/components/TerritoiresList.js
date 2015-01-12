@@ -4,6 +4,18 @@ var React = require('react');
 
 var TerritoireListItem = require('./TerritoireListItem');
 
+/*
+
+interface TerritoireListProps{
+    territoires: MyWITerritoire[],
+    onTerritoireListChange: function(ts: MyWITerritoire[]){
+    
+    }
+}
+
+
+*/
+
 module.exports = React.createClass({
     getInitialState: function(){
         return {};
@@ -30,8 +42,22 @@ module.exports = React.createClass({
             </ul>
         */
         
-        return React.DOM.ul({className: "territoires"}, props.territoires.map(function(t){
-            return TerritoireListItem({territoire: t});
-        }));
+        return React.DOM.div({className: "territoires"}, [
+            React.DOM.h1({}, "Territoires"),
+            React.DOM.ul({className: "territoires"}, props.territoires.map(function(t){
+                return TerritoireListItem({
+                    territoire: t,
+                    onTerritoireChange: function(newT){
+                        var index = props.territoires.findIndex(function(t){
+                            return t.id === newT.id;
+                        });
+                        
+                        props.territoires[index] = newT;
+                        
+                        props.onTerritoireListChange(props.territoires);
+                    }
+                });
+            }))
+        ]);
     }
 });

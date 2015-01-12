@@ -4,6 +4,15 @@ var React = require('react');
 
 var QueryForm = require('./QueryForm');
 
+
+/*
+interface TerritoireListItemProps{
+    territoire: MyWITerritoire
+    onTerritoireChange : (t: MyWITerritoire) => void
+}
+
+*/
+
 module.exports = React.createClass({
     getInitialState: function(){
         return { openQueryForms: new Set() };
@@ -24,8 +33,13 @@ module.exports = React.createClass({
                 }
             }, [
                 React.DOM.div({className: "name"}, t.name),
-                React.DOM.div({className: "description"}, t.description),
+                React.DOM.p({className: "description"}, t.description),
             ]),
+            React.DOM.span({
+                style: {
+                    display: "inline"
+                }
+            }, "Queries: "),
             React.DOM.ul({className: "queries"}, t.queries.map(function(q){
                 return React.DOM.li({
                     className: state.openQueryForms.has(q.id) ? 'open' : ''
@@ -42,8 +56,23 @@ module.exports = React.createClass({
                     }, q.name),
                     state.openQueryForms.has(q.id) ? QueryForm({
                         query: q,
-                        onSubmit: function(e){
-                            throw 'TODO';
+                        onSubmit: function(formData){
+                            var keysWithChange = Object.keys(formData).filter(function(k){
+                                return q[k] !== formData[k];
+                            });
+                            
+                            if(keysWithChange.length >= 1){
+                                keysWithChange.forEach(function(k){
+                                    q[k] = formData[k];
+                                });
+                                
+                                // new territoire is the current one mutated at the .queries array level
+                                props.onTerritoireChange(t);
+                            }
+                            
+                            // close the form UI in all cases
+                            state.openQueryForms.delete(q.id);
+                            self.setState({openQueryForms: state.openQueryForms});
                         }
                     }) : undefined
                 ]);
@@ -62,7 +91,7 @@ module.exports = React.createClass({
                         }
                     }, '+'),
                     state.openQueryForms.has('+') ? QueryForm({
-                        onSubmit: function(e){
+                        onSubmit: function(formData){
                             throw 'TODO';
                         }
                     }) : undefined

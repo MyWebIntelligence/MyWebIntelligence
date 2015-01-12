@@ -31,8 +31,8 @@ var loggedInUserStub = {
                     name: "chocolatier",
                     q: "chocolatier",
                     lang: "fr",
-                    nbPage: 400, // still not convinced of this one.
-                    oracle: "Twitter Search"
+                    nbPage: 200, // still not convinced of this one.
+                    oracle: 2
                 }
             ]
         },
@@ -46,16 +46,16 @@ var loggedInUserStub = {
                     name: "gros",
                     q: "Tortank Leviator",
                     lang: "fr",
-                    nbPage: 400, // still not convinced of this one.
-                    oracle: "Google"
+                    nbPage: 250, // still not convinced of this one.
+                    oracle: 1
                 },
                 {
                     id: 66,
                     name: "petit",
                     q: "Carapuce Poissirène",
                     lang: "fr",
-                    nbPage: 400, // still not convinced of this one.
-                    oracle: "Google"
+                    nbPage: 300, // still not convinced of this one.
+                    oracle: 1
                 }
             ]
         },
@@ -69,16 +69,16 @@ var loggedInUserStub = {
                     name: "gros",
                     q: "Dracaufeu Arcanin",
                     lang: "fr",
-                    nbPage: 400, // still not convinced of this one.
-                    oracle: "Google"
+                    nbPage: 500, // still not convinced of this one.
+                    oracle: 1
                 },
                 {
                     id: 54,
                     name: "petit",
                     q: "Goupix Salamèche",
                     lang: "fr",
-                    nbPage: 400, // still not convinced of this one.
-                    oracle: "Google"
+                    nbPage: 550, // still not convinced of this one.
+                    oracle: 1
                 }
             ]
         }
@@ -98,8 +98,6 @@ module.exports = React.createClass({
         var data = this.props;
         var state = this.state;
         
-        console.log('loginbox state', state);
-        
         return React.DOM.div({className: "login-box"}, [
             React.DOM.header({}, [
                 React.DOM.h1({}, "Login"),
@@ -108,7 +106,6 @@ module.exports = React.createClass({
             React.DOM.button({
                 className: "google",
                 onClick: function(e){
-                    console.log('click google');
                     self.setState({
                         waiting: true
                     });

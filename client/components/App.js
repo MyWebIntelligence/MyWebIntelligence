@@ -112,7 +112,8 @@ var loggedInUserStub = {
 };
 
 
-var nextMyWIOracleId = 1000;
+var nextMyWITerritoireId = 1000;
+var nextMyWIQueryId = 1000;
 
 module.exports = React.createClass({
     getInitialState: function() {
@@ -137,7 +138,7 @@ module.exports = React.createClass({
         if(state.currentUser){
             
             if(state.currentTerritoire){
-            
+                throw 'TODO';
             }
             else{
                 mainChildren.push(TerritoiresList({
@@ -149,12 +150,28 @@ module.exports = React.createClass({
                             currentTerritoire: state.currentTerritoire
                         })
                     },
+                    createTerritoire: function(territoireData){
+                        if(!Object.assign){
+                            throw 'add Object.assign polyfill';
+                        }
+                        
+                        var territoire = Object.assign({queries: []}, territoireData, {id: nextMyWITerritoireId++});
+                        
+                        // add at the beginning of the array so it appears first
+                        state.currentUser.territoires.unshift(territoire);
+                        
+                        // some element of the state.currentUser.territoires array was mutated
+                        self.setState({
+                            currentUser: state.currentUser,
+                            currentTerritoire: state.currentTerritoire //territoire
+                        });
+                    },
                     createQuery: function(queryData, territoire){
                         if(!Object.assign){
                             throw 'add Object.assign polyfill';
                         }
                         
-                        var query = Object.assign({}, queryData, {id: nextMyWIOracleId++});
+                        var query = Object.assign({}, queryData, {id: nextMyWIQueryId++});
                         
                         territoire.queries.push(query);
                         // some element of the state.currentUser.territoires array was mutated

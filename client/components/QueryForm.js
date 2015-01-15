@@ -2,19 +2,6 @@
 
 var React = require('react');
 
-function makeFormInput(name, tagName, type, placeholder){
-    return React.DOM.label({}, [
-        name,
-        React.DOM[tagName]({
-            type: type,
-            placeholder: placeholder
-        })
-    ]);
-}
-
-//throw 'TODO add close button as well as confirm/ok button';
-// add props.onSubmit
-
 /*
 
 interface QueryFormProps{
@@ -43,13 +30,11 @@ module.exports = React.createClass({
                 var formElement = e.target;
                 
                 var formData = Object.create(null);
-                formData.name = formElement.querySelector('input[name="name"]').value;
+                formData.name = formElement.querySelector('input[name="name"]').value.trim();
                 formData.q = formElement.querySelector('input[name="q"]').value;
                 formData.lang = formElement.querySelector('select[name="lang"]').value;
                 formData.nbPage = Number( formElement.querySelector('input[name="nbPage"]').value );
                 formData.oracle = Number( formElement.querySelector('select[name="oracle"]').value );
-                
-                console.log('formData', formData);
                 
                 props.onSubmit(formData);
             }
@@ -59,6 +44,17 @@ module.exports = React.createClass({
                 React.DOM.input({
                     name: 'name',
                     type: 'text',
+                    required: true,
+                    /*
+                        https://github.com/facebook/react/issues/2860
+                        https://bugzilla.mozilla.org/show_bug.cgi?id=1121945
+                        Giving up for now
+                    */
+                    //pattern: '\\S+', 
+                    
+                    // browsers auto-complete based on @name and here it's "name" which is common
+                    // so autocompletion values aren't that useful. This isn't very autocompletable anyway
+                    autocomplete: 'off', 
                     defaultValue: query.name
                 })
             ]),
@@ -66,6 +62,7 @@ module.exports = React.createClass({
                 React.DOM.span({}, 'query string'),
                 React.DOM.input({
                     name: 'q',
+                    required: true,
                     type: 'text',
                     defaultValue: query.q
                 })

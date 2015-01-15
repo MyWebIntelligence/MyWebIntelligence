@@ -16,7 +16,10 @@ interface TerritoireListItemProps{
 
 module.exports = React.createClass({
     getInitialState: function(){
-        return { openQueryForms: new Set() };
+        return {
+            openQueryForms: new Set(),
+            editMode: false
+        };
     },
     
     render: function(){
@@ -33,7 +36,7 @@ module.exports = React.createClass({
                     e.preventDefault();
                 }
             }, [
-                React.DOM.div({className: "name"}, t.name),
+                React.DOM.h1({}, t.name),
                 React.DOM.p({className: "description"}, t.description),
             ]),
             React.DOM.span({

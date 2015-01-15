@@ -8,6 +8,10 @@ body div.react-wrapper{
     overflow-y: scroll;
 }
 
+button:empty::before{
+    content: '-';
+}
+
 header{
     width: 100%;
     height: 3em;
@@ -70,10 +74,21 @@ main ul.territoires > li > button.delete{
     height: 100%;
 }
 
-main ul.territoires > li .name{
+main ul.territoires > li h1{
     font-weight: bold;
     margin-bottom: 0.5em;
+    font-size: 1em;
+    
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
 }
+
+main ul.territoires > li .edit{
+    
+    
+}
+
 main ul.territoires > li .description{
     font-size: 0.8em;
     color: #999;
@@ -95,7 +110,6 @@ main ul.territoires > li.add > button{
 }
 
 main ul.territoires > li ul.queries{
-    font-size: 0.9em;
     display: inline;
 }
 main ul.territoires > li ul.queries > li{
@@ -103,7 +117,6 @@ main ul.territoires > li ul.queries > li{
     border: solid 1px #777;
     border-radius: 0.5em;
     
-    padding: 0.2em;
     margin: 0.2em;
     text-align: justify;
     
@@ -120,13 +133,15 @@ main ul.territoires > li ul.queries > li.open{
 }
 
 main ul.territoires > li ul.queries > li button{
-    padding: 0;
+    
+    padding: 0.2em;
     margin: 0;
     border: 0;
     text-transform: none;
     
     width: 100%;
     height: 100%;
+    position: relative;
     
     background-color: transparent;
     color: inherit;

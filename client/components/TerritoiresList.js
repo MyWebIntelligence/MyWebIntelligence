@@ -3,6 +3,8 @@
 var React = require('react');
 
 var TerritoireListItem = require('./TerritoireListItem');
+var TerritoireForm = require('./TerritoireForm');
+
 
 /*
 
@@ -11,6 +13,7 @@ interface TerritoireListProps{
     onTerritoireListChange: function(ts: MyWITerritoire[]){
     
     },
+    createTerritoire: (territoireData) => void
     createQuery: (queryData, territoire: MyWITerritoire) => void
 }
 
@@ -19,7 +22,7 @@ interface TerritoireListProps{
 
 module.exports = React.createClass({
     getInitialState: function(){
-        return {};
+        return { newTerritoireFormOpen: false };
     },
     
     render: function(){
@@ -46,7 +49,20 @@ module.exports = React.createClass({
         return React.DOM.div({className: "territoires"}, [
             React.DOM.h1({}, "Territoires"),
             React.DOM.ul({className: "territoires"}, [
-                React.DOM.li({className: 'add'}, React.DOM.button({}, '+'))
+                React.DOM.li({className: state.newTerritoireFormOpen ? '' : 'add'}, 
+                    state.newTerritoireFormOpen ?
+                        TerritoireForm({
+                            onSubmit: function(territoireData){
+                                props.createTerritoire(territoireData);
+                                self.setState({ newTerritoireFormOpen: false });
+                            }
+                        }) :
+                        React.DOM.button({
+                            onClick: function(){
+                                self.setState({ newTerritoireFormOpen: true });
+                            }
+                        }, '+')
+                )
             ].concat(props.territoires.map(function(t){
                 return TerritoireListItem({
                     territoire: t,

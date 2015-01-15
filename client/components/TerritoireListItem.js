@@ -47,12 +47,12 @@ module.exports = React.createClass({
 
                         // new territoire is the current one mutated at the .queries array level
                         props.onTerritoireChange(t);
-                        
-                        self.setState({
-                            openQueryForms: state.openQueryForms,
-                            editMode: false
-                        });
                     }
+
+                    self.setState({
+                        openQueryForms: state.openQueryForms,
+                        editMode: false
+                    });
                 }
             }) ];
         }

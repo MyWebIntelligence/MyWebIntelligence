@@ -59,6 +59,8 @@ main ul.territoires > li{
     padding: 0.5em;
     margin: 0.2em 0;
     border: outset 3px #BBB;
+    
+    position: relative;
 }
 
 main ul.territoires > li > a{
@@ -84,9 +86,17 @@ main ul.territoires > li h1{
     justify-content: space-between;
 }
 
-main ul.territoires > li .edit{
+main ul.territoires > li button.edit{
+    font-size: 1.4em;
+    padding: 0.2em;
+    position: absolute;
     
+    right: 0.2em;
+    top: 0.2em;
     
+    background-color: transparent;
+    
+    border: 0;
 }
 
 main ul.territoires > li .description{
@@ -96,7 +106,7 @@ main ul.territoires > li .description{
 
 main ul.territoires > li.add{
     background-color: lightgreen;
-    padding: 0;
+    padding: 1em;
 }
 
 main ul.territoires > li.add > button{
@@ -174,36 +184,10 @@ main ul.territoires > li ul.queries > li form label{
 
 button{
     font-family: "DejaVu Serif";
-    padding: 1em 2em;
-    background-color: white;
     
     cursor: pointer;
-    
-    text-transform: uppercase;
-    
-    width: 80%;
-    
-    text-align: center;
 }
 
-button:disabled{
-    background-color: #AAA;
-    color: white;
-    
-    text-decoration: line-through;
-    
-    cursor:default;
-}
-
-button.google{
-    border: 1px solid indianred;
-}
-button.twitter{
-    border: 1px solid #4fe3e3;
-}
-button.linkedin{
-    border: 1px solid #3037de;
-}
 
 .login-box{
     width: 20%;
@@ -231,8 +215,32 @@ button.linkedin{
 }
 
 .login-box button{
-    
+    padding: 1em 2em;
     margin: 0.5em;
+    width: 80%;
+    background-color: white;
+    
+    text-transform: uppercase;
+    text-align: center;
+}
+
+.login-box button:disabled{
+    background-color: #AAA;
+    color: white;
+    
+    text-decoration: line-through;
+    
+    cursor:default;
+}
+
+.login-box button.google{
+    border: 1px solid indianred;
+}
+.login-box button.twitter{
+    border: 1px solid #4fe3e3;
+}
+.login-box button.linkedin{
+    border: 1px solid #3037de;
 }
 
 

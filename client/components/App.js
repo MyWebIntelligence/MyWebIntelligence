@@ -166,6 +166,16 @@ module.exports = React.createClass({
                             currentTerritoire: state.currentTerritoire //territoire
                         });
                     },
+                    deleteTerritoire: function(t){
+                        var index = state.currentUser.territoires.indexOf(t);
+                        state.currentUser.territoires.splice(index, 1);
+                        
+                        // some element of the state.currentUser.territoires array was mutated
+                        self.setState({
+                            currentUser: state.currentUser,
+                            currentTerritoire: state.currentTerritoire
+                        });
+                    },
                     createQuery: function(queryData, territoire){
                         if(!Object.assign){
                             throw 'add Object.assign polyfill';

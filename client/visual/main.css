@@ -76,7 +76,7 @@ main ul.territoires > li > button.delete{
     height: 100%;
 }
 
-main ul.territoires > li h1{
+main ul.territoires > li h1.name{
     font-weight: bold;
     margin-bottom: 0.5em;
     font-size: 1em;
@@ -202,7 +202,13 @@ form.query label{
     padding: 0.2em;
 }
 
-
+.TerritoireForm-react-component .delete{
+    position: absolute;
+    
+    top: 0.2em;
+    right: 0.2em;
+    padding: 0.2em;
+}
 
 
 button{

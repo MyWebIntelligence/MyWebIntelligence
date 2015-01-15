@@ -41,7 +41,7 @@ module.exports = React.createClass({
         if(state.pendingConfirmation){
             children.push(React.DOM.div({className: 'confirmation-box'}, [
                 React.DOM.h1({}, 'Confirm?'),
-                React.DOM.div({}, [
+                React.DOM.div({className: "button-group"}, [
                     React.DOM.button({
                         className: 'cancel',
                         onClick: function(){

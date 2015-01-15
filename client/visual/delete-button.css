@@ -2,7 +2,7 @@
     position: relative;
 }
 
-.delete button{
+.delete > button{
     position: absolute;
     
     top: 0.2em;
@@ -17,13 +17,33 @@
     background-color: transparent;
 }
 
-.delete .confirmation{
+.delete .confirmation-box{
+    position: absolute;
+    text-align: center;
     
+    top: 0.2em;
+    right: -5em;
+    width: 10em;
+    
+    border: 1px solid red;
+    
+    background-color: white;
 }
-.delete .confirmation button.confirm{
+.delete .confirmation-box h1{
+    font-size: 1.1em;
+    color: red;
+}
+
+.delete .confirmation-box .button-group{
+    display: flex;
+    justify-content: space-around;
+}
+
+
+.delete .confirmation-box button.confirm{
     
 }
 
-.delete .confirmation button.delete{
+.delete .confirmation-box button.delete{
     
 }

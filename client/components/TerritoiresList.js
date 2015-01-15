@@ -45,7 +45,9 @@ module.exports = React.createClass({
         
         return React.DOM.div({className: "territoires"}, [
             React.DOM.h1({}, "Territoires"),
-            React.DOM.ul({className: "territoires"}, props.territoires.map(function(t){
+            React.DOM.ul({className: "territoires"}, [
+                React.DOM.li({className: 'add'}, React.DOM.button({}, '+'))
+            ].concat(props.territoires.map(function(t){
                 return TerritoireListItem({
                     territoire: t,
                     onTerritoireChange: function(newT){
@@ -61,7 +63,7 @@ module.exports = React.createClass({
                         props.createQuery(queryData, t);
                     }
                 });
-            }))
+            })))
         ]);
     }
 });

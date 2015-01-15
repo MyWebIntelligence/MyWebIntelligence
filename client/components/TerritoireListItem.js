@@ -79,7 +79,7 @@ module.exports = React.createClass({
                 ]);
             }).concat([
                 React.DOM.li({
-                    className: state.openQueryForms.has('+') ? 'open' : ''
+                    className: 'add' + (state.openQueryForms.has('+') ? ' open' : '')
                 }, [
                     React.DOM.button({
                         onClick: function(e){

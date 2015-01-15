@@ -1,0 +1,29 @@
+.delete{
+    position: relative;
+}
+
+.delete button{
+    position: absolute;
+    
+    top: 0.2em;
+    right: 0.2em;
+    padding: 0.2em;
+    
+    font-size: 1.3em;
+    color: red;
+    
+    border: 0;
+    
+    background-color: transparent;
+}
+
+.delete .confirmation{
+    
+}
+.delete .confirmation button.confirm{
+    
+}
+
+.delete .confirmation button.delete{
+    
+}

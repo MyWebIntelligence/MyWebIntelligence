@@ -11,6 +11,7 @@ interface TerritoireListItemProps{
     territoire: MyWITerritoire
     onTerritoireChange : (t: MyWITerritoire) => void
     createQuery: (q: MyWIQueryData) => void
+    removeQueryFromTerritoire: (q: MyWIQueryData, t: MyWITerritoire) => void
 }
 
 */
@@ -120,6 +121,9 @@ module.exports = React.createClass({
                                     openQueryForms: state.openQueryForms,
                                     editMode: false
                                 });
+                            },
+                            deleteQuery: function(query){
+                                props.removeQueryFromTerritoire(query, t);
                             }
                         }) : undefined
                     ]);

@@ -142,7 +142,7 @@ main ul.territoires > li ul.queries > li.open{
     color: white;
 }
 
-main ul.territoires > li ul.queries > li button{
+main ul.territoires > li ul.queries > li > button{
     
     padding: 0.2em;
     margin: 0;
@@ -160,7 +160,7 @@ main ul.territoires > li ul.queries > li button{
 
     
 
-main ul.territoires > li ul.queries > li form{
+main ul.territoires > li ul.queries > li .QueryForm-react-component{
     position: absolute;
     color: black;
     background: white;
@@ -172,14 +172,37 @@ main ul.territoires > li ul.queries > li form{
     width: 25em;
 }
 
-main ul.territoires > li ul.queries > li form button[type="submit"]{
-    padding: 0.5em 0;
-    border: 3px outset #AAA;
+.QueryForm-react-component form.query{
+    
 }
 
-main ul.territoires > li ul.queries > li form label{
+form.query button[type="submit"]{
+    padding: 0.5em 0.2em;
+    border: 3px outset #AAA;
+    
+    margin: 0;
+    
+    width: 100%;
+    height: 100%;
+    position: relative;
+    
+    background-color: transparent;
+    color: inherit;
+}
+
+form.query label{
     display: block;
 }
+
+.QueryForm-react-component .delete{
+    position: absolute;
+    
+    top: 0.2em;
+    right: 0.2em;
+    padding: 0.2em;
+}
+
+
 
 
 button{

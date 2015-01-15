@@ -179,6 +179,16 @@ module.exports = React.createClass({
                             currentUser: state.currentUser,
                             currentTerritoire: state.currentTerritoire
                         });
+                    },
+                    removeQueryFromTerritoire: function(query, territoire){
+                        var index = territoire.queries.indexOf(query);
+                        territoire.queries.splice(index, 1);
+                        
+                        // some element of the state.currentUser.territoires array was mutated
+                        self.setState({
+                            currentUser: state.currentUser,
+                            currentTerritoire: state.currentTerritoire
+                        });
                     }
                 }));
             }

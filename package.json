@@ -1,0 +1,38 @@
+{
+  "name": "MyWebIntelligence",
+  "version": "0.0.0",
+  "description": "Understanding the web around you",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server/index.js",
+    "build": "browserify client/index.js -o client/browserify-bundle.js -d",
+    "watch": "watchify client/index.js -o client/browserify-bundle.js -d -v"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:MyWebIntelligence/MyWebIntelligence.git"
+  },
+  "keywords": [
+    "web",
+    "crawling",
+    "SNA",
+    "Social",
+    "Networks",
+    "text",
+    "analysis"
+  ],
+  "author": "Université Bordeaux III",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/MyWebIntelligence/MyWebIntelligence/issues"
+  },
+  "dependencies": {
+    "browserify": "~8.0.3",
+    "react": "~0.12.2",
+    "express": "~4.10.7"
+  },
+  "devDependencies": {
+    "watchify": "~2.2.1"
+  }
+}

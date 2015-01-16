@@ -11,6 +11,8 @@ interface TerritoireListItemProps{
     territoire: MyWITerritoire
     onTerritoireChange : (t: MyWITerritoire) => void
     createQuery: (q: MyWIQueryData) => void
+    removeQueryFromTerritoire: (q: MyWIQueryData, t: MyWITerritoire) => void
+    deleteTerritoire: (t: MyWITerritoire) => void
 }
 
 */
@@ -53,6 +55,13 @@ module.exports = React.createClass({
                         openQueryForms: state.openQueryForms,
                         editMode: false
                     });
+                },
+                deleteTerritoire: function(){
+                    props.deleteTerritoire(t);
+                    self.setState({
+                        openQueryForms: state.openQueryForms,
+                        editMode: false
+                    });
                 }
             }) ];
         }
@@ -64,7 +73,7 @@ module.exports = React.createClass({
                         e.preventDefault();
                     }
                 }, [
-                    React.DOM.h1({}, t.name),
+                    React.DOM.h1({className: "name"}, t.name),
                     React.DOM.p({className: "description"}, t.description),
                 ]),
                 React.DOM.button({
@@ -120,6 +129,9 @@ module.exports = React.createClass({
                                     openQueryForms: state.openQueryForms,
                                     editMode: false
                                 });
+                            },
+                            deleteQuery: function(query){
+                                props.removeQueryFromTerritoire(query, t);
                             }
                         }) : undefined
                     ]);

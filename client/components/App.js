@@ -166,6 +166,16 @@ module.exports = React.createClass({
                             currentTerritoire: state.currentTerritoire //territoire
                         });
                     },
+                    deleteTerritoire: function(t){
+                        var index = state.currentUser.territoires.indexOf(t);
+                        state.currentUser.territoires.splice(index, 1);
+                        
+                        // some element of the state.currentUser.territoires array was mutated
+                        self.setState({
+                            currentUser: state.currentUser,
+                            currentTerritoire: state.currentTerritoire
+                        });
+                    },
                     createQuery: function(queryData, territoire){
                         if(!Object.assign){
                             throw 'add Object.assign polyfill';
@@ -174,6 +184,16 @@ module.exports = React.createClass({
                         var query = Object.assign({}, queryData, {id: nextMyWIQueryId++});
                         
                         territoire.queries.push(query);
+                        // some element of the state.currentUser.territoires array was mutated
+                        self.setState({
+                            currentUser: state.currentUser,
+                            currentTerritoire: state.currentTerritoire
+                        });
+                    },
+                    removeQueryFromTerritoire: function(query, territoire){
+                        var index = territoire.queries.indexOf(query);
+                        territoire.queries.splice(index, 1);
+                        
                         // some element of the state.currentUser.territoires array was mutated
                         self.setState({
                             currentUser: state.currentUser,

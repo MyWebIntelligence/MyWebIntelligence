@@ -45,6 +45,17 @@ Client-side is built with
 TODO figure out and document relationship with Trello
 
 
+## Getting started
+
+* Install Node.js
+* `npm install`
+* For Google Login
+** Create Google project in the [Google Console](https://console.developers.google.com)
+** Activate Google+ API for your project
+** Create `config/google-credentials.json` file with credentials
+* `npm run build`
+* `npm start`
+
 
 ## Licence
 

@@ -51,10 +51,9 @@ module.exports = React.createClass({
                         required: true,
                         /*
                             https://github.com/facebook/react/issues/2860
-                            https://bugzilla.mozilla.org/show_bug.cgi?id=1121945
                             Giving up for now
                         */
-                        //pattern: '\\S+', 
+                        //pattern: '\s*(\S+\s*)+', 
 
                         // browsers auto-complete based on @name and here it's "name" which is common
                         // so autocompletion values aren't that useful. This isn't very autocompletable anyway

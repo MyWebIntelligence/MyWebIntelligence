@@ -34,8 +34,9 @@ module.exports = React.createClass({
                 React.DOM.h1({}, "Login"),
                 Spinner({active: state.waiting})
             ]),
-            React.DOM.button({
+            React.DOM.a({
                 className: "google",
+                href: "/auth/google"/*,
                 onClick: function(e){
                     self.setState({
                         waiting: true
@@ -45,9 +46,9 @@ module.exports = React.createClass({
                         self.setState({
                             waiting: false
                         });
-                        data.onLogin( /* ? */ );
+                        data.onLogin(  );
                     }, Math.random()*3*1000)
-                }
+                }*/
             }, "Google"),
             React.DOM.button({disabled: true, className: "twitter"}, "Twitter"),
             React.DOM.button({disabled: true, className: "linkedin"}, "Linkedin")

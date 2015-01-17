@@ -1,7 +1,7 @@
 "use strict";
 
 var Map = require('es6-map');
-var Promise = require('es6-promise');
+var Promise = require('es6-promise').Promise;
 
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign#Polyfill
 if (!Object.assign) {
@@ -80,8 +80,9 @@ passport.use(new GoogleStrategy({
             console.log('no corresponding user for google id', googleUser.id);
             
             return database.Users.create({
-                google_id: googleUser.id,
+                name: googleUser.name,
                 emails: [googleUser.email],
+                google_id: googleUser.id,
                 google_name: googleUser.name,
                 google_pictureURL: googleUser.picture
             }).then(function(user){
@@ -129,7 +130,6 @@ app.get('/auth/google/callback',
         passport.authenticate('google', { failureRedirect: '/' }),
         function(req, res) {
             // Successful authentication, redirect home.
-            
             res.redirect('/territoires');
         }
 );
@@ -138,7 +138,7 @@ app.get('/auth/google/callback',
 /*
     Application routes
 */
-var territoiresData = require('./territoires.json');
+//var territoiresData = require('./territoires.json');
 
 function renderDocumentWithData(doc, data){
     doc.querySelector('body').innerHTML = React.renderToString( App(data) );
@@ -150,11 +150,12 @@ app.get('/territoires', function(req, res){
     
     console.log('/territoires', 'user', user);
     
+    var userInitDataP = database.complexQueries.getUserInitData(user.id);
+    
     // Create a fresh document every time
-    makeDocument(indexHTMLStr).then(function(doc){
-        var initData = {
-            currentUser: territoiresData
-        };
+    Promise.all([makeDocument(indexHTMLStr), userInitDataP]).then(function(result){
+        var doc = result[0]
+        var initData = result[1];
         
         renderDocumentWithData(doc, initData);
         

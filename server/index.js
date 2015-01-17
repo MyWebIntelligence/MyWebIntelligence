@@ -29,9 +29,6 @@ if (!Object.assign) {
     });
 }
 
-
-
-
 var resolve = require('path').resolve;
 var fs = require('fs');
 
@@ -44,12 +41,15 @@ var React = require('react');
 
 
 var makeDocument = require('./makeDocument.js');
+var database = require('../database/index.js');
 
 var App = require('../client/components/App.js');
 
 var googleCredentials = require('../config/google-credentials.json');
 
 function serializeDocumentToHTML(doc){ return '<!doctype html>\n'+doc.documentElement.outerHTML; }
+
+
 
 // Doesn't make sense to start the server if this file doesn't exist. *Sync is fine.
 var indexHTMLStr = fs.readFileSync(resolve(__dirname, '../client/index.html'), {encoding: 'utf8'});
@@ -67,20 +67,29 @@ passport.use(new GoogleStrategy({
     clientSecret: googleCredentials["CLIENT_SECRET"],
     callbackURL: "http://localhost:3333/auth/google/callback"
 }, function(accessToken, refreshToken, profile, done){
-    var googleUser = profile._json
+    var googleUser = profile._json;
     
-    var user = {
-        id: googleUser.id,
-        email: googleUser.email,
-        name: googleUser.name,
-        pictureURL: googleUser.picture
-    };
+    function errFun(err){ done(err) }
     
-    //console.log('google login', user);
-    
-    //User.findOrCreate({ googleId: profile.id }, function (err, user) {
-    return done(null, user);
-    //});
+    return database.Users.findByGoogleId(googleUser.id).then(function(user){
+        if(user){
+            console.log('existing user', user);
+            done(null, user);
+        }
+        else{
+            console.log('no corresponding user for google id', googleUser.id);
+            
+            return database.Users.create({
+                google_id: googleUser.id,
+                emails: [googleUser.email],
+                google_name: googleUser.name,
+                google_pictureURL: googleUser.picture
+            }).then(function(user){
+                console.log('created new user', user);
+                done(null, user);
+            });
+        }
+    }).catch(errFun)
 }));
 
 passport.serializeUser(function(user, done) {

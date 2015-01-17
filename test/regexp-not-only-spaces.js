@@ -1,5 +1,6 @@
 function test(str){
-    var regexp = /\S+/; // /(\S+)+/gi;
+    // https://html.spec.whatwg.org/multipage/forms.html#the-pattern-attribute
+    var regexp = /^(?:\s*(\S+\s*)+)$/; // /(\S+)+/gi;
     
     return !!str.match(regexp);
 }

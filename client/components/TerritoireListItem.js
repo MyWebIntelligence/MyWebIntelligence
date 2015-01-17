@@ -4,7 +4,7 @@ var React = require('react');
 
 var QueryForm = require('./QueryForm');
 var TerritoireForm = require('./TerritoireForm');
-
+var Set = require('es6-set');
 
 /*
 interface TerritoireListItemProps{

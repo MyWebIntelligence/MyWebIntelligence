@@ -56,6 +56,11 @@ module.exports = React.createClass({
                         name: 'name',
                         type: 'text',
                         required: true,
+                        /*
+                            https://github.com/facebook/react/issues/2860
+                            Giving up for now
+                        */
+                        //pattern: '\s*(\S+\s*)+', 
                         defaultValue: territoire.name
                     })
                 ]),

@@ -11,7 +11,7 @@ module.exports = function makeJSONDatabaseModel(name, methods){
     var nextId = Math.round(Math.random() * Math.pow(2, 30));
     
     // to queue all I/O operations
-    var lastOperationFinishedP = new Promise(function(resolve){ resolve(); });
+    var lastOperationFinishedP = Promise.resolve();
     
     var storageControl = {
         // Purposefully don't cache the file value

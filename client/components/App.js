@@ -96,6 +96,8 @@ module.exports = React.createClass({
                     createTerritoire: function(territoireData){
                         var territoire = Object.assign({queries: []}, territoireData, {id: nextMyWITerritoireId++});
                         
+                        throw 'Do network version of it';
+                        
                         // add at the beginning of the array so it appears first
                         state.currentUser.territoires.unshift(territoire);
                         

@@ -2,8 +2,8 @@
 
 var React = require('react');
 
-var TerritoireListItem = require('./TerritoireListItem');
-var TerritoireForm = require('./TerritoireForm');
+var TerritoireListItem = React.createFactory(require('./TerritoireListItem'));
+var TerritoireForm = React.createFactory(require('./TerritoireForm'));
 
 
 /*

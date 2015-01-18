@@ -1,7 +1,8 @@
 "use strict";
 
 var React = require('react');
-var Spinner = require('./Spinner');
+
+var Spinner = React.createFactory(require('./Spinner'));
 
 /*
 

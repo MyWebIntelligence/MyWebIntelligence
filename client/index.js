@@ -1,7 +1,7 @@
 "use strict";
 
 var React = require('react');
-var App = require('./components/App');
+var App = React.createFactory(require('./components/App'));
 
 if(typeof HTMLElement.prototype.remove !== 'function')
     throw 'Add HTMLElement.prototype.remove polyfill';

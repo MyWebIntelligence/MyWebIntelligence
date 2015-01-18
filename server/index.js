@@ -43,7 +43,7 @@ var React = require('react');
 var makeDocument = require('./makeDocument.js');
 var database = require('../database/index.js');
 
-var App = require('../client/components/App.js');
+var App = React.createFactory(require('../client/components/App.js'));
 
 var googleCredentials = require('../config/google-credentials.json');
 

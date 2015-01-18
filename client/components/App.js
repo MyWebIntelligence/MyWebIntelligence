@@ -2,9 +2,8 @@
 
 var React = require('react');
 
-var LoginBox = require('./LoginBox');
-var SimpleStart = require('./SimpleStart');
-var TerritoiresList = require('./TerritoiresList');
+var LoginBox = React.createFactory(require('./LoginBox'));
+var TerritoiresList = React.createFactory(require('./TerritoiresList'));
 
 
 if(!Object.assign){

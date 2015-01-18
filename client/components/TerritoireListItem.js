@@ -1,10 +1,11 @@
 "use strict";
 
+var Set = require('es6-set');
+
 var React = require('react');
 
-var QueryForm = require('./QueryForm');
-var TerritoireForm = require('./TerritoireForm');
-var Set = require('es6-set');
+var QueryForm = React.createFactory(require('./QueryForm'));
+var TerritoireForm = React.createFactory(require('./TerritoireForm'));
 
 /*
 interface TerritoireListItemProps{

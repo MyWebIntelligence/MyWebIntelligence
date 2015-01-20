@@ -52,13 +52,11 @@ module.exports = makeJSONDatabaseModel('Users', {
             });;
         });
     },
-    delete: function(user){ // can be a user or a userId
+    delete: function(userId){
         var self = this;
 
         return this._getStorageFile().then(function(all){
-            var id = Object(user) === user ? user.id : id;
-            
-            delete all[id];
+            delete all[userId];
             return self._save(all);
         });
     }

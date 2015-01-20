@@ -50,13 +50,11 @@ module.exports = makeJSONDatabaseModel('Territoires', {
             });
         });
     },
-    delete: function(territoire){ // can be a Territoire or a TerritoireId
+    delete: function(territoireId){
         var self = this;
 
         return this._getStorageFile().then(function(all){
-            var id = Object(territoire) === territoire ? territoire.id : id;
-            
-            delete all[id];
+            delete all[territoireId];
             return self._save(all);
         });
     }

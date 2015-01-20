@@ -44,13 +44,11 @@ module.exports = makeJSONDatabaseModel('XXXX', {
             });;
         });
     },
-    delete: function(XXXX){ // can be a XXXX or a XXXXId
+    delete: function(XXXXId){
         var self = this;
 
-        return this._getStorageFile().then(function(all){
-            var id = Object(XXXX) === XXXX ? XXXX.id : id;
-            
-            delete all[id];
+        return this._getStorageFile().then(function(all){            
+            delete all[XXXXId];
             return self._save(all);
         });
     }

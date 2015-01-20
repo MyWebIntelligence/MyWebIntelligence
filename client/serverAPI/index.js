@@ -31,5 +31,8 @@ module.exports = {
     updateTerritoire: function(territoire){
         var id = territoire.id;
         return sendReq('POST', '/territoire/'+id, territoire);
+    },
+    deleteTerritoire: function(territoire){
+        return sendReq('DELETE', '/territoire/'+territoire.id);
     }
 };

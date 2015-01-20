@@ -177,6 +177,13 @@ module.exports = React.createClass({
                             currentUser: state.currentUser,
                             currentTerritoire: state.currentTerritoire
                         });
+                        
+                        props.serverAPI.deleteTerritoire(t).then(function(){
+                            self.setState({
+                                currentUser: state.currentUser,
+                                currentTerritoire: state.currentTerritoire
+                            });
+                        });// .catch() // TODO
                     },
                     createQuery: function(queryData, territoire){
                         var query = Object.assign({}, queryData, {id: nextMyWIQueryId++});

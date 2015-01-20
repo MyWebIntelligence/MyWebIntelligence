@@ -189,7 +189,7 @@ app.post('/territoire', function(req, res){
 
 app.post('/territoire/:id', function(req, res){
     var user = serializedUsers.get(req.session.passport.user);
-    var id = req.params.id;
+    var id = Number(req.params.id);
     var territoireData = req.body;
     territoireData.id = id; // preventive measure to force consistency between URL and body
     console.log('updating territoire', user.id, 'territoire', territoireData);
@@ -200,6 +200,18 @@ app.post('/territoire/:id', function(req, res){
         res.status(500).send('database problem '+ err);
     });
 
+});
+
+app.delete('/territoire/:id', function(req, res){
+    var user = serializedUsers.get(req.session.passport.user);
+    var id = Number(req.params.id);
+    console.log('deleting territoire', user.id, 'territoire id', id);
+
+    database.Territoires.delete(id).then(function(){
+        res.status(204).send('');
+    }).catch(function(err){
+        res.status(500).send('database problem '+ err);
+    }); 
 });
 
 var server = app.listen(PORT, function(){

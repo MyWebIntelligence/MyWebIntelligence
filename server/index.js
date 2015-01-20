@@ -35,6 +35,9 @@ var fs = require('fs');
 var express = require('express');
 var session = require('express-session');
 var compression = require('compression');
+var bodyParser = require('body-parser');
+var multer = require('multer'); 
+
 var passport = require('passport');
 var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
 var React = require('react');
@@ -59,6 +62,10 @@ var PORT = 3333;
 
 var app = express();
 
+
+app.use(bodyParser.json()); // for parsing application/json
+app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
+app.use(multer()); // for parsing multipart/form-data
 
 var serializedUsers = new Map();
 
@@ -147,8 +154,7 @@ function renderDocumentWithData(doc, data){
 
 app.get('/territoires', function(req, res){
     var user = serializedUsers.get(req.session.passport.user);
-    
-    console.log('/territoires', 'user', user);
+    //console.log('/territoires', 'user', user);
     
     var userInitDataP = database.complexQueries.getUserInitData(user.id);
     
@@ -162,6 +168,21 @@ app.get('/territoires', function(req, res){
         res.send( serializeDocumentToHTML(doc) );
     })
     .catch(function(err){ console.error('/territoires', err); });
+});
+
+app.post('/territoire', function(req, res){
+    var user = serializedUsers.get(req.session.passport.user);
+    console.log('creating territoire', 'user', user, req.body);
+    
+    var territoireData = req.body;
+    territoireData.created_by = user.id;
+    
+    database.Territoires.create(territoireData).then(function(newTerritoire){
+        res.status(201).send(newTerritoire);
+    }).catch(function(err){
+        res.status(500).send('database problem '+ err);
+    });
+    
 });
 
 

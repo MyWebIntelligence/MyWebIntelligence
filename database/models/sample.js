@@ -39,7 +39,9 @@ module.exports = makeJSONDatabaseModel('XXXX', {
             var updatedXXXX = Object.assign({}, all[id], XXXX, {id: id});
 
             all[id] = updatedXXXX;
-            return self._save(all);
+            return self._save(all).then(function(){
+                return updatedXXXX;
+            });;
         });
     },
     delete: function(XXXX){ // can be a XXXX or a XXXXId

@@ -1,12 +1,15 @@
 "use strict";
 
 var React = require('react');
+
+var serverAPI = require('./serverAPI/index');
+
 var App = React.createFactory(require('./components/App'));
 
 if(typeof HTMLElement.prototype.remove !== 'function')
     throw 'Add HTMLElement.prototype.remove polyfill';
 
-location.pathname
+//location.pathname
 
 document.addEventListener('DOMContentLoaded', function(){
     var initDataElement = document.querySelector('script#init-data');
@@ -17,6 +20,8 @@ document.addEventListener('DOMContentLoaded', function(){
         initData = JSON.parse(initDataElement.textContent);
         initDataElement.remove();
     }
+    
+    initData.serverAPI = serverAPI;
     
     React.render(App(initData), document.body);
 });

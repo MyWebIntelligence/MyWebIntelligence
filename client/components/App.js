@@ -48,14 +48,11 @@ interface MyWIOracleId extends Number{ __MyWIOracleId: MyWIOracleId }
 interface AppProps{
     currentUser: MyWIUser
     currentTerritoire: MyWITerritoire
+    serverAPI: MyWIServerAPI
 }
 
 
 */
-
-
-var nextMyWITerritoireId = 1000;
-var nextMyWIQueryId = 1000;
 
 module.exports = React.createClass({
     getInitialState: function() {
@@ -93,9 +90,7 @@ module.exports = React.createClass({
                         })
                     },
                     createTerritoire: function(territoireData){
-                        var territoire = Object.assign({queries: []}, territoireData, {id: nextMyWITerritoireId++});
-                        
-                        throw 'Do network version of it';
+                        var territoire = Object.assign({queries: []}, territoireData);
                         
                         // add at the beginning of the array so it appears first
                         state.currentUser.territoires.unshift(territoire);
@@ -103,7 +98,36 @@ module.exports = React.createClass({
                         // some element of the state.currentUser.territoires array was mutated
                         self.setState({
                             currentUser: state.currentUser,
-                            currentTerritoire: state.currentTerritoire //territoire
+                            currentTerritoire: state.currentTerritoire
+                        });
+                        
+                        props.serverAPI.createTerritoire(territoire).then(function(serverTerritoire){
+                            var index = state.currentUser.territoires.findIndex(function(t){
+                                return t === territoire;
+                            });
+                            
+                            state.currentUser.territoires[index] = Object.assign({queries: []}, serverTerritoire);
+                            
+                            // some element of the state.currentUser.territoires array was mutated
+                            self.setState({
+                                currentUser: state.currentUser,
+                                currentTerritoire: state.currentTerritoire
+                            });
+                        
+                        }).catch(function(err){
+                            throw 'TODO add error message to UI '+err;
+                            
+                            /*var index = state.currentUser.territoires.findIndex(function(t){
+                                return t === territoire;
+                            });
+                            
+                            state.currentUser.territoires.unshift(index, 1);
+                            
+                            // some element of the state.currentUser.territoires array was mutated
+                            self.setState({
+                                currentUser: state.currentUser,
+                                currentTerritoire: state.currentTerritoire
+                            });*/
                         });
                     },
                     deleteTerritoire: function(t){

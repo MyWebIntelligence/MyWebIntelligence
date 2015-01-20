@@ -45,7 +45,9 @@ module.exports = makeJSONDatabaseModel('Territoires', {
             var updatedTerritoire = Object.assign({}, all[id], Territoire, {id: id});
 
             all[id] = updatedTerritoire;
-            return self._save(all);
+            return self._save(all).then(function(){
+                return updatedTerritoire;
+            });
         });
     },
     delete: function(territoire){ // can be a Territoire or a TerritoireId

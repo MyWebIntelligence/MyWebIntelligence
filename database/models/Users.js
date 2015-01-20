@@ -28,7 +28,7 @@ module.exports = makeJSONDatabaseModel('Users', {
     },
     create: function(userData){
         var self = this;
-        var id = this._nextId;
+        var id = this._nextId();
 
         return this._getStorageFile().then(function(all){
             var newUser = Object.assign({id: id}, userData);
@@ -44,7 +44,7 @@ module.exports = makeJSONDatabaseModel('Users', {
         var id = user.id;
 
         return this._getStorageFile().then(function(all){
-            var updatedUser = Object.assign({id: id}, all[id], user);
+            var updatedUser = Object.assign(all[id], user);
 
             all[id] = updatedUser;
             return self._save(all).then(function(){

@@ -41,7 +41,10 @@ module.exports = {
                 var user = res[0];
                 var relevantTerritoires = res[1];
                 
-                // TODO : get queries
+                relevantTerritoires.forEach(function(t){
+                    // TODO : get queries
+                    t.queries = [];
+                });
                 
                 user.territoires = relevantTerritoires;
                 user.pictureURL = user.google_pictureURL;

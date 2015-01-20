@@ -90,10 +90,10 @@ module.exports = React.createClass({
                         })
                     },
                     createTerritoire: function(territoireData){
-                        var territoire = Object.assign({queries: []}, territoireData);
+                        var temporaryTerritoire = Object.assign({queries: []}, territoireData);
                         
                         // add at the beginning of the array so it appears first
-                        state.currentUser.territoires.unshift(territoire);
+                        state.currentUser.territoires.unshift(temporaryTerritoire);
                         
                         // some element of the state.currentUser.territoires array was mutated
                         self.setState({
@@ -101,12 +101,13 @@ module.exports = React.createClass({
                             currentTerritoire: state.currentTerritoire
                         });
                         
-                        props.serverAPI.createTerritoire(territoire).then(function(serverTerritoire){
+                        props.serverAPI.createTerritoire(territoireData).then(function(serverTerritoire){
                             var index = state.currentUser.territoires.findIndex(function(t){
-                                return t === territoire;
+                                return t === temporaryTerritoire;
                             });
                             
-                            state.currentUser.territoires[index] = Object.assign({queries: []}, serverTerritoire);
+                            serverTerritoire.queries = [];
+                            state.currentUser.territoires[index] = serverTerritoire;
                             
                             // some element of the state.currentUser.territoires array was mutated
                             self.setState({
@@ -115,7 +116,7 @@ module.exports = React.createClass({
                             });
                         
                         }).catch(function(err){
-                            throw 'TODO add error message to UI '+err;
+                            console.error('TODO add error message to UI '+err);
                             
                             /*var index = state.currentUser.territoires.findIndex(function(t){
                                 return t === territoire;
@@ -128,6 +129,43 @@ module.exports = React.createClass({
                                 currentUser: state.currentUser,
                                 currentTerritoire: state.currentTerritoire
                             });*/
+                        });
+                        
+                    },
+                    onTerritoireChange: function(territoireDelta){
+                        var relevantTerritoireIndex = state.currentUser.territoires.findIndex(function(t){
+                            return t.id === territoireDelta.id;
+                        });
+                        
+                        var temporaryTerritoire = Object.assign(
+                            {},          
+                            state.currentUser.territoires[relevantTerritoireIndex],
+                            territoireDelta
+                        );
+                        
+                        state.currentUser.territoires[relevantTerritoireIndex] = temporaryTerritoire;
+                        
+                        // some element of the state.currentUser.territoires array was mutated
+                        self.setState({
+                            currentUser: state.currentUser,
+                            currentTerritoire: state.currentTerritoire
+                        });
+                        
+                        props.serverAPI.updateTerritoire(territoireDelta).then(function(updatedTerritoire){
+                            console.log('update of', territoireDelta, 'went well', updatedTerritoire);
+                            
+                            var relevantTerritoireIndex = state.currentUser.territoires.findIndex(function(t){
+                                return t.id === territoireDelta.id;
+                            });
+                            
+                            state.currentUser.territoires[relevantTerritoireIndex] = Object.assign(temporaryTerritoire, updatedTerritoire);
+                            
+                            self.setState({
+                                currentUser: state.currentUser,
+                                currentTerritoire: state.currentTerritoire
+                            });
+                        }).catch(function(err){
+                            console.error('TODO add error message to UI '+err);
                         });
                     },
                     deleteTerritoire: function(t){

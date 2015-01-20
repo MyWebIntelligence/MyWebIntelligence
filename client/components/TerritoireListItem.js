@@ -9,11 +9,13 @@ var TerritoireForm = React.createFactory(require('./TerritoireForm'));
 
 /*
 interface TerritoireListItemProps{
-    territoire: MyWITerritoire
+    territoire?: MyWITerritoire
     onTerritoireChange : (t: MyWITerritoire) => void
+    deleteTerritoire: (t: MyWITerritoire) => void
+    
     createQuery: (q: MyWIQueryData) => void
     removeQueryFromTerritoire: (q: MyWIQueryData, t: MyWITerritoire) => void
-    deleteTerritoire: (t: MyWITerritoire) => void
+    onQueryChange: (q: MyWIQueryData) => void
 }
 
 */
@@ -44,12 +46,13 @@ module.exports = React.createClass({
                     });
                     
                     if(keysWithChange.length >= 1){
+                        var changedValues = {id: t.id};
+                        
                         keysWithChange.forEach(function(k){
-                            t[k] = formData[k];
+                            changedValues[k] = formData[k];
                         });
 
-                        // new territoire is the current one mutated at the .queries array level
-                        props.onTerritoireChange(t);
+                        props.onTerritoireChange(changedValues);
                     }
 
                     self.setState({
@@ -121,7 +124,7 @@ module.exports = React.createClass({
                                     });
 
                                     // new territoire is the current one mutated at the .queries array level
-                                    props.onTerritoireChange(t);
+                                    props.onQueryChange(q);
                                 }
 
                                 // close the form UI in all cases

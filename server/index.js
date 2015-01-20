@@ -154,28 +154,30 @@ function renderDocumentWithData(doc, data){
 
 app.get('/territoires', function(req, res){
     var user = serializedUsers.get(req.session.passport.user);
-    //console.log('/territoires', 'user', user);
-    
-    var userInitDataP = database.complexQueries.getUserInitData(user.id);
-    
-    // Create a fresh document every time
-    Promise.all([makeDocument(indexHTMLStr), userInitDataP]).then(function(result){
-        var doc = result[0]
-        var initData = result[1];
-        
-        renderDocumentWithData(doc, initData);
-        
-        res.send( serializeDocumentToHTML(doc) );
-    })
-    .catch(function(err){ console.error('/territoires', err); });
+    if(!user || !user.id){
+        res.redirect('/');
+    }
+    else{
+        var userInitDataP = database.complexQueries.getUserInitData(user.id);
+
+        // Create a fresh document every time
+        Promise.all([makeDocument(indexHTMLStr), userInitDataP]).then(function(result){
+            var doc = result[0]
+            var initData = result[1];
+
+            renderDocumentWithData(doc, initData);
+
+            res.send( serializeDocumentToHTML(doc) );
+        })
+        .catch(function(err){ console.error('/territoires', err); });
+    }
 });
 
 app.post('/territoire', function(req, res){
     var user = serializedUsers.get(req.session.passport.user);
-    console.log('creating territoire', 'user', user, req.body);
-    
     var territoireData = req.body;
     territoireData.created_by = user.id;
+    console.log('creating territoire', user.id, territoireData);
     
     database.Territoires.create(territoireData).then(function(newTerritoire){
         res.status(201).send(newTerritoire);
@@ -185,6 +187,20 @@ app.post('/territoire', function(req, res){
     
 });
 
+app.post('/territoire/:id', function(req, res){
+    var user = serializedUsers.get(req.session.passport.user);
+    var id = req.params.id;
+    var territoireData = req.body;
+    territoireData.id = id; // preventive measure to force consistency between URL and body
+    console.log('updating territoire', user.id, 'territoire', territoireData);
+    
+    database.Territoires.update(territoireData).then(function(newTerritoire){
+        res.status(200).send(newTerritoire);
+    }).catch(function(err){
+        res.status(500).send('database problem '+ err);
+    });
+
+});
 
 var server = app.listen(PORT, function(){
     var host = server.address().address;

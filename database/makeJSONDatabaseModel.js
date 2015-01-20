@@ -6,10 +6,6 @@ var fs = require('fs');
 var path = require('path');
 
 module.exports = function makeJSONDatabaseModel(name, methods){
-    
-    // hopefully helps against collisions for long enough
-    var nextId = Math.round(Math.random() * Math.pow(2, 30));
-    
     // to queue all I/O operations
     var lastOperationFinishedP = Promise.resolve();
     
@@ -33,7 +29,7 @@ module.exports = function makeJSONDatabaseModel(name, methods){
         _save: function(data){
             lastOperationFinishedP = lastOperationFinishedP.then(function(){
                 return new Promise(function(resolve, reject){
-                    fs.writeFile(path.resolve(__dirname, '_storage', name+'.json'), JSON.stringify(data), function(err, res){
+                    fs.writeFile(path.resolve(__dirname, '_storage', name+'.json'), JSON.stringify(data, null, 3), function(err, res){
                         if(err) reject(err); else resolve(res);
                     });
                 });
@@ -41,7 +37,10 @@ module.exports = function makeJSONDatabaseModel(name, methods){
             
             return lastOperationFinishedP;
         },
-        get _nextId(){ return nextId++; }
+        // hopefully helps against collisions for long enough
+        _nextId: function(){
+            return Math.round(Math.random() * Math.pow(2, 30));
+        }
     };
     
     return Object.assign({}, storageControl, methods);

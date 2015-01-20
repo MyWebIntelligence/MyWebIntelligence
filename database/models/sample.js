@@ -20,7 +20,7 @@ module.exports = makeJSONDatabaseModel('XXXX', {
     },
     create: function(XXXXData){
         var self = this;
-        var id = this._nextId;
+        var id = this._nextId();
 
         return this._getStorageFile().then(function(all){
             var newXXXX = Object.assign({id: id}, XXXXData);
@@ -36,7 +36,7 @@ module.exports = makeJSONDatabaseModel('XXXX', {
         var id = XXXX.id;
 
         return this._getStorageFile().then(function(all){
-            var updatedXXXX = Object.assign({}, all[id], XXXX, {id: id});
+            var updatedXXXX = Object.assign({}, all[id], XXXX);
 
             all[id] = updatedXXXX;
             return self._save(all).then(function(){

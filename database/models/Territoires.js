@@ -26,8 +26,8 @@ module.exports = makeJSONDatabaseModel('Territoires', {
     },
     create: function(territoireData){
         var self = this;
-        var id = this._nextId;
-
+        var id = this._nextId();
+        
         return this._getStorageFile().then(function(all){
             var newTerritoire = Object.assign({}, territoireData, {id: id});
 
@@ -42,7 +42,7 @@ module.exports = makeJSONDatabaseModel('Territoires', {
         var id = Territoire.id;
 
         return this._getStorageFile().then(function(all){
-            var updatedTerritoire = Object.assign({}, all[id], Territoire, {id: id});
+            var updatedTerritoire = Object.assign({}, all[id], Territoire);
 
             all[id] = updatedTerritoire;
             return self._save(all).then(function(){

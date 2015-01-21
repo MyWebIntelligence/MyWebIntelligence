@@ -29,6 +29,30 @@ if (!Object.assign) {
     });
 }
 
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/findIndex#Polyfill
+if (!Array.prototype.findIndex) {
+    Array.prototype.findIndex = function(predicate) {
+        if (this == null) {
+            throw new TypeError('Array.prototype.find called on null or undefined');
+        }
+        if (typeof predicate !== 'function') {
+            throw new TypeError('predicate must be a function');
+        }
+        var list = Object(this);
+        var length = list.length >>> 0;
+        var thisArg = arguments[1];
+        var value;
+
+        for (var i = 0; i < length; i++) {
+            value = list[i];
+            if (predicate.call(thisArg, value, i, list)) {
+                return i;
+            }
+        }
+        return -1;
+    };
+}
+
 var resolve = require('path').resolve;
 var fs = require('fs');
 
@@ -75,9 +99,9 @@ passport.use(new GoogleStrategy({
     callbackURL: "http://localhost:3333/auth/google/callback"
 }, function(accessToken, refreshToken, profile, done){
     var googleUser = profile._json;
-    
+
     function errFun(err){ done(err) }
-    
+
     return database.Users.findByGoogleId(googleUser.id).then(function(user){
         if(user){
             console.log('existing user', user);
@@ -85,7 +109,7 @@ passport.use(new GoogleStrategy({
         }
         else{
             console.log('no corresponding user for google id', googleUser.id);
-            
+
             return database.Users.create({
                 name: googleUser.name,
                 emails: [googleUser.email],
@@ -111,7 +135,7 @@ passport.deserializeUser(function(id, done) {
 
 
 
-    // gzip/deflate outgoing responses
+// gzip/deflate outgoing responses
 app.use(session({ 
     secret: 'olive wood amplifi jourbon',
     resave: false,
@@ -124,8 +148,8 @@ app.use(passport.session());
 app.use(express.static(resolve(__dirname, '..', 'client')));
 
 app.use(compression());
-    
-    
+
+
 /*
     Authentication routes
 */
@@ -136,10 +160,10 @@ app.get('/auth/google', passport.authenticate('google', {
 app.get('/auth/google/callback', 
         passport.authenticate('google', { failureRedirect: '/' }),
         function(req, res) {
-            // Successful authentication, redirect home.
-            res.redirect('/territoires');
-        }
-);
+    // Successful authentication, redirect home.
+    res.redirect('/territoires');
+}
+       );
 
 
 /*
@@ -178,13 +202,13 @@ app.post('/territoire', function(req, res){
     var territoireData = req.body;
     territoireData.created_by = user.id;
     console.log('creating territoire', user.id, territoireData);
-    
+
     database.Territoires.create(territoireData).then(function(newTerritoire){
         res.status(201).send(newTerritoire);
     }).catch(function(err){
         res.status(500).send('database problem '+ err);
     });
-    
+
 });
 
 app.post('/territoire/:id', function(req, res){
@@ -193,7 +217,7 @@ app.post('/territoire/:id', function(req, res){
     var territoireData = req.body;
     territoireData.id = id; // preventive measure to force consistency between URL and body
     console.log('updating territoire', user.id, 'territoire', territoireData);
-    
+
     database.Territoires.update(territoireData).then(function(newTerritoire){
         res.status(200).send(newTerritoire);
     }).catch(function(err){
@@ -219,18 +243,33 @@ app.post('/territoire/:id/query', function(req, res){
     var user = serializedUsers.get(req.session.passport.user);
     var territoireId = Number(req.params.id);
     var queryData = req.body;
-    
+
     console.log('creating query', territoireId, queryData);
     queryData.belongs_to = territoireId;
-    
+
     database.Queries.create(queryData).then(function(newQuery){
-        res.status(200).send(newQuery);
+        res.status(201).send(newQuery);
     }).catch(function(err){
         res.status(500).send('database problem '+ err);
     });
 
 });
 
+// update query
+app.post('/query/:id', function(req, res){
+    var user = serializedUsers.get(req.session.passport.user);
+    var id = Number(req.params.id);
+    var queryData = req.body;
+    queryData.id = id; // preventive measure to force consistency between URL and body
+    console.log('updating query', user.id, 'query', queryData);
+
+    database.Queries.update(queryData).then(function(newQuery){
+        res.status(200).send(newQuery);
+    }).catch(function(err){
+        res.status(500).send('database problem '+ err);
+    });
+
+});
 
 
 

@@ -10,6 +10,10 @@ if(!Object.assign){
     throw 'add Object.assign polyfill';
 }
 
+if(!Array.prototype.findIndex){
+    throw 'add Array.prototype.findIndex polyfill';
+}
+
 
 /*
 
@@ -196,7 +200,9 @@ module.exports = React.createClass({
                         });
                         
                         props.serverAPI.createQueryInTerritoire(queryData, territoire).then(function(serverQuery){
-                            var index = territoire.queries.findIndex(temporaryQuery);
+                            var index = territoire.queries.findIndex(function(q){
+                                return q === temporaryQuery;
+                            });
                             territoire.queries[index] = serverQuery;
                             
                             self.setState({
@@ -205,6 +211,42 @@ module.exports = React.createClass({
                             });
                         
                         })// .catch() // TODO error message
+                    },
+                    onQueryChange: function(queryDelta, territoire){
+                        var relevantQueryIndex = territoire.queries.findIndex(function(q){
+                            return q.id === queryDelta.id;
+                        });
+                        
+                        var temporaryQuery = Object.assign(
+                            {},          
+                            territoire.queries[relevantQueryIndex],
+                            queryDelta
+                        );
+                        
+                        territoire.queries[relevantQueryIndex] = temporaryQuery;
+                        
+                        // some element of the state.currentUser.territoires array was mutated
+                        self.setState({
+                            currentUser: state.currentUser,
+                            currentTerritoire: state.currentTerritoire
+                        });
+                        
+                        props.serverAPI.updateQuery(queryDelta).then(function(updatedQuery){
+                            console.log('update of', queryDelta, 'went well', updatedQuery);
+                            
+                            var relevantQueryIndex = territoire.queries.findIndex(function(q){
+                                return q.id === queryDelta.id;
+                            });
+                            
+                            territoire.queries[relevantQueryIndex] = Object.assign(temporaryQuery, updatedQuery);
+                            
+                            self.setState({
+                                currentUser: state.currentUser,
+                                currentTerritoire: state.currentTerritoire
+                            });
+                        }).catch(function(err){
+                            console.error('TODO add error message to UI '+err);
+                        });
                     },
                     removeQueryFromTerritoire: function(query, territoire){
                         var index = territoire.queries.indexOf(query);

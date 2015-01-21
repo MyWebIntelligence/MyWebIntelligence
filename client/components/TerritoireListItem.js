@@ -117,14 +117,16 @@ module.exports = React.createClass({
                                 var keysWithChange = Object.keys(formData).filter(function(k){
                                     return q[k] !== formData[k];
                                 });
-
+                                
                                 if(keysWithChange.length >= 1){
+                                    var deltaQuery = {id: q.id};
+                                    
                                     keysWithChange.forEach(function(k){
-                                        q[k] = formData[k];
+                                        deltaQuery[k] = formData[k];
                                     });
 
                                     // new territoire is the current one mutated at the .queries array level
-                                    props.onQueryChange(q);
+                                    props.onQueryChange(deltaQuery, t);
                                 }
 
                                 // close the form UI in all cases

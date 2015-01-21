@@ -28,14 +28,18 @@ module.exports = {
     createTerritoire: function(data){
         return sendReq('POST', '/territoire', data);
     },
-    updateTerritoire: function(territoire){
-        var id = territoire.id;
-        return sendReq('POST', '/territoire/'+id, territoire);
+    updateTerritoire: function(territoireDelta){
+        var id = territoireDelta.id;
+        return sendReq('POST', '/territoire/'+id, territoireDelta);
     },
     deleteTerritoire: function(territoire){
         return sendReq('DELETE', '/territoire/'+territoire.id);
     },
     createQueryInTerritoire: function(queryData, territoire){
         return sendReq('POST', '/territoire/'+territoire.id+'/query', queryData);
+    },
+    updateQuery: function(queryDelta){
+        var id = queryDelta.id;
+        return sendReq('POST', '/query/'+queryDelta.id, queryDelta);
     }
 };

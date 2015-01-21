@@ -17,7 +17,7 @@ interface MyWIUserId extends Number{ __MyWIUserId: MyWIUserId }
 
 interface MyWIUser{
     id: MyWIUserId
-    username: string
+    name: string
     pictureURL: string
     territoires : MyWITerritoire[]
 }
@@ -183,17 +183,28 @@ module.exports = React.createClass({
                                 currentUser: state.currentUser,
                                 currentTerritoire: state.currentTerritoire
                             });
-                        });// .catch() // TODO
+                        });// .catch() // TODO add back + error message
                     },
-                    createQuery: function(queryData, territoire){
-                        var query = Object.assign({}, queryData, {id: nextMyWIQueryId++});
+                    createQueryInTerritoire: function(queryData, territoire){
+                        var temporaryQuery = Object.assign({}, queryData);
                         
-                        territoire.queries.push(query);
+                        territoire.queries.push(temporaryQuery);
                         // some element of the state.currentUser.territoires array was mutated
                         self.setState({
                             currentUser: state.currentUser,
                             currentTerritoire: state.currentTerritoire
                         });
+                        
+                        props.serverAPI.createQueryInTerritoire(queryData, territoire).then(function(serverQuery){
+                            var index = territoire.queries.findIndex(temporaryQuery);
+                            territoire.queries[index] = serverQuery;
+                            
+                            self.setState({
+                                currentUser: state.currentUser,
+                                currentTerritoire: state.currentTerritoire
+                            });
+                        
+                        })// .catch() // TODO error message
                     },
                     removeQueryFromTerritoire: function(query, territoire){
                         var index = territoire.queries.indexOf(query);
@@ -211,7 +222,7 @@ module.exports = React.createClass({
             
             headerChildren.push(React.DOM.div({className: "user-infos"}, [
                 React.DOM.img({className:"avatar", src: state.currentUser.pictureURL}),
-                React.DOM.span({className:"username"}, state.currentUser.username)
+                React.DOM.span({className:"username"}, state.currentUser.name)
             ]));
         }
         else{

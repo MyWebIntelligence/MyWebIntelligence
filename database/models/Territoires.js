@@ -53,6 +53,8 @@ module.exports = makeJSONDatabaseModel('Territoires', {
     delete: function(territoireId){
         var self = this;
 
+        throw 'TODO delete all related queries';
+        
         return this._getStorageFile().then(function(all){
             delete all[territoireId];
             return self._save(all);

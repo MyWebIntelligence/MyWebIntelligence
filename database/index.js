@@ -27,11 +27,13 @@ var Promise = require('es6-promise').Promise;
 
 var Users = require('./models/Users');
 var Territoires = require('./models/Territoires');
+var Queries = require('./models/Queries');
 
 
 module.exports = {
     Users: Users,
     Territoires: Territoires,
+    Queries: Queries,
     complexQueries: {
         getUserInitData: function(userId){
             var userP = Users.findById(userId);
@@ -41,15 +43,18 @@ module.exports = {
                 var user = res[0];
                 var relevantTerritoires = res[1];
                 
-                relevantTerritoires.forEach(function(t){
-                    // TODO : get queries
-                    t.queries = [];
+                var territoiresReadyPs = relevantTerritoires.map(function(t){
+                    return Queries.findByBelongsTo(t.id).then(function(queries){
+                        t.queries = queries;
+                    });
                 });
                 
                 user.territoires = relevantTerritoires;
                 user.pictureURL = user.google_pictureURL;
                 
-                return {currentUser: user};
+                return Promise.all(territoiresReadyPs).then(function(){
+                    return {currentUser: user};
+                });
             });
         }
     }

@@ -34,5 +34,8 @@ module.exports = {
     },
     deleteTerritoire: function(territoire){
         return sendReq('DELETE', '/territoire/'+territoire.id);
+    },
+    createQueryInTerritoire: function(queryData, territoire){
+        return sendReq('POST', '/territoire/'+territoire.id+'/query', queryData);
     }
 };

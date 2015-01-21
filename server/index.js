@@ -214,6 +214,26 @@ app.delete('/territoire/:id', function(req, res){
     }); 
 });
 
+// to create a query
+app.post('/territoire/:id/query', function(req, res){
+    var user = serializedUsers.get(req.session.passport.user);
+    var territoireId = Number(req.params.id);
+    var queryData = req.body;
+    
+    console.log('creating query', territoireId, queryData);
+    queryData.belongs_to = territoireId;
+    
+    database.Queries.create(queryData).then(function(newQuery){
+        res.status(200).send(newQuery);
+    }).catch(function(err){
+        res.status(500).send('database problem '+ err);
+    });
+
+});
+
+
+
+
 var server = app.listen(PORT, function(){
     var host = server.address().address;
     var port = server.address().port;

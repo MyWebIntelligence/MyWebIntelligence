@@ -13,7 +13,7 @@ interface TerritoireListItemProps{
     onTerritoireChange : (t: MyWITerritoire) => void
     deleteTerritoire: (t: MyWITerritoire) => void
     
-    createQuery: (q: MyWIQueryData) => void
+    createQueryInTerritoire: (q: MyWIQueryData, t: MyWITerritoire) => void
     removeQueryFromTerritoire: (q: MyWIQueryData, t: MyWITerritoire) => void
     onQueryChange: (q: MyWIQueryData) => void
 }
@@ -155,7 +155,7 @@ module.exports = React.createClass({
                         }, '+'),
                         state.openQueryForms.has('+') ? QueryForm({
                             onSubmit: function(formData){
-                                props.createQuery(formData);
+                                props.createQueryInTerritoire(formData, t);
 
                                 // close the form UI in all cases
                                 state.openQueryForms.delete('+');

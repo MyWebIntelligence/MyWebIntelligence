@@ -257,6 +257,13 @@ module.exports = React.createClass({
                             currentUser: state.currentUser,
                             currentTerritoire: state.currentTerritoire
                         });
+                        
+                        props.serverAPI.deleteQuery(query).then(function(){
+                            self.setState({
+                                currentUser: state.currentUser,
+                                currentTerritoire: state.currentTerritoire
+                            });
+                        });// .catch() // TODO add back + error message
                     }
                 }));
             }

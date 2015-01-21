@@ -272,6 +272,19 @@ app.post('/query/:id', function(req, res){
 });
 
 
+app.delete('/query/:id', function(req, res){
+    var user = serializedUsers.get(req.session.passport.user);
+    var id = Number(req.params.id);
+    console.log('deleting query', user.id, 'query id', id);
+
+    database.Queries.delete(id).then(function(){
+        res.status(204).send('');
+    }).catch(function(err){
+        res.status(500).send('database problem '+ err);
+    }); 
+});
+
+
 
 var server = app.listen(PORT, function(){
     var host = server.address().address;

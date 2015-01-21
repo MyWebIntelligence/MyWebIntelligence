@@ -41,5 +41,8 @@ module.exports = {
     updateQuery: function(queryDelta){
         var id = queryDelta.id;
         return sendReq('POST', '/query/'+queryDelta.id, queryDelta);
+    },
+    deleteQuery: function(query){
+        return sendReq('DELETE', '/query/'+query.id);
     }
 };

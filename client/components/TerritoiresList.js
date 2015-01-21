@@ -2,21 +2,21 @@
 
 var React = require('react');
 
-var TerritoireListItem = require('./TerritoireListItem');
-var TerritoireForm = require('./TerritoireForm');
+var TerritoireListItem = React.createFactory(require('./TerritoireListItem'));
+var TerritoireForm = React.createFactory(require('./TerritoireForm'));
 
 
 /*
 
 interface TerritoireListProps{
     territoires: MyWITerritoire[],
-    onTerritoireListChange: function(ts: MyWITerritoire[]){
-    
-    },
+    onTerritoireChange: function(ts: MyWITerritoire[]){}
     createTerritoire: (territoireData) => void
     deleteTerritoire: (territoire: MyWITerritoire) => void
-    createQuery: (queryData, territoire: MyWITerritoire) => void
+    
+    createQueryInTerritoire: (queryData, territoire: MyWITerritoire) => void
     removeQueryFromTerritoire: (q: MyWIQuery, t: MyWITerritoire) => void
+    onQueryChange: props.onQueryChange
 }
 
 
@@ -68,20 +68,11 @@ module.exports = React.createClass({
             ].concat(props.territoires.map(function(t){
                 return TerritoireListItem({
                     territoire: t,
-                    onTerritoireChange: function(newT){
-                        var index = props.territoires.findIndex(function(t){
-                            return t.id === newT.id;
-                        });
-                        
-                        props.territoires[index] = newT;
-                        
-                        props.onTerritoireListChange(props.territoires);
-                    },
-                    createQuery: function(queryData){
-                        props.createQuery(queryData, t);
-                    },
+                    onTerritoireChange: props.onTerritoireChange,
+                    deleteTerritoire: props.deleteTerritoire,
+                    createQueryInTerritoire: props.createQueryInTerritoire,
                     removeQueryFromTerritoire: props.removeQueryFromTerritoire,
-                    deleteTerritoire: props.deleteTerritoire
+                    onQueryChange: props.onQueryChange
                 });
             })))
         ]);

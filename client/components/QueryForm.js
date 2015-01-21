@@ -2,7 +2,7 @@
 
 var React = require('react');
 
-var DeleteButton = require('./DeleteButton');
+var DeleteButton = React.createFactory(require('./DeleteButton'));
 
 /*
 

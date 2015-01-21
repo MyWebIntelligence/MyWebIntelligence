@@ -6,3 +6,5 @@ node_modules
 browserify-*.js
 
 config/*-credentials.json
+
+database/_storage/*

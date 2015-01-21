@@ -1,18 +1,21 @@
 "use strict";
 
+var Set = require('es6-set');
+
 var React = require('react');
 
-var QueryForm = require('./QueryForm');
-var TerritoireForm = require('./TerritoireForm');
-var Set = require('es6-set');
+var QueryForm = React.createFactory(require('./QueryForm'));
+var TerritoireForm = React.createFactory(require('./TerritoireForm'));
 
 /*
 interface TerritoireListItemProps{
-    territoire: MyWITerritoire
+    territoire?: MyWITerritoire
     onTerritoireChange : (t: MyWITerritoire) => void
-    createQuery: (q: MyWIQueryData) => void
-    removeQueryFromTerritoire: (q: MyWIQueryData, t: MyWITerritoire) => void
     deleteTerritoire: (t: MyWITerritoire) => void
+    
+    createQueryInTerritoire: (q: MyWIQueryData, t: MyWITerritoire) => void
+    removeQueryFromTerritoire: (q: MyWIQueryData, t: MyWITerritoire) => void
+    onQueryChange: (q: MyWIQueryData) => void
 }
 
 */
@@ -43,12 +46,13 @@ module.exports = React.createClass({
                     });
                     
                     if(keysWithChange.length >= 1){
+                        var changedValues = {id: t.id};
+                        
                         keysWithChange.forEach(function(k){
-                            t[k] = formData[k];
+                            changedValues[k] = formData[k];
                         });
 
-                        // new territoire is the current one mutated at the .queries array level
-                        props.onTerritoireChange(t);
+                        props.onTerritoireChange(changedValues);
                     }
 
                     self.setState({
@@ -113,14 +117,16 @@ module.exports = React.createClass({
                                 var keysWithChange = Object.keys(formData).filter(function(k){
                                     return q[k] !== formData[k];
                                 });
-
+                                
                                 if(keysWithChange.length >= 1){
+                                    var deltaQuery = {id: q.id};
+                                    
                                     keysWithChange.forEach(function(k){
-                                        q[k] = formData[k];
+                                        deltaQuery[k] = formData[k];
                                     });
 
                                     // new territoire is the current one mutated at the .queries array level
-                                    props.onTerritoireChange(t);
+                                    props.onQueryChange(deltaQuery, t);
                                 }
 
                                 // close the form UI in all cases
@@ -151,7 +157,7 @@ module.exports = React.createClass({
                         }, '+'),
                         state.openQueryForms.has('+') ? QueryForm({
                             onSubmit: function(formData){
-                                props.createQuery(formData);
+                                props.createQueryInTerritoire(formData, t);
 
                                 // close the form UI in all cases
                                 state.openQueryForms.delete('+');

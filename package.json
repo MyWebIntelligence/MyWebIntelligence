@@ -27,17 +27,19 @@
     "url": "https://github.com/MyWebIntelligence/MyWebIntelligence/issues"
   },
   "dependencies": {
+    "body-parser": "^1.10.1",
     "browserify": "~8.0.3",
-    "react": "~0.12.2",
+    "compression": "~1.3.0",
+    "es6-map": "~0.1.1",
+    "es6-promise": "~2.0.1",
+    "es6-set": "~0.1.1",
     "express": "~4.10.7",
+    "express-session": "~1.10.1",
+    "jsdom": "~2.0.0",
+    "multer": "^0.1.7",
     "passport": "~0.2.1",
     "passport-google-oauth": "~0.1.5",
-    "es6-map": "~0.1.1",
-    "express-session": "~1.10.1",
-    "es6-promise": "~2.0.1",
-    "jsdom": "~2.0.0",
-    "compression": "~1.3.0",
-    "es6-set": "~0.1.1"
+    "react": "~0.12.2"
   },
   "devDependencies": {
     "watchify": "~2.2.1"

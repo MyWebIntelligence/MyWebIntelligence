@@ -2,13 +2,16 @@
 
 var React = require('react');
 
-var LoginBox = require('./LoginBox');
-var SimpleStart = require('./SimpleStart');
-var TerritoiresList = require('./TerritoiresList');
+var LoginBox = React.createFactory(require('./LoginBox'));
+var TerritoiresList = React.createFactory(require('./TerritoiresList'));
 
 
 if(!Object.assign){
     throw 'add Object.assign polyfill';
+}
+
+if(!Array.prototype.findIndex){
+    throw 'add Array.prototype.findIndex polyfill';
 }
 
 
@@ -18,7 +21,7 @@ interface MyWIUserId extends Number{ __MyWIUserId: MyWIUserId }
 
 interface MyWIUser{
     id: MyWIUserId
-    username: string
+    name: string
     pictureURL: string
     territoires : MyWITerritoire[]
 }
@@ -49,14 +52,11 @@ interface MyWIOracleId extends Number{ __MyWIOracleId: MyWIOracleId }
 interface AppProps{
     currentUser: MyWIUser
     currentTerritoire: MyWITerritoire
+    serverAPI: MyWIServerAPI
 }
 
 
 */
-
-
-var nextMyWITerritoireId = 1000;
-var nextMyWIQueryId = 1000;
 
 module.exports = React.createClass({
     getInitialState: function() {
@@ -94,15 +94,82 @@ module.exports = React.createClass({
                         })
                     },
                     createTerritoire: function(territoireData){
-                        var territoire = Object.assign({queries: []}, territoireData, {id: nextMyWITerritoireId++});
+                        var temporaryTerritoire = Object.assign({queries: []}, territoireData);
                         
                         // add at the beginning of the array so it appears first
-                        state.currentUser.territoires.unshift(territoire);
+                        state.currentUser.territoires.unshift(temporaryTerritoire);
                         
                         // some element of the state.currentUser.territoires array was mutated
                         self.setState({
                             currentUser: state.currentUser,
-                            currentTerritoire: state.currentTerritoire //territoire
+                            currentTerritoire: state.currentTerritoire
+                        });
+                        
+                        props.serverAPI.createTerritoire(territoireData).then(function(serverTerritoire){
+                            var index = state.currentUser.territoires.findIndex(function(t){
+                                return t === temporaryTerritoire;
+                            });
+                            
+                            serverTerritoire.queries = [];
+                            state.currentUser.territoires[index] = serverTerritoire;
+                            
+                            // some element of the state.currentUser.territoires array was mutated
+                            self.setState({
+                                currentUser: state.currentUser,
+                                currentTerritoire: state.currentTerritoire
+                            });
+                        
+                        }).catch(function(err){
+                            console.error('TODO add error message to UI '+err);
+                            
+                            /*var index = state.currentUser.territoires.findIndex(function(t){
+                                return t === territoire;
+                            });
+                            
+                            state.currentUser.territoires.unshift(index, 1);
+                            
+                            // some element of the state.currentUser.territoires array was mutated
+                            self.setState({
+                                currentUser: state.currentUser,
+                                currentTerritoire: state.currentTerritoire
+                            });*/
+                        });
+                        
+                    },
+                    onTerritoireChange: function(territoireDelta){
+                        var relevantTerritoireIndex = state.currentUser.territoires.findIndex(function(t){
+                            return t.id === territoireDelta.id;
+                        });
+                        
+                        var temporaryTerritoire = Object.assign(
+                            {},          
+                            state.currentUser.territoires[relevantTerritoireIndex],
+                            territoireDelta
+                        );
+                        
+                        state.currentUser.territoires[relevantTerritoireIndex] = temporaryTerritoire;
+                        
+                        // some element of the state.currentUser.territoires array was mutated
+                        self.setState({
+                            currentUser: state.currentUser,
+                            currentTerritoire: state.currentTerritoire
+                        });
+                        
+                        props.serverAPI.updateTerritoire(territoireDelta).then(function(updatedTerritoire){
+                            console.log('update of', territoireDelta, 'went well', updatedTerritoire);
+                            
+                            var relevantTerritoireIndex = state.currentUser.territoires.findIndex(function(t){
+                                return t.id === territoireDelta.id;
+                            });
+                            
+                            state.currentUser.territoires[relevantTerritoireIndex] = Object.assign(temporaryTerritoire, updatedTerritoire);
+                            
+                            self.setState({
+                                currentUser: state.currentUser,
+                                currentTerritoire: state.currentTerritoire
+                            });
+                        }).catch(function(err){
+                            console.error('TODO add error message to UI '+err);
                         });
                     },
                     deleteTerritoire: function(t){
@@ -114,15 +181,71 @@ module.exports = React.createClass({
                             currentUser: state.currentUser,
                             currentTerritoire: state.currentTerritoire
                         });
-                    },
-                    createQuery: function(queryData, territoire){
-                        var query = Object.assign({}, queryData, {id: nextMyWIQueryId++});
                         
-                        territoire.queries.push(query);
+                        props.serverAPI.deleteTerritoire(t).then(function(){
+                            self.setState({
+                                currentUser: state.currentUser,
+                                currentTerritoire: state.currentTerritoire
+                            });
+                        });// .catch() // TODO add back + error message
+                    },
+                    createQueryInTerritoire: function(queryData, territoire){
+                        var temporaryQuery = Object.assign({}, queryData);
+                        
+                        territoire.queries.push(temporaryQuery);
                         // some element of the state.currentUser.territoires array was mutated
                         self.setState({
                             currentUser: state.currentUser,
                             currentTerritoire: state.currentTerritoire
+                        });
+                        
+                        props.serverAPI.createQueryInTerritoire(queryData, territoire).then(function(serverQuery){
+                            var index = territoire.queries.findIndex(function(q){
+                                return q === temporaryQuery;
+                            });
+                            territoire.queries[index] = serverQuery;
+                            
+                            self.setState({
+                                currentUser: state.currentUser,
+                                currentTerritoire: state.currentTerritoire
+                            });
+                        
+                        })// .catch() // TODO error message
+                    },
+                    onQueryChange: function(queryDelta, territoire){
+                        var relevantQueryIndex = territoire.queries.findIndex(function(q){
+                            return q.id === queryDelta.id;
+                        });
+                        
+                        var temporaryQuery = Object.assign(
+                            {},          
+                            territoire.queries[relevantQueryIndex],
+                            queryDelta
+                        );
+                        
+                        territoire.queries[relevantQueryIndex] = temporaryQuery;
+                        
+                        // some element of the state.currentUser.territoires array was mutated
+                        self.setState({
+                            currentUser: state.currentUser,
+                            currentTerritoire: state.currentTerritoire
+                        });
+                        
+                        props.serverAPI.updateQuery(queryDelta).then(function(updatedQuery){
+                            console.log('update of', queryDelta, 'went well', updatedQuery);
+                            
+                            var relevantQueryIndex = territoire.queries.findIndex(function(q){
+                                return q.id === queryDelta.id;
+                            });
+                            
+                            territoire.queries[relevantQueryIndex] = Object.assign(temporaryQuery, updatedQuery);
+                            
+                            self.setState({
+                                currentUser: state.currentUser,
+                                currentTerritoire: state.currentTerritoire
+                            });
+                        }).catch(function(err){
+                            console.error('TODO add error message to UI '+err);
                         });
                     },
                     removeQueryFromTerritoire: function(query, territoire){
@@ -134,6 +257,13 @@ module.exports = React.createClass({
                             currentUser: state.currentUser,
                             currentTerritoire: state.currentTerritoire
                         });
+                        
+                        props.serverAPI.deleteQuery(query).then(function(){
+                            self.setState({
+                                currentUser: state.currentUser,
+                                currentTerritoire: state.currentTerritoire
+                            });
+                        });// .catch() // TODO add back + error message
                     }
                 }));
             }
@@ -141,7 +271,7 @@ module.exports = React.createClass({
             
             headerChildren.push(React.DOM.div({className: "user-infos"}, [
                 React.DOM.img({className:"avatar", src: state.currentUser.pictureURL}),
-                React.DOM.span({className:"username"}, state.currentUser.username)
+                React.DOM.span({className:"username"}, state.currentUser.name)
             ]));
         }
         else{

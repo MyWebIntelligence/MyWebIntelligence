@@ -4,10 +4,20 @@ var React = require('react');
 
 var serverAPI = require('./serverAPI/index');
 
-var App = React.createFactory(require('./components/App'));
+var LoginScreen = React.createFactory(require('./components/LoginScreen'));
+var TerritoiresScreen = React.createFactory(require('./components/TerritoiresScreen'));
 
 if(typeof HTMLElement.prototype.remove !== 'function')
     throw 'Add HTMLElement.prototype.remove polyfill';
+
+if(!Object.assign){
+    throw 'add Object.assign polyfill';
+}
+
+if(!Array.prototype.findIndex){
+    throw 'add Array.prototype.findIndex polyfill';
+}
+
 
 //location.pathname
 
@@ -21,7 +31,22 @@ document.addEventListener('DOMContentLoaded', function(){
         initDataElement.remove();
     }
     
-    initData.serverAPI = serverAPI;
+    switch(location.pathname){
+        case '/':
+            React.render(LoginScreen(initData), document.body);
+            break;
+        case '/territoires': 
+            initData.serverAPI = serverAPI;
+            console.log('/territoires initData', initData);
+            
+            React.render(TerritoiresScreen(initData), document.body);
+            break;
+        case '/oracles': 
+            throw 'TODO';
+        default:
+            console.error('Unknown pathname', location.pathname);
+    }
     
-    React.render(App(initData), document.body);
+    
+    
 });

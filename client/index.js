@@ -6,6 +6,7 @@ var serverAPI = require('./serverAPI/index');
 
 var LoginScreen = React.createFactory(require('./components/LoginScreen'));
 var TerritoiresScreen = React.createFactory(require('./components/TerritoiresScreen'));
+var OraclesScreen = React.createFactory(require('./components/OraclesScreen'));
 
 if(typeof HTMLElement.prototype.remove !== 'function')
     throw 'Add HTMLElement.prototype.remove polyfill';
@@ -18,31 +19,39 @@ if(!Array.prototype.findIndex){
     throw 'add Array.prototype.findIndex polyfill';
 }
 
+var data = {};
+
 
 //location.pathname
 
 document.addEventListener('DOMContentLoaded', function(){
     var initDataElement = document.querySelector('script#init-data');
     
-    var initData = {};
-    
     if(initDataElement && initDataElement.textContent.length >= 2){
-        initData = JSON.parse(initDataElement.textContent);
+        data = JSON.parse(initDataElement.textContent);
         initDataElement.remove();
     }
     
     switch(location.pathname){
         case '/':
-            React.render(LoginScreen(initData), document.body);
+            var screenData = Object.assign({
+                moveToOracleScreen: function(){
+                    history.pushState('', undefined, '/oracles');
+                    React.render(OraclesScreen(), document.body);
+                }
+            }, data);
+            
+            React.render(LoginScreen(screenData), document.body);
             break;
         case '/territoires': 
-            initData.serverAPI = serverAPI;
-            console.log('/territoires initData', initData);
+            var screenData = Object.assign({serverAPI : serverAPI}, data);
+            console.log('/territoires initData', screenData);
             
-            React.render(TerritoiresScreen(initData), document.body);
+            React.render(TerritoiresScreen(screenData), document.body);
             break;
         case '/oracles': 
-            throw 'TODO';
+            
+            break;
         default:
             console.error('Unknown pathname', location.pathname);
     }

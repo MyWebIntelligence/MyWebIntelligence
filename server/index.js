@@ -70,19 +70,32 @@ var React = require('react');
 var makeDocument = require('./makeDocument.js');
 var database = require('../database/index.js');
 
-var App = React.createFactory(require('../client/components/App.js'));
+var LoginScreen = React.createFactory(require('../client/components/LoginScreen'));
+var TerritoiresScreen = React.createFactory(require('../client/components/TerritoiresScreen'));
+var OraclesScreen = React.createFactory(require('../client/components/OraclesScreen'));
 
 var googleCredentials = require('../config/google-credentials.json');
 
 function serializeDocumentToHTML(doc){ return '<!doctype html>\n'+doc.documentElement.outerHTML; }
 
 
-
 // Doesn't make sense to start the server if this file doesn't exist. *Sync is fine.
 var indexHTMLStr = fs.readFileSync(resolve(__dirname, '../client/index.html'), {encoding: 'utf8'});
 
-
 var PORT = 3333;
+
+var oracles = require('./initOraclesData.json');
+
+oracles.forEach(function(o){
+    
+    // TODO verify there is corresponding node module with fs.existsSync(path)
+    // verify if there is already an entry in the database. If not, add it.
+    
+    database.Oracles
+});
+
+
+
 
 var app = express();
 
@@ -171,8 +184,8 @@ app.get('/auth/google/callback',
 */
 //var territoiresData = require('./territoires.json');
 
-function renderDocumentWithData(doc, data){
-    doc.querySelector('body').innerHTML = React.renderToString( App(data) );
+function renderDocumentWithData(doc, data, reactFactory){
+    doc.querySelector('body').innerHTML = React.renderToString( reactFactory(data) );
     doc.querySelector('script#init-data').textContent = JSON.stringify(data);
 }
 
@@ -189,7 +202,7 @@ app.get('/territoires', function(req, res){
             var doc = result[0]
             var initData = result[1];
 
-            renderDocumentWithData(doc, initData);
+            renderDocumentWithData(doc, initData, TerritoiresScreen);
 
             res.send( serializeDocumentToHTML(doc) );
         })

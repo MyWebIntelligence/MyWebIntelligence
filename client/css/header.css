@@ -1,0 +1,21 @@
+header{
+    width: 100%;
+    height: 3em;
+    padding: 1em;
+    border-bottom: 1px solid #888;
+    
+    font-size: 1.5em;
+    
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+header .user-infos{
+    font-size: 0.7em;
+}
+
+header .user-infos img.avatar{
+    height: 2em;
+    border-radius: 25%;
+}

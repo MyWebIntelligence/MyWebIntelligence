@@ -42,7 +42,8 @@ interface MyWIOracleId extends Number{ __MyWIOracleId: MyWIOracleId }
 interface TerritoiresScreenProps{
     currentUser: MyWIUser
     currentTerritoire: MyWITerritoire
-    serverAPI: MyWIServerAPI
+    serverAPI: MyWIServerAPI,
+    moveToOraclesScreen: () => void
 }
 
 
@@ -257,7 +258,10 @@ module.exports = React.createClass({
         
         return React.DOM.div({className: "react-wrapper"}, [
             
-            Header({user: state.currentUser}),
+            Header({
+                user: state.currentUser,
+                moveToOraclesScreen: props.moveToOracleScreen
+            }),
             
             React.DOM.main({className: mainClassName}, mainChildren)
         

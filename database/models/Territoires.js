@@ -3,6 +3,7 @@
 var Promise = require('es6-promise').Promise;
 
 var makeJSONDatabaseModel = require('../makeJSONDatabaseModel');
+var makePromiseQueuer = require('../makePromiseQueue')();
 
 
 module.exports = makeJSONDatabaseModel('Territoires', {
@@ -24,7 +25,7 @@ module.exports = makeJSONDatabaseModel('Territoires', {
             });
         });
     },
-    create: function(territoireData){
+    create: makePromiseQueuer(function(territoireData){
         var self = this;
         var id = this._nextId();
         
@@ -36,8 +37,8 @@ module.exports = makeJSONDatabaseModel('Territoires', {
                 return newTerritoire;
             });
         });
-    },
-    update: function(Territoire){ // Territoire can be a delta-Territoire 
+    }),
+    update: makePromiseQueuer(function(Territoire){ // Territoire can be a delta-Territoire 
         var self = this;
         var id = Territoire.id;
 
@@ -49,8 +50,8 @@ module.exports = makeJSONDatabaseModel('Territoires', {
                 return updatedTerritoire;
             });
         });
-    },
-    delete: function(territoireId){
+    }),
+    delete: makePromiseQueuer(function(territoireId){
         var self = this;
 
         throw 'TODO delete all related queries';
@@ -59,5 +60,5 @@ module.exports = makeJSONDatabaseModel('Territoires', {
             delete all[territoireId];
             return self._save(all);
         });
-    }
+    })
 });

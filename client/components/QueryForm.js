@@ -96,10 +96,7 @@ module.exports = React.createClass({
                     React.DOM.select({
                         name: 'oracle',
                         defaultValue: query.oracle
-                    }, [
-                        React.DOM.option({value: 1}, 'Google search'),
-                        React.DOM.option({value: 2}, 'Twitter search')
-                    ])
+                    }, [(function(){ throw 'Generate this list from data from the server' })()])
                 ]),
                 React.DOM.button({
                     type: "submit"

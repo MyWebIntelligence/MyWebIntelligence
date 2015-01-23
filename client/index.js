@@ -19,7 +19,18 @@ if(!Array.prototype.findIndex){
     throw 'add Array.prototype.findIndex polyfill';
 }
 
+/*
+    "all" data. Reference data/state to be used in UI components.
+*/
 var data = {};
+
+function moveToOraclesScreen(){
+    console.log('moveToOraclesScreen');
+    history.pushState('', undefined, '/oracles');
+    React.render(OraclesScreen({
+        oracles: data.oracles
+    }), document.body);
+}
 
 
 //location.pathname
@@ -34,18 +45,16 @@ document.addEventListener('DOMContentLoaded', function(){
     
     switch(location.pathname){
         case '/':
-            var screenData = Object.assign({
-                moveToOracleScreen: function(){
-                    history.pushState('', undefined, '/oracles');
-                    React.render(OraclesScreen(), document.body);
-                }
-            }, data);
+            var screenData = Object.assign({}, data);
             
             React.render(LoginScreen(screenData), document.body);
             break;
         case '/territoires': 
-            var screenData = Object.assign({serverAPI : serverAPI}, data);
-            console.log('/territoires initData', screenData);
+            var screenData = Object.assign({
+                serverAPI : serverAPI,
+                moveToOracleScreen: moveToOraclesScreen
+            }, data);
+            console.log('/territoires screenData', screenData);
             
             React.render(TerritoiresScreen(screenData), document.body);
             break;

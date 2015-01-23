@@ -28,20 +28,25 @@ var Promise = require('es6-promise').Promise;
 var Users = require('./models/Users');
 var Territoires = require('./models/Territoires');
 var Queries = require('./models/Queries');
+var Oracles = require('./models/Oracles');
 
 
 module.exports = {
     Users: Users,
     Territoires: Territoires,
     Queries: Queries,
+    Oracles: Oracles,
+    
     complexQueries: {
         getUserInitData: function(userId){
             var userP = Users.findById(userId);
             var relevantTerritoiresP = Territoires.findByCreatedBy(userId);
+            var oraclesP = Oracles.getAll();
             
-            return Promise.all([userP, relevantTerritoiresP]).then(function(res){
+            return Promise.all([userP, relevantTerritoiresP, oraclesP]).then(function(res){
                 var user = res[0];
                 var relevantTerritoires = res[1];
+                var oracles = res[2].map(function(o){ delete o.oracleNodeModuleName; return o; });
                 
                 var territoiresReadyPs = relevantTerritoires.map(function(t){
                     return Queries.findByBelongsTo(t.id).then(function(queries){
@@ -53,7 +58,10 @@ module.exports = {
                 user.pictureURL = user.google_pictureURL;
                 
                 return Promise.all(territoiresReadyPs).then(function(){
-                    return {currentUser: user};
+                    return {
+                        currentUser: user,
+                        oracles: oracles
+                    };
                 });
             });
         }

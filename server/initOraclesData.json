@@ -1,10 +1,10 @@
 [
     {
-        name: "Google Custom Search Engine",
-        oracleNodeModuleName: "GCSE"
+        "name": "Google Custom Search Engine",
+        "oracleNodeModuleName": "GCSE"
     },
     {
-        name: "URL list",
-        oracleNodeModuleName: "URLList"
+        "name": "URL list",
+        "oracleNodeModuleName": "URLList"
     }
 ]

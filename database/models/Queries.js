@@ -3,6 +3,7 @@
 var Promise = require('es6-promise').Promise;
 
 var makeJSONDatabaseModel = require('../makeJSONDatabaseModel');
+var makePromiseQueuer = require('../makePromiseQueue')();
 
 module.exports = makeJSONDatabaseModel('Queries', {
     // return in array
@@ -23,7 +24,7 @@ module.exports = makeJSONDatabaseModel('Queries', {
             });
         });
     },
-    create: function(QueryData){
+    create: makePromiseQueuer(function(QueryData){
         var self = this;
         var id = this._nextId();
 
@@ -35,8 +36,8 @@ module.exports = makeJSONDatabaseModel('Queries', {
                 return newQuery;
             });
         });
-    },
-    update: function(Query){ // Query can be a delta-Query
+    }),
+    update: makePromiseQueuer(function(Query){ // Query can be a delta-Query
         var self = this;
         var id = Query.id;
 
@@ -48,13 +49,13 @@ module.exports = makeJSONDatabaseModel('Queries', {
                 return updatedQuery;
             });;
         });
-    },
-    delete: function(QueryId){
+    }),
+    delete: makePromiseQueuer(function(QueryId){
         var self = this;
 
         return this._getStorageFile().then(function(all){            
             delete all[QueryId];
             return self._save(all);
         });
-    }
+    })
 });

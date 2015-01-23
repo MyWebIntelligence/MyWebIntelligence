@@ -6,6 +6,7 @@ var React = require('react');
 
 interface HeaderProps{
     user: MyWIUser
+    moveToOraclesScreen: () => void
 }
 
 */
@@ -27,9 +28,10 @@ module.exports = React.createClass({
         if(props.user){
             headerChildren.push(React.DOM.div({className: "user-infos"}, [
                 React.DOM.a({
-                    href:"/oracles",
+                    href: "/oracles",
                     onClick: function(e){
                         e.preventDefault();
+                        props.moveToOraclesScreen();
                     }
                 }, "Oracles"),
                 React.DOM.img({className:"avatar", src: state.currentUser.pictureURL}),

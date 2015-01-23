@@ -8,15 +8,15 @@ var Header = require('./Header');
 
 interface OraclesScreenProps{
     user: MyWIUser
+    oracles: MyWIOracle[]
+    oracleCredentials: MyWIOracleCredentials[]
 }
 
 */
 
 module.exports = React.createClass({
     getInitialState: function() {
-        return {
-            currentUser: this.props.user
-        }
+        return {}
     },
     
     render: function() {
@@ -24,16 +24,12 @@ module.exports = React.createClass({
         var props = this.props;
         var state = this.state;
         
-        
         return React.DOM.div({className: "react-wrapper"}, [
             Header(),
-            
-            React.DOM.main({className: ""}, LoginBox({
-                onLogin: function(){
-                    props.moveToTerritoiresScreen();
-                }
+            React.DOM.h1({}, "Oracles"),
+            React.DOM.ul({className: 'oracles'}, props.oracles.map(function(o){
+                return React.DOM.li({}, o.name);
             }))
-        
         ]);
     }
 });

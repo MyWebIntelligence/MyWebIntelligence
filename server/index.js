@@ -86,16 +86,26 @@ var PORT = 3333;
 
 var oracles = require('./initOraclesData.json');
 
-oracles.forEach(function(o){
+var oraclesReadyP = Promise.all(oracles.map(function(o){
+    var modulePath = resolve(__dirname, '../oracles', o.oracleNodeModuleName+'.js');
     
-    // TODO verify there is corresponding node module with fs.existsSync(path)
-    // verify if there is already an entry in the database. If not, add it.
+    if(!fs.existsSync(modulePath))
+        throw new Error('Missing module file '+modulePath +' for Oracle '+o.name);
     
-    database.Oracles
-});
+    // check if entry with oracleNodeModuleName exists. If not, create it.
+    // by oracleNodeModuleName because names may be localized in the future. Module names likely won't ever.
+    return database.Oracles.findByOracleNodeModuleName(o.oracleNodeModuleName).then(function(result){
+        if(!result)
+            return database.Oracles.create(o);
+        // else an entry exist, nothing to do.
+    });
+}));
 
 
-
+oraclesReadyP.catch(function(err){
+    console.error("oracles error", err);
+    process.kill()
+})
 
 var app = express();
 

@@ -3,6 +3,7 @@
 var Promise = require('es6-promise').Promise;
 
 var makeJSONDatabaseModel = require('../makeJSONDatabaseModel');
+var makePromiseQueuer = require('../makePromiseQueue')();
 
 throw 'Search/replace XXXX';
 
@@ -18,7 +19,7 @@ module.exports = makeJSONDatabaseModel('XXXX', {
             return all[XXXXId];
         });
     },
-    create: function(XXXXData){
+    create: makePromiseQueuer(function(XXXXData){
         var self = this;
         var id = this._nextId();
 
@@ -30,8 +31,8 @@ module.exports = makeJSONDatabaseModel('XXXX', {
                 return newXXXX;
             });
         });
-    },
-    update: function(XXXX){ // XXXX can be a delta-XXXX
+    }),
+    update: makePromiseQueuer(function(XXXX){ // XXXX can be a delta-XXXX
         var self = this;
         var id = XXXX.id;
 
@@ -41,15 +42,15 @@ module.exports = makeJSONDatabaseModel('XXXX', {
             all[id] = updatedXXXX;
             return self._save(all).then(function(){
                 return updatedXXXX;
-            });;
+            });
         });
-    },
-    delete: function(XXXXId){
+    }),
+    delete: makePromiseQueuer(function(XXXXId){
         var self = this;
 
         return this._getStorageFile().then(function(all){            
             delete all[XXXXId];
             return self._save(all);
         });
-    }
+    })
 });

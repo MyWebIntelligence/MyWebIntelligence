@@ -9,7 +9,7 @@ var Header = require('./Header');
 interface OraclesScreenProps{
     user: MyWIUser
     oracles: MyWIOracle[]
-    oracleCredentials: Map<string, any>
+    oracleCredentials: Object // dictionary key'd on oracleId
     onOracleCredentialsChange: (f: FormData) => void
 }
 
@@ -17,7 +17,19 @@ interface OraclesScreenProps{
 
 module.exports = React.createClass({
     getInitialState: function() {
-        return {}
+        var oracleCredentials = this.props.oracleCredentials ? this.props.oracleCredentials : Object.create(null);
+        
+        return {
+            oracleCredentials: oracleCredentials
+        }
+    },
+    
+    componentWillReceiveProps: function(newProps){
+        var oracleCredentials = newProps.oracleCredentials ? newProps.oracleCredentials : Object.create(null);
+        
+        this.setState({
+            oracleCredentials: oracleCredentials
+        });
     },
     
     render: function() {
@@ -43,16 +55,27 @@ module.exports = React.createClass({
                                     
                                     props.onOracleCredentialsChange(fd);
                                 }
-                            }, Object.keys(o.needsCredentials).map(function(k){
+                            }, Object.keys(o.needsCredentials).map(function(k){                                
                                 return React.DOM.label({}, [
                                     k + ' ',
                                     React.DOM.input({
                                         type: 'text',
                                         name: k,
-                                        defaultValue: props.oracleCredentials && props.oracleCredentials[o.id] ?
-                                        props.oracleCredentials[o.id][k] : undefined
+                                        value: state.oracleCredentials[o.id] ?
+                                            state.oracleCredentials[o.id][k] : 
+                                            '',
+                                        onChange: function(e){
+                                            var delta = {};
+                                            delta[k] = e.target.value;
+                                            
+                                            state.oracleCredentials[o.id] = Object.assign({}, state.oracleCredentials[o.id], delta)
+                                            
+                                            self.setState({
+                                                oracleCredentials: state.oracleCredentials
+                                            });
+                                        }
                                     })
-                                ])
+                                ]);
                             }).concat([React.DOM.button({type: 'submit'}, 'Ok')]))
                         )
                     }

@@ -30,13 +30,29 @@ function onOracleCredentialsChange(formData){
 function moveToOraclesScreen(){
     console.log('moveToOraclesScreen');
     history.pushState('', undefined, '/oracles');
-    React.render(OraclesScreen({
+    displayOraclesScreen();
+}
+
+function displayOraclesScreen(){
+    var screenData = {
         user: data.currentUser,
         oracles: data.oracles,
         onOracleCredentialsChange: onOracleCredentialsChange
-    }), document.body);
-}
+    };
 
+    serverAPI.getCurrentUserOraclesCredentials().then(function(credentials){
+        var credentialsByOracleId = Object.create(null);
+        
+        credentials.forEach(function(c){
+            credentialsByOracleId[c.oracleId] = c;
+        });
+        
+        screenData.oracleCredentials = credentialsByOracleId;
+        React.render(OraclesScreen(screenData), document.body);
+    });
+
+    React.render(OraclesScreen(screenData), document.body);
+}
 
 
 document.addEventListener('DOMContentLoaded', function(){
@@ -63,18 +79,7 @@ document.addEventListener('DOMContentLoaded', function(){
             React.render(TerritoiresScreen(screenData), document.body);
             break;
         case '/oracles': 
-            var screenData = {
-                user: data.currentUser,
-                oracles: data.oracles,
-                onOracleCredentialsChange: onOracleCredentialsChange
-            };
-            
-            serverAPI.getCurrentUserOraclesCredentials().then(function(credentials){
-                screenData.oracleCredentials = credentials;
-                React.render(OraclesScreen(screenData), document.body);
-            });
-            
-            React.render(OraclesScreen(screenData), document.body);
+            displayOraclesScreen();
             break;
         default:
             console.error('Unknown pathname', location.pathname);

@@ -52,6 +52,7 @@ module.exports = {
     updateOracleCredentials: function(formData){
         return sendReq('POST', '/oracle-credentials', formData);
     },
+    // This function transports sensitive data. Call with care.
     getCurrentUserOraclesCredentials: function(){
         return sendReq('GET', '/oracle-credentials');
     }

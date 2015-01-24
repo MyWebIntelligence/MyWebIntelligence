@@ -48,24 +48,21 @@ module.exports = React.createClass({
             </ul>
         */
         
-        return React.DOM.div({className: "territoires"}, [
-            React.DOM.h1({}, "Territoires"),
-            React.DOM.ul({className: "territoires"}, [
-                React.DOM.li({className: state.newTerritoireFormOpen ? '' : 'add'}, 
-                    state.newTerritoireFormOpen ?
-                        TerritoireForm({
-                            onSubmit: function(territoireData){
-                                props.createTerritoire(territoireData);
-                                self.setState({ newTerritoireFormOpen: false });
-                            }
-                        }) :
-                        React.DOM.button({
-                            onClick: function(){
-                                self.setState({ newTerritoireFormOpen: true });
-                            }
-                        }, '+')
-                )
-            ].concat(props.territoires.map(function(t){
+        return React.DOM.ul({className: "territoires"}, [
+            React.DOM.li({className: state.newTerritoireFormOpen ? '' : 'add'}, 
+                state.newTerritoireFormOpen ?
+                    TerritoireForm({
+                        onSubmit: function(territoireData){
+                            props.createTerritoire(territoireData);
+                            self.setState({ newTerritoireFormOpen: false });
+                        }
+                    }) :
+                    React.DOM.button({
+                        onClick: function(){
+                            self.setState({ newTerritoireFormOpen: true });
+                        }
+                    }, '+')
+            )].concat(props.territoires.map(function(t){
                 return TerritoireListItem({
                     territoire: t,
                     onTerritoireChange: props.onTerritoireChange,
@@ -74,7 +71,7 @@ module.exports = React.createClass({
                     removeQueryFromTerritoire: props.removeQueryFromTerritoire,
                     onQueryChange: props.onQueryChange
                 });
-            })))
-        ]);
+            }))
+        );
     }
 });

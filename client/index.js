@@ -11,29 +11,33 @@ var OraclesScreen = React.createFactory(require('./components/OraclesScreen'));
 if(typeof HTMLElement.prototype.remove !== 'function')
     throw 'Add HTMLElement.prototype.remove polyfill';
 
-if(!Object.assign){
+if(!Object.assign)
     throw 'add Object.assign polyfill';
-}
 
-if(!Array.prototype.findIndex){
+if(!Array.prototype.findIndex)
     throw 'add Array.prototype.findIndex polyfill';
-}
+
 
 /*
     "all" data. Reference data/state to be used in UI components.
 */
 var data = {};
 
+function onOracleCredentialsChange(formData){
+    serverAPI.updateOracleCredentials(formData);
+}
+
 function moveToOraclesScreen(){
     console.log('moveToOraclesScreen');
     history.pushState('', undefined, '/oracles');
     React.render(OraclesScreen({
-        oracles: data.oracles
+        user: data.currentUser,
+        oracles: data.oracles,
+        onOracleCredentialsChange: onOracleCredentialsChange
     }), document.body);
 }
 
 
-//location.pathname
 
 document.addEventListener('DOMContentLoaded', function(){
     var initDataElement = document.querySelector('script#init-data');
@@ -59,7 +63,18 @@ document.addEventListener('DOMContentLoaded', function(){
             React.render(TerritoiresScreen(screenData), document.body);
             break;
         case '/oracles': 
+            var screenData = {
+                user: data.currentUser,
+                oracles: data.oracles,
+                onOracleCredentialsChange: onOracleCredentialsChange
+            };
             
+            serverAPI.getCurrentUserOraclesCredentials().then(function(credentials){
+                screenData.oracleCredentials = credentials;
+                React.render(OraclesScreen(screenData), document.body);
+            });
+            
+            React.render(OraclesScreen(screenData), document.body);
             break;
         default:
             console.error('Unknown pathname', location.pathname);

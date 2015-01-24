@@ -29,13 +29,14 @@ var Users = require('./models/Users');
 var Territoires = require('./models/Territoires');
 var Queries = require('./models/Queries');
 var Oracles = require('./models/Oracles');
-
+var OracleCredentials = require('./models/OracleCredentials');
 
 module.exports = {
     Users: Users,
     Territoires: Territoires,
     Queries: Queries,
     Oracles: Oracles,
+    OracleCredentials: OracleCredentials,
     
     complexQueries: {
         getUserInitData: function(userId){

@@ -15,9 +15,10 @@ button:empty::before{
 main{
     display: flex;
     min-height: 80%;
+    flex-direction: column;
     
-    align-items: flex-start;
-    justify-content: center;
+    align-items: center;
+    justify-content: flex-start;
 }
 
 

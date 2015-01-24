@@ -6,6 +6,8 @@ module.exports = function makePromiseQueue(){
     
     var lastOperationFinishedP = Promise.resolve();
 
+    // Only apply this function to a set of functions that aren't interdependent
+    // otherwise, it results in a deadlock
     return function makeQueueingOperation(f){
 
         return function(){

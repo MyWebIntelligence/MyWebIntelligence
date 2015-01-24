@@ -308,6 +308,69 @@ app.delete('/query/:id', function(req, res){
 });
 
 
+app.get('/oracles', function(req, res){
+    var user = serializedUsers.get(req.session.passport.user);
+    if(!user || !user.id){
+        res.redirect('/');
+    }
+    else{
+        var userInitDataP = database.complexQueries.getUserInitData(user.id);
+
+        // Create a fresh document every time
+        Promise.all([makeDocument(indexHTMLStr), userInitDataP]).then(function(result){
+            var doc = result[0]
+            var initData = result[1];
+
+            renderDocumentWithData(doc, initData, OraclesScreen);
+
+            res.send( serializeDocumentToHTML(doc) );
+        })
+        .catch(function(err){ console.error('/oracles', err); });
+    }
+});
+
+
+app.post('/oracle-credentials', function(req, res){
+    var user = serializedUsers.get(req.session.passport.user);
+    if(!user || !user.id){
+        res.redirect('/');
+    }
+    else{
+        var userId = user.id;
+        
+        var oracleCredentialsData = req.body;
+        
+        oracleCredentialsData.oracleId = Number(oracleCredentialsData.oracleId);
+        oracleCredentialsData.userId = userId;
+        
+        console.log('updating oracle credentials', oracleCredentialsData);
+
+        database.OracleCredentials.createOrUpdate(oracleCredentialsData).then(function(){
+            res.status(200).send();
+        }).catch(function(err){
+            res.status(500).send('database problem '+ err);
+        });
+    }
+});
+
+app.get('/oracle-credentials', function(req, res){
+    var user = serializedUsers.get(req.session.passport.user);
+    if(!user || !user.id){
+        res.redirect('/');
+    }
+    else{
+        var userId = user.id;
+        
+        console.log('getting oracle credentials', userId);
+
+        database.OracleCredentials.findByUserId(userId).then(function(oracleCredentials){
+            res.status(200).send(oracleCredentials);
+        }).catch(function(err){
+            res.status(500).send('database problem '+ err);
+        });
+    }
+});
+
 
 var server = app.listen(PORT, function(){
     var host = server.address().address;

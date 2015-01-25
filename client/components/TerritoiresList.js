@@ -13,6 +13,7 @@ interface TerritoireListProps{
     onTerritoireChange: function(ts: MyWITerritoire[]){}
     createTerritoire: (territoireData) => void
     deleteTerritoire: (territoire: MyWITerritoire) => void
+    moveToTerritoireViewScreen: (territoire: MyWITerritoire) => void
     
     createQueryInTerritoire: (queryData, territoire: MyWITerritoire) => void
     removeQueryFromTerritoire: (q: MyWIQuery, t: MyWITerritoire) => void
@@ -68,6 +69,7 @@ module.exports = React.createClass({
                     oracles: props.oracles,
                     onTerritoireChange: props.onTerritoireChange,
                     deleteTerritoire: props.deleteTerritoire,
+                    moveToTerritoireViewScreen: props.moveToTerritoireViewScreen,
                     createQueryInTerritoire: props.createQueryInTerritoire,
                     removeQueryFromTerritoire: props.removeQueryFromTerritoire,
                     onQueryChange: props.onQueryChange

@@ -7,6 +7,7 @@ var serverAPI = require('./serverAPI/index');
 var LoginScreen = React.createFactory(require('./components/LoginScreen'));
 var TerritoiresScreen = React.createFactory(require('./components/TerritoiresScreen'));
 var OraclesScreen = React.createFactory(require('./components/OraclesScreen'));
+var TerritoireViewScreen = React.createFactory(require('./components/TerritoireViewScreen'));
 
 if(typeof HTMLElement.prototype.remove !== 'function')
     throw 'Add HTMLElement.prototype.remove polyfill';
@@ -55,6 +56,26 @@ function displayOraclesScreen(){
 }
 
 
+function moveToTerritoireViewScreen(t){
+    console.log('moveToTerritoireViewScreen', t);
+    history.pushState('', undefined, '/territoire/'+t.id);
+    displayTerritoireViewScreen(t);
+}
+
+function displayTerritoireViewScreen(t){
+    var screenData = {
+        territoire: t,
+        oracles: data.oracles
+    };
+
+    React.render(TerritoireViewScreen(screenData), document.body);
+    
+    serverAPI.getTerritoireViewData(t).then(function(data){
+        React.render(TerritoireViewScreen(data), document.body);
+    });
+}
+
+
 document.addEventListener('DOMContentLoaded', function(){
     var initDataElement = document.querySelector('script#init-data');
     
@@ -72,7 +93,8 @@ document.addEventListener('DOMContentLoaded', function(){
         case '/territoires': 
             var screenData = Object.assign({
                 serverAPI : serverAPI,
-                moveToOracleScreen: moveToOraclesScreen
+                moveToOracleScreen: moveToOraclesScreen,
+                moveToTerritoireViewScreen: moveToTerritoireViewScreen
             }, data);
             console.log('/territoires screenData', screenData);
             

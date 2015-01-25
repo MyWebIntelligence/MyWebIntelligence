@@ -1,0 +1,18 @@
+main.territoire{
+
+}
+
+main.territoire ul.queries{
+    text-align: center;
+}
+
+main.territoire ul.queries li{
+    display: inline-block;
+    vertical-align: top;
+    
+    min-width: 15em;
+    min-height: 10em;
+    padding: 1em;
+    
+    border: 1px solid #888;
+}

@@ -13,6 +13,7 @@ interface TerritoireListItemProps{
     oracles: MyWIOracle[]
     onTerritoireChange : (t: MyWITerritoire) => void
     deleteTerritoire: (t: MyWITerritoire) => void
+    moveToTerritoireViewScreen: (t: MyWITerritoire) => void
     
     createQueryInTerritoire: (q: MyWIQueryData, t: MyWITerritoire) => void
     removeQueryFromTerritoire: (q: MyWIQueryData, t: MyWITerritoire) => void
@@ -73,9 +74,11 @@ module.exports = React.createClass({
         else{
             children = [
                 React.DOM.a({
-                    href: "TODO",
+                    href: "/territoire/"+t.id,
                     onClick: function(e){
                         e.preventDefault();
+                        
+                        props.moveToTerritoireViewScreen(t);
                     }
                 }, [
                     React.DOM.h1({className: "name"}, t.name),

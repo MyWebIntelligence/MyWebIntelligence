@@ -41,9 +41,9 @@ interface MyWIOracleId extends Number{ __MyWIOracleId: MyWIOracleId }
 
 interface TerritoiresScreenProps{
     currentUser: MyWIUser
-    currentTerritoire: MyWITerritoire
     serverAPI: MyWIServerAPI,
     moveToOraclesScreen: () => void
+    moveToTerritoireViewScreen: (territoire: MyWITerritoire) => void
 }
 
 
@@ -54,8 +54,7 @@ interface TerritoiresScreenProps{
 module.exports = React.createClass({
     getInitialState: function() {
         return {
-            currentUser: this.props.currentUser,
-            currentTerritoire: this.props.currentTerritoire
+            currentUser: this.props.currentUser
         }
     },
     
@@ -76,8 +75,7 @@ module.exports = React.createClass({
                 onTerritoireListChange: function(newTerritoireList){
                     state.currentUser.territoires = newTerritoireList;
                     self.setState({
-                        currentUser: state.currentUser,
-                        currentTerritoire: state.currentTerritoire
+                        currentUser: state.currentUser
                     })
                 },
                 createTerritoire: function(territoireData){
@@ -88,8 +86,7 @@ module.exports = React.createClass({
 
                     // some element of the state.currentUser.territoires array was mutated
                     self.setState({
-                        currentUser: state.currentUser,
-                        currentTerritoire: state.currentTerritoire
+                        currentUser: state.currentUser
                     });
 
                     props.serverAPI.createTerritoire(territoireData).then(function(serverTerritoire){
@@ -102,8 +99,7 @@ module.exports = React.createClass({
 
                         // some element of the state.currentUser.territoires array was mutated
                         self.setState({
-                            currentUser: state.currentUser,
-                            currentTerritoire: state.currentTerritoire
+                            currentUser: state.currentUser
                         });
 
                     }).catch(function(err){
@@ -138,8 +134,7 @@ module.exports = React.createClass({
 
                     // some element of the state.currentUser.territoires array was mutated
                     self.setState({
-                        currentUser: state.currentUser,
-                        currentTerritoire: state.currentTerritoire
+                        currentUser: state.currentUser
                     });
 
                     props.serverAPI.updateTerritoire(territoireDelta).then(function(updatedTerritoire){
@@ -152,8 +147,7 @@ module.exports = React.createClass({
                         state.currentUser.territoires[relevantTerritoireIndex] = Object.assign(temporaryTerritoire, updatedTerritoire);
 
                         self.setState({
-                            currentUser: state.currentUser,
-                            currentTerritoire: state.currentTerritoire
+                            currentUser: state.currentUser
                         });
                     }).catch(function(err){
                         console.error('TODO add error message to UI '+err);
@@ -165,14 +159,12 @@ module.exports = React.createClass({
 
                     // some element of the state.currentUser.territoires array was mutated
                     self.setState({
-                        currentUser: state.currentUser,
-                        currentTerritoire: state.currentTerritoire
+                        currentUser: state.currentUser
                     });
 
                     props.serverAPI.deleteTerritoire(t).then(function(){
                         self.setState({
-                            currentUser: state.currentUser,
-                            currentTerritoire: state.currentTerritoire
+                            currentUser: state.currentUser
                         });
                     });// .catch() // TODO add back + error message
                 },
@@ -182,8 +174,7 @@ module.exports = React.createClass({
                     territoire.queries.push(temporaryQuery);
                     // some element of the state.currentUser.territoires array was mutated
                     self.setState({
-                        currentUser: state.currentUser,
-                        currentTerritoire: state.currentTerritoire
+                        currentUser: state.currentUser
                     });
 
                     props.serverAPI.createQueryInTerritoire(queryData, territoire).then(function(serverQuery){
@@ -193,8 +184,7 @@ module.exports = React.createClass({
                         territoire.queries[index] = serverQuery;
 
                         self.setState({
-                            currentUser: state.currentUser,
-                            currentTerritoire: state.currentTerritoire
+                            currentUser: state.currentUser
                         });
 
                     })// .catch() // TODO error message
@@ -214,8 +204,7 @@ module.exports = React.createClass({
 
                     // some element of the state.currentUser.territoires array was mutated
                     self.setState({
-                        currentUser: state.currentUser,
-                        currentTerritoire: state.currentTerritoire
+                        currentUser: state.currentUser
                     });
 
                     props.serverAPI.updateQuery(queryDelta).then(function(updatedQuery){
@@ -228,8 +217,7 @@ module.exports = React.createClass({
                         territoire.queries[relevantQueryIndex] = Object.assign(temporaryQuery, updatedQuery);
 
                         self.setState({
-                            currentUser: state.currentUser,
-                            currentTerritoire: state.currentTerritoire
+                            currentUser: state.currentUser
                         });
                     }).catch(function(err){
                         console.error('TODO add error message to UI '+err);
@@ -241,17 +229,16 @@ module.exports = React.createClass({
 
                     // some element of the state.currentUser.territoires array was mutated
                     self.setState({
-                        currentUser: state.currentUser,
-                        currentTerritoire: state.currentTerritoire
+                        currentUser: state.currentUser
                     });
 
                     props.serverAPI.deleteQuery(query).then(function(){
                         self.setState({
-                            currentUser: state.currentUser,
-                            currentTerritoire: state.currentTerritoire
+                            currentUser: state.currentUser
                         });
                     });// .catch() // TODO add back + error message
-                }
+                },
+                moveToTerritoireViewScreen: props.moveToTerritoireViewScreen
             })
         ];
         

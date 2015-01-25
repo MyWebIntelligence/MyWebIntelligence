@@ -13,6 +13,7 @@ interface TerritoireListProps{
     onTerritoireChange: function(ts: MyWITerritoire[]){}
     createTerritoire: (territoireData) => void
     deleteTerritoire: (territoire: MyWITerritoire) => void
+    moveToTerritoireViewScreen: (territoire: MyWITerritoire) => void
     
     createQueryInTerritoire: (queryData, territoire: MyWITerritoire) => void
     removeQueryFromTerritoire: (q: MyWIQuery, t: MyWITerritoire) => void
@@ -48,33 +49,32 @@ module.exports = React.createClass({
             </ul>
         */
         
-        return React.DOM.div({className: "territoires"}, [
-            React.DOM.h1({}, "Territoires"),
-            React.DOM.ul({className: "territoires"}, [
-                React.DOM.li({className: state.newTerritoireFormOpen ? '' : 'add'}, 
-                    state.newTerritoireFormOpen ?
-                        TerritoireForm({
-                            onSubmit: function(territoireData){
-                                props.createTerritoire(territoireData);
-                                self.setState({ newTerritoireFormOpen: false });
-                            }
-                        }) :
-                        React.DOM.button({
-                            onClick: function(){
-                                self.setState({ newTerritoireFormOpen: true });
-                            }
-                        }, '+')
-                )
-            ].concat(props.territoires.map(function(t){
+        return React.DOM.ul({className: "territoires"}, [
+            React.DOM.li({className: state.newTerritoireFormOpen ? '' : 'add'}, 
+                state.newTerritoireFormOpen ?
+                    TerritoireForm({
+                        onSubmit: function(territoireData){
+                            props.createTerritoire(territoireData);
+                            self.setState({ newTerritoireFormOpen: false });
+                        }
+                    }) :
+                    React.DOM.button({
+                        onClick: function(){
+                            self.setState({ newTerritoireFormOpen: true });
+                        }
+                    }, '+')
+            )].concat(props.territoires.map(function(t){
                 return TerritoireListItem({
                     territoire: t,
+                    oracles: props.oracles,
                     onTerritoireChange: props.onTerritoireChange,
                     deleteTerritoire: props.deleteTerritoire,
+                    moveToTerritoireViewScreen: props.moveToTerritoireViewScreen,
                     createQueryInTerritoire: props.createQueryInTerritoire,
                     removeQueryFromTerritoire: props.removeQueryFromTerritoire,
                     onQueryChange: props.onQueryChange
                 });
-            })))
-        ]);
+            }))
+        );
     }
 });

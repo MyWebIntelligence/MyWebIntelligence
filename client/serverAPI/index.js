@@ -5,7 +5,8 @@ function sendReq(method, url, data){
         var xhr = new XMLHttpRequest();
 
         xhr.open(method, url);
-        xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+        if(data !== undefined && typeof data !== 'string' && !(data instanceof FormData))
+            xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
 
         xhr.responseType = 'json';
 
@@ -20,7 +21,10 @@ function sendReq(method, url, data){
 
         xhr.addEventListener('error', reject);
 
-        xhr.send(JSON.stringify(data));
+        if(data === undefined || typeof data === 'string' || data instanceof FormData)
+            xhr.send(data);
+        else
+            xhr.send(JSON.stringify(data));
     });
 }
 
@@ -44,5 +48,15 @@ module.exports = {
     },
     deleteQuery: function(query){
         return sendReq('DELETE', '/query/'+query.id);
+    },
+    updateOracleCredentials: function(formData){
+        return sendReq('POST', '/oracle-credentials', formData);
+    },
+    // This function transports sensitive data. Call with care.
+    getCurrentUserOraclesCredentials: function(){
+        return sendReq('GET', '/oracle-credentials');
+    },
+    getTerritoireViewData: function(territoire){
+        return sendReq('GET', '/territoire-screen-data/'+territoire.id);
     }
 };

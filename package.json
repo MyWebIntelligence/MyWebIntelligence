@@ -39,7 +39,8 @@
     "multer": "^0.1.7",
     "passport": "~0.2.1",
     "passport-google-oauth": "~0.1.5",
-    "react": "~0.12.2"
+    "react": "~0.12.2",
+    "request": "^2.51.0"
   },
   "devDependencies": {
     "watchify": "~2.2.1"

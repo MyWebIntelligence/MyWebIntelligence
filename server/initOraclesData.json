@@ -1,0 +1,15 @@
+[
+    {
+        "name": "Google Custom Search Engine",
+        "oracleNodeModuleName": "GCSE",
+        "needsCredentials": {
+            "API key": "text",
+            "cx": "text"
+        }
+    },
+    {
+        "name": "URL list",
+        "oracleNodeModuleName": "URLList",
+        "needsCredentials": false
+    }
+]

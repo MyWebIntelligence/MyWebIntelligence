@@ -3,6 +3,7 @@
 var Promise = require('es6-promise').Promise;
 
 var makeJSONDatabaseModel = require('../makeJSONDatabaseModel');
+var makePromiseQueuer = require('../makePromiseQueue')();
 
 
 module.exports = makeJSONDatabaseModel('Users', {
@@ -26,7 +27,7 @@ module.exports = makeJSONDatabaseModel('Users', {
             });
         });
     },
-    create: function(userData){
+    create: makePromiseQueuer(function(userData){
         var self = this;
         var id = this._nextId();
 
@@ -38,8 +39,8 @@ module.exports = makeJSONDatabaseModel('Users', {
                 return newUser;
             });
         });
-    },
-    update: function(user){ // user can be a delta-user
+    }),
+    update: makePromiseQueuer(function(user){ // user can be a delta-user
         var self = this;
         var id = user.id;
 
@@ -49,15 +50,15 @@ module.exports = makeJSONDatabaseModel('Users', {
             all[id] = updatedUser;
             return self._save(all).then(function(){
                 return updatedUser;
-            });;
+            });
         });
-    },
-    delete: function(userId){
+    }),
+    delete: makePromiseQueuer(function(userId){
         var self = this;
 
         return this._getStorageFile().then(function(all){
             delete all[userId];
             return self._save(all);
         });
-    }
+    })
 });

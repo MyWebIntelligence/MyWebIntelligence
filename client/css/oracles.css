@@ -1,0 +1,27 @@
+main.oracles{
+
+}
+
+ul.oracles{
+    text-align: center;
+}
+
+ul.oracles li{
+    display: inline-block;
+    vertical-align: top;
+    
+    min-width: 15em;
+    min-height: 10em;
+    padding: 1em;
+    
+    border: 1px solid #888;
+}
+
+
+main.oracles form{
+    text-align: left;
+}
+
+main.oracles form label{
+    display: block;
+}

@@ -32,9 +32,9 @@ module.exports = function prepareGCSEOracle(credentials){
 
     return function GCSEOracle(q){
         
-        var resultPs = STARTS.map(function(){
+        var resultPs = STARTS.map(function(start){
             return new Promise(function(resolve, reject){
-                var url = makeGCSESearchURL(q, 1);
+                var url = makeGCSESearchURL(q, start);
                 request(url, function(error, response, body){
                     if(error){
                         reject(error);

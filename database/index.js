@@ -30,6 +30,7 @@ var Territoires = require('./models/Territoires');
 var Queries = require('./models/Queries');
 var Oracles = require('./models/Oracles');
 var OracleCredentials = require('./models/OracleCredentials');
+var QueryResults = require('./models/QueryResults');
 
 module.exports = {
     Users: Users,
@@ -37,6 +38,7 @@ module.exports = {
     Queries: Queries,
     Oracles: Oracles,
     OracleCredentials: OracleCredentials,
+    QueryResults: QueryResults,
     
     complexQueries: {
         getUserInitData: function(userId){

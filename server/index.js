@@ -281,7 +281,7 @@ app.post('/territoire/:id/query', function(req, res){
             console.log('oracle found', oracle.name, user.name, newQuery.q);
             
             if(oracle.needsCredentials){
-                database.OracleCredentials.findByUserAndOracleId(user.id, oracle.id).then(function(oracleCredentials){
+                return database.OracleCredentials.findByUserAndOracleId(user.id, oracle.id).then(function(oracleCredentials){
                     console.log('oracle credentials', oracle.name, user.name, newQuery.q, oracleCredentials);
                     
                     // temporarily hardcoded. TODO generalize in the future
@@ -290,10 +290,13 @@ app.post('/territoire/:id/query', function(req, res){
                         cx: oracleCredentials["cx"]
                     });
                     
-                    oracleFunction(newQuery.q).then(function(searchResults){
-                        console.log('GCSE oracle results for', newQuery.q, searchResults);
-                        
-                        
+                    return oracleFunction(newQuery.q).then(function(searchResults){
+                        console.log('GCSE oracle results for', newQuery.q, searchResults.length);
+                        return database.QueryResults.create({
+                            query_id: newQuery.id,
+                            results: searchResults,
+                            created_at: new Date()
+                        });
                     });
                 }).catch(function(err){
                     console.error('oracling after credentials err', err);

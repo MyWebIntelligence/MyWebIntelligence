@@ -6,7 +6,7 @@ main.territoire ul.queries{
     text-align: center;
 }
 
-main.territoire ul.queries li{
+main.territoire ul.queries > li{
     display: inline-block;
     vertical-align: top;
     
@@ -15,4 +15,29 @@ main.territoire ul.queries li{
     padding: 1em;
     
     border: 1px solid #888;
+}
+
+main.territoire ul.queries > li ul.oracle-results{
+
+}
+
+main.territoire ul.queries > li ul.oracle-results > li{
+    text-align: left;
+    margin-bottom: 0.6em;
+}
+
+main.territoire ul.queries > li ul.oracle-results > li a h3,
+main.territoire ul.queries > li ul.oracle-results > li a h4
+{
+    margin: 0;
+    padding: 0;
+}
+
+main.territoire ul.queries > li ul.oracle-results > li a h3{
+    font-size: 1em;
+}
+main.territoire ul.queries > li ul.oracle-results > li a h4{
+    font-size: 0.7em;
+    color: #61d161;
+    text-decoration: none;
 }

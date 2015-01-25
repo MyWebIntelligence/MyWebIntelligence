@@ -17,6 +17,13 @@ module.exports = makeJSONDatabaseModel('QueryResults', {
             return all[QueryResultId];
         });
     },
+    findByQueryId: function(queryId){
+        return this.getAll().then(function(arr){
+            return arr.filter(function(queryResult){
+                return queryResult.query_id === queryId;
+            })[0]; // should be the latest, but [0] is fine for now
+        });
+    },
     create: makePromiseQueuer(function(QueryResultData){
         var self = this;
         var id = this._nextId();

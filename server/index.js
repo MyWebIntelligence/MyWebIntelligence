@@ -408,6 +408,17 @@ app.get('/oracle-credentials', function(req, res){
     }
 });
 
+app.get('/territoire-screen-data/:id', function(req, res){
+    var user = serializedUsers.get(req.session.passport.user);
+    var territoireId = Number(req.params.id);
+    
+    database.complexQueries.getTerritoireScreenData(territoireId).then(function(territoireData){
+        res.status(200).send(territoireData);
+    }).catch(function(err){
+        res.status(500).send('database problem '+ err);
+    });
+})
+
 
 var server = app.listen(PORT, function(){
     var host = server.address().address;

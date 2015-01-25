@@ -71,7 +71,11 @@ function displayTerritoireViewScreen(t){
     React.render(TerritoireViewScreen(screenData), document.body);
     
     serverAPI.getTerritoireViewData(t).then(function(data){
-        React.render(TerritoireViewScreen(data), document.body);
+        console.log('getTerritoireViewData', t, data);
+        React.render(TerritoireViewScreen({
+            territoire: data,
+            oracles: data.oracles
+        }), document.body);
     });
 }
 

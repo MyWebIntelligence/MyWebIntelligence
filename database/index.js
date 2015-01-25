@@ -67,6 +67,28 @@ module.exports = {
                     };
                 });
             });
+        },
+        
+        getTerritoireScreenData: function(territoireId){
+            var territoireP = Territoires.findById(territoireId);
+            var relevantQueries = Queries.findByBelongsTo(territoireId);
+            
+            var queryReadyP = relevantQueries.then(function(queries){
+                return Promise.all(queries.map(function(q){
+                    return QueryResults.findByQueryId(q.id).then(function(queryResults){
+                        q.oracleResults = queryResults.results;
+                    });
+                }));
+            });
+            
+            return Promise.all([territoireP, relevantQueries, queryReadyP]).then(function(res){
+                var territoire = res[0];
+                var queries = res[1];
+                
+                territoire.queries = queries;
+                
+                return territoire;
+            });
         }
     }
 };

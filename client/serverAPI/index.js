@@ -55,5 +55,8 @@ module.exports = {
     // This function transports sensitive data. Call with care.
     getCurrentUserOraclesCredentials: function(){
         return sendReq('GET', '/oracle-credentials');
+    },
+    getTerritoireViewData: function(territoire){
+        return sendReq('GET', '/territoire-screen-data/'+territoire.id);
     }
 };

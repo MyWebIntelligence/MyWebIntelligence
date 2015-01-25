@@ -34,7 +34,16 @@ module.exports = React.createClass({
             React.DOM.main({className: 'territoire'}, [
                 React.DOM.h1({}, "Territoire "+props.territoire.name),
                 props.territoire.queries ? React.DOM.ul({className: 'queries'}, props.territoire.queries.map(function(q){
-                    return React.DOM.li({}, q.name)
+                    return React.DOM.li({}, [
+                        React.DOM.h2({}, q.name),
+                        q.oracleResults ? React.DOM.ul({className: 'oracle-results'}, q.oracleResults.map(function(res){
+                            return React.DOM.li({}, React.DOM.a({href: res.link, target: '_blank'}, [
+                                React.DOM.h3({}, res.title),
+                                React.DOM.h4({}, res.link)
+                            ]))
+                        })) : undefined
+                    
+                    ]);
                 })) : undefined
             ])
         

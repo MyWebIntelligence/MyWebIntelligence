@@ -72,6 +72,7 @@ module.exports = React.createClass({
             React.DOM.h1({}, "Territoires"),
             TerritoiresList({
                 territoires: state.currentUser.territoires,
+                oracles: props.oracles,
                 onTerritoireListChange: function(newTerritoireList){
                     state.currentUser.territoires = newTerritoireList;
                     self.setState({

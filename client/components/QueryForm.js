@@ -8,6 +8,7 @@ var DeleteButton = React.createFactory(require('./DeleteButton'));
 
 interface QueryFormProps{
     query: MyWIQuery
+    oracles: MyWIOracle[]
     deleteQuery: (q: MyWIQuery) => void
 }
 
@@ -38,7 +39,7 @@ module.exports = React.createClass({
                     formData.q = formElement.querySelector('input[name="q"]').value;
                     formData.lang = formElement.querySelector('select[name="lang"]').value;
                     formData.nbPage = Number( formElement.querySelector('input[name="nbPage"]').value );
-                    formData.oracle = Number( formElement.querySelector('select[name="oracle"]').value );
+                    formData.oracle_id = Number( formElement.querySelector('select[name="oracle_id"]').value );
 
                     props.onSubmit(formData);
                 }
@@ -94,9 +95,13 @@ module.exports = React.createClass({
                 React.DOM.label({}, [
                     React.DOM.span({}, 'oracle'),
                     React.DOM.select({
-                        name: 'oracle',
-                        defaultValue: query.oracle
-                    }, [(function(){ throw 'Generate this list from data from the server' })()])
+                        name: 'oracle_id',
+                        defaultValue: query.oracle_id
+                    }, props.oracles.map(function(o){
+                        return React.DOM.option({
+                            value: o.id,
+                        }, o.name)
+                    }))
                 ]),
                 React.DOM.button({
                     type: "submit"

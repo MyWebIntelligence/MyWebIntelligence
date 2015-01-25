@@ -10,6 +10,7 @@ var TerritoireForm = React.createFactory(require('./TerritoireForm'));
 /*
 interface TerritoireListItemProps{
     territoire?: MyWITerritoire
+    oracles: MyWIOracle[]
     onTerritoireChange : (t: MyWITerritoire) => void
     deleteTerritoire: (t: MyWITerritoire) => void
     
@@ -112,6 +113,7 @@ module.exports = React.createClass({
                             }
                         }, q.name),
                         state.openQueryForms.has(q.id) ? QueryForm({
+                            oracles: props.oracles,
                             query: q,
                             onSubmit: function(formData){
                                 var keysWithChange = Object.keys(formData).filter(function(k){
@@ -156,6 +158,7 @@ module.exports = React.createClass({
                             }
                         }, '+'),
                         state.openQueryForms.has('+') ? QueryForm({
+                            oracles: props.oracles,
                             onSubmit: function(formData){
                                 props.createQueryInTerritoire(formData, t);
 

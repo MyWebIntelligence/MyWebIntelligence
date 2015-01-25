@@ -65,6 +65,7 @@ module.exports = React.createClass({
             )].concat(props.territoires.map(function(t){
                 return TerritoireListItem({
                     territoire: t,
+                    oracles: props.oracles,
                     onTerritoireChange: props.onTerritoireChange,
                     deleteTerritoire: props.deleteTerritoire,
                     createQueryInTerritoire: props.createQueryInTerritoire,

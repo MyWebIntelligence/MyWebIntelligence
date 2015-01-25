@@ -84,13 +84,14 @@ var indexHTMLStr = fs.readFileSync(resolve(__dirname, '../client/index.html'), {
 
 var PORT = 3333;
 
-var oracles = require('./initOraclesData.json');
+var oraclesInitData = require('./initOraclesData.json');
+var oracleModules = Object.create(null);
 
-var oraclesReadyP = Promise.all(oracles.map(function(o){
+var oraclesReadyP = Promise.all(oraclesInitData.map(function(o){
     var modulePath = resolve(__dirname, '../oracles', o.oracleNodeModuleName+'.js');
     
-    if(!fs.existsSync(modulePath))
-        throw new Error('Missing module file '+modulePath +' for Oracle '+o.name);
+    // will throw if there is no corresponding module and that's on purpose
+    oracleModules[o.oracleNodeModuleName] = require(modulePath);
     
     // check if entry with oracleNodeModuleName exists. If not, create it.
     // by oracleNodeModuleName because names may be localized in the future. Module names likely won't ever.
@@ -108,7 +109,7 @@ oraclesReadyP.catch(function(err){
 })
 
 var app = express();
-
+app.disable("x-powered-by");
 
 app.use(bodyParser.json()); // for parsing application/json
 app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
@@ -161,6 +162,7 @@ passport.deserializeUser(function(id, done) {
 // gzip/deflate outgoing responses
 app.use(session({ 
     secret: 'olive wood amplifi jourbon',
+    key: "s",
     resave: false,
     saveUninitialized: true
 }));
@@ -264,6 +266,8 @@ app.delete('/territoire/:id', function(req, res){
 // to create a query
 app.post('/territoire/:id/query', function(req, res){
     var user = serializedUsers.get(req.session.passport.user);
+    // TODO  this should 403 if the user doesn't own the territoire or something
+    
     var territoireId = Number(req.params.id);
     var queryData = req.body;
 
@@ -272,6 +276,36 @@ app.post('/territoire/:id/query', function(req, res){
 
     database.Queries.create(queryData).then(function(newQuery){
         res.status(201).send(newQuery);
+        
+        database.Oracles.findById(newQuery.oracle_id).then(function(oracle){
+            console.log('oracle found', oracle.name, user.name, newQuery.q);
+            
+            if(oracle.needsCredentials){
+                database.OracleCredentials.findByUserAndOracleId(user.id, oracle.id).then(function(oracleCredentials){
+                    console.log('oracle credentials', oracle.name, user.name, newQuery.q, oracleCredentials);
+                    
+                    // temporarily hardcoded. TODO generalize in the future
+                    var oracleFunction = oracleModules[oracle.oracleNodeModuleName]({
+                        "API key": oracleCredentials["API key"],
+                        cx: oracleCredentials["cx"]
+                    });
+                    
+                    oracleFunction(newQuery.q).then(function(searchResults){
+                        console.log('GCSE oracle results for', newQuery.q, searchResults);
+                        
+                        
+                    });
+                }).catch(function(err){
+                    console.error('oracling after credentials err', err);
+                });
+            }
+            else{
+                throw 'TODO';
+            }
+        }).catch(function(err){
+            console.error('oracling err', err);
+        });
+        
     }).catch(function(err){
         res.status(500).send('database problem '+ err);
     });

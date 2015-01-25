@@ -7,3 +7,4 @@
 [Find API key](https://developers.google.com/custom-search/json-api/v1/introduction#identify_your_application_to_google_with_api_key)
 
 [REST API](https://developers.google.com/custom-search/json-api/v1/using_rest)
+[Parameters options](https://developers.google.com/custom-search/json-api/v1/reference/cse/list)

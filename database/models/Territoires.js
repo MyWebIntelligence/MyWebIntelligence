@@ -2,6 +2,8 @@
 
 var Promise = require('es6-promise').Promise;
 
+var Queries = require('./Queries');
+
 var makeJSONDatabaseModel = require('../makeJSONDatabaseModel');
 var makePromiseQueuer = require('../makePromiseQueue')();
 
@@ -54,11 +56,20 @@ module.exports = makeJSONDatabaseModel('Territoires', {
     delete: makePromiseQueuer(function(territoireId){
         var self = this;
 
-        throw 'TODO delete all related queries';
-        
-        return this._getStorageFile().then(function(all){
-            delete all[territoireId];
-            return self._save(all);
+        var relatedQueriesDeletedP = Queries.findByBelongsTo(territoireId).then(function(queries){
+            console.log('found', queries.length, "relevant queries");
+            
+            return Promise.all(queries.map(function(q){ return Queries.delete(q.id); }));
         });
+        
+        return relatedQueriesDeletedP.then(function(){
+            console.log('relatedQueriesDeletedP');
+            
+            return self._getStorageFile().then(function(all){
+                delete all[territoireId];
+                return self._save(all);
+            });
+        });
+        
     })
 });

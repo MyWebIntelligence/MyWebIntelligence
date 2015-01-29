@@ -4,7 +4,7 @@
   "description": "Understanding the web around you",
   "main": "index.js",
   "scripts": {
-    "test": "mocha test/database",
+    "test": "mocha test/*",
     "start": "node server/index.js",
     "build": "browserify client/index.js -o client/browserify-bundle.js -d",
     "watch": "watchify client/index.js -o client/browserify-bundle.js -d -v"

@@ -23,7 +23,7 @@ module.exports = makeJSONDatabaseModel('XXXX', {
         var self = this;
         var id = this._nextId();
 
-        return this._getStorageFile().then(function(all){
+        return self._getStorageFile().then(function(all){
             var newXXXX = Object.assign({id: id}, XXXXData);
 
             all[id] = newXXXX;
@@ -36,7 +36,7 @@ module.exports = makeJSONDatabaseModel('XXXX', {
         var self = this;
         var id = XXXX.id;
 
-        return this._getStorageFile().then(function(all){
+        return self._getStorageFile().then(function(all){
             var updatedXXXX = Object.assign({}, all[id], XXXX);
 
             all[id] = updatedXXXX;
@@ -48,7 +48,7 @@ module.exports = makeJSONDatabaseModel('XXXX', {
     delete: makePromiseQueuer(function(XXXXId){
         var self = this;
 
-        return this._getStorageFile().then(function(all){            
+        return self._getStorageFile().then(function(all){            
             delete all[XXXXId];
             return self._save(all);
         });

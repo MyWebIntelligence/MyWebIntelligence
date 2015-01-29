@@ -57,19 +57,25 @@ module.exports = makeJSONDatabaseModel('Territoires', {
         var self = this;
 
         var relatedQueriesDeletedP = Queries.findByBelongsTo(territoireId).then(function(queries){
-            console.log('found', queries.length, "relevant queries");
+            //console.log('found', queries.length, "relevant queries");
             
             return Promise.all(queries.map(function(q){ return Queries.delete(q.id); }));
         });
         
         return relatedQueriesDeletedP.then(function(){
-            console.log('relatedQueriesDeletedP');
-            
             return self._getStorageFile().then(function(all){
                 delete all[territoireId];
                 return self._save(all);
             });
-        });
-        
-    })
+        }); 
+    }),
+    deleteAll: function(){
+        var self = this;
+
+        return this.getAll().then(function(all){
+            return Promise.all(all.map(function(t){
+                return self.delete(t.id);
+            }))
+        })
+    }
 });

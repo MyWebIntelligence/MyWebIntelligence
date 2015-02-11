@@ -57,5 +57,10 @@ module.exports = makeJSONDatabaseModel('Queries', {
             delete all[QueryId];
             return self._save(all);
         });
-    })
+    }),
+    deleteAll: function(){
+        var self = this;
+
+        return this._save({});
+    }
 });

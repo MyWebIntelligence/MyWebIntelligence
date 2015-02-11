@@ -93,11 +93,6 @@ module.exports = React.createClass({
                         })
                     }
                 }, React.DOM.i({className: 'fa fa-pencil '}, '')),
-                React.DOM.span({
-                    style: {
-                        display: "inline"
-                    }
-                }, "Queries: "),
                 React.DOM.ul({className: "queries"}, t.queries.map(function(q){
                     return React.DOM.li({
                         className: state.openQueryForms.has(q.id) ? 'open' : ''
@@ -114,7 +109,15 @@ module.exports = React.createClass({
                                     editMode: false
                                 });
                             }
-                        }, q.name),
+                        }, [
+                            React.DOM.strong({}, q.name),
+                            React.DOM.span({}, props.oracles.find(function(o){
+                                console.log(o.id, q.oracle_id, q.name);
+                                return o.id === q.oracle_id;
+                            }).name),
+                            React.DOM.span({}, '"'+q.q+'"'),
+                            React.DOM.span({}, '0/'+q.nbPage)
+                        ]),
                         state.openQueryForms.has(q.id) ? QueryForm({
                             oracles: props.oracles,
                             query: q,

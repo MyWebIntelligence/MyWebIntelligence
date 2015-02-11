@@ -1,9 +1,30 @@
 "use strict";
 
 var Promise = require('es6-promise').Promise;
+var promisify = require('es6-promisify');
 
 var fs = require('fs');
 var path = require('path');
+var tmpdir = require('tmp').dir;
+
+var readFile = promisify(fs.readFile);
+var writeFile = promisify(fs.writeFile);
+
+console.log("process.env.NODE_ENV", process.env.NODE_ENV);
+
+var BASE_PATH_P = new Promise(function(resolve, reject){
+    if(process.env.NODE_ENV === 'test')
+        tmpdir(function(err, d){
+            if(err) reject(err); else resolve(d);
+        });
+    else
+        resolve(path.resolve(__dirname, '_storage'))
+})
+
+
+BASE_PATH_P.then(function(p){
+    console.log('BASE_PATH', p);
+});
 
 module.exports = function makeJSONDatabaseModel(name, methods){
     // to queue all I/O operations
@@ -13,26 +34,29 @@ module.exports = function makeJSONDatabaseModel(name, methods){
         // Purposefully don't cache the file value
         _getStorageFile: function(){
             lastOperationFinishedP = lastOperationFinishedP.then(function(){
-                return new Promise(function(resolve, reject){
-                    fs.readFile(path.resolve(__dirname, '_storage', name+'.json'), {encoding: 'utf8'}, function(err, res){
+                return BASE_PATH_P
+                    .then(function(BASE_PATH){
+                        return readFile(path.resolve(BASE_PATH, name+'.json'), {encoding: 'utf8'})
+                    })
+                    .then(function(res){
+                        return JSON.parse(res);
+                    })
+                    .catch(function(err){
                         if(err){
                             // no file. Return empty "table". File will be created by next _save call
-                            if(err.code === "ENOENT") resolve({}); else reject(err);
-                        } 
-                        else resolve(JSON.parse(res));
+                            if(err.code === "ENOENT") return {}; else throw err;
+                        }
                     });
-                });
             });
             
             return lastOperationFinishedP;
         },
         _save: function(data){
             lastOperationFinishedP = lastOperationFinishedP.then(function(){
-                return new Promise(function(resolve, reject){
-                    fs.writeFile(path.resolve(__dirname, '_storage', name+'.json'), JSON.stringify(data, null, 3), function(err, res){
-                        if(err) reject(err); else resolve(res);
+                return BASE_PATH_P
+                    .then(function(BASE_PATH){
+                        return writeFile(path.resolve(BASE_PATH, name+'.json'), JSON.stringify(data, null, 3));
                     });
-                });
             });
             
             return lastOperationFinishedP;

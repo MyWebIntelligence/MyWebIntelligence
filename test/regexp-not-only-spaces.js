@@ -1,42 +1,45 @@
+"use strict";
+
+var assert = assert = require('chai').assert;
+
+
 function test(str){
     // https://html.spec.whatwg.org/multipage/forms.html#the-pattern-attribute
     var regexp = /^(?:\s*(\S+\s*)+)$/; // /(\S+)+/gi;
-    
+
     return !!str.match(regexp);
 }
+
+describe('"not-only-spaces" regexp', function(){
     
-var truthy = [
-    'a',
-    'ab',
-    ' a',
-    'a ',
-    ' a ',
-    ' ab ',
-    'ab uy',
-    'é ç à'
-];
+    [
+        'a',
+        'ab',
+        ' a',
+        'a ',
+        ' a ',
+        ' ab ',
+        'ab uy',
+        'é ç à'
+    ].forEach(function(str){
+        it('"'+str+'" should be true', function(){
+            assert.isTrue(test(str), str);
+        });
+    });
 
-truthy.forEach(function(str){
-    console.log(str);
-    if(test(str) === false)
-        throw str + ' should be truthy, but is falsy';
+
+    [
+        '',
+        ' ',
+        '\n',
+        '\t',
+        '  ',
+        ' \t',
+        '\t '
+    ].forEach(function(str){
+        it('"'+str+'" should be false', function(){
+            assert.isFalse(test(str), str);
+        });
+    });
+    
 });
-
-var falsy = [
-    '',
-    ' ',
-    '\n',
-    '\t',
-    '  ',
-    ' \t',
-    '\t '
-];
-
-
-falsy.forEach(function(str){
-    console.log(str);
-    if(test(str) === true)
-        throw '('+str+') should be falsy, but is truthy';
-});
-
-console.log('pass');

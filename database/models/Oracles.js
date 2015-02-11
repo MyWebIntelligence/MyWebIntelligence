@@ -24,9 +24,7 @@ module.exports = makeJSONDatabaseModel('Oracles', {
             });
         });
     },
-    create: makePromiseQueuer(function create(oracleData){
-        console.log('creating oracle', oracleData);
-        
+    create: makePromiseQueuer(function create(oracleData){        
         var self = this;
         var id = this._nextId();
 
@@ -60,5 +58,10 @@ module.exports = makeJSONDatabaseModel('Oracles', {
             delete all[OracleId];
             return self._save(all);
         });
-    })
+    }),
+    deleteAll: function(){
+        var self = this;
+
+        return this._save({});
+    }
 });

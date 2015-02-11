@@ -60,5 +60,10 @@ module.exports = makeJSONDatabaseModel('Users', {
             delete all[userId];
             return self._save(all);
         });
-    })
+    }),
+    deleteAll: function(){
+        var self = this;
+
+        return this._save({});
+    }
 });

@@ -95,6 +95,9 @@ module.exports = {
             });
         },
         
+        /*
+            Query search results
+        */
         getTerritoireScreenData: function(territoireId){
             var territoireP = Territoires.findById(territoireId);
             var relevantQueries = Queries.findByBelongsTo(territoireId);

@@ -89,10 +89,12 @@ main ul.territoires > li ul.queries > li{
 main ul.territoires > li ul.queries > li.add{
     background-color: lightgreen;
 }
+main ul.territoires > li ul.queries > li.add button{
+    text-align: center;
+}
 
 main ul.territoires > li ul.queries > li.open{
-    background-color: black;
-    color: white;
+    background-color: white;
 }
 
 main ul.territoires > li ul.queries > li > button{
@@ -114,6 +116,7 @@ main ul.territoires > li ul.queries > li > button > *{
     display: inline-block;
     width: 13%;
     padding: 0 1em;
+    vertical-align: middle;
 }
 
 main ul.territoires > li ul.queries > li > button > *:nth-child(2){
@@ -122,15 +125,9 @@ main ul.territoires > li ul.queries > li > button > *:nth-child(2){
 
 
 main ul.territoires > li ul.queries > li .QueryForm-react-component{
-    position: absolute;
-    color: black;
-    background: white;
     padding: 1em;
-    border: 1px solid black;
     
     z-index: 1;
-    
-    width: 25em;
 }
 
 .QueryForm-react-component form.query{
@@ -149,10 +146,11 @@ form.query button[type="submit"]{
     
     background-color: transparent;
     color: inherit;
+    
+    left: 100%;
 }
 
 form.query label{
-    display: block;
 }
 
 .QueryForm-react-component .delete{

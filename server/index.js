@@ -85,29 +85,7 @@ var indexHTMLStr = fs.readFileSync(resolve(__dirname, '../client/index.html'), {
 
 var PORT = 3333;
 
-var oraclesInitData = require('./initOraclesData.json');
-var oracleModules = Object.create(null);
 
-var oraclesReadyP = Promise.all(oraclesInitData.map(function(o){
-    var modulePath = resolve(__dirname, '../oracles', o.oracleNodeModuleName+'.js');
-    
-    // will throw if there is no corresponding module and that's on purpose
-    oracleModules[o.oracleNodeModuleName] = require(modulePath);
-    
-    // check if entry with oracleNodeModuleName exists. If not, create it.
-    // by oracleNodeModuleName because names may be localized in the future. Module names likely won't ever.
-    return database.Oracles.findByOracleNodeModuleName(o.oracleNodeModuleName).then(function(result){
-        if(!result)
-            return database.Oracles.create(o);
-        // else an entry exist, nothing to do.
-    });
-}));
-
-
-oraclesReadyP.catch(function(err){
-    console.error("oracles error", err);
-    process.kill()
-})
 
 var app = express();
 app.disable("x-powered-by");

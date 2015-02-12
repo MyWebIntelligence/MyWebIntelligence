@@ -71,7 +71,7 @@ var makeDocument = require('./makeDocument.js');
 var database = require('../database/index.js');
 
 var LoginScreen = React.createFactory(require('../client/components/LoginScreen'));
-var TerritoiresScreen = React.createFactory(require('../client/components/TerritoiresScreen'));
+var TerritoireListScreen = React.createFactory(require('../client/components/TerritoireListScreen'));
 var OraclesScreen = React.createFactory(require('../client/components/OraclesScreen'));
 
 var googleCredentials = require('../config/google-credentials.json');
@@ -214,7 +214,7 @@ app.get('/territoires', function(req, res){
             var doc = result[0]
             var initData = result[1];
 
-            renderDocumentWithData(doc, initData, TerritoiresScreen);
+            renderDocumentWithData(doc, initData, TerritoireListScreen);
 
             res.send( serializeDocumentToHTML(doc) );
         })

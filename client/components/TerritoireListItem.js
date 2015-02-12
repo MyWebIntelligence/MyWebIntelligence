@@ -93,58 +93,61 @@ module.exports = React.createClass({
                         })
                     }
                 }, React.DOM.i({className: 'fa fa-pencil '}, '')),
-                React.DOM.span({
-                    style: {
-                        display: "inline"
-                    }
-                }, "Queries: "),
                 React.DOM.ul({className: "queries"}, t.queries.map(function(q){
                     return React.DOM.li({
                         className: state.openQueryForms.has(q.id) ? 'open' : ''
                     }, [
-                        React.DOM.button({
-                            onClick: function(e){
-                                if(state.openQueryForms.has(q.id))
-                                    state.openQueryForms.delete(q.id);
-                                else
-                                    state.openQueryForms.add(q.id);
-
-                                self.setState({
-                                    openQueryForms: state.openQueryForms,
-                                    editMode: false
-                                });
-                            }
-                        }, q.name),
-                        state.openQueryForms.has(q.id) ? QueryForm({
-                            oracles: props.oracles,
-                            query: q,
-                            onSubmit: function(formData){
-                                var keysWithChange = Object.keys(formData).filter(function(k){
-                                    return q[k] !== formData[k];
-                                });
-                                
-                                if(keysWithChange.length >= 1){
-                                    var deltaQuery = {id: q.id};
-                                    
-                                    keysWithChange.forEach(function(k){
-                                        deltaQuery[k] = formData[k];
+                        state.openQueryForms.has(q.id) ?
+                            QueryForm({
+                                oracles: props.oracles,
+                                query: q,
+                                onSubmit: function(formData){
+                                    var keysWithChange = Object.keys(formData).filter(function(k){
+                                        return q[k] !== formData[k];
                                     });
 
-                                    // new territoire is the current one mutated at the .queries array level
-                                    props.onQueryChange(deltaQuery, t);
-                                }
+                                    if(keysWithChange.length >= 1){
+                                        var deltaQuery = {id: q.id};
 
-                                // close the form UI in all cases
-                                state.openQueryForms.delete(q.id);
-                                self.setState({
-                                    openQueryForms: state.openQueryForms,
-                                    editMode: false
-                                });
-                            },
-                            deleteQuery: function(query){
-                                props.removeQueryFromTerritoire(query, t);
-                            }
-                        }) : undefined
+                                        keysWithChange.forEach(function(k){
+                                            deltaQuery[k] = formData[k];
+                                        });
+
+                                        // new territoire is the current one mutated at the .queries array level
+                                        props.onQueryChange(deltaQuery, t);
+                                    }
+
+                                    // close the form UI in all cases
+                                    state.openQueryForms.delete(q.id);
+                                    self.setState({
+                                        openQueryForms: state.openQueryForms,
+                                        editMode: false
+                                    });
+                                },
+                                deleteQuery: function(query){
+                                    props.removeQueryFromTerritoire(query, t);
+                                }
+                            }) :
+                            React.DOM.button({
+                                onClick: function(e){
+                                    if(state.openQueryForms.has(q.id))
+                                        state.openQueryForms.delete(q.id);
+                                    else
+                                        state.openQueryForms.add(q.id);
+
+                                    self.setState({
+                                        openQueryForms: state.openQueryForms,
+                                        editMode: false
+                                    });
+                                }
+                            }, [
+                                React.DOM.strong({}, q.name),
+                                React.DOM.span({}, props.oracles.find(function(o){
+                                    return o.id === q.oracle_id;
+                                }).name),
+                                React.DOM.span({}, '"'+q.q+'"'),
+                                React.DOM.span({}, '0/'+q.nbPage)
+                            ])
                     ]);
                 }).concat([
                     React.DOM.li({

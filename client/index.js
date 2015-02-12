@@ -5,7 +5,7 @@ var React = require('react');
 var serverAPI = require('./serverAPI/index');
 
 var LoginScreen = React.createFactory(require('./components/LoginScreen'));
-var TerritoiresScreen = React.createFactory(require('./components/TerritoiresScreen'));
+var TerritoireListScreen = React.createFactory(require('./components/TerritoireListScreen'));
 var OraclesScreen = React.createFactory(require('./components/OraclesScreen'));
 var TerritoireViewScreen = React.createFactory(require('./components/TerritoireViewScreen'));
 
@@ -102,7 +102,7 @@ document.addEventListener('DOMContentLoaded', function(){
             }, data);
             console.log('/territoires screenData', screenData);
             
-            React.render(TerritoiresScreen(screenData), document.body);
+            React.render(TerritoireListScreen(screenData), document.body);
             break;
         case '/oracles': 
             displayOraclesScreen();

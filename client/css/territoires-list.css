@@ -74,7 +74,7 @@ main ul.territoires > li ul.queries{
     display: inline;
 }
 main ul.territoires > li ul.queries > li{
-    display: inline-block;
+    display: block;
     border: solid 1px #777;
     border-radius: 0.5em;
     
@@ -82,19 +82,23 @@ main ul.territoires > li ul.queries > li{
     text-align: justify;
     
     position: relative;
+    
+    width: 100%;
 }
 
 main ul.territoires > li ul.queries > li.add{
     background-color: lightgreen;
 }
+main ul.territoires > li ul.queries > li.add button{
+    text-align: center;
+}
 
 main ul.territoires > li ul.queries > li.open{
-    background-color: black;
-    color: white;
+    background-color: white;
 }
 
 main ul.territoires > li ul.queries > li > button{
-    
+    text-align: left;
     padding: 0.2em;
     margin: 0;
     border: 0;
@@ -108,19 +112,22 @@ main ul.territoires > li ul.queries > li > button{
     color: inherit;
 }
 
+main ul.territoires > li ul.queries > li > button > *{
+    display: inline-block;
+    width: 13%;
+    padding: 0 1em;
+    vertical-align: middle;
+}
 
-    
+main ul.territoires > li ul.queries > li > button > *:nth-child(2){
+    width: 50%;
+}
+
 
 main ul.territoires > li ul.queries > li .QueryForm-react-component{
-    position: absolute;
-    color: black;
-    background: white;
     padding: 1em;
-    border: 1px solid black;
     
     z-index: 1;
-    
-    width: 25em;
 }
 
 .QueryForm-react-component form.query{
@@ -139,10 +146,11 @@ form.query button[type="submit"]{
     
     background-color: transparent;
     color: inherit;
+    
+    left: 100%;
 }
 
 form.query label{
-    display: block;
 }
 
 .QueryForm-react-component .delete{

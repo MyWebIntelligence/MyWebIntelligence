@@ -66,7 +66,7 @@ var passport = require('passport');
 var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
 var React = require('react');
 
-var makeDocument = require('./makeDocument.js');
+var makeDocument = require('../common/makeDocument');
 var database = require('../database/index.js');
 var onQueryCreated = require('./onQueryCreated');
 

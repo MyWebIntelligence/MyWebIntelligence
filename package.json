@@ -43,7 +43,7 @@
     "passport": "~0.2.1",
     "passport-google-oauth": "~0.1.5",
     "react": "~0.12.2",
-    "request": "^2.51.0"
+    "request": "^2.53.0"
   },
   "devDependencies": {
     "chai": "^1.10.0",

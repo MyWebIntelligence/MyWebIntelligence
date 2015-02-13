@@ -1,10 +1,23 @@
 "use strict";
 
 var Set = require('es6-set');
+var Map = require('es6-map');
+var Promise = require('es6-promise').Promise;
 
 // The fetch module takes care of redirects, per-domain throttling all that
 var fetch = require('./fetch');
-var extractContent = require('./extractContent');
+var extractEffectiveDocument = require('./extractEffectiveDocument');
+
+// necessary because the Promise polyfill doesn't accept Sets.
+Set.prototype._toArray = function(){
+    var a = [];
+    
+    this.forEach(function(e){
+        a.push(e);
+    })
+    
+    return a;
+}
 
 /*
 interface EffectiveDocument{
@@ -41,8 +54,8 @@ module.exports = function(initialUrls, originalWords){
     }
     
     function crawl(){
-        return Promise.all(todo.map(function(u){
-            todo.remove(u)
+        return Promise.all(todo._toArray().map(function(u){
+            todo.delete(u)
             doing.add(u);
 
             return fetch(u)
@@ -51,20 +64,27 @@ module.exports = function(initialUrls, originalWords){
                         redirects.set(fetchedDocument.originalURL, fetchedDocument.URLAfterRedirects);
                     }
                 
-                    var effectiveDocument = extractEffectiveDocument(fetchedDocument.html);
-                    doing.remove(u);
-                    results.set(fetchedDocument.URLAfterRedirects, effectiveDocument);
-                    done.add(u);
-                
-                    if(approve(fetchedDocument)){
-                        effectiveDocument.links.forEach(function(u){
-                            if(!doing.has(u) && !done.has(u) && !results.has(u))
-                                todo.add(u);
+                    return extractEffectiveDocument(fetchedDocument.URLAfterRedirects)
+                        .then(function(effectiveDocument){
+                            doing.delete(u);
+                            results.set(fetchedDocument.URLAfterRedirects, effectiveDocument);
+                            done.add(u);
+                        
+                            //console.log('yo', fetchedDocument.URLAfterRedirects, effectiveDocument); 
+
+                            if(approve(fetchedDocument)){
+                                effectiveDocument.links.forEach(function(u){
+                                    if(!doing.has(u) && !done.has(u) && !results.has(u))
+                                        todo.add(u);
+                                });
+                            }
                         });
-                    }
                 })
                 .then(function(){
                     return todo.size >= 1 ? crawl() : undefined;
+                })
+                .catch(function(err){
+                    console.error('error while exploring the web', err)
                 });
 
         }));

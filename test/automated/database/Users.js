@@ -7,7 +7,7 @@ var Promise = require('es6-promise').Promise;
 var assert = assert = require('chai').assert;
 require('chai-as-promised');
 
-var db = require('../../database/index.js');
+var db = require('../../../database/index.js');
 
 var GOOGLE_ID = String(Math.round(Math.random() * Math.pow(2, 30)));
 

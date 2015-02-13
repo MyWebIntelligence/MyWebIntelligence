@@ -7,24 +7,27 @@ var fetch = require('./fetch');
 var extractContent = require('./extractContent');
 
 /*
+interface EffectiveDocument{
+    html: string // stipped HTML containing only the useful content
+    title: string // <title> or <h1>
+    meta: Map<string, string>
+    links: Set<string>
+}
+
+// ignoring intermediate redirects
+interface FetchedDocument{
+    originalURL: string
+    URLAfterRedirects : string
+    html: string
+}
+*/
+
+
+/*
     urls: Set<string>
     originalWords: Set<string>
     
     @return Promise<CrawlResult> which is sort of a graph
-    
-    interface EffectiveDocument{
-        html: string // stipped HTML containing only the useful content
-        title: string // <title> or <h1>
-        meta: Map<string, string>
-        links: Set<string>
-    }
-    
-    // ignoring intermediate redirects
-    interface FetchedDocument{
-        originalURL: string
-        URLAfterRedirects : string
-        html: string
-    }
 */
 module.exports = function(initialUrls, originalWords){
     var todo = new Set(initialUrls); // clone

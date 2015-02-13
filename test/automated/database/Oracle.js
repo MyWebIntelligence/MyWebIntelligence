@@ -7,7 +7,7 @@ var Promise = require('es6-promise').Promise;
 var assert = assert = require('chai').assert;
 require('chai-as-promised');
 
-var db = require('../../database/index.js');
+var db = require('../../../database/index.js');
 
 
 

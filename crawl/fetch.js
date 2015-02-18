@@ -11,7 +11,14 @@ var request = require('request');
 */
 module.exports = function(url){
     return new Promise(function(resolve, reject){
-        request(url, function(error, response, body){
+        request({
+            url: url,
+            headers: {
+                // Firefox Accept header
+                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+                "User-Agent": "My Web Intelligence crawler"
+            }
+        }, function(error, response, body){
             if(error)
                 reject(error);
             else{

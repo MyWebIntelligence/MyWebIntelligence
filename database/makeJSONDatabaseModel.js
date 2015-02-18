@@ -12,7 +12,7 @@ var writeFile = promisify(fs.writeFile);
 
 console.log("process.env.NODE_ENV", process.env.NODE_ENV);
 
-var BASE_PATH_P = new Promise(function(resolve, reject){
+var BASE_STORAGE_PATH_P = new Promise(function(resolve, reject){
     if(process.env.NODE_ENV === 'test')
         tmpdir(function(err, d){
             if(err) reject(err); else resolve(d);
@@ -22,8 +22,8 @@ var BASE_PATH_P = new Promise(function(resolve, reject){
 })
 
 
-BASE_PATH_P.then(function(p){
-    console.log('BASE_PATH', p);
+BASE_STORAGE_PATH_P.then(function(p){
+    console.log('BASE_STORAGE_PATH', p);
 });
 
 module.exports = function makeJSONDatabaseModel(name, methods){
@@ -34,9 +34,9 @@ module.exports = function makeJSONDatabaseModel(name, methods){
         // Purposefully don't cache the file value
         _getStorageFile: function(){
             lastOperationFinishedP = lastOperationFinishedP.then(function(){
-                return BASE_PATH_P
-                    .then(function(BASE_PATH){
-                        return readFile(path.resolve(BASE_PATH, name+'.json'), {encoding: 'utf8'})
+                return BASE_STORAGE_PATH_P
+                    .then(function(BASE_STORAGE_PATH){
+                        return readFile(path.resolve(BASE_STORAGE_PATH, name+'.json'), {encoding: 'utf8'})
                     })
                     .then(function(res){
                         return JSON.parse(res);
@@ -53,9 +53,9 @@ module.exports = function makeJSONDatabaseModel(name, methods){
         },
         _save: function(data){
             lastOperationFinishedP = lastOperationFinishedP.then(function(){
-                return BASE_PATH_P
-                    .then(function(BASE_PATH){
-                        return writeFile(path.resolve(BASE_PATH, name+'.json'), JSON.stringify(data, null, 3));
+                return BASE_STORAGE_PATH_P
+                    .then(function(BASE_STORAGE_PATH){
+                        return writeFile(path.resolve(BASE_STORAGE_PATH, name+'.json'), JSON.stringify(data, null, 3));
                     });
             });
             

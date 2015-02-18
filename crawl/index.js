@@ -8,17 +8,6 @@ var Promise = require('es6-promise').Promise;
 var fetch = require('./fetch');
 var extractEffectiveDocument = require('./extractEffectiveDocument');
 
-// necessary because the Promise polyfill doesn't accept Sets.
-Set.prototype._toArray = function(){
-    var a = [];
-    
-    this.forEach(function(e){
-        a.push(e);
-    })
-    
-    return a;
-}
-
 /*
 interface EffectiveDocument{
     html: string // stipped HTML containing only the useful content
@@ -43,6 +32,8 @@ interface FetchedDocument{
     @return Promise<CrawlResult> which is sort of a graph
 */
 module.exports = function(initialUrls, originalWords){
+    console.log('crawl call', initialUrls.size, originalWords);
+    
     var todo = new Set(initialUrls); // clone
     var doing = new Set();
     var done = new Set();
@@ -50,10 +41,12 @@ module.exports = function(initialUrls, originalWords){
     var redirects = new Map(); 
     
     function approve(fetchedDocument){
-        throw 'TODO';
+        // TODO
+        return false;
     }
     
     function crawl(){
+        console.log('internal crawl', todo.size, doing.size, done.size);
         return Promise.all(todo._toArray().map(function(u){
             todo.delete(u)
             doing.add(u);
@@ -84,7 +77,7 @@ module.exports = function(initialUrls, originalWords){
                     return todo.size >= 1 ? crawl() : undefined;
                 })
                 .catch(function(err){
-                    console.error('error while exploring the web', err)
+                    console.error('error while exploring the web', u, err)
                 });
 
         }));
@@ -92,7 +85,7 @@ module.exports = function(initialUrls, originalWords){
     
     return crawl().then(function(){
         return {
-            nodes: done,
+            nodes: results,
             redirects: redirects
         }
     });

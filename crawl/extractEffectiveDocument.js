@@ -18,8 +18,8 @@ var READABILITY_PARSER_BASE_URL = "https://readability.com/api/content/v1/parser
 interface EffectiveDocument{
     html: string // stipped HTML containing only the useful content
     title: string // <title> or <h1>
-    meta: Map<string, string>
-    links: Set<string>
+    links: Set<string>,
+    date_published: DateString
 }
 */
 
@@ -55,13 +55,13 @@ module.exports = function(urlToExplore){
                                 return a.href;
                             }));
                         
-                            console.log('uniqueLinks', urlToExplore, uniqueLinks.size);
+                            // console.log('uniqueLinks', urlToExplore, uniqueLinks.size);
                         
                             return {
                                 html: responseObj.content,
                                 title: responseObj.title,
                                 "date_published": responseObj.date_published,
-                                links: uniqueLinks.length
+                                links: uniqueLinks
                             };
                         })
                     );

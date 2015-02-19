@@ -1,8 +1,8 @@
 "use strict";
 
-process.env.NODE_ENV = "test";
+require('../../../ES-mess');
 
-var Promise = require('es6-promise').Promise;
+process.env.NODE_ENV = "test";
 
 var assert = assert = require('chai').assert;
 require('chai-as-promised');

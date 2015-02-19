@@ -48,7 +48,7 @@ module.exports = function(initialUrls, originalWords){
     }
     
     function crawl(depth){
-        console.log('internal crawl', depth, '|', todo.size, doing.size, done.size);
+        // console.log('internal crawl', depth, '|', todo.size, doing.size, done.size);
         return Promise.all(todo._toArray().map(function(u){
             todo.delete(u)
             doing.add(u);

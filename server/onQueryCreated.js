@@ -9,7 +9,7 @@ var crawl = require('../crawl');
 
 
 module.exports = function onQueryCreated(query, user){
-    console.log("onQueryCreated", query.name, user.name);
+    // console.log("onQueryCreated", query.name, user.name);
     
     return db.Oracles.findById(query.oracle_id)
         .then(function(oracle){
@@ -23,7 +23,6 @@ module.exports = function onQueryCreated(query, user){
             }
         })
         .then(function(queryResults){
-            console.log('yo', 2, queryResults.size);
             db.QueryResults.create({
                 query_id: query.id,
                 results: queryResults._toArray(),
@@ -37,7 +36,6 @@ module.exports = function onQueryCreated(query, user){
                 nodes: results,
                 redirects: redirects
             }*/
-            console.log('yo', 3, crawlResult.nodes.size);
             var expressions = [];
             var references = [];
             var aliases = [];

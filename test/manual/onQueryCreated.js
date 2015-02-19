@@ -1,6 +1,7 @@
 "use strict";
 
 require('../../ES-mess');
+process.title = 'crawl + graph';
 
 var db = require('../../database');
 var onQueryCreated = require('../../server/onQueryCreated');
@@ -57,13 +58,13 @@ oP.then(function(oracle){
         console.timeEnd('getting graph');
         console.log('graph', graph.nodes.size, graph.edges.size);
     })
-    .catch(function(err){
-        console.error('onQueryCreated manual test error', error); 
-    })
     .then(function(){
         return Promise.all([
             db.Queries.delete(queryId)
         ]);
+    })
+    .catch(function(err){
+        console.error('onQueryCreated manual test error', error); 
     });
 
 

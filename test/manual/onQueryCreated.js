@@ -49,6 +49,13 @@ oP.then(function(oracle){
     })
     .then(function(){
         console.timeEnd('onQueryCreated');
+    
+        console.time('getting graph');
+        return db.complexQueries.getQueryGraph(queryId);
+    })
+    .then(function(graph){
+        console.timeEnd('getting graph');
+        console.log('graph', graph.nodes.size, graph.edges.size);
     })
     .catch(function(err){
         console.error('onQueryCreated manual test error', error); 

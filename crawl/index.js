@@ -68,7 +68,7 @@ module.exports = function(initialUrls, originalWords){
                             //console.log('yo', fetchedDocument.URLAfterRedirects, effectiveDocument); 
 
                             if(approve(fetchedDocument)){
-                                effectiveDocument.links._randomSubset(depth < 1 ? 1 : 0).forEach(function(u){
+                                effectiveDocument.links._randomSubset(depth < 1 ? 2 : 0).forEach(function(u){
                                     if(!doing.has(u) && !done.has(u) && !results.has(u))
                                         todo.add(u);
                                 });

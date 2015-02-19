@@ -73,6 +73,92 @@ module.exports = {
                 
                 return territoire;
             });
+        },
+        
+        /*
+            This returns a graph of pages
+            The url is the URL after redirects
+        */
+        getQueryGraph: function(queryId){
+            console.log('getQueryGraph', queryId);
+            var nodes = new Set();
+            var potentialEdges = new Set();
+            
+            var getCanonicalURLP = Aliases.getAll().then(function(all){
+                var aliasMap = new Map();
+                
+                all.forEach(function(alias){
+                    aliasMap.set(alias.source, alias.target);
+                })
+                
+                return function(url){
+                    return aliasMap.get(url) || url;
+                };
+            });
+            
+            function keepURLsWithAnExpression(urls){
+                return Expressions.findByURIs(urls).then(function(exps){
+                    return new Set(exps.map(function(e){ return e.uri }));
+                })
+            }
+            
+            return Promise.all([
+                getCanonicalURLP,
+                QueryResults.findLatestByQueryId(queryId)
+            ])  
+                .then(function(res){
+                    var getCanonicalURL = res[0]
+                    var qRes = res[1];
+
+                    var roots = new Set(qRes.results.map(getCanonicalURL));
+
+                    // urls correspond to new URLs to retrieve relations from, maybe
+                    return (function buildGraph(urls){
+                        return keepURLsWithAnExpression(urls).then(function(urlsWithExpression){
+                            urlsWithExpression.forEach(function(u){
+                                nodes.add(u);
+                            });
+
+                            var nextURLs = new Set();
+
+                            return References.findBySourceURIs(urlsWithExpression).then(function(refs){
+                                refs.forEach(function(r){
+                                    var canonicalSource = r.source; // already is canonical
+                                    var canonicalTarget = getCanonicalURL(r.target);
+
+                                    if(!nodes.has(canonicalTarget) && !nextURLs.has(canonicalTarget))
+                                        nextURLs.add(canonicalTarget);
+
+                                    potentialEdges.add({
+                                        source: canonicalSource,
+                                        target: canonicalTarget
+                                    });
+                                });
+
+                                if(nextURLs.size >= 1){
+                                    return buildGraph(nextURLs);
+                                }
+
+                            });
+                        
+                        });
+                        
+                    })(roots);
+
+                })
+                .then(function(){
+                    var edges = new Set();
+                
+                    potentialEdges.forEach(function(e){
+                        if(nodes.has(e.source) && nodes.has(e.target))
+                            edges.add(e);
+                    })
+                
+                    return {
+                        nodes: nodes,
+                        edges: edges
+                    };
+                });
         }
     }
 };

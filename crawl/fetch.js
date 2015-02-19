@@ -4,6 +4,13 @@ var Promise = require('es6-promise').Promise;
 
 var request = require('request');
 
+/*
+    // Content type filtering
+    if (!/html/.test(response.headers["content-type"])) {
+      error = new Error('Invalid content-type');
+      errInfo.contentType = response.headers["content-type"];
+    }
+*/
 
 /*
     This module exports a function which fetches the content of a URL.

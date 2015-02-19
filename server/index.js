@@ -1,11 +1,6 @@
 "use strict";
 
-var Set = require('es6-set');
-var Map = require('es6-map');
-var Promise = require('es6-promise').Promise;
-
-require('../nodePolyfills');
-
+require('../ES-mess');
 
 var resolve = require('path').resolve;
 var fs = require('fs');
@@ -23,7 +18,6 @@ var React = require('react');
 var makeDocument = require('../common/makeDocument');
 var database = require('../database');
 var onQueryCreated = require('./onQueryCreated');
-
 
 var LoginScreen = React.createFactory(require('../client/components/LoginScreen'));
 var TerritoireListScreen = React.createFactory(require('../client/components/TerritoireListScreen'));

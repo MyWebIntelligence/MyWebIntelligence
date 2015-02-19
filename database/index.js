@@ -1,9 +1,5 @@
 "use strict";
 
-var Promise = require('es6-promise').Promise;
-
-require('../nodePolyfills');
-
 var Users = require('./models/Users');
 var Territoires = require('./models/Territoires');
 var Queries = require('./models/Queries');

@@ -1,9 +1,5 @@
 "use strict";
 
-var Set = require('es6-set');
-var Map = require('es6-map');
-var Promise = require('es6-promise').Promise;
-
 // The fetch module takes care of redirects, per-domain throttling all that
 var fetch = require('./fetch');
 var extractEffectiveDocument = require('./extractEffectiveDocument');
@@ -40,13 +36,19 @@ module.exports = function(initialUrls, originalWords){
     var results = new Map(); // Map<urlAfterRedirect, result>()
     var redirects = new Map(); 
     
+    var EVAPORATION_FACTOR = 0.5;
+    var approvalProbability = 1;
+    
+    
     function approve(fetchedDocument){
+        //approvalProbability *= EVAPORATION_FACTOR;
+    
         // TODO
-        return false;
+        return true; // Math.random() < approvalProbability;
     }
     
-    function crawl(){
-        console.log('internal crawl', todo.size, doing.size, done.size);
+    function crawl(depth){
+        console.log('internal crawl', depth, '|', todo.size, doing.size, done.size);
         return Promise.all(todo._toArray().map(function(u){
             todo.delete(u)
             doing.add(u);
@@ -66,7 +68,7 @@ module.exports = function(initialUrls, originalWords){
                             //console.log('yo', fetchedDocument.URLAfterRedirects, effectiveDocument); 
 
                             if(approve(fetchedDocument)){
-                                effectiveDocument.links.forEach(function(u){
+                                effectiveDocument.links._randomSubset(depth < 1 ? 1 : 0).forEach(function(u){
                                     if(!doing.has(u) && !done.has(u) && !results.has(u))
                                         todo.add(u);
                                 });
@@ -74,7 +76,7 @@ module.exports = function(initialUrls, originalWords){
                         });
                 })
                 .then(function(){
-                    return todo.size >= 1 ? crawl() : undefined;
+                    return todo.size >= 1 ? crawl(depth+1) : undefined;
                 })
                 .catch(function(err){
                     console.error('error while exploring the web', u, err)
@@ -83,7 +85,9 @@ module.exports = function(initialUrls, originalWords){
         }));
     }
     
-    return crawl().then(function(){
+    // http://www.passeportsante.net/fr/Maux/Problemes/Fiche.aspx?doc=asthme_pm
+    
+    return crawl(0).then(function(){
         return {
             nodes: results,
             redirects: redirects

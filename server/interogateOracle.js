@@ -1,8 +1,5 @@
 "use strict";
 
-var Promise = require('es6-promise').Promise;
-var Map = require('es6-map');
-
 var resolve = require('path').resolve;
 
 var database = require('../database');

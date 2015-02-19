@@ -1,10 +1,27 @@
 "use strict";
 
+require('../../ES-mess');
+
 var db = require('../../database');
 var onQueryCreated = require('../../server/onQueryCreated');
 
-var oP = db.Oracles.findByOracleNodeModuleName('GCSE');
+var cleanDBP = Promise.all([
+    db.QueryResults.deleteAll(),
+    db.Aliases.deleteAll(),
+    db.Expressions.deleteAll(),
+    db.References.deleteAll()
+]);
+
+var oP = cleanDBP.then(function(){
+    return db.Oracles.findByOracleNodeModuleName('GCSE');
+});
+
+// WARNING : this is harcoded. Baaaaad!
+// need a user with GCSE credentials
 var uP = db.Users.findById(68451720);
+
+var queryId;
+
 
 oP.then(function(oracle){
         return oracle.id;
@@ -17,10 +34,15 @@ oP.then(function(oracle){
             "nbPage": 400,
             "oracle_id": GCSEOracleId,
             "belongs_to": 'nope'
+        }).then(function(q){
+            queryId = q.id;
+            return q;
         });
     })
     .then(function(query){
         return uP.then(function(user){
+            if(!user)
+                throw new Error('no user');
             console.time('onQueryCreated');
             return onQueryCreated(query, user);
         });
@@ -30,10 +52,13 @@ oP.then(function(oracle){
     })
     .catch(function(err){
         console.error('onQueryCreated manual test error', error); 
+    })
+    .then(function(){
+        return Promise.all([
+            db.Queries.delete(queryId)
+        ]);
     });
 
 
 
-// create query
-// call onQueryCreate
 

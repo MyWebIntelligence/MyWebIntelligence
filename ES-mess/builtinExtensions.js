@@ -17,6 +17,18 @@ Set.prototype._toArray = function(){
 }
 
 
-Set.prototype._randomSubset = function(){
+Set.prototype._randomSubset = function(size){
+    if(size > this.size)
+        throw new RangeError('size problem: '+this.size+ ' ' + size);
     
+    var newSet = new Set();
+    
+    while(newSet.size < size){
+        this.forEach(function(e){
+            if(newSet.size < size && Math.random() < 0.5)
+                newSet.add(e);
+        });
+    }
+    
+    return newSet;
 }

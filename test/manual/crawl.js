@@ -1,6 +1,6 @@
 "use strict";
 
-var Set = require('es6-set');
+require('../../ES-mess');
 
 var crawl = require('../../crawl');
 

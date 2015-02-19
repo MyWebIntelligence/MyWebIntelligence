@@ -47,13 +47,16 @@ module.exports = function(urlToExplore){
                 else{
                     var responseObj = JSON.parse(body);
                     
-                    resolve(makeDocument(responseObj.content)
+                    resolve(makeDocument(responseObj.content, urlToExplore)
                         .then(function(doc){
                             var links = doc.body.querySelectorAll('a[href]');
                         
                             var uniqueLinks = new Set(Array.prototype.map.call(links, function(a){
                                 return a.href;
                             }));
+                        
+                            // remove self-references
+                            uniqueLinks.delete(urlToExplore);
                         
                             // console.log('uniqueLinks', urlToExplore, uniqueLinks.size);
                         

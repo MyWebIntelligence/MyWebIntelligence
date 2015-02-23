@@ -9,7 +9,9 @@
     "start": "node server/index.js",
     "build": "browserify client/index.js -o client/browserify-bundle.js -d",
     "watch": "watchify client/index.js -o client/browserify-bundle.js -d -v",
-    "lint": "eslint ./"
+    "lint": "eslint ./",
+    "build-test-crawl-docker-image": "docker build --tag=\"mywi/test-crawl\" test/automated/crawl",
+    "test-crawl": "docker run --add-host a.web:127.0.0.1 mywi/test-crawl /usr/bin/supervisord"
   },
   "repository": {
     "type": "git",

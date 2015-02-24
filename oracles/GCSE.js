@@ -62,6 +62,7 @@ module.exports = function prepareGCSEOracle(credentials){
         return Promise.all(resultPs).then(function(results){
             var ret = new Set();
             
+            // results is a string[][]. flatten it
             results.forEach(function(r){
                 r.forEach(function(url){
                     ret.add(url);

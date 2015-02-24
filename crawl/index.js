@@ -28,6 +28,8 @@ interface FetchedDocument{
     @return Promise<CrawlResult> which is sort of a graph
 */
 module.exports = function(initialUrls, originalWords){
+    originalWords = originalWords || new Set();
+    
     console.log('crawl call', initialUrls.size, originalWords);
     
     var todo = new Set(initialUrls); // clone

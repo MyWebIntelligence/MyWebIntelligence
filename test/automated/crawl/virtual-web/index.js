@@ -1,13 +1,15 @@
 "use strict";
 
-var express = require('express')
-var app = express()
+var resolve = require('path').resolve;
 
-app.get('/', function (req, res) {
-    console.log('virtual web answering!');
-    res.send('Hello World!')
-})
+var express = require('express');
 
+
+var app = express();
+
+app.use(express.static(resolve(__dirname, 'a.web')));
+
+// http://a.web/
 var server = app.listen(80, "127.0.0.1", function (e) {
     if(e)
         console.error(e);

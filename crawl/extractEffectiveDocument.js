@@ -25,6 +25,16 @@ interface EffectiveDocument{
 
 module.exports = function(urlToExplore){
     
+    // TODO use module mocking instead
+    if(process.env.NODE_ENV === 'test'){
+        return Promise.resolve({
+            html: '',
+            title: '',
+            "date_published": '',
+            links: new Set()
+        });
+    }
+    
     var url = READABILITY_PARSER_BASE_URL + '?' + makeSearchString({
         token: readabilityParserKey,
         url: urlToExplore
@@ -43,7 +53,7 @@ module.exports = function(urlToExplore){
                 reject(error);
             else{
                 if(response.statusCode >= 400)
-                    reject(new Error('status code '+response.statusCode));
+                    reject(new Error('Readability parser status code '+response.statusCode));
                 else{
                     var responseObj = JSON.parse(body);
                     

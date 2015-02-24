@@ -1,15 +1,9 @@
-FROM node:0.10
+FROM nodesource/node:trusty
 
 MAINTAINER David Bruant <bruant.d@gmail.com>
 
-RUN mkdir /usr/virtual-web
-
 RUN apt-get update && apt-get install -y supervisor
 
-COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+ENV NODE_ENV test
 
-COPY virtual-web /usr/virtual-web
-
-WORKDIR /usr/virtual-web
-RUN npm install
-WORKDIR /
+WORKDIR /usr/mywi

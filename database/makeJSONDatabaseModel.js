@@ -14,9 +14,11 @@ console.log("process.env.NODE_ENV", process.env.NODE_ENV);
 
 var BASE_STORAGE_PATH_P = new Promise(function(resolve, reject){
     if(process.env.NODE_ENV === 'test')
-        tmpdir(function(err, d){
+        // doesn't work inside a docker container
+        /*tmpdir(function(err, d){
             if(err) reject(err); else resolve(d);
-        });
+        });*/
+        resolve('/tmp');
     else
         resolve(path.resolve(__dirname, '_storage'))
 })

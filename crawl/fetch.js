@@ -17,6 +17,8 @@ var request = require('request');
     This module takes care of per-domain throttling
 */
 module.exports = function(url){
+    // console.log('fetching', url);
+    
     return new Promise(function(resolve, reject){
         request({
             url: url,
@@ -30,7 +32,7 @@ module.exports = function(url){
                 reject(error);
             else{
                 if(response.statusCode >= 400)
-                    reject(new Error('status code '+response.statusCode));
+                    reject(new Error('Fetch status code '+response.statusCode));
                 else
                     resolve({
                         html: body,

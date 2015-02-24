@@ -76,11 +76,9 @@ module.exports = {
         },
         
         /*
-            This returns a graph of pages
-            The url is the URL after redirects
+            uris: Set<string>
         */
-        getQueryGraph: function(queryId){
-            console.log('getQueryGraph', queryId);
+        getGraphFromRootURIs: function(rootURIs){
             var nodes = new Set();
             var potentialEdges = new Set();
             
@@ -102,15 +100,8 @@ module.exports = {
                 })
             }
             
-            return Promise.all([
-                getCanonicalURLP,
-                QueryResults.findLatestByQueryId(queryId)
-            ])  
-                .then(function(res){
-                    var getCanonicalURL = res[0]
-                    var qRes = res[1];
-
-                    var roots = new Set(qRes.results.map(getCanonicalURL));
+            return getCanonicalURLP
+                .then(function(getCanonicalURL){
 
                     // urls correspond to new URLs to retrieve relations from, maybe
                     return (function buildGraph(urls){
@@ -140,24 +131,39 @@ module.exports = {
                                 }
 
                             });
-                        
+
                         });
-                        
-                    })(roots);
+
+                    })(rootURIs);
 
                 })
                 .then(function(){
                     var edges = new Set();
-                
+
                     potentialEdges.forEach(function(e){
                         if(nodes.has(e.source) && nodes.has(e.target))
                             edges.add(e);
                     })
-                
+
                     return {
                         nodes: nodes,
                         edges: edges
                     };
+                });
+        },
+        
+        /*
+            This returns a graph of pages
+            The url is the URL after redirects
+        */
+        getQueryGraph: function(queryId){
+            console.log('getQueryGraph', queryId);
+            
+            var self = this;
+            
+            QueryResults.findLatestByQueryId(queryId)
+                .then(function(qRes){
+                    return self.getGraphFromRootURIs( new Set(qRes.results) );
                 });
         }
     }

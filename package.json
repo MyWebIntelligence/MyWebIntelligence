@@ -3,15 +3,19 @@
   "version": "0.0.0",
   "description": "Understanding the web around you",
   "main": "index.js",
+  "engines": {
+    "node": ">=0.10.3 <0.12"
+  },
   "scripts": {
     "postinstall": "cp git-hooks/pre-commit .git/hooks/pre-commit; chmod a+x .git/hooks/pre-commit",
     "test": "mocha test/automated/*",
+    "test-crawler": "mocha test/automated/crawl/tests/*",
     "start": "node server/index.js",
     "build": "browserify client/index.js -o client/browserify-bundle.js -d",
     "watch": "watchify client/index.js -o client/browserify-bundle.js -d -v",
     "lint": "eslint ./",
-    "build-test-crawl-docker-image": "docker build --tag=\"mywi/test-crawl\" test/automated/crawl",
-    "test-crawl": "docker run --add-host a.web:127.0.0.1 mywi/test-crawl /usr/bin/supervisord"
+    "build-test-crawl-docker-image": "docker build --tag=\"mywi/test-crawl\" --file=test/automated/crawl/Dockerfile .",
+    "test-crawl": "docker run --add-host a.web:127.0.0.1 -v ~/projects/MyWebIntelligence:/usr/mywi mywi/test-crawl /usr/bin/supervisord -c /usr/mywi/test/automated/crawl/supervisord.conf"
   },
   "repository": {
     "type": "git",

@@ -21,6 +21,19 @@ module.exports = {
     Expressions : Expressions,
     References : References,
     
+    clearAll: function(){
+        var self = this;
+        
+        var deleteAllFunctions = Object.keys(self)
+            .map(function(k){
+                if(typeof self[k].deleteAll === 'function')
+                    return self[k].deleteAll.bind(self[k]);
+            })
+            .filter(function(v){ return !!v; });
+
+        return Promise.all(deleteAllFunctions.map(function(f){ return f(); }));
+    },
+    
     complexQueries: {
         getUserInitData: function(userId){
             var userP = Users.findById(userId);

@@ -9,7 +9,6 @@
   "scripts": {
     "postinstall": "cp git-hooks/pre-commit .git/hooks/pre-commit; chmod a+x .git/hooks/pre-commit",
     "test": "mocha test/automated/*",
-    "test-crawler": "mocha test/automated/crawl/tests/*",
     "start": "node server/index.js",
     "build": "browserify client/index.js -o client/browserify-bundle.js -d",
     "watch": "watchify client/index.js -o client/browserify-bundle.js -d -v",

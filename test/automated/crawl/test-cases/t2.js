@@ -1,5 +1,7 @@
 "use strict";
 
+console.log('simplest')
+
 require('../../../../ES-mess');
 
 var assert = assert = require('chai').assert;
@@ -8,41 +10,20 @@ var mockReq = require('mock-require');
 
 mockReq('../../../../crawl/extractEffectiveDocument', '../mocks/extractEffectiveDocument');
 
-
-
 var db = require('../../../../database');
 
-var crawl = require('../../../../crawl');
-var persistCrawlResult = require('../../../../crawl/persistCrawlResult');
-
-function cleanDB(){
-    var deleteAllFunctions = Object.keys(db)
-        .map(function(k){
-            if(typeof db[k].deleteAll === 'function')
-                return db[k].deleteAll.bind(db[k]);
-        })
-        .filter(function(v){ return !!v; });
-    
-    return Promise.all(deleteAllFunctions.map(function(f){ return f(); }));
-}
+var rootURIsToGraph = require('../rootURIsToGraph');
 
 
+var roots = ['http://a.web/1'];
 
-var roots = ['http://a.web/index.html'];
 
 describe('Simplest graph', function(){
     
-    before(function(){
-        
-        return cleanDB();
-    });
+    before(function(){ return db.clearAll(); });
     
     it('should return a graph with one node and no edge', function(){
-        return crawl(new Set(roots))
-            .then(persistCrawlResult)
-            .then(function(){
-                return db.complexQueries.getGraphFromRootURIs(new Set(roots));
-            })
+        return rootURIsToGraph(new Set(roots))
             .then(function(graph){
                 console.log('graph', typeof graph);
                 assert.strictEqual(graph.nodes.size, 1, "should have one node");
@@ -53,7 +34,7 @@ describe('Simplest graph', function(){
     
     after(function(){
         mockReq.stop('../../../../crawl/extractEffectiveDocument');
-        return cleanDB();
+        return db.clearAll();
     });
     
 });

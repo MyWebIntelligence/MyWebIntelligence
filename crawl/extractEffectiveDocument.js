@@ -25,16 +25,6 @@ interface EffectiveDocument{
 
 module.exports = function(urlToExplore){
     
-    // TODO use module mocking instead
-    if(process.env.NODE_ENV === 'test'){
-        return Promise.resolve({
-            html: '',
-            title: '',
-            "date_published": '',
-            links: new Set()
-        });
-    }
-    
     var url = READABILITY_PARSER_BASE_URL + '?' + makeSearchString({
         token: readabilityParserKey,
         url: urlToExplore

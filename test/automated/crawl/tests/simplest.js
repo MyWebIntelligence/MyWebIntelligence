@@ -4,6 +4,11 @@ require('../../../../ES-mess');
 
 var assert = assert = require('chai').assert;
 require('chai-as-promised');
+var mockReq = require('mock-require');
+
+mockReq('../../../../crawl/extractEffectiveDocument', '../mocks/extractEffectiveDocument');
+
+
 
 var db = require('../../../../database');
 
@@ -28,7 +33,6 @@ var roots = ['http://a.web/index.html'];
 describe('Simplest graph', function(){
     
     before(function(){
-    
         
         return cleanDB();
     });
@@ -48,6 +52,7 @@ describe('Simplest graph', function(){
     });
     
     after(function(){
+        mockReq.stop('../../../../crawl/extractEffectiveDocument');
         return cleanDB();
     });
     

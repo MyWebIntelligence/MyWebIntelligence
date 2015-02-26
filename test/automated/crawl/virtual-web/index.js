@@ -25,6 +25,11 @@ var baseHTMLStr = readFileSync(resolve(__dirname, './index.html'));
 app.use(function(req, res){
     var status = Number(req.query.status || req.query.redirect || 200);
     
+    if(req.query.links){
+        res.status(500).send('TODO');
+        return;
+    }
+    
     if(req.query.redirect){
         if(!req.query.location){
             res.status(400).send([

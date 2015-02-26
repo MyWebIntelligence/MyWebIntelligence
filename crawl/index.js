@@ -30,7 +30,7 @@ interface FetchedDocument{
 module.exports = function(initialUrls, originalWords){
     originalWords = originalWords || new Set();
     
-    console.log('crawl call', initialUrls.size, originalWords);
+    //console.log('crawl call', initialUrls.size, originalWords._toArray());
     
     var todo = new Set(initialUrls); // clone
     var doing = new Set();
@@ -41,7 +41,7 @@ module.exports = function(initialUrls, originalWords){
     var EVAPORATION_FACTOR = 0.5;
     var approvalProbability = 1;
     
-    
+    // Approving is deciding to follow the links of the page (not whether to fetch the page)
     function approve(fetchedDocument){
         //approvalProbability *= EVAPORATION_FACTOR;
     

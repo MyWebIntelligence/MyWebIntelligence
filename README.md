@@ -59,6 +59,24 @@ TODO figure out and document relationship with Trello
 * `npm start`
 
 
+### Test
+
+#### General
+
+```bash
+npm test
+```
+
+#### Crawler
+
+Build the Docker image then run tests in it
+
+````bash
+npm run build-test-crawl-docker-image
+npm run test-crawl
+````
+
+
 ## Licence
 
 [MIT](LICENCE)

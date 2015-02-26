@@ -17,7 +17,7 @@ var request = require('request');
     This module takes care of per-domain throttling
 */
 module.exports = function(url){
-    // console.log('fetching', url);
+    //console.log('fetching', url);
     
     return new Promise(function(resolve, reject){
         request({

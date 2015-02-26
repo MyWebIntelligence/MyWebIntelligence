@@ -23,7 +23,6 @@ describe('Graph with one erroneous URL', function(){
     it('should return a graph with no node and no edge', function(){
         return rootURIsToGraph(new Set(roots))
             .then(function(graph){
-                console.log('graph', typeof graph);
                 assert.strictEqual(graph.nodes.size, 0, "should have no node");
                 assert.strictEqual(graph.edges.size, 0, "should have no edge");
             });

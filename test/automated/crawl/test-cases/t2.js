@@ -25,7 +25,6 @@ describe('Simplest graph', function(){
     it('should return a graph with one node and no edge', function(){
         return rootURIsToGraph(new Set(roots))
             .then(function(graph){
-                console.log('graph', typeof graph);
                 assert.strictEqual(graph.nodes.size, 1, "should have one node");
                 assert.strictEqual(graph.edges.size, 0, "should have no edge");
                 assert.strictEqual(graph.nodes._toArray()[0], roots[0], "node should have the correct URL");

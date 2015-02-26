@@ -32,7 +32,9 @@ app.use(function(req, res){
             ].join(' '));
         }
         else{
-            res.redirect(req.query.redirect, decodeURI(req.query.location));
+            var to = decodeURI(req.query.location);
+            //console.log('to', to);
+            res.redirect(status, to);
         }
     }
     else{

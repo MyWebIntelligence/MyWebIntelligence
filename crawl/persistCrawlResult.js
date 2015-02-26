@@ -39,6 +39,7 @@ module.exports = function(crawlResult){
     });
 
     console.log('expressions, references, aliases', expressions.length, references.length, aliases.length);
+    //console.log('expression', expressions);
 
     return Promise.all([
         db.Expressions.createByBatch(expressions),

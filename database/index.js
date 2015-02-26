@@ -115,10 +115,13 @@ module.exports = {
             
             return getCanonicalURLP
                 .then(function(getCanonicalURL){
-
+                    var canonicalRootURIs = new Set(rootURIs._toArray().map(getCanonicalURL));
+                
                     // urls correspond to new URLs to retrieve relations from, maybe
                     return (function buildGraph(urls){
+                        
                         return keepURLsWithAnExpression(urls).then(function(urlsWithExpression){
+                            
                             urlsWithExpression.forEach(function(u){
                                 nodes.add(u);
                             });
@@ -147,7 +150,7 @@ module.exports = {
 
                         });
 
-                    })(rootURIs);
+                    })(canonicalRootURIs);
 
                 })
                 .then(function(){
@@ -156,7 +159,7 @@ module.exports = {
                     potentialEdges.forEach(function(e){
                         if(nodes.has(e.source) && nodes.has(e.target))
                             edges.add(e);
-                    })
+                    });
 
                     return {
                         nodes: nodes,

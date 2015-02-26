@@ -21,25 +21,28 @@ dockerfile needs to be top level to see the crawl code (will simplify the virtua
 3) one URL that 404s
     => (0, 0) graph
 
-4) one URL that 301 redirects to another
-    => (1, 0) graph with the redirect target as url
+4) /1 --301--> /2
+    => (1, 0) graph with /2
 
-5) 2 URLs
+5) /1 --301--> /2 --301--> /3
+    => (1, 0) graph with /3
+
+6) 2 URLs
     => (2, 0) graph
 
-6) /1 -> /2 graph
+7) /1 -> /2 graph
     => (2, 1)
     
-7) /1 <-> /2 graph
+8) /1 <-> /2 graph
     => (2, 2)
     
-8) /1 -> /2 --301--> /3
+9) /1 -> /2 --301--> /3
     => (2, 1) graph (the second node is /3)
 
-9) /1 -> /2 , /1 -> /3
+10) /1 -> /2 , /1 -> /3
     => (3, 2) graph 
 
-10) /1 -> /2 -> /3
+11) /1 -> /2 -> /3
     => (3, 2) graph
 
 

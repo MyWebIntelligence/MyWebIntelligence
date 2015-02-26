@@ -15,7 +15,7 @@ var db = require('../../../../database');
 var rootURIsToGraph = require('../rootURIsToGraph');
 
 var linksTo = 'http://a.web/2';
-var roots = ['http://a.web/1?links='+encodeURI(linksTo)];
+var roots = ['http://a.web/1?links='+encodeURIComponent(linksTo)];
 
 
 describe('(2, 1) graph', function(){

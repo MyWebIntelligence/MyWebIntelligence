@@ -6,6 +6,8 @@ var resolve = require('path').resolve;
 var express = require('express');
 var app = express();
 
+var makeDocument = require('../../../../common/makeDocument');
+
 var baseHTMLStr = readFileSync(resolve(__dirname, './index.html'));
 
 // answer for all requests
@@ -25,11 +27,6 @@ var baseHTMLStr = readFileSync(resolve(__dirname, './index.html'));
 app.use(function(req, res){
     var status = Number(req.query.status || req.query.redirect || 200);
     
-    if(req.query.links){
-        res.status(500).send('TODO');
-        return;
-    }
-    
     if(req.query.redirect){
         if(!req.query.location){
             res.status(400).send([
@@ -43,7 +40,27 @@ app.use(function(req, res){
         }
     }
     else{
-        res.status(status).send(baseHTMLStr);   
+        var html = baseHTMLStr;
+        
+        if(req.query.links){
+            makeDocument(baseHTMLStr)
+                .then(function(doc){
+                    var urls = req.query.links.split(',').map(decodeURI);
+                    urls.forEach(function(u){
+                        var a = doc.createElement('a');
+                        a.setAttribute('href', u);
+                        a.textContent = u; // symbolically
+                        doc.body.appendChild(a);
+                    });
+                
+                    res.status(status).send('<!doctype html>\n'+doc.documentElement.outerHTML);
+                })
+        }
+        else{
+            res.status(status).send(baseHTMLStr);
+        }
+        
+        
     }    
        
 });

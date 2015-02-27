@@ -9,6 +9,7 @@ require('chai-as-promised');
 var mockReq = require('mock-require');
 
 mockReq('../../../../crawl/extractEffectiveDocument', '../mocks/extractEffectiveDocument');
+mockReq('../../../../crawl/approve', '../mocks/approve'); // always return true
 
 var db = require('../../../../database');
 
@@ -37,6 +38,7 @@ describe('(2, 1) graph', function(){
     
     after(function(){
         mockReq.stop('../../../../crawl/extractEffectiveDocument');
+        mockReq.stop('../../../../crawl/approve');
         return db.clearAll();
     });
     

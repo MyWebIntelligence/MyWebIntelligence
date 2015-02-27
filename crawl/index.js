@@ -3,6 +3,7 @@
 // The fetch module takes care of redirects, per-domain throttling all that
 var fetch = require('./fetch');
 var extractEffectiveDocument = require('./extractEffectiveDocument');
+var approve = require('./approve');
 
 /*
 interface EffectiveDocument{
@@ -40,14 +41,6 @@ module.exports = function(initialUrls, originalWords){
     
     var EVAPORATION_FACTOR = 0.5;
     var approvalProbability = 1;
-    
-    // Approving is deciding to follow the links of the page (not whether to fetch the page)
-    function approve(fetchedDocument){
-        //approvalProbability *= EVAPORATION_FACTOR;
-    
-        // TODO
-        return true; // Math.random() < approvalProbability;
-    }
     
     function crawl(depth){
         // console.log('internal crawl', depth, '|', todo.size, doing.size, done.size);

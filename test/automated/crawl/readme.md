@@ -37,9 +37,9 @@ dockerfile needs to be top level to see the crawl code (will simplify the virtua
     => (2, 2)
     
 9) /4 -> /1 --301--> /end/2
-    => (2, 1) graph (the second node is /3)
+    => (2, 1) graph (the second node is /end/2)
 
-10) /1 -> /end/2 , /1 -> /end/3
+10) /5 -> /end/6 , /5 -> /end/7
     => (3, 2) graph 
 
 11) /1 -> /2 -> /end/3

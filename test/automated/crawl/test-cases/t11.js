@@ -14,22 +14,26 @@ var db = require('../../../../database');
 
 var rootURIsToGraph = require('../rootURIsToGraph');
 
+var webDesc = require('../virtual-web/a.web.json');
+var path = "/6";
 
-var roots = ['http://a.web/2', 'http://a.web/3'];
+var roots = ['http://a.web'+path];
 
 
-describe('(2, 2) graph', function(){
+describe('(3, 2) graph', function(){
     
     before(function(){ return db.clearAll(); });
     
-    it('should return a graph with two nodes and no edge', function(){
+    it('should return a (3, 2) graph', function(){
         return rootURIsToGraph(new Set(roots))
             .then(function(graph){
-                assert.strictEqual(graph.nodes.size, 2, "should have two nodes");
-                assert.strictEqual(graph.edges.size, 2, "should have no edge");
-                var oneNode = graph.nodes._toArray()[0];
+                assert.strictEqual(graph.nodes.size, 3, "should have 3 nodes");
+                assert.strictEqual(graph.edges.size, 2, "should have 2 edges");
+                var nodes = graph.nodes._toArray();
+                assert.ok(nodes.indexOf(roots[0]) !== -1, "One node is "+roots[0]);
+                assert.ok(nodes.indexOf('http://a.web/7') !== -1, "One node is "+'http://a.web/7');
+                assert.ok(nodes.indexOf('http://a.web/end/8') !== -1, "One node is "+'http://a.web/end/8');
             
-                assert.ok(oneNode === roots[0] || oneNode === roots[1], "node should have the correct URL");
             });
     });
     

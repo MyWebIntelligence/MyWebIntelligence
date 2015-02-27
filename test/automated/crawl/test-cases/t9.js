@@ -14,11 +14,13 @@ var db = require('../../../../database');
 
 var rootURIsToGraph = require('../rootURIsToGraph');
 
+var webDesc = require('../virtual-web/a.web.json');
 
-var roots = ['http://a.web/2', 'http://a.web/3'];
+var path = "/4"
+var roots = ['http://a.web'+path];
 
 
-describe('(2, 2) graph', function(){
+describe('(2, 1) graph', function(){
     
     before(function(){ return db.clearAll(); });
     
@@ -26,10 +28,11 @@ describe('(2, 2) graph', function(){
         return rootURIsToGraph(new Set(roots))
             .then(function(graph){
                 assert.strictEqual(graph.nodes.size, 2, "should have two nodes");
-                assert.strictEqual(graph.edges.size, 2, "should have no edge");
-                var oneNode = graph.nodes._toArray()[0];
+                assert.strictEqual(graph.edges.size, 1, "should have two edges");
+                var nodes = graph.nodes._toArray();
             
-                assert.ok(oneNode === roots[0] || oneNode === roots[1], "node should have the correct URL");
+                assert.ok(nodes[0] === 'http://a.web/end/2' || nodes[1] === 'http://a.web/end/2', "One node is /end/2");
+                assert.ok(nodes[0] === roots[0] || nodes[1] === roots[0], "One node is the root path");
             });
     });
     

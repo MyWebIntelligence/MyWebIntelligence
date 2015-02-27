@@ -12,7 +12,7 @@ var db = require('../../../../database');
 
 var rootURIsToGraph = require('../rootURIsToGraph');
 
-var redirectLocation = "http://a.web/2";
+var redirectLocation = "http://a.web/end/2";
 var roots = ['http://a.web/1?redirect=301&location='+encodeURIComponent(redirectLocation)];
 
 

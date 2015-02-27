@@ -13,7 +13,7 @@ var db = require('../../../../database');
 var rootURIsToGraph = require('../rootURIsToGraph');
 
 
-var roots = ['http://a.web/1?status=400'];
+var roots = ['http://a.web/1?status=404'];
 
 
 describe('Graph with one erroneous URL', function(){

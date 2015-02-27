@@ -1,5 +1,7 @@
 "use strict";
 
+require('../../../../ES-mess');
+
 var readFileSync = require('fs').readFileSync;
 var resolve = require('path').resolve;
 
@@ -10,8 +12,13 @@ var makeDocument = require('../../../../common/makeDocument');
 
 var baseHTMLStr = readFileSync(resolve(__dirname, './index.html'));
 
+var webDescription = require('./a.web.json');
+
 // answer for all requests
 /*
+    path
+    * startsWith /end => page with no links
+
     URL query options:
     * status (200, 404, 403, 500...)
         => request should be answered with this status
@@ -19,8 +26,7 @@ var baseHTMLStr = readFileSync(resolve(__dirname, './index.html'));
         => request should be answered with this redirect status
     * location
         => where the request should go to when redirect
-    * links
-        => Array of URLs the page has links to
+
 
 */
 
@@ -40,28 +46,24 @@ app.use(function(req, res){
         }
     }
     else{
-        var html = baseHTMLStr;
-        
-        if(req.query.links){
-            makeDocument(baseHTMLStr)
-                .then(function(doc){
-                    var urls = req.query.links.split(',').map(decodeURI);
-                    urls.forEach(function(u){
-                        var a = doc.createElement('a');
-                        a.setAttribute('href', u);
-                        a.textContent = u; // symbolically
-                        doc.body.appendChild(a);
-                    });
-                
-                    res.status(status).send('<!doctype html>\n'+doc.documentElement.outerHTML);
-                })
-        }
-        else{
+        if(req.path.startsWith('/end/')){
             res.status(status).send(baseHTMLStr);
         }
-        
-        
-    }    
+        else{
+            var links = webDescription[req.path];
+            
+            makeDocument(baseHTMLStr).then(function(doc){
+                links.forEach(function(u){
+                    var a = doc.createElement('a');
+                    a.setAttribute('href', u);
+                    a.textContent = u; // symbolically
+                    doc.body.appendChild(a);
+                });
+
+                res.status(status).send('<!doctype html>\n'+doc.documentElement.outerHTML);
+            })
+        }
+    }
        
 });
 

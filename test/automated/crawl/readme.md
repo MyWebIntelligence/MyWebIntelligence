@@ -15,34 +15,34 @@ dockerfile needs to be top level to see the crawl code (will simplify the virtua
 1) no url
     => (0, 0) graph
 
-2) one valid url
+2) /end/1
     => (1, 0) graph
     
-3) one URL that 404s
+3) /1?status=404
     => (0, 0) graph
 
-4) /1 --301--> /2
+4) /1 --301--> /end/2
     => (1, 0) graph with /2
 
-5) /1 --301--> /2 --301--> /3
+5) /1 --301--> /2 --301--> /end/3
     => (1, 0) graph with /3
 
-6) 2 URLs
+6) /end/1, /end/2
     => (2, 0) graph
 
-7) /1 -> /2 graph
+7) /1 -> /end/2
     => (2, 1)
     
-8) /1 <-> /2 graph
+8) /2 <-> /3 graph
     => (2, 2)
     
-9) /1 -> /2 --301--> /3
+9) /4 -> /1 --301--> /end/2
     => (2, 1) graph (the second node is /3)
 
-10) /1 -> /2 , /1 -> /3
+10) /1 -> /end/2 , /1 -> /end/3
     => (3, 2) graph 
 
-11) /1 -> /2 -> /3
+11) /1 -> /2 -> /end/3
     => (3, 2) graph
 
 

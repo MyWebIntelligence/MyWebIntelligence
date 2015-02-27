@@ -15,7 +15,7 @@ var db = require('../../../../database');
 var rootURIsToGraph = require('../rootURIsToGraph');
 
 
-var roots = ['http://a.web/1'];
+var roots = ['http://a.web/end/1'];
 
 
 describe('Simplest graph', function(){

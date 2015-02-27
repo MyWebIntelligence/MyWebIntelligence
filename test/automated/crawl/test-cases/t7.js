@@ -14,8 +14,10 @@ var db = require('../../../../database');
 
 var rootURIsToGraph = require('../rootURIsToGraph');
 
-var linksTo = 'http://a.web/2';
-var roots = ['http://a.web/1?links='+encodeURIComponent(linksTo)];
+var webDesc = require('../virtual-web/a.web.json');
+var path = "/1";
+
+var roots = ['http://a.web'+path];
 
 
 describe('(2, 1) graph', function(){
@@ -29,7 +31,7 @@ describe('(2, 1) graph', function(){
                 assert.strictEqual(graph.edges.size, 1, "should have one edge");
                 var edge = graph.edges._toArray()[0];
                 assert.strictEqual(edge.source, roots[0], "correct source URL");
-                assert.strictEqual(edge.target, linksTo, "correct target URL");
+                assert.strictEqual(edge.target, 'http://a.web'+webDesc[path][0], "correct target URL");
             });
     });
     

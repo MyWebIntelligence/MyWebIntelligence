@@ -1,12 +1,12 @@
 "use strict";
 
-if(typeof Set === 'undefined')
+if (typeof Set === 'undefined')
     global.Set = require('es6-set');
 
-if(typeof Map === 'undefined')
+if (typeof Map === 'undefined')
     global.Map = require('es6-map');
 
-if(typeof Promise === 'undefined')
+if (typeof Promise === 'undefined')
     global.Promise = require('es6-promise').Promise;
 
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign#Polyfill
@@ -15,7 +15,7 @@ if (!Object.assign) {
         enumerable: false,
         configurable: true,
         writable: true,
-        value: function(target, firstSource) {
+        value: function (target, firstSource) {
             "use strict";
             if (target === undefined || target === null)
                 throw new TypeError("Cannot convert first argument to object");
@@ -37,7 +37,7 @@ if (!Object.assign) {
 
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/find#Polyfill
 if (!Array.prototype.find) {
-    Array.prototype.find = function(predicate) {
+    Array.prototype.find = function (predicate) {
         if (this == null) {
             throw new TypeError('Array.prototype.find called on null or undefined');
         }
@@ -62,7 +62,7 @@ if (!Array.prototype.find) {
 
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/findIndex#Polyfill
 if (!Array.prototype.findIndex) {
-    Array.prototype.findIndex = function(predicate) {
+    Array.prototype.findIndex = function (predicate) {
         if (this == null) {
             throw new TypeError('Array.prototype.find called on null or undefined');
         }
@@ -93,8 +93,12 @@ if (!Array.from) {
         };
         var toInteger = function (value) {
             var number = Number(value);
-            if (isNaN(number)) { return 0; }
-            if (number === 0 || !isFinite(number)) { return number; }
+            if (isNaN(number)) {
+                return 0;
+            }
+            if (number === 0 || !isFinite(number)) {
+                return number;
+            }
             return (number > 0 ? 1 : -1) * Math.floor(Math.abs(number));
         };
         var maxSafeInteger = Math.pow(2, 53) - 1;
@@ -104,7 +108,7 @@ if (!Array.from) {
         };
 
         // The length property of the from method is 1.
-        return function from(arrayLike/*, mapFn, thisArg */) {
+        return function from(arrayLike /*, mapFn, thisArg */ ) {
             // 1. Let C be the this value.
             var C = this;
 
@@ -160,4 +164,19 @@ if (!Array.from) {
             return A;
         };
     }());
+}
+
+
+
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/startsWith#Polyfill
+if (!String.prototype.startsWith) {
+    Object.defineProperty(String.prototype, 'startsWith', {
+        enumerable: false,
+        configurable: false,
+        writable: false,
+        value: function (searchString, position) {
+            position = position || 0;
+            return this.lastIndexOf(searchString, position) === position;
+        }
+    });
 }

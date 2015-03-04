@@ -4,6 +4,8 @@ The opensource platform MyWebIntelligence ('MyWi' for short) produced by the MIC
 
 My Web Intelligence can provide the means to capture, qualify and prioritize considerable discourse mass to map the universe of discourse on your interests. This will not only have real-time studies in the online discourse but also better understand the heterogeneous actors by their arguments and strategies.
 
+A more high-level description can be found on [slideshare](http://fr.slideshare.net/alakel/my-web-intelligence-une-plateforme-open-source-au-service-des-humanits-digitales) (French)
+
 ## Architecture
 
 For now, everything will belong in this repo. Eventually, parts will be separated into their own repos (perhaps some parts will even be released as NPM modules).

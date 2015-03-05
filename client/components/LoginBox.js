@@ -26,14 +26,12 @@ module.exports = React.createClass({
     },
     
     render: function() {
-        var self = this;
-        var data = this.props;
         var state = this.state;
         
         return React.DOM.div({className: "login-box"}, [
             React.DOM.header({}, [
                 React.DOM.h1({}, "Login"),
-                Spinner({active: state.waiting})
+                new Spinner({active: state.waiting})
             ]),
             React.DOM.a({
                 className: "google",
@@ -56,4 +54,3 @@ module.exports = React.createClass({
         ]);      
     }
 });
-

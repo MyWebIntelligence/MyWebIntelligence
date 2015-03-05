@@ -1,0 +1,31 @@
+{
+    "env": {
+        "browser": true,
+        "node": true
+    },
+    "rules": {
+        "eqeqeq": 2,
+        "dot-notation": 0,
+        "no-shadow": 1,
+        "curly": 0,
+        "no-use-before-define": "no-func",
+        "no-native-reassign": 1,
+        
+        "eol-last": 1,
+        "new-cap": {
+            "capIsNewExceptions": ["React"]
+        },
+        "semi": 1,
+        "quotes": 0,
+        "no-trailing-spaces": 0,
+        "no-multi-spaces": 0,
+        "space-infix-ops": 0,
+        "no-underscore-dangle": 0,
+        "key-spacing": 0,
+        "camelcase": 0,
+        "no-extra-strict": 0
+    },
+    "globals": {
+        "Promise": true
+    }
+}

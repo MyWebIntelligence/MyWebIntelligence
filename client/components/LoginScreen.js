@@ -16,18 +16,16 @@ interface LoginScreenProps{
 
 module.exports = React.createClass({
     getInitialState: function() {
-        return {}
+        return {};
     },
     
     render: function() {
-        var self = this;
         var props = this.props;
-        var state = this.state;
         
         return React.DOM.div({className: "react-wrapper"}, [
-            Header(),
+            new Header(),
             
-            React.DOM.main({className: "login"}, LoginBox({
+            React.DOM.main({className: "login"}, new LoginBox({
                 onLogin: function(){
                     props.moveToTerritoiresScreen();
                 }

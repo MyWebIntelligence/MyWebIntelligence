@@ -15,11 +15,10 @@ module.exports = React.createClass({
     getInitialState: function() {
         return {
             currentUser: this.props.user
-        }
+        };
     },
     
     render: function() {
-        var self = this;
         var props = this.props;
         var state = this.state;
         
@@ -42,4 +41,3 @@ module.exports = React.createClass({
         return React.DOM.header({}, headerChildren);
     }
 });
-            

@@ -8,3 +8,6 @@ browserify-*.js
 config/*-credentials.json
 
 database/_storage/*
+
+notes.md
+crawl/config.json

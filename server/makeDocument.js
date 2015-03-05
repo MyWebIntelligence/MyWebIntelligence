@@ -10,5 +10,5 @@ module.exports = function makeDocument(htmlFragment){
             if(err) reject(err);
             else resolve(window.document);
         });
-    })
+    });
 };

@@ -21,7 +21,7 @@ module.exports = React.createClass({
         
         return {
             oracleCredentials: oracleCredentials
-        }
+        };
     },
     
     componentWillReceiveProps: function(newProps){
@@ -33,12 +33,10 @@ module.exports = React.createClass({
     },
     
     render: function() {
-        var self = this;
         var props = this.props;
-        var state = this.state;
         
         return React.DOM.div({className: "react-wrapper"}, [
-            Header({user: props.user}),
+            new Header({user: props.user}),
             React.DOM.main({className: 'oracles'}, [
                 React.DOM.h1({}, "Oracles"),
                 React.DOM.ul({className: 'oracles'}, props.oracles.map(function(o){
@@ -86,4 +84,3 @@ module.exports = React.createClass({
         ]);
     }
 });
-            

@@ -4,10 +4,12 @@
   "description": "Understanding the web around you",
   "main": "index.js",
   "scripts": {
+    "postinstall": "cp git-hooks/pre-commit .git/hooks/pre-commit; chmod a+x .git/hooks/pre-commit",
     "test": "mocha test/*",
     "start": "node server/index.js",
     "build": "browserify client/index.js -o client/browserify-bundle.js -d",
-    "watch": "watchify client/index.js -o client/browserify-bundle.js -d -v"
+    "watch": "watchify client/index.js -o client/browserify-bundle.js -d -v",
+    "lint": "eslint ./"
   },
   "repository": {
     "type": "git",
@@ -46,6 +48,7 @@
   "devDependencies": {
     "chai": "^1.10.0",
     "chai-as-promised": "^4.1.1",
+    "eslint": "^0.15.1",
     "mocha": "^2.1.0",
     "tmp": "0.0.24",
     "watchify": "~2.2.1"

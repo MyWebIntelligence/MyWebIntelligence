@@ -1,0 +1,4 @@
+node_modules
+
+client/browserify-bundle.js
+test/**/*.js

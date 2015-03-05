@@ -26,7 +26,7 @@ module.exports = React.createClass({
         
         var children = [
             React.DOM.button({
-                onClick: function(e){
+                onClick: function(){
                     if(askForConfirmation){
                         self.setState({pendingConfirmation: true});
                     }

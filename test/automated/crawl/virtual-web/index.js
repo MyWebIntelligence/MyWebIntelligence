@@ -46,6 +46,8 @@ app.use(function(req, res){
         }
     }
     else{
+        res.type('html');
+        
         if(req.path.startsWith('/end/')){
             res.status(status).send(baseHTMLStr);
         }

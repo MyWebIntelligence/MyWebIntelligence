@@ -8,6 +8,7 @@ var approve = require('./approve');
 /*
 interface EffectiveDocument{
     html: string // stipped HTML containing only the useful content
+    text: string // textual content of 'html'
     title: string // <title> or <h1>
     meta: Map<string, string>
     links: Set<string>
@@ -62,8 +63,15 @@ module.exports = function(initialUrls, originalWords){
                         
                             //console.log('yo', fetchedDocument.URLAfterRedirects, effectiveDocument); 
 
-                            if(approve(fetchedDocument)){
-                                effectiveDocument.links/*._randomSubset(depth < 1 ? 2 : 0)*/.forEach(function(u){
+                            if(approve({
+                                depth: depth,
+                                coreContent: effectiveDocument.html,
+                                wordsToMatch: originalWords,
+                                fullPage: fetchedDocument.html // full HTML page
+                                //citedBy: Set<URL>
+                            })){
+                                //console.log('approved', u, effectiveDocument.links._toArray())
+                                effectiveDocument.links.forEach(function(u){
                                     if(!doing.has(u) && !done.has(u) && !results.has(u))
                                         todo.add(u);
                                 });
@@ -71,6 +79,7 @@ module.exports = function(initialUrls, originalWords){
                         });
                 })
                 .then(function(){
+                    //console.log('crawl', todo.size, doing.size, done.size);
                     return todo.size >= 1 ? crawl(depth+1) : undefined;
                 })
                 .catch(function(err){

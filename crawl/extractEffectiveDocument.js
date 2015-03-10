@@ -49,11 +49,14 @@ module.exports = function(urlToExplore){
                     
                     resolve(makeDocument(responseObj.content, urlToExplore)
                         .then(function(doc){
-                            var links = doc.body.querySelectorAll('a[href]');
+                            var links = Array.from(doc.body.querySelectorAll('a[href]'));
                         
-                            var uniqueLinks = new Set(Array.prototype.map.call(links, function(a){
-                                return a.href;
-                            }));
+                            var urls = links
+                                .map(function(a){ return a.href.trim() })
+                                // remove non-http links, like javascript: and mailto: links
+                                .filter(function(url){ return /^https?/.test(url); })
+                        
+                            var uniqueLinks = new Set(urls);
                         
                             // remove self-references
                             uniqueLinks.delete(urlToExplore);
@@ -62,6 +65,7 @@ module.exports = function(urlToExplore){
                         
                             return {
                                 html: responseObj.content,
+                                text: doc.body.textContent,
                                 title: responseObj.title,
                                 "date_published": responseObj.date_published,
                                 links: uniqueLinks

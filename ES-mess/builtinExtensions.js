@@ -6,7 +6,7 @@
 */
 
 // necessary because Promise.all of the Promise polyfill doesn't accept Sets as iterables.
-Set.prototype._toArray = function(){
+Set.prototype._toArray = function _toArray(){
     var a = [];
     
     this.forEach(function(e){
@@ -17,7 +17,7 @@ Set.prototype._toArray = function(){
 }
 
 
-Set.prototype._randomSubset = function(size){
+Set.prototype._randomSubset = function _randomSubset(size){
     if(size > this.size)
         throw new RangeError('size problem: '+this.size+ ' ' + size);
     
@@ -31,4 +31,15 @@ Set.prototype._randomSubset = function(size){
     }
     
     return newSet;
+}
+
+// chooses an element from the set, removes it and return it.
+Set.prototype._pick = function _pick(){
+    if(this.size === 0)
+        return undefined;
+    
+    var element = this.values().next().value;
+    this.delete(element);
+    
+    return element;
 }

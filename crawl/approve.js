@@ -20,6 +20,10 @@ interface ApproveOptions{
 }
 
 */
+    
+
+// var EVAPORATION_FACTOR = 0.5;
+// var approvalProbability = 1;
 
 module.exports = function approve(options){
     var depth = options.depth;

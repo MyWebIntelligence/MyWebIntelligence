@@ -1,8 +1,5 @@
 "use strict";
 
-var Promise = require('es6-promise').Promise;
-var Set = require('es6-set');
-
 var request = require('request');
 
 var makeSearchString = require('../common/makeSearchString');

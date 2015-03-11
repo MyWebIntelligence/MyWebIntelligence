@@ -36,16 +36,11 @@ module.exports = function(initialUrls, originalWords){
     
     //console.log('crawl call', initialUrls.size, originalWords._toArray());
     
-    
-    
     var todo = new Set(initialUrls._toArray().map(stripURLHash)); // clone
     var doing = new Set();
     var done = new Set();
     var results = new Map(); // Map<urlAfterRedirect, result>()
     var redirects = new Map(); 
-    
-    var EVAPORATION_FACTOR = 0.5;
-    var approvalProbability = 1;
     
     function crawl(depth){
         // console.log('internal crawl', depth, '|', todo.size, doing.size, done.size);
@@ -75,9 +70,9 @@ module.exports = function(initialUrls, originalWords){
                                 //citedBy: Set<URL>
                             })){
                                 //console.log('approved', u, effectiveDocument.links._toArray())
-                                effectiveDocument.links.forEach(function(u){
-                                    if(!doing.has(u) && !done.has(u) && !results.has(u))
-                                        todo.add(u);
+                                effectiveDocument.links.forEach(function(linkUrl){
+                                    if(!doing.has(linkUrl) && !done.has(linkUrl) && !results.has(linkUrl))
+                                        todo.add(linkUrl);
                                 });
                             }
                         });

@@ -21,7 +21,7 @@ module.exports = React.createClass({
     
     componentDidMount: function(){
         var self = this;
-        this.getDOMNode().addEventListener('transitionend', function(e){
+        this.getDOMNode().addEventListener('transitionend', function(){
             self.setState({
                 renderNow: true,
                 fadeIn: !self.state.fadeIn
@@ -52,4 +52,3 @@ module.exports = React.createClass({
         }, '');
     }
 });
-    

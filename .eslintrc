@@ -12,10 +12,11 @@
         "no-native-reassign": 1,
         
         "eol-last": 1,
+        "no-space-before-semi": 1,
         "new-cap": {
             "capIsNewExceptions": ["React"]
         },
-        "semi": 1,
+        "semi": 0,
         "quotes": 0,
         "no-trailing-spaces": 0,
         "no-multi-spaces": 0,
@@ -23,7 +24,9 @@
         "no-underscore-dangle": 0,
         "key-spacing": 0,
         "camelcase": 0,
-        "no-extra-strict": 0
+        "no-extra-strict": 0,
+        "no-spaced-func": 0,
+        "consistent-return": 0
     },
     "globals": {
         "Promise": true

@@ -1,7 +1,5 @@
 "use strict";
 
-var Promise = require('es6-promise').Promise;
-
 var makeJSONDatabaseModel = require('../makeJSONDatabaseModel');
 var makePromiseQueuer = require('../makePromiseQueue')();
 
@@ -48,7 +46,7 @@ module.exports = makeJSONDatabaseModel('Oracles', {
             all[id] = updatedOracle;
             return self._save(all).then(function(){
                 return updatedOracle;
-            });;
+            });
         });
     }),
     delete: makePromiseQueuer(function(OracleId){
@@ -60,8 +58,6 @@ module.exports = makeJSONDatabaseModel('Oracles', {
         });
     }),
     deleteAll: function(){
-        var self = this;
-
         return this._save({});
     }
 });

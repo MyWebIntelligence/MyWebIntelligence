@@ -24,7 +24,7 @@ var oraclesReadyP = Promise.all(oraclesInitData.map(function(o){
 
 oraclesReadyP.catch(function(err){
     console.error("oracles error", err);
-    process.kill()
+    process.kill();
 });
 
 module.exports = function(oracle, q, searchOptions, credentials){

@@ -5,12 +5,12 @@
 var SPACE = ' ';
 var DOUBLE_QUOTE = '"';
 
- function xmlEscape(s){
+function xmlEscape(s){
     return s.replace(/&/g, '&amp;')
         .replace(/"/g, "&quot;")
         .replace(/</g, "&gt;")
         .replace(/>/g, "&lt;");
-};
+}
 
 function createElement(tagname, attributes, content){
 
@@ -45,7 +45,7 @@ var DOMbuilder = {};
 var ALLOWED_ELEMENTS = [
     'gexf', 'graph',
     'nodes', 'node',
-    'edges', 'edge', 'attributes', 'attribute','default',
+    'edges', 'edge', 'attributes', 'attribute', 'default',
     'attvalues', 'attvalue'];
 
 

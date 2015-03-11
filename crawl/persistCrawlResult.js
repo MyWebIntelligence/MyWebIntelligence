@@ -46,4 +46,4 @@ module.exports = function(crawlResult){
         db.References.createByBatch(references),
         db.Aliases.createByBatch(aliases)
     ]);
-}
+};

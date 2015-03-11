@@ -26,7 +26,7 @@ function enumerablePropNames(o){
     }
 
     // Removing duplicates
-    return propNames.filter(function(e,i,a){
+    return propNames.filter(function(e, i, a){
         return a.indexOf(e) === i;
     });
 }
@@ -250,9 +250,9 @@ function GraphModel(nodeAttributes, edgeAttributes, options){
             if(name in nodes)
                 throw new Error("Node "+name+" already exists");
 
-            var options = makeAttributes(nodeAttributes, optargs);
+            var opts = makeAttributes(nodeAttributes, optargs);
 
-            var node = new GraphNode(name, options);
+            var node = new GraphNode(name, opts);
             nodes[name] = node;
 
             return node;
@@ -264,7 +264,7 @@ function GraphModel(nodeAttributes, edgeAttributes, options){
          */
         getNode: function(name){
             if(name === undefined)
-                return;
+                return undefined;
             
             if(typeof name !== 'string')
                 throw new TypeError("First argument of GraphModel.getNode should be a string ("+typeof name+")");
@@ -327,14 +327,14 @@ function GraphModel(nodeAttributes, edgeAttributes, options){
                 edges.set(node1, wm2);
             }
 
-            var options = makeAttributes(edgeAttributes, attributesArgs);
+            var opts = makeAttributes(edgeAttributes, attributesArgs);
             var edge;
 
             // Adding an edge
             if(accumulateEdgeWeights){ // unique edge per node pair
                 edge = wm2.get(node2);
                 if(!edge){
-                    edge = new GraphEdge(node1, node2, options, {editableWeight: true}); // weight is initiallized
+                    edge = new GraphEdge(node1, node2, opts, {editableWeight: true}); // weight is initiallized
                     wm2.set(node2, edge);
                     edgesList.push(edge);
                 }
@@ -350,7 +350,7 @@ function GraphModel(nodeAttributes, edgeAttributes, options){
                     wm2.set(node2, theseNodeEdges);
                 }
 
-                edge = new GraphEdge(node1, node2, options);
+                edge = new GraphEdge(node1, node2, opts);
 
                 theseNodeEdges.push(edge);
                 edgesList.push(edge);
@@ -484,7 +484,7 @@ function GraphModel(nodeAttributes, edgeAttributes, options){
                     });
 
                 return DOM.node({id:nodeName, label:nodeName}, [
-                    DOM.attvalues({},attrvalues)
+                    DOM.attvalues({}, attrvalues)
                 ]);
             });
 
@@ -519,12 +519,10 @@ function GraphModel(nodeAttributes, edgeAttributes, options){
                             undefined :
                             DOM.attvalue({"for":opt, value: e[opt]===null ? NULL: e[opt]});
                     })
-                    .filter(function(e){
-                        return !!e;
-                    });
+                    .filter(function(x){ return !!x; });
 
-                return DOM.edge({id:i, source:e.node1.name, target:e.node2.name, weight:e.weight},[
-                    DOM.attvalues({},attrvalues)
+                return DOM.edge({id:i, source:e.node1.name, target:e.node2.name, weight:e.weight}, [
+                    DOM.attvalues({}, attrvalues)
                 ]);
             });
 

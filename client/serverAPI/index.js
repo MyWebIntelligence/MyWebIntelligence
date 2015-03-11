@@ -43,7 +43,6 @@ module.exports = {
         return sendReq('POST', '/territoire/'+territoire.id+'/query', queryData);
     },
     updateQuery: function(queryDelta){
-        var id = queryDelta.id;
         return sendReq('POST', '/query/'+queryDelta.id, queryDelta);
     },
     deleteQuery: function(query){

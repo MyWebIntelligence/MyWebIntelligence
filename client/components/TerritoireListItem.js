@@ -1,7 +1,5 @@
 "use strict";
 
-var Set = require('es6-set');
-
 var React = require('react');
 
 var QueryForm = React.createFactory(require('./QueryForm'));
@@ -40,7 +38,7 @@ module.exports = React.createClass({
         var children;
         
         if(state.editMode){
-            children = [ TerritoireForm({
+            children = [ new TerritoireForm({
                 territoire: t,
                 onSubmit: function(formData){
                     var keysWithChange = Object.keys(formData).filter(function(k){
@@ -82,7 +80,7 @@ module.exports = React.createClass({
                     }
                 }, [
                     React.DOM.h1({className: "name"}, t.name),
-                    React.DOM.p({className: "description"}, t.description),
+                    React.DOM.p({className: "description"}, t.description)
                 ]),
                 React.DOM.button({
                     className: 'edit',
@@ -98,7 +96,7 @@ module.exports = React.createClass({
                         className: state.openQueryForms.has(q.id) ? 'open' : ''
                     }, [
                         state.openQueryForms.has(q.id) ?
-                            QueryForm({
+                            new QueryForm({
                                 oracles: props.oracles,
                                 query: q,
                                 onSubmit: function(formData){
@@ -129,7 +127,7 @@ module.exports = React.createClass({
                                 }
                             }) :
                             React.DOM.button({
-                                onClick: function(e){
+                                onClick: function(){
                                     if(state.openQueryForms.has(q.id))
                                         state.openQueryForms.delete(q.id);
                                     else
@@ -154,7 +152,7 @@ module.exports = React.createClass({
                         className: 'add' + (state.openQueryForms.has('+') ? ' open' : '')
                     }, [
                         React.DOM.button({
-                            onClick: function(e){
+                            onClick: function(){
                                 if(state.openQueryForms.has('+'))
                                     state.openQueryForms.delete('+');
                                 else
@@ -163,7 +161,7 @@ module.exports = React.createClass({
                                 self.setState({openQueryForms: state.openQueryForms});
                             }
                         }, '+'),
-                        state.openQueryForms.has('+') ? QueryForm({
+                        state.openQueryForms.has('+') ? new QueryForm({
                             oracles: props.oracles,
                             onSubmit: function(formData){
                                 props.createQueryInTerritoire(formData, t);

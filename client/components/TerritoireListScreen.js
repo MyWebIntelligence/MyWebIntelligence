@@ -62,14 +62,10 @@ module.exports = React.createClass({
         var self = this;
         var props = this.props;
         var state = this.state;
-        
-        var headerChildren = [
-            React.DOM.span({}, "My Web Intelligence")
-        ];
 
         var mainChildren = [
             React.DOM.h1({}, "Territoires"),
-            TerritoiresList({
+            new TerritoiresList({
                 territoires: state.currentUser.territoires,
                 oracles: props.oracles,
                 onTerritoireListChange: function(newTerritoireList){
@@ -140,11 +136,11 @@ module.exports = React.createClass({
                     props.serverAPI.updateTerritoire(territoireDelta).then(function(updatedTerritoire){
                         console.log('update of', territoireDelta, 'went well', updatedTerritoire);
 
-                        var relevantTerritoireIndex = state.currentUser.territoires.findIndex(function(t){
+                        var newRelevantTerritoireIndex = state.currentUser.territoires.findIndex(function(t){
                             return t.id === territoireDelta.id;
                         });
 
-                        state.currentUser.territoires[relevantTerritoireIndex] = Object.assign(temporaryTerritoire, updatedTerritoire);
+                        state.currentUser.territoires[newRelevantTerritoireIndex] = Object.assign(temporaryTerritoire, updatedTerritoire);
 
                         self.setState({
                             currentUser: state.currentUser
@@ -210,11 +206,11 @@ module.exports = React.createClass({
                     props.serverAPI.updateQuery(queryDelta).then(function(updatedQuery){
                         console.log('update of', queryDelta, 'went well', updatedQuery);
 
-                        var relevantQueryIndex = territoire.queries.findIndex(function(q){
+                        var newRelevantQueryIndex = territoire.queries.findIndex(function(q){
                             return q.id === queryDelta.id;
                         });
 
-                        territoire.queries[relevantQueryIndex] = Object.assign(temporaryQuery, updatedQuery);
+                        territoire.queries[newRelevantQueryIndex] = Object.assign(temporaryQuery, updatedQuery);
 
                         self.setState({
                             currentUser: state.currentUser
@@ -245,7 +241,7 @@ module.exports = React.createClass({
         
         return React.DOM.div({className: "react-wrapper"}, [
             
-            Header({
+            new Header({
                 user: state.currentUser,
                 moveToOraclesScreen: props.moveToOracleScreen
             }),

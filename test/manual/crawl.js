@@ -2,7 +2,7 @@
 
 require('../../ES-mess');
 
-var crawl = require('../../crawl');
+var rootURIsToGraph = require('../automated/crawl/rootURIsToGraph');
 
 var URLs = new Set([
     /*'http://en.wikipedia.org/wiki/List_of_HTTP_status_codes',
@@ -14,10 +14,12 @@ var URLs = new Set([
 
 var keywords = new Set(['graph']);
 
-crawl(URLs, keywords)
-    .then(function(result){
-        console.log('crawl result', result.nodes.size);
+rootURIsToGraph(URLs, keywords)
+    .then(function(graph){
+        console.log('crawl result', graph.nodes.size, graph.edges.size);
+    
+        console.log(graph.exportAsGEXF());
     })
     .catch(function(err){
-        console.error('crawl error', err);
+        console.error('rootURIsToGraph error', err);
     });

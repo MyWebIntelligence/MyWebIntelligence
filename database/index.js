@@ -10,6 +10,20 @@ var Aliases = require('./models/Aliases');
 var Expressions = require('./models/Expressions');
 var References = require('./models/References');
 
+var GraphModel = require('../common/graph/GraphModel');
+var pageNodeDesc = {
+    // Node attributes description
+    /*"domain": {
+        type: "string"
+    },*/
+    "url": {
+        type: "string"
+    }
+};
+
+var pageEdgeDesc = {};
+
+
 module.exports = {
     Users: Users,
     Territoires: Territoires,
@@ -72,7 +86,7 @@ module.exports = {
             
             var queryReadyP = relevantQueries.then(function(queries){
                 return Promise.all(queries.map(function(q){
-                    return QueryResults.findByQueryId(q.id).then(function(queryResults){
+                    return QueryResults.findLatestByQueryId(q.id).then(function(queryResults){
                         q.oracleResults = queryResults.results;
                     });
                 }));
@@ -92,7 +106,7 @@ module.exports = {
             uris: Set<string>
         */
         getGraphFromRootURIs: function(rootURIs){
-            var nodes = new Set();
+            var nodes = new Set/*<url>*/();
             var potentialEdges = new Set();
             
             var getCanonicalURLP = Aliases.getAll().then(function(all){
@@ -116,7 +130,6 @@ module.exports = {
             return getCanonicalURLP
                 .then(function(getCanonicalURL){
                     var canonicalRootURIs = new Set(rootURIs._toArray().map(getCanonicalURL));
-                
                     // urls correspond to new URLs to retrieve relations from, maybe
                     return (function buildGraph(urls){
                         
@@ -154,17 +167,36 @@ module.exports = {
 
                 })
                 .then(function(){
-                    var edges = new Set();
+                    var pageGraph = GraphModel(pageNodeDesc, pageEdgeDesc);
+                
+                    var nextNodeName = (function(){
+                        var next = 0;
 
-                    potentialEdges.forEach(function(e){
-                        if(nodes.has(e.source) && nodes.has(e.target))
-                            edges.add(e);
+                        return function(){
+                            return 'n'+(next++);
+                        };
+                    })();
+                    
+                
+                    var urlToNodeName = Map();
+                
+                    nodes.forEach(function(url){
+                        var name = nextNodeName();
+                        
+                        var node = pageGraph.addNode(name, {url: url});
+                        
+                        urlToNodeName.set(url, name);
                     });
-
-                    return {
-                        nodes: nodes,
-                        edges: edges
-                    };
+                    
+                    potentialEdges.forEach(function(e){
+                        var sourceNode = pageGraph.getNode(urlToNodeName.get(e.source));
+                        var targetNode = pageGraph.getNode(urlToNodeName.get(e.target));
+                        
+                        if(sourceNode && targetNode)
+                            pageGraph.addEdge(sourceNode, targetNode);
+                    });
+                    
+                    return pageGraph;
                 });
         },
         
@@ -177,7 +209,7 @@ module.exports = {
             
             var self = this;
             
-            QueryResults.findLatestByQueryId(queryId)
+            return QueryResults.findLatestByQueryId(queryId)
                 .then(function(qRes){
                     return self.getGraphFromRootURIs( new Set(qRes.results) );
                 });

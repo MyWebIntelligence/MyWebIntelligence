@@ -1,4 +1,4 @@
 "use strict";
 
-require('./polyfills');
+require('es-env-polyfills');
 require('./builtinExtensions');

@@ -3,12 +3,14 @@
 // The override mistake prevents Object.freezing Object.prototype
 // https://mail.mozilla.org/pipermail/es-discuss/2015-February/041628.html
 Object.seal(Object.prototype);
-
 Object.freeze(Object);
+
+// Cannot freeze it, because apparently, somewhere in React 0.12, React.renderToString assigns a "bind" method to a function, thus throwing
+Object.seal(Function.prototype);
+Object.freeze(Function);
 
 [
     // ES5 types
-    Function,
     Array,
     String,
     Number,

@@ -10,7 +10,7 @@ var persistCrawlResult = require('../crawl/persistCrawlResult');
 
 
 module.exports = function onQueryCreated(query, user){
-    // console.log("onQueryCreated", query.name, user.name);
+    console.log("onQueryCreated", query.name, user.name);
     
     return db.Oracles.findById(query.oracle_id)
         .then(function(oracle){
@@ -34,6 +34,6 @@ module.exports = function onQueryCreated(query, user){
         })
         .then(persistCrawlResult)
         .catch(function(err){
-            console.error('onQueryCreated error', err);
+            console.error('onQueryCreated error', err, err.stack);
         });
 }

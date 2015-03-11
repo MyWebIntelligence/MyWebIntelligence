@@ -5,6 +5,8 @@ var fetch = require('./fetch');
 var extractEffectiveDocument = require('./extractEffectiveDocument');
 var approve = require('./approve');
 
+var stripURLHash = require('../common/stripURLHash');
+
 /*
 interface EffectiveDocument{
     html: string // stipped HTML containing only the useful content
@@ -34,7 +36,9 @@ module.exports = function(initialUrls, originalWords){
     
     //console.log('crawl call', initialUrls.size, originalWords._toArray());
     
-    var todo = new Set(initialUrls); // clone
+    
+    
+    var todo = new Set(initialUrls._toArray().map(stripURLHash)); // clone
     var doing = new Set();
     var done = new Set();
     var results = new Map(); // Map<urlAfterRedirect, result>()

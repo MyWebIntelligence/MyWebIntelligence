@@ -26,7 +26,7 @@ describe('Graph with one URL with 301 redirect', function(){
             .then(function(graph){
                 assert.strictEqual(graph.nodes.size, 1, "should have one node");
                 assert.strictEqual(graph.edges.size, 0, "should have no edge");
-                assert.strictEqual(graph.nodes._toArray()[0], redirectLocation, "node should have the correct URL");
+                assert.strictEqual(graph.nodes._toArray()[0].url, redirectLocation, "node should have the correct URL");
             });
     });
     

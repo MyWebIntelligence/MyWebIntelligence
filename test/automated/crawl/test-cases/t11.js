@@ -1,7 +1,5 @@
 "use strict";
 
-console.log('simplest')
-
 require('../../../../ES-mess');
 
 var assert = assert = require('chai').assert;
@@ -21,7 +19,7 @@ var path = "/6";
 var roots = ['http://a.web'+path];
 
 
-describe('(3, 2) graph', function(){
+describe('(3, 2) linear graph', function(){
     
     before(function(){ return db.clearAll(); });
     
@@ -31,9 +29,15 @@ describe('(3, 2) graph', function(){
                 assert.strictEqual(graph.nodes.size, 3, "should have 3 nodes");
                 assert.strictEqual(graph.edges.size, 2, "should have 2 edges");
                 var nodes = graph.nodes._toArray();
-                assert.ok(nodes.indexOf(roots[0]) !== -1, "One node is "+roots[0]);
-                assert.ok(nodes.indexOf('http://a.web/7') !== -1, "One node is "+'http://a.web/7');
-                assert.ok(nodes.indexOf('http://a.web/end/8') !== -1, "One node is "+'http://a.web/end/8');
+                assert.ok(nodes.find(function(n){
+                    return n.url === roots[0]
+                }), "One node is "+roots[0]);
+                assert.ok(nodes.find(function(n){
+                    return n.url === 'http://a.web/7'
+                }), "One node is "+'http://a.web/7');
+                assert.ok(nodes.find(function(n){
+                    return n.url === 'http://a.web/end/8'
+                }), "One node is "+'http://a.web/end/8');
             
             });
     });

@@ -7,6 +7,7 @@ var request = require('request');
 
 var makeSearchString = require('../common/makeSearchString');
 var makeDocument = require('../common/makeDocument');
+var stripURLHash = require('../common/stripURLHash');
 
 var config = require('./config.json');
 
@@ -55,6 +56,7 @@ module.exports = function(urlToExplore){
                                 .map(function(a){ return a.href.trim() })
                                 // remove non-http links, like javascript: and mailto: links
                                 .filter(function(url){ return /^https?/.test(url); })
+                                .map(stripURLHash)
                         
                             var uniqueLinks = new Set(urls);
                         

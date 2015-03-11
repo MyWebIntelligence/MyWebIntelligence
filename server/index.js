@@ -142,10 +142,9 @@ app.get('/territoires', function(req, res){
             var initData = result[1];
 
             renderDocumentWithData(doc, initData, TerritoireListScreen);
-
             res.send( serializeDocumentToHTML(doc) );
         })
-        .catch(function(err){ console.error('/territoires', err); });
+        .catch(function(err){ console.error('/territoires', err, err.stackTrace); });
     }
 });
 
@@ -203,7 +202,7 @@ app.post('/territoire/:id/query', function(req, res){
 
     database.Queries.create(queryData).then(function(newQuery){
         res.status(201).send(newQuery);
-        onQueryCreated(newQuery);
+        onQueryCreated(newQuery, user);
     }).catch(function(err){
         res.status(500).send('database problem '+ err);
     });
@@ -235,6 +234,35 @@ app.delete('/query/:id', function(req, res){
     database.Queries.delete(id).then(function(){
         res.status(204).send('');
     }).catch(function(err){
+        res.status(500).send('database problem '+ err);
+    }); 
+});
+
+
+app.get('/query/:id/crawl-result.gexf', function(req, res){
+    var user = serializedUsers.get(req.session.passport.user);
+    var id = Number(req.params.id);
+    console.log('Getting crawl result', user.id, 'query id', id);
+    
+    var queryP = database.Queries.findById(id)
+    console.time('graph from db')
+    var graphP = database.complexQueries.getQueryGraph(id)
+    
+    Promise.all([queryP, graphP]).then(function(result){
+        console.timeEnd('graph from db')
+        var query = result[0];
+        var graph = result[1];
+        
+        // convert the file to GEXF
+        // send with proper content-type
+        res.set('Content-Type', "application/gexf+xml");
+        res.set('Content-disposition', 'attachment; filename="' + query.name+'.gexf"');
+        console.time('as gexf');
+        res.status(200).send(graph.exportAsGEXF());
+        console.timeEnd('as gexf');
+    }).catch(function(err){
+        console.error('crawl-result.gexf error', err, err.stack)
+        
         res.status(500).send('database problem '+ err);
     }); 
 });

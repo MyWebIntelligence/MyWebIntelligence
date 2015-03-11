@@ -21,8 +21,6 @@ module.exports = React.createClass({
     
     render: function(){
         var props = this.props;
-        var state = this.state;
-        var self = this;
         
         var query = props.query || {};
         
@@ -99,7 +97,7 @@ module.exports = React.createClass({
                         defaultValue: query.oracle_id
                     }, props.oracles.map(function(o){
                         return React.DOM.option({
-                            value: o.id,
+                            value: o.id
                         }, o.name)
                     }))
                 ]),
@@ -107,7 +105,7 @@ module.exports = React.createClass({
                     type: "submit"
                 }, "ok")
             ]),
-            props.query ? DeleteButton({
+            props.query ? new DeleteButton({
                 onDelete: function(){
                     props.deleteQuery(props.query);
                 }

@@ -52,7 +52,7 @@ module.exports = React.createClass({
         return React.DOM.ul({className: "territoires"}, [
             React.DOM.li({className: state.newTerritoireFormOpen ? '' : 'add'}, 
                 state.newTerritoireFormOpen ?
-                    TerritoireForm({
+                    new TerritoireForm({
                         onSubmit: function(territoireData){
                             props.createTerritoire(territoireData);
                             self.setState({ newTerritoireFormOpen: false });
@@ -64,7 +64,7 @@ module.exports = React.createClass({
                         }
                     }, '+')
             )].concat(props.territoires.map(function(t){
-                return TerritoireListItem({
+                return new TerritoireListItem({
                     territoire: t,
                     oracles: props.oracles,
                     onTerritoireChange: props.onTerritoireChange,

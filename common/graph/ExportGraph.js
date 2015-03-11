@@ -2,10 +2,6 @@
 
 var Graph = require('./GraphModel.js');
 
-var urlLib = require('url');
-var parseURL = urlLib.parse;
-var formatURL = urlLib.format;
-
 
 function makeNodeNameGenerator(){
     var PREFIX = 'n';

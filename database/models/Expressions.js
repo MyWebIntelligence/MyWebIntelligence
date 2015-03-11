@@ -1,7 +1,5 @@
 "use strict";
 
-var Promise = require('es6-promise').Promise;
-
 var makeJSONDatabaseModel = require('../makeJSONDatabaseModel');
 var makePromiseQueuer = require('../makePromiseQueue')();
 
@@ -77,8 +75,6 @@ module.exports = makeJSONDatabaseModel('Expressions', {
         });
     }),
     deleteAll: function(){
-        var self = this;
-
         return this._save({});
     }
 });

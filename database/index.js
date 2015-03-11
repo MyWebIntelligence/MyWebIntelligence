@@ -167,7 +167,7 @@ module.exports = {
 
                 })
                 .then(function(){
-                    var pageGraph = GraphModel(pageNodeDesc, pageEdgeDesc);
+                    var pageGraph = new GraphModel(pageNodeDesc, pageEdgeDesc);
                 
                     var nextNodeName = (function(){
                         var next = 0;
@@ -178,12 +178,12 @@ module.exports = {
                     })();
                     
                 
-                    var urlToNodeName = Map();
+                    var urlToNodeName = new Map();
                 
                     nodes.forEach(function(url){
                         var name = nextNodeName();
                         
-                        var node = pageGraph.addNode(name, {url: url});
+                        pageGraph.addNode(name, {url: url});
                         
                         urlToNodeName.set(url, name);
                     });

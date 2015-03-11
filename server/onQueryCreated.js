@@ -1,8 +1,5 @@
 "use strict";
 
-var Set = require('es6-set');
-var Promise = require('es6-promise').Promise;
-
 var db = require('../database');
 var interogateOracle = require('./interogateOracle');
 var crawl = require('../crawl');
@@ -17,10 +14,10 @@ module.exports = function onQueryCreated(query, user){
             if(oracle.needsCredentials){
                 return db.OracleCredentials.findByUserAndOracleId(user.id, oracle.id).then(function(creds){
                     return interogateOracle(oracle, query.q, query.searchOptions, creds);
-                })
+                });
             }
             else{
-                return interogateOracle(oracle, query.q, query.searchOptions);    
+                return interogateOracle(oracle, query.q, query.searchOptions);
             }
         })
         .then(function(queryResults){
@@ -36,4 +33,4 @@ module.exports = function onQueryCreated(query, user){
         .catch(function(err){
             console.error('onQueryCreated error', err, err.stack);
         });
-}
+};

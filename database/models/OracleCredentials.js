@@ -1,7 +1,5 @@
 "use strict";
 
-var Promise = require('es6-promise').Promise;
-
 var makeJSONDatabaseModel = require('../makeJSONDatabaseModel');
 var makePromiseQueuer = require('../makePromiseQueue')();
 
@@ -58,7 +56,7 @@ module.exports = makeJSONDatabaseModel('OracleCredentials', {
         return this.findByUserAndOracleId(oracleCredentialsData.userId, oracleCredentialsData.oracleId).then(function(o){
             return o ?
                 self.update(Object.assign(o, oracleCredentialsData)) : 
-                self.create(oracleCredentialsData) ;
+                self.create(oracleCredentialsData);
         });
         
     },

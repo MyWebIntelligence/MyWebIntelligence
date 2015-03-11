@@ -21,14 +21,13 @@ module.exports = React.createClass({
     },
     
     render: function() {
-        var self = this;
         var props = this.props;
         console.log('Territoire view', props);
         
         var state = this.state;
         
         return React.DOM.div({className: "react-wrapper"}, [
-            Header({
+            new Header({
                  user: state.currentUser,
                  moveToOraclesScreen: props.moveToOracleScreen
             }),

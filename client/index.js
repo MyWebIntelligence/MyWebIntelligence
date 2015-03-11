@@ -49,10 +49,10 @@ function displayOraclesScreen(){
         });
         
         screenData.oracleCredentials = credentialsByOracleId;
-        React.render(OraclesScreen(screenData), document.body);
+        React.render(new OraclesScreen(screenData), document.body);
     });
 
-    React.render(OraclesScreen(screenData), document.body);
+    React.render(new OraclesScreen(screenData), document.body);
 }
 
 
@@ -68,12 +68,12 @@ function displayTerritoireViewScreen(t){
         oracles: data.oracles
     };
 
-    React.render(TerritoireViewScreen(screenData), document.body);
+    React.render(new TerritoireViewScreen(screenData), document.body);
     
-    serverAPI.getTerritoireViewData(t).then(function(data){
-        console.log('getTerritoireViewData', t, data);
-        React.render(TerritoireViewScreen({
-            territoire: data,
+    serverAPI.getTerritoireViewData(t).then(function(terrViewData){
+        console.log('getTerritoireViewData', t, terrViewData);
+        React.render(new TerritoireViewScreen({
+            territoire: terrViewData,
             oracles: data.oracles
         }), document.body);
     });
@@ -82,6 +82,7 @@ function displayTerritoireViewScreen(t){
 
 document.addEventListener('DOMContentLoaded', function(){
     var initDataElement = document.querySelector('script#init-data');
+    var screenData;
     
     if(initDataElement && initDataElement.textContent.length >= 2){
         data = JSON.parse(initDataElement.textContent);
@@ -90,19 +91,19 @@ document.addEventListener('DOMContentLoaded', function(){
     
     switch(location.pathname){
         case '/':
-            var screenData = Object.assign({}, data);
+            screenData = Object.assign({}, data);
             
-            React.render(LoginScreen(screenData), document.body);
+            React.render(new LoginScreen(screenData), document.body);
             break;
         case '/territoires': 
-            var screenData = Object.assign({
+            screenData = Object.assign({
                 serverAPI : serverAPI,
                 moveToOracleScreen: moveToOraclesScreen,
                 moveToTerritoireViewScreen: moveToTerritoireViewScreen
             }, data);
             console.log('/territoires screenData', screenData);
             
-            React.render(TerritoireListScreen(screenData), document.body);
+            React.render(new TerritoireListScreen(screenData), document.body);
             break;
         case '/oracles': 
             displayOraclesScreen();
@@ -110,7 +111,5 @@ document.addEventListener('DOMContentLoaded', function(){
         default:
             console.error('Unknown pathname', location.pathname);
     }
-    
-    
     
 });

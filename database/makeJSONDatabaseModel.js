@@ -5,14 +5,13 @@ var promisify = require('es6-promisify');
 
 var fs = require('fs');
 var path = require('path');
-var tmpdir = require('tmp').dir;
 
 var readFile = promisify(fs.readFile);
 var writeFile = promisify(fs.writeFile);
 
 console.log("process.env.NODE_ENV", process.env.NODE_ENV);
 
-var BASE_STORAGE_PATH_P = new Promise(function(resolve, reject){
+var BASE_STORAGE_PATH_P = new Promise(function(resolve){
     if(process.env.NODE_ENV === 'test')
         // doesn't work inside a docker container
         /*tmpdir(function(err, d){
@@ -70,4 +69,4 @@ module.exports = function makeJSONDatabaseModel(name, methods){
     };
     
     return Object.assign({}, storageControl, methods);
-}
+};

@@ -19,7 +19,6 @@ var makeDocument = require('../common/makeDocument');
 var database = require('../database');
 var onQueryCreated = require('./onQueryCreated');
 
-var LoginScreen = React.createFactory(require('../client/components/LoginScreen'));
 var TerritoireListScreen = React.createFactory(require('../client/components/TerritoireListScreen'));
 var OraclesScreen = React.createFactory(require('../client/components/OraclesScreen'));
 
@@ -67,9 +66,9 @@ passport.use(new GoogleStrategy({
                 google_id: googleUser.id,
                 google_name: googleUser.name,
                 google_pictureURL: googleUser.picture
-            }).then(function(user){
-                console.log('created new user', user);
-                done(null, user);
+            }).then(function(u){
+                console.log('created new user', u);
+                done(null, u);
             });
         }
     }).catch(errFun)
@@ -333,6 +332,11 @@ app.get('/oracle-credentials', function(req, res){
 
 app.get('/territoire-screen-data/:id', function(req, res){
     var user = serializedUsers.get(req.session.passport.user);
+    if(!user || !user.id){
+        res.redirect('/');
+        return;
+    }
+    
     var territoireId = Number(req.params.id);
     
     database.complexQueries.getTerritoireScreenData(territoireId).then(function(territoireData){

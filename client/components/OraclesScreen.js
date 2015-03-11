@@ -34,6 +34,7 @@ module.exports = React.createClass({
     
     render: function() {
         var props = this.props;
+        var state = this.state;
         
         return React.DOM.div({className: "react-wrapper"}, [
             new Header({user: props.user}),

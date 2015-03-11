@@ -28,8 +28,6 @@ module.exports = React.createClass({
     
     render: function(){
         var props = this.props;
-        var state = this.state;
-        var self = this;
         
         var territoire = props.territoire || {};
         
@@ -77,7 +75,7 @@ module.exports = React.createClass({
                     type: "submit"
                 }, "ok")
             ]),
-            props.territoire ? DeleteButton({
+            props.territoire ? new DeleteButton({
                 onDelete: function(){
                     props.deleteTerritoire(props.territoire);
                 }

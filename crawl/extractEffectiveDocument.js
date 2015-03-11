@@ -1,8 +1,5 @@
 "use strict";
 
-var Promise = require('es6-promise').Promise;
-var Set = require('es6-set');
-
 var request = require('request');
 
 var makeSearchString = require('../common/makeSearchString');
@@ -55,7 +52,7 @@ module.exports = function(urlToExplore){
                             var urls = links
                                 .map(function(a){ return a.href.trim() })
                                 // remove non-http links, like javascript: and mailto: links
-                                .filter(function(url){ return /^https?/.test(url); })
+                                .filter(function(u){ return /^https?/.test(u); })
                                 .map(stripURLHash)
                         
                             var uniqueLinks = new Set(urls);
@@ -75,7 +72,7 @@ module.exports = function(urlToExplore){
                         })
                     );
                 }
-            };
+            }
         });
     });
 };

@@ -1,57 +1,6 @@
 "use strict";
 
-var Map = require('es6-map');
-var Promise = require('es6-promise').Promise;
-
-// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign#Polyfill
-if (!Object.assign) {
-    Object.defineProperty(Object, "assign", {
-        enumerable: false,
-        configurable: true,
-        writable: true,
-        value: function(target, firstSource) {
-            "use strict";
-            if (target === undefined || target === null)
-                throw new TypeError("Cannot convert first argument to object");
-            var to = Object(target);
-            for (var i = 1; i < arguments.length; i++) {
-                var nextSource = arguments[i];
-                if (nextSource === undefined || nextSource === null) continue;
-                var keysArray = Object.keys(Object(nextSource));
-                for (var nextIndex = 0, len = keysArray.length; nextIndex < len; nextIndex++) {
-                    var nextKey = keysArray[nextIndex];
-                    var desc = Object.getOwnPropertyDescriptor(nextSource, nextKey);
-                    if (desc !== undefined && desc.enumerable) to[nextKey] = nextSource[nextKey];
-                }
-            }
-            return to;
-        }
-    });
-}
-
-// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/findIndex#Polyfill
-if (!Array.prototype.findIndex) {
-    Array.prototype.findIndex = function(predicate) {
-        if (this == null) {
-            throw new TypeError('Array.prototype.find called on null or undefined');
-        }
-        if (typeof predicate !== 'function') {
-            throw new TypeError('predicate must be a function');
-        }
-        var list = Object(this);
-        var length = list.length >>> 0;
-        var thisArg = arguments[1];
-        var value;
-
-        for (var i = 0; i < length; i++) {
-            value = list[i];
-            if (predicate.call(thisArg, value, i, list)) {
-                return i;
-            }
-        }
-        return -1;
-    };
-}
+require('../ES-mess');
 
 var resolve = require('path').resolve;
 var fs = require('fs');
@@ -66,9 +15,9 @@ var passport = require('passport');
 var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
 var React = require('react');
 
-
-var makeDocument = require('./makeDocument.js');
-var database = require('../database/index.js');
+var makeDocument = require('../common/makeDocument');
+var database = require('../database');
+var onQueryCreated = require('./onQueryCreated');
 
 var LoginScreen = React.createFactory(require('../client/components/LoginScreen'));
 var TerritoireListScreen = React.createFactory(require('../client/components/TerritoireListScreen'));
@@ -84,29 +33,7 @@ var indexHTMLStr = fs.readFileSync(resolve(__dirname, '../client/index.html'), {
 
 var PORT = 3333;
 
-var oraclesInitData = require('./initOraclesData.json');
-var oracleModules = Object.create(null);
 
-var oraclesReadyP = Promise.all(oraclesInitData.map(function(o){
-    var modulePath = resolve(__dirname, '../oracles', o.oracleNodeModuleName+'.js');
-    
-    // will throw if there is no corresponding module and that's on purpose
-    oracleModules[o.oracleNodeModuleName] = require(modulePath);
-    
-    // check if entry with oracleNodeModuleName exists. If not, create it.
-    // by oracleNodeModuleName because names may be localized in the future. Module names likely won't ever.
-    return database.Oracles.findByOracleNodeModuleName(o.oracleNodeModuleName).then(function(result){
-        if(!result)
-            return database.Oracles.create(o);
-        // else an entry exist, nothing to do.
-    });
-}));
-
-
-oraclesReadyP.catch(function(err){
-    console.error("oracles error", err);
-    process.kill()
-})
 
 var app = express();
 app.disable("x-powered-by");
@@ -215,10 +142,9 @@ app.get('/territoires', function(req, res){
             var initData = result[1];
 
             renderDocumentWithData(doc, initData, TerritoireListScreen);
-
             res.send( serializeDocumentToHTML(doc) );
         })
-        .catch(function(err){ console.error('/territoires', err); });
+        .catch(function(err){ console.error('/territoires', err, err.stackTrace); });
     }
 });
 
@@ -276,39 +202,7 @@ app.post('/territoire/:id/query', function(req, res){
 
     database.Queries.create(queryData).then(function(newQuery){
         res.status(201).send(newQuery);
-        
-        database.Oracles.findById(newQuery.oracle_id).then(function(oracle){
-            console.log('oracle found', oracle.name, user.name, newQuery.q);
-            
-            if(oracle.needsCredentials){
-                return database.OracleCredentials.findByUserAndOracleId(user.id, oracle.id).then(function(oracleCredentials){
-                    console.log('oracle credentials', oracle.name, user.name, newQuery.q, oracleCredentials);
-                    
-                    // temporarily hardcoded. TODO generalize in the future
-                    var oracleFunction = oracleModules[oracle.oracleNodeModuleName]({
-                        "API key": oracleCredentials["API key"],
-                        cx: oracleCredentials["cx"]
-                    });
-                    
-                    return oracleFunction(newQuery.q).then(function(searchResults){
-                        console.log('GCSE oracle results for', newQuery.q, searchResults.length);
-                        return database.QueryResults.create({
-                            query_id: newQuery.id,
-                            results: searchResults,
-                            created_at: new Date()
-                        });
-                    });
-                }).catch(function(err){
-                    console.error('oracling after credentials err', err);
-                });
-            }
-            else{
-                throw 'TODO';
-            }
-        }).catch(function(err){
-            console.error('oracling err', err);
-        });
-        
+        onQueryCreated(newQuery, user);
     }).catch(function(err){
         res.status(500).send('database problem '+ err);
     });
@@ -340,6 +234,35 @@ app.delete('/query/:id', function(req, res){
     database.Queries.delete(id).then(function(){
         res.status(204).send('');
     }).catch(function(err){
+        res.status(500).send('database problem '+ err);
+    }); 
+});
+
+
+app.get('/query/:id/crawl-result.gexf', function(req, res){
+    var user = serializedUsers.get(req.session.passport.user);
+    var id = Number(req.params.id);
+    console.log('Getting crawl result', user.id, 'query id', id);
+    
+    var queryP = database.Queries.findById(id)
+    console.time('graph from db')
+    var graphP = database.complexQueries.getQueryGraph(id)
+    
+    Promise.all([queryP, graphP]).then(function(result){
+        console.timeEnd('graph from db')
+        var query = result[0];
+        var graph = result[1];
+        
+        // convert the file to GEXF
+        // send with proper content-type
+        res.set('Content-Type', "application/gexf+xml");
+        res.set('Content-disposition', 'attachment; filename="' + query.name+'.gexf"');
+        console.time('as gexf');
+        res.status(200).send(graph.exportAsGEXF());
+        console.timeEnd('as gexf');
+    }).catch(function(err){
+        console.error('crawl-result.gexf error', err, err.stack)
+        
         res.status(500).send('database problem '+ err);
     }); 
 });

@@ -1,0 +1,8 @@
+.git
+database/_storage
+design
+doc
+test/manual
+
+node_modules/browserify
+node_modules/watchify

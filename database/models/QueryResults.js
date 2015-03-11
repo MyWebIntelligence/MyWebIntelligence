@@ -17,11 +17,15 @@ module.exports = makeJSONDatabaseModel('QueryResults', {
             return all[QueryResultId];
         });
     },
-    findByQueryId: function(queryId){
+    findLatestByQueryId: function(queryId){
         return this.getAll().then(function(arr){
             return arr.filter(function(queryResult){
                 return queryResult.query_id === queryId;
-            })[0]; // should be the latest, but [0] is fine for now
+            }).reduce(function(latest, res){
+                return Date.parse(latest.created_at) > Date.parse(res.created_at) ?
+                    latest :
+                    res;
+            });
         });
     },
     create: makePromiseQueuer(function(QueryResultData){
@@ -57,5 +61,10 @@ module.exports = makeJSONDatabaseModel('QueryResults', {
             delete all[QueryResultId];
             return self._save(all);
         });
-    })
+    }),
+    deleteAll: function(){
+        var self = this;
+
+        return this._save({});
+    }
 });

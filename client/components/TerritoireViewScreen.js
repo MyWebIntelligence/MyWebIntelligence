@@ -23,6 +23,8 @@ module.exports = React.createClass({
     render: function() {
         var self = this;
         var props = this.props;
+        console.log('Territoire view', props);
+        
         var state = this.state;
         
         return React.DOM.div({className: "react-wrapper"}, [
@@ -36,13 +38,10 @@ module.exports = React.createClass({
                 props.territoire.queries ? React.DOM.ul({className: 'queries'}, props.territoire.queries.map(function(q){
                     return React.DOM.li({}, [
                         React.DOM.h2({}, q.name),
-                        q.oracleResults ? React.DOM.ul({className: 'oracle-results'}, q.oracleResults.map(function(res){
-                            return React.DOM.li({}, React.DOM.a({href: res.link, target: '_blank'}, [
-                                React.DOM.h3({}, res.title),
-                                React.DOM.h4({}, res.link)
-                            ]))
-                        })) : undefined
-                    
+                        (q.oracleResults ?
+                            React.DOM.span({className: 'oracle-results'}, q.oracleResults.length) :
+                            undefined),
+                        React.DOM.a({href: "/query/"+q.id+"/crawl-result.gexf"}, 'Download GEXF')
                     ]);
                 })) : undefined
             ])

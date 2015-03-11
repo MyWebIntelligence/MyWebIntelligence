@@ -1,13 +1,13 @@
 "use strict";
 
-process.env.NODE_ENV = "test";
+require('../../../ES-mess');
 
-var Promise = require('es6-promise').Promise;
+process.env.NODE_ENV = "test";
 
 var assert = assert = require('chai').assert;
 require('chai-as-promised');
 
-var db = require('../../database/index.js');
+var db = require('../../../database/index.js');
 
 var deleteAllQueries = db.Queries.deleteAll.bind(db.Queries);
 var deleteAllOracles = db.Oracles.deleteAll.bind(db.Oracles);

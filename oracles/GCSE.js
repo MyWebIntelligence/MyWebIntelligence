@@ -1,6 +1,8 @@
 "use strict";
 
 var Promise = require('es6-promise').Promise;
+var Set = require('es6-set');
+
 var request = require('request');
 
 var makeSearchString = require('../common/makeSearchString');
@@ -8,7 +10,7 @@ var makeSearchString = require('../common/makeSearchString');
 var GCSE_BASE_URL = "https://www.googleapis.com/customsearch/v1?";
 
 var MAX_GCSE_NUM = 10;
-var STARTS = [1, 11/*, 21, 31, 41, 51, 61, 71, 81, 91*/];
+var STARTS = [1/*, 11, 21, 31, 41, 51, 61, 71, 81, 91*/];
 
 module.exports = function prepareGCSEOracle(credentials){
     var apiKey = credentials["API key"];
@@ -41,8 +43,13 @@ module.exports = function prepareGCSEOracle(credentials){
                         return;
                     }
 
+                    var bodyObj = JSON.parse(body)
+                    var linksArray = bodyObj.items.map(function(item){
+                        return item.link;
+                    });
+                    
                     if (response.statusCode < 400) {
-                        resolve(JSON.parse(body).items);
+                        resolve(new Set(linksArray));
                     }
                     else{
                         reject(new Error('HTTP status '+response.statusCode));
@@ -53,10 +60,13 @@ module.exports = function prepareGCSEOracle(credentials){
         });
         
         return Promise.all(resultPs).then(function(results){
-            var ret = [];
+            var ret = new Set();
             
-            results.forEach(function(res){
-                ret = ret.concat(res);
+            // results is a string[][]. flatten it
+            results.forEach(function(r){
+                r.forEach(function(url){
+                    ret.add(url);
+                });
             });
             
             return ret;

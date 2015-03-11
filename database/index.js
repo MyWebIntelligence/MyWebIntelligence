@@ -1,62 +1,28 @@
 "use strict";
 
-if (!Array.prototype.find) {
-    Array.prototype.find = function(predicate) {
-        if (this == null) {
-            throw new TypeError('Array.prototype.find called on null or undefined');
-        }
-        if (typeof predicate !== 'function') {
-            throw new TypeError('predicate must be a function');
-        }
-        var list = Object(this);
-        var length = list.length >>> 0;
-        var thisArg = arguments[1];
-        var value;
-
-        for (var i = 0; i < length; i++) {
-            value = list[i];
-            if (predicate.call(thisArg, value, i, list)) {
-                return value;
-            }
-        }
-        return undefined;
-    };
-}
-
-// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign#Polyfill
-if (!Object.assign) {
-    Object.defineProperty(Object, "assign", {
-        enumerable: false,
-        configurable: true,
-        writable: true,
-        value: function(target, firstSource) {
-            "use strict";
-            if (target === undefined || target === null)
-                throw new TypeError("Cannot convert first argument to object");
-            var to = Object(target);
-            for (var i = 1; i < arguments.length; i++) {
-                var nextSource = arguments[i];
-                if (nextSource === undefined || nextSource === null) continue;
-                var keysArray = Object.keys(Object(nextSource));
-                for (var nextIndex = 0, len = keysArray.length; nextIndex < len; nextIndex++) {
-                    var nextKey = keysArray[nextIndex];
-                    var desc = Object.getOwnPropertyDescriptor(nextSource, nextKey);
-                    if (desc !== undefined && desc.enumerable) to[nextKey] = nextSource[nextKey];
-                }
-            }
-            return to;
-        }
-    });
-}
-
-var Promise = require('es6-promise').Promise;
-
 var Users = require('./models/Users');
 var Territoires = require('./models/Territoires');
 var Queries = require('./models/Queries');
 var Oracles = require('./models/Oracles');
 var OracleCredentials = require('./models/OracleCredentials');
 var QueryResults = require('./models/QueryResults');
+var Aliases = require('./models/Aliases');
+var Expressions = require('./models/Expressions');
+var References = require('./models/References');
+
+var GraphModel = require('../common/graph/GraphModel');
+var pageNodeDesc = {
+    // Node attributes description
+    /*"domain": {
+        type: "string"
+    },*/
+    "url": {
+        type: "string"
+    }
+};
+
+var pageEdgeDesc = {};
+
 
 module.exports = {
     Users: Users,
@@ -65,6 +31,22 @@ module.exports = {
     Oracles: Oracles,
     OracleCredentials: OracleCredentials,
     QueryResults: QueryResults,
+    Aliases: Aliases,
+    Expressions : Expressions,
+    References : References,
+    
+    clearAll: function(){
+        var self = this;
+        
+        var deleteAllFunctions = Object.keys(self)
+            .map(function(k){
+                if(typeof self[k].deleteAll === 'function')
+                    return self[k].deleteAll.bind(self[k]);
+            })
+            .filter(function(v){ return !!v; });
+
+        return Promise.all(deleteAllFunctions.map(function(f){ return f(); }));
+    },
     
     complexQueries: {
         getUserInitData: function(userId){
@@ -95,13 +77,16 @@ module.exports = {
             });
         },
         
+        /*
+            Query search results
+        */
         getTerritoireScreenData: function(territoireId){
             var territoireP = Territoires.findById(territoireId);
             var relevantQueries = Queries.findByBelongsTo(territoireId);
             
             var queryReadyP = relevantQueries.then(function(queries){
                 return Promise.all(queries.map(function(q){
-                    return QueryResults.findByQueryId(q.id).then(function(queryResults){
+                    return QueryResults.findLatestByQueryId(q.id).then(function(queryResults){
                         q.oracleResults = queryResults.results;
                     });
                 }));
@@ -115,6 +100,119 @@ module.exports = {
                 
                 return territoire;
             });
+        },
+        
+        /*
+            uris: Set<string>
+        */
+        getGraphFromRootURIs: function(rootURIs){
+            var nodes = new Set/*<url>*/();
+            var potentialEdges = new Set();
+            
+            var getCanonicalURLP = Aliases.getAll().then(function(all){
+                var aliasMap = new Map();
+                
+                all.forEach(function(alias){
+                    aliasMap.set(alias.source, alias.target);
+                })
+                
+                return function(url){
+                    return aliasMap.get(url) || url;
+                };
+            });
+            
+            function keepURLsWithAnExpression(urls){
+                return Expressions.findByURIs(urls).then(function(exps){
+                    return new Set(exps.map(function(e){ return e.uri }));
+                })
+            }
+            
+            return getCanonicalURLP
+                .then(function(getCanonicalURL){
+                    var canonicalRootURIs = new Set(rootURIs._toArray().map(getCanonicalURL));
+                    // urls correspond to new URLs to retrieve relations from, maybe
+                    return (function buildGraph(urls){
+                        
+                        return keepURLsWithAnExpression(urls).then(function(urlsWithExpression){
+                            
+                            urlsWithExpression.forEach(function(u){
+                                nodes.add(u);
+                            });
+
+                            var nextURLs = new Set();
+
+                            return References.findBySourceURIs(urlsWithExpression).then(function(refs){
+                                refs.forEach(function(r){
+                                    var canonicalSource = r.source; // already is canonical
+                                    var canonicalTarget = getCanonicalURL(r.target);
+
+                                    if(!nodes.has(canonicalTarget) && !nextURLs.has(canonicalTarget))
+                                        nextURLs.add(canonicalTarget);
+
+                                    potentialEdges.add({
+                                        source: canonicalSource,
+                                        target: canonicalTarget
+                                    });
+                                });
+
+                                if(nextURLs.size >= 1){
+                                    return buildGraph(nextURLs);
+                                }
+
+                            });
+
+                        });
+
+                    })(canonicalRootURIs);
+
+                })
+                .then(function(){
+                    var pageGraph = GraphModel(pageNodeDesc, pageEdgeDesc);
+                
+                    var nextNodeName = (function(){
+                        var next = 0;
+
+                        return function(){
+                            return 'n'+(next++);
+                        };
+                    })();
+                    
+                
+                    var urlToNodeName = Map();
+                
+                    nodes.forEach(function(url){
+                        var name = nextNodeName();
+                        
+                        var node = pageGraph.addNode(name, {url: url});
+                        
+                        urlToNodeName.set(url, name);
+                    });
+                    
+                    potentialEdges.forEach(function(e){
+                        var sourceNode = pageGraph.getNode(urlToNodeName.get(e.source));
+                        var targetNode = pageGraph.getNode(urlToNodeName.get(e.target));
+                        
+                        if(sourceNode && targetNode)
+                            pageGraph.addEdge(sourceNode, targetNode);
+                    });
+                    
+                    return pageGraph;
+                });
+        },
+        
+        /*
+            This returns a graph of pages
+            The url is the URL after redirects
+        */
+        getQueryGraph: function(queryId){
+            console.log('getQueryGraph', queryId);
+            
+            var self = this;
+            
+            return QueryResults.findLatestByQueryId(queryId)
+                .then(function(qRes){
+                    return self.getGraphFromRootURIs( new Set(qRes.results) );
+                });
         }
     }
 };

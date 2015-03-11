@@ -1,13 +1,13 @@
 "use strict";
 
-process.env.NODE_ENV = "test";
+require('../../../ES-mess');
 
-var Promise = require('es6-promise').Promise;
+process.env.NODE_ENV = "test";
 
 var assert = assert = require('chai').assert;
 require('chai-as-promised');
 
-var db = require('../../database/index.js');
+var db = require('../../../database/index.js');
 
 var GOOGLE_ID = String(Math.round(Math.random() * Math.pow(2, 30)));
 
@@ -45,10 +45,6 @@ var territoireData = [
     {
         "name": "yo",
         "description": "bla"
-    },
-    {
-        "name": "Ants",
-        "description": "des fourmis"
     }
 ];
 
@@ -57,15 +53,13 @@ var queryData = [
         "name": "a",
         "q": "a",
         "lang": "none",
-        "nbPage": 400,
-        "belongs_to": 1
+        "nbPage": 400
     },
     {
         "name": "Amar Lakel",
         "q": "Amar Lakel",
         "lang": "none",
-        "nbPage": 400,
-        "belongs_to": 2
+        "nbPage": 400
     }
 ];
 
@@ -131,7 +125,7 @@ describe('Complex queries: getUserInitData', function(){
 
 
                 assert.ok(Array.isArray(result.currentUser.territoires));
-                assert.equal(result.currentUser.territoires.length, 3);
+                assert.equal(result.currentUser.territoires.length, 2);
                 var firstTerritoireName = result.currentUser.territoires[0].name
                 
                 assert.ok(
@@ -159,7 +153,7 @@ describe('Complex queries: getUserInitData', function(){
             
             var territoiresP = Promise.all(territoireData.map(function(td){
                 td["created_by"] = users[0].id;
-                return db.Territoires.create(td)
+                return db.Territoires.create(td);
             })).then(function(_territoires){
                 territoires = _territoires;
             });
@@ -167,7 +161,7 @@ describe('Complex queries: getUserInitData', function(){
             var queriesP = territoiresP.then(function(){
                 return Promise.all(queryData.map(function(qd){
                     qd["belongs_to"] = territoires[0].id;
-                    return db.Queries.create(qd)
+                    return db.Queries.create(qd);
                 }));
             });
             
@@ -188,17 +182,25 @@ describe('Complex queries: getUserInitData', function(){
                 assert.equal(result.oracles.length, 2);
                 
                 assert.ok(Array.isArray(result.currentUser.territoires));
-                assert.equal(result.currentUser.territoires.length, 3);
+                assert.equal(result.currentUser.territoires.length, 2);
                 
-                assert.ok(Array.isArray(result.currentUser.territoires[0].queries));
-                assert.equal(result.currentUser.territoires[0].queries.length, 2);
-                assert.ok(Array.isArray(result.currentUser.territoires[1].queries));
-                assert.equal(result.currentUser.territoires[1].queries.length, 0);
+                var t1 = result.currentUser.territoires[0];
+                var t2 = result.currentUser.territoires[1];
                 
-                var firstTerr = result.currentUser.territoires[0]
+                assert.ok(Array.isArray(t1.queries));
+                assert.ok(Array.isArray(t2.queries));
+                
+                assert.ok(t1.queries.length === 2 || t2.queries.length === 2, "one of the terrioire has 2 queries");
+                assert.ok(t1.queries.length === 0 || t2.queries.length === 0, "one of the terrioire has 0 queries");
+                
+                var territoireWithQueries = result.currentUser.territoires.find(function(t){
+                    return t.queries.length === 2;
+                })
+                
                 assert.ok(
-                    firstTerr.queries[0].name === queryData[0].name ||
-                    firstTerr.queries[0].name === queryData[1].name);
+                    territoireWithQueries.queries[0].name === queryData[0].name ||
+                    territoireWithQueries.queries[0].name === queryData[1].name
+                );
             });
         
         });

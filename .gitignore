@@ -6,8 +6,11 @@ node_modules
 browserify-*.js
 
 config/*-credentials.json
+crawl/config.json
 
 database/_storage/*
 
+
 notes.md
 crawl/config.json
+

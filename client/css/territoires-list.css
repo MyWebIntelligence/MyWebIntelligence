@@ -134,6 +134,23 @@ main ul.territoires > li ul.queries > li .QueryForm-react-component{
     
 }
 
+.QueryForm-react-component form.query section{
+    margin-bottom: 1em;
+    width: 100%;
+}
+
+.QueryForm-react-component form.query section h1{
+    font-size: 1.1em;
+}
+
+.QueryForm-react-component form.query section label *:first-child{
+    width: 40%;
+    text-transform: capitalize;
+}
+.QueryForm-react-component form.query section label *:nth-child(2){
+    width: 100%;
+}
+
 form.query button[type="submit"]{
     padding: 0.5em 0.2em;
     border: 3px outset #AAA;
@@ -142,12 +159,9 @@ form.query button[type="submit"]{
     
     width: 100%;
     height: 100%;
-    position: relative;
     
     background-color: transparent;
     color: inherit;
-    
-    left: 100%;
 }
 
 form.query label{

@@ -3,11 +3,11 @@
 var resolve = require('path').resolve;
 
 var database = require('../database');
-var oraclesInitData = require('./initOraclesData.json');
+var oraclesInitData = require('./oracleDescriptions.json');
 var oracleModules = new Map();
 
 var oraclesReadyP = Promise.all(oraclesInitData.map(function(o){
-    var modulePath = resolve(__dirname, '../oracles', o.oracleNodeModuleName);
+    var modulePath = resolve(__dirname, o.oracleNodeModuleName);
     
     // will throw if there is no corresponding module and that's on purpose
     oracleModules.set(o.oracleNodeModuleName, require(modulePath));
@@ -27,7 +27,7 @@ oraclesReadyP.catch(function(err){
     process.kill();
 });
 
-module.exports = function(oracle, q, searchOptions, credentials){
+module.exports = function(oracle, q, oracleOptions, credentials){
     console.log('Interogate oracle', oracle, q, credentials);
     
     return oraclesReadyP.then(function(){
@@ -35,7 +35,7 @@ module.exports = function(oracle, q, searchOptions, credentials){
             oracleModules.get(oracle.oracleNodeModuleName)(credentials) :
             oracleModules.get(oracle.oracleNodeModuleName);
         
-        return oracleFunction(q, searchOptions).then(function(searchResults){
+        return oracleFunction(q, oracleOptions).then(function(searchResults){
             console.log('GCSE oracle results for', q, searchResults.size);
             return searchResults;
         });

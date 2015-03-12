@@ -1,7 +1,7 @@
 "use strict";
 
 var db = require('../database');
-var interogateOracle = require('./interogateOracle');
+var interogateOracle = require('../oracles/interogateOracle');
 var crawl = require('../crawl');
 var persistCrawlResult = require('../crawl/persistCrawlResult');
 
@@ -13,7 +13,7 @@ module.exports = function onQueryCreated(query, user){
         .then(function(oracle){
             if(oracle.needsCredentials){
                 return db.OracleCredentials.findByUserAndOracleId(user.id, oracle.id).then(function(creds){
-                    return interogateOracle(oracle, query.q, query.searchOptions, creds);
+                    return interogateOracle(oracle, query.q, JSON.parse(query.oracleOptions), creds);
                 });
             }
             else{

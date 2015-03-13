@@ -12,9 +12,7 @@ TODO instead of "citedBy", consider computing a PageRank the the "graph so far"
 
 interface ApproveOptions{
     wordsToMatch: Set<String>
-    fullPage: string // full HTML page
-    coreHTML: string // html, but reduced
-    coreTextContent: string // human text included in coreHTML
+    expression: Expression
     depth: number
     citedBy: Set<URL>
 }
@@ -28,7 +26,7 @@ interface ApproveOptions{
 module.exports = function approve(options){
     var depth = options.depth;
     var wordsToMatch = options.wordsToMatch;
-    var coreContent = options.coreContent;
+    var mainText = options.expression.mainText;
     
     if(depth === 0)
         return true;
@@ -39,13 +37,12 @@ module.exports = function approve(options){
     
     var allWordOccurences = 0;
     wordsToMatch.forEach(function(word){
-        allWordOccurences += (coreContent.match(new RegExp(word, "g")) || []).length;
+        allWordOccurences += (mainText.match(new RegExp(word, "g")) || []).length;
     });
     var averageOccurencesPerWord = allWordOccurences/wordsToMatch.size;
     
     if(averageOccurencesPerWord > depth)
         return true;
-    
     
     
     return false;

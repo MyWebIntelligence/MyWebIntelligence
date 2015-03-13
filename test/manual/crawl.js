@@ -2,6 +2,8 @@
 
 require('../../ES-mess');
 
+var database = require('../../database');
+
 var rootURIsToGraph = require('../automated/crawl/rootURIsToGraph');
 
 var URLs = new Set([
@@ -14,12 +16,15 @@ var URLs = new Set([
 
 var keywords = new Set(['graph']);
 
-rootURIsToGraph(URLs, keywords)
-    .then(function(graph){
-        console.log('crawl result', graph.nodes.size, graph.edges.size);
-    
-        console.log(graph.exportAsGEXF());
-    })
-    .catch(function(err){
-        console.error('rootURIsToGraph error', err);
-    });
+database.Expressions.deleteAll().then(function(){
+    rootURIsToGraph(URLs, keywords)
+        .then(function(graph){
+            console.log('crawl result', graph.nodes.size, graph.edges.size);
+
+            console.log(graph.exportAsGEXF());
+        })
+        .catch(function(err){
+            console.error('rootURIsToGraph error', err, err.stack);
+        });
+})
+

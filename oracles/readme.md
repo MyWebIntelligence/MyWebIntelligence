@@ -16,7 +16,7 @@ function(authData){
     return function(keywords, options){
         return authDanceOverP.then(function(secondaryAuthData){ // secondaryAuthData happens in OAuth for instance 
         
-            // askOracle return a Promise<URL[]>
+            // askOracle return a Promise<Set<URL>>
             return askOracle(keywords, options, secondaryAuthData);
         })
     };

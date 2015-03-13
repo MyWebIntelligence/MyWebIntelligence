@@ -11,13 +11,15 @@ module.exports = function onQueryCreated(query, user){
     
     return db.Oracles.findById(query.oracle_id)
         .then(function(oracle){
+            var oracleOptions = query.oracleOptions ? JSON.parse(query.oracleOptions) : undefined;
+        
             if(oracle.needsCredentials){
                 return db.OracleCredentials.findByUserAndOracleId(user.id, oracle.id).then(function(creds){
-                    return interogateOracle(oracle, query.q, JSON.parse(query.oracleOptions), creds);
+                    return interogateOracle(oracle, query.q, oracleOptions, creds);
                 });
             }
             else{
-                return interogateOracle(oracle, query.q, query.searchOptions);
+                return interogateOracle(oracle, query.q, oracleOptions);
             }
         })
         .then(function(queryResults){

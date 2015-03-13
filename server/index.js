@@ -33,7 +33,6 @@ var indexHTMLStr = fs.readFileSync(resolve(__dirname, '../client/index.html'), {
 var PORT = 3333;
 
 
-
 var app = express();
 app.disable("x-powered-by");
 

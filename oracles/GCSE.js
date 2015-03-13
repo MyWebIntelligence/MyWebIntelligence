@@ -29,7 +29,7 @@ module.exports = function prepareGCSEOracle(credentials){
     }
 
 
-    return function GCSEOracle(q){
+    return function GCSEOracle(q/*, oracleOptions*/){
         
         var resultPs = STARTS.map(function(start){
             return new Promise(function(resolve, reject){

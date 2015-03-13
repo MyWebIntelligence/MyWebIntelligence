@@ -33,7 +33,7 @@ module.exports = React.createClass({
         var selectedOracle = props.oracles.find(function(o){
             return o.id === state.selectedOracleId
         });
-        var queryOracleOptions = query.oracleOptions && JSON.parse(query.oracleOptions);
+        var queryOracleOptions = (query.oracleOptions && JSON.parse(query.oracleOptions)) || {};
         
         
         return React.DOM.div({className: "QueryForm-react-component"}, [
@@ -44,8 +44,9 @@ module.exports = React.createClass({
 
                     var formData = Object.create(null);
                     
-                    if(!editionMode){
-                        formData.name = self.refs['form-name'].getDOMNode().value.trim();
+                    formData.name = self.refs['form-name'].getDOMNode().value.trim();
+                    
+                    if(!editionMode){    
                         formData.q = self.refs['form-q'].getDOMNode().value;
                         formData.oracle_id = Number( self.refs['form-oracle_id'].getDOMNode().value );
                     }
@@ -87,19 +88,18 @@ module.exports = React.createClass({
                     React.DOM.h1({}, "Query settings"),
                     React.DOM.label({}, [
                         React.DOM.span({}, 'name'),
-                        editionMode ?
-                            React.DOM.span({}, query.name) :
-                            React.DOM.input({
-                                ref: "form-name",
-                                name: 'name',
-                                type: 'text',
-                                required: true,
-                                pattern: '\\s*(\\S+\\s*)+', 
+                        React.DOM.input({
+                            ref: "form-name",
+                            name: 'name',
+                            type: 'text',
+                            required: true,
+                            pattern: '\\s*(\\S+\\s*)+', 
 
-                                // browsers auto-complete based on @name and here it's "name" which is common
-                                // so autocompletion values aren't that useful. This isn't very autocompletable anyway
-                                autoComplete: 'off'
-                            })
+                            // browsers auto-complete based on @name and here it's "name" which is common
+                            // so autocompletion values aren't that useful. This isn't very autocompletable anyway
+                            autoComplete: 'off',
+                            defaultValue: query.name
+                        })
                     ]),
                     React.DOM.label({}, [
                         React.DOM.span({}, 'query string'),

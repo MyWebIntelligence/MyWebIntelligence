@@ -28,7 +28,7 @@ oraclesReadyP.catch(function(err){
 });
 
 module.exports = function(oracle, q, oracleOptions, credentials){
-    console.log('Interogate oracle', oracle, q, credentials);
+    console.log('Interogate oracle', oracle, q, oracleOptions, credentials);
     
     return oraclesReadyP.then(function(){
         var oracleFunction = oracle.needsCredentials ?

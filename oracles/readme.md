@@ -13,12 +13,14 @@ function(authData){
 
     var authDanceOverP = authDance(authData);
 
-    return function(keywords, searchParams){
+    return function(keywords, options){
         return authDanceOverP.then(function(secondaryAuthData){ // secondaryAuthData happens in OAuth for instance 
         
-            // askOracle return a Promise<URL[]>
-            return askOracle(keywords, searchParams, secondaryAuthData);
+            // askOracle return a Promise<Set<URL>>
+            return askOracle(keywords, options, secondaryAuthData);
         })
     };
 }
 ```
+
+Over time, it is expected from oracles to mostly return fresh URLs.

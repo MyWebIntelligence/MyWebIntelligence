@@ -2,6 +2,15 @@
     {
         "name": "Google Custom Search Engine",
         "oracleNodeModuleName": "GCSE",
+        "options": [
+            {
+                "name": "language",
+                "type": [
+                    "fr",
+                    "en"
+                ]
+            }
+        ],
         "needsCredentials": {
             "API key": "text",
             "cx": "text"
@@ -10,6 +19,12 @@
     {
         "name": "URL list",
         "oracleNodeModuleName": "URLList",
+        "options": [
+            {
+                "name": "list",
+                "type": "list"
+            }
+        ],
         "needsCredentials": false
     }
 ]

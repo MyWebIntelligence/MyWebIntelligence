@@ -33,7 +33,6 @@ var indexHTMLStr = fs.readFileSync(resolve(__dirname, '../client/index.html'), {
 var PORT = 3333;
 
 
-
 var app = express();
 app.disable("x-powered-by");
 
@@ -109,12 +108,12 @@ app.get('/auth/google', passport.authenticate('google', {
 }) );
 
 app.get('/auth/google/callback', 
-        passport.authenticate('google', { failureRedirect: '/' }),
-        function(req, res) {
+    passport.authenticate('google', { failureRedirect: '/' }),
+    function(req, res) {
     // Successful authentication, redirect home.
-    res.redirect('/territoires');
-}
-       );
+        res.redirect('/territoires');
+    }
+);
 
 
 /*
@@ -143,7 +142,7 @@ app.get('/territoires', function(req, res){
             renderDocumentWithData(doc, initData, TerritoireListScreen);
             res.send( serializeDocumentToHTML(doc) );
         })
-        .catch(function(err){ console.error('/territoires', err, err.stackTrace); });
+        .catch(function(err){ console.error('/territoires', err, err.stack); });
     }
 });
 

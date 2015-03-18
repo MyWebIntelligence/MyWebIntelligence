@@ -46,9 +46,9 @@ module.exports = function(initialUrls, originalWords){
     // var results = new Map(); // Map<urlAfterRedirect, result>()
     
     function crawl(depth){
-        // console.log('internal crawl', depth, '|', todo.size, doing.size, done.size);
+        console.log('internal crawl', depth, '|', todo.size, doing.size, done.size);
         return Promise.all(todo._toArray().map(function(u){
-            todo.delete(u)
+            todo.delete(u);
             doing.add(u);
 
             return getExpression(u)
@@ -58,12 +58,14 @@ module.exports = function(initialUrls, originalWords){
 
                     var expressionSavedP;
                 
-                    if(approve({
+                    var approved = approve({
                         depth: depth,
                         wordsToMatch: originalWords,
                         expression: expression
                         //citedBy: Set<URL>
-                    })){
+                    });
+                
+                    if(approved){
                         // save the expression only if it's approved
                         // expression may come from db or may be new or changed (added alias)
                         if(!expression._dontSave){ // save here
@@ -74,7 +76,7 @@ module.exports = function(initialUrls, originalWords){
                         }
                         
                         //console.log('approved', u, expression);
-                        expression.links.forEach(function(linkUrl){
+                        expression.references.forEach(function(linkUrl){
                             if(!doing.has(linkUrl) && !done.has(linkUrl))
                                 todo.add(linkUrl);
                         });
@@ -83,14 +85,15 @@ module.exports = function(initialUrls, originalWords){
                     
                     }*/
                 
-                    return expressionSavedP;
+                    return (expressionSavedP || Promise.resolve()).then(function(){
+                        return approved;
+                    });
                 })
-                .then(function(){
-                    //console.log('crawl', todo.size, doing.size, done.size);
-                    return todo.size >= 1 ? crawl(depth+1) : undefined;
+                .then(function(approved){
+                    return approved && todo.size >= 1 ? crawl(depth+1) : undefined;
                 })
                 .catch(function(err){
-                    console.error('error while exploring the web', u, err, err.stack)
+                    console.error('Crawl error', u, err)
                 });
 
         }));

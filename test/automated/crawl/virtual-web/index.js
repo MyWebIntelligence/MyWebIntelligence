@@ -54,7 +54,10 @@ app.use(function(req, res){
         else{
             var links = webDescription[req.path];
             
-            makeDocument(baseHTMLStr).then(function(doc){
+            makeDocument(baseHTMLStr).then(function(o){
+                var doc = o.document;
+                var dispose = o.dispose;
+                
                 links.forEach(function(u){
                     var a = doc.createElement('a');
                     a.setAttribute('href', u);
@@ -63,6 +66,7 @@ app.use(function(req, res){
                 });
 
                 res.status(status).send('<!doctype html>\n'+doc.documentElement.outerHTML);
+                dispose();
             })
         }
     }

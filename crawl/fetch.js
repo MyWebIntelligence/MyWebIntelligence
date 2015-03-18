@@ -12,6 +12,8 @@ var pendingByHostname = new Map/*<hostname, Set<url>>*/()
 var resolveRejectPromiseByUrl = new Map/*<url, {resolve, reject, promise}>*/()
 
 function sendTheHTTPRequest(url){
+    console.log('Fetch', url);
+    
     var hostname = parseURL(url).hostname;
     
     request({

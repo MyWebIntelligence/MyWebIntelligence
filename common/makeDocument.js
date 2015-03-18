@@ -11,7 +11,14 @@ module.exports = function makeDocument(htmlFragment, baseURL){
             url: baseURL,
             done: function(err, window){
                 if(err) reject(err);
-                else resolve(window.document);
+                else resolve({
+                    dispose: function(){
+                        // to free memory, jsdom requires window.close to be called.
+                        // otherwise, massive leaks ensue, eventually leading to process crash
+                        window.close();
+                    },
+                    document: window.document
+                });
             }
         });
     });

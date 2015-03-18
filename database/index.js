@@ -6,9 +6,7 @@ var Queries = require('./models/Queries');
 var Oracles = require('./models/Oracles');
 var OracleCredentials = require('./models/OracleCredentials');
 var QueryResults = require('./models/QueryResults');
-var Aliases = require('./models/Aliases');
 var Expressions = require('./models/Expressions');
-var References = require('./models/References');
 
 var GraphModel = require('../common/graph/GraphModel');
 var pageNodeDesc = {
@@ -31,9 +29,7 @@ module.exports = {
     Oracles: Oracles,
     OracleCredentials: OracleCredentials,
     QueryResults: QueryResults,
-    Aliases: Aliases,
     Expressions : Expressions,
-    References : References,
     
     clearAll: function(){
         var self = this;
@@ -106,66 +102,54 @@ module.exports = {
             uris: Set<string>
         */
         getGraphFromRootURIs: function(rootURIs){
-            var nodes = new Set/*<url>*/();
+            var nodes = new Set/*<url>*/(); // these are only canonical urls
             var potentialEdges = new Set();
             
-            var getCanonicalURLP = Aliases.getAll().then(function(all){
-                var aliasMap = new Map();
-                
-                all.forEach(function(alias){
-                    aliasMap.set(alias.source, alias.target);
-                })
-                
-                return function(url){
-                    return aliasMap.get(url) || url;
-                };
-            });
+            // (alias => canonical URL) map
+            var urlToCanonical = new Map/*<url, url>*/();
             
-            function keepURLsWithAnExpression(urls){
-                return Expressions.findByURIs(urls).then(function(exps){
-                    return new Set(exps.map(function(e){ return e.uri }));
-                })
+            function buildGraph(urls){
+                return Expressions.findByURIAndAliases(urls).then(function(expressions){
+                    // fill in nodes
+                    expressions.forEach(function(expr){
+                        var uri = expr.uri;
+                        
+                        nodes.add(uri);
+                        
+                        if(Array.isArray(expr.aliases)){
+                            expr.aliases.forEach(function(a){
+                                urlToCanonical.set(a, uri);
+                            });
+                        }
+                    });
+                    
+                    var nextURLs = new Set();
+                    
+                    // add references
+                    expressions.forEach(function(expr){
+                        var uri = expr.uri;
+                        
+                        if(Array.isArray(expr.references)){
+                            expr.references.forEach(function(refURL){
+                                potentialEdges.add({
+                                    source: uri,
+                                    target: refURL
+                                });
+                                
+                                nextURLs.add(refURL);
+                            });
+                        }
+                    });
+                    
+                    
+                    if(nextURLs.size >= 1){
+                        return buildGraph(nextURLs);
+                    }
+
+                });
             }
             
-            return getCanonicalURLP
-                .then(function(getCanonicalURL){
-                    var canonicalRootURIs = new Set(rootURIs._toArray().map(getCanonicalURL));
-                    // urls correspond to new URLs to retrieve relations from, maybe
-                    return (function buildGraph(urls){
-                        
-                        return keepURLsWithAnExpression(urls).then(function(urlsWithExpression){
-                            
-                            urlsWithExpression.forEach(function(u){
-                                nodes.add(u);
-                            });
-
-                            var nextURLs = new Set();
-
-                            return References.findBySourceURIs(urlsWithExpression).then(function(refs){
-                                refs.forEach(function(r){
-                                    var canonicalSource = r.source; // already is canonical
-                                    var canonicalTarget = getCanonicalURL(r.target);
-
-                                    if(!nodes.has(canonicalTarget) && !nextURLs.has(canonicalTarget))
-                                        nextURLs.add(canonicalTarget);
-
-                                    potentialEdges.add({
-                                        source: canonicalSource,
-                                        target: canonicalTarget
-                                    });
-                                });
-
-                                if(nextURLs.size >= 1){
-                                    return buildGraph(nextURLs);
-                                }
-
-                            });
-
-                        });
-
-                    })(canonicalRootURIs);
-
-                })
+            return buildGraph(rootURIs)
                 .then(function(){
                     var pageGraph = new GraphModel(pageNodeDesc, pageEdgeDesc);
                 
@@ -189,8 +173,11 @@ module.exports = {
                     });
                     
                     potentialEdges.forEach(function(e){
-                        var sourceNode = pageGraph.getNode(urlToNodeName.get(e.source));
-                        var targetNode = pageGraph.getNode(urlToNodeName.get(e.target));
+                        var source = urlToCanonical.get(e.source) || e.source;
+                        var target = urlToCanonical.get(e.target) || e.target;
+                        
+                        var sourceNode = pageGraph.getNode(urlToNodeName.get(source));
+                        var targetNode = pageGraph.getNode(urlToNodeName.get(target));
                         
                         if(sourceNode && targetNode)
                             pageGraph.addEdge(sourceNode, targetNode);

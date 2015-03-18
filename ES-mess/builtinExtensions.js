@@ -42,4 +42,14 @@ Set.prototype._pick = function _pick(){
     this.delete(element);
     
     return element;
-}
+};
+
+
+Set.prototype.toJSON = function toJSON(){
+    var arr = [];
+    this.forEach(function(e){ arr.push(e); });
+    return arr;
+};
+
+
+

@@ -23,15 +23,17 @@ interface ApproveOptions{
 // var EVAPORATION_FACTOR = 0.5;
 // var approvalProbability = 1;
 
+var ACCEPTED_DEPTH = 1;
+
 module.exports = function approve(options){
     var depth = options.depth;
     var wordsToMatch = options.wordsToMatch;
     var mainText = options.expression.mainText;
     
-    if(depth === 0)
+    if(depth <= ACCEPTED_DEPTH)
         return true;
     
-    if(depth === 1)
+    if(depth > ACCEPTED_DEPTH)
         return false;
     
     

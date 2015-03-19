@@ -19,6 +19,8 @@ module.exports = function(url){
         }
         else{
             return fetch(url).then(function(fetchedDocument){
+                //console.log('Fetched', fetchedDocument);
+                
                 var canonicalURL = fetchedDocument.canonicalURL;
                 
                 if(canonicalURL !== fetchedDocument.originalURL){
@@ -34,7 +36,7 @@ module.exports = function(url){
                             return expr;
                         }
                         else{
-                            return makeExpression(canonicalURL, fetchedDocument).then(function(expr){
+                            return makeExpression(canonicalURL, fetchedDocument.html).then(function(expr){
                                 expr.aliases = [fetchedDocument.originalURL];
                                 return expr;
                             });

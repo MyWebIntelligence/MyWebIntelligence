@@ -102,6 +102,8 @@ module.exports = {
             uris: Set<string>
         */
         getGraphFromRootURIs: function(rootURIs){
+            //console.log('getGraphFromRootURIs', rootURIs._toArray());
+            
             var nodes = new Set/*<url>*/(); // these are only canonical urls
             var potentialEdges = new Set();
             
@@ -110,6 +112,8 @@ module.exports = {
             
             function buildGraph(urls){
                 return Expressions.findByURIAndAliases(urls).then(function(expressions){
+                    //console.log('building graph, found expressions', expressions.length, expressions.map(function(e){ return e.uri}));
+                    
                     // fill in nodes
                     expressions.forEach(function(expr){
                         var uri = expr.uri;
@@ -136,7 +140,8 @@ module.exports = {
                                     target: refURL
                                 });
                                 
-                                nextURLs.add(refURL);
+                                if(!nodes.has(refURL) && !urlToCanonical.has(refURL))
+                                    nextURLs.add(refURL);
                             });
                         }
                     });

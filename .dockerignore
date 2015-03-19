@@ -3,6 +3,9 @@ database/_storage
 design
 doc
 test/manual
+crawl/config.json
+*.md
 
 node_modules/browserify
 node_modules/watchify
+node_modules/eslint

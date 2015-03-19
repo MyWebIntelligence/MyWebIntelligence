@@ -46,13 +46,15 @@ module.exports = function(initialUrls, originalWords){
     // var results = new Map(); // Map<urlAfterRedirect, result>()
     
     function crawl(depth){
-        console.log('internal crawl', depth, '|', todo.size, doing.size, done.size);
+        //console.log('internal crawl', depth, '|', todo.size, doing.size, done.size);
         return Promise.all(todo._toArray().map(function(u){
             todo.delete(u);
             doing.add(u);
 
             return getExpression(u)
                 .then(function(expression){
+                    //console.log('gotExpression', expression);
+                
                     doing.delete(u);
                     done.add(u);
 
@@ -93,7 +95,7 @@ module.exports = function(initialUrls, originalWords){
                     return approved && todo.size >= 1 ? crawl(depth+1) : undefined;
                 })
                 .catch(function(err){
-                    console.error('Crawl error', u, err)
+                    console.error('Crawl error', u, err);
                 });
 
         }));

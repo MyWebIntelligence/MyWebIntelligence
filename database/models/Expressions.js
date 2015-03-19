@@ -20,7 +20,7 @@ module.exports = makeJSONDatabaseModel('Expressions', {
         return this.getAll().then(function(all){
             return all.filter(function(expression){
                 return uris.has(expression.uri) || (expression.aliases || []).some(function(alias){
-                    uris.has(alias);
+                    return uris.has(alias);
                 });
             })
         });

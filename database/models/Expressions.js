@@ -16,11 +16,20 @@ module.exports = makeJSONDatabaseModel('Expressions', {
         });
     },
     /* uris is a Set */
-    findByURIs: function(uris){
+    findByURIAndAliases: function(uris){
         return this.getAll().then(function(all){
             return all.filter(function(expression){
-                return uris.has(expression.uri);
+                return uris.has(expression.uri) || (expression.aliases || []).some(function(alias){
+                    return uris.has(alias);
+                });
             })
+        });
+    },
+    findByCanonicalURI: function(uri){
+        return this.getAll().then(function(all){
+            return all.find(function(expression){
+                return uri === expression.uri;
+            });
         });
     },
     create: makePromiseQueuer(function(expressionData){

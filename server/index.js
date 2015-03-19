@@ -136,11 +136,14 @@ app.get('/territoires', function(req, res){
 
         // Create a fresh document every time
         Promise.all([makeDocument(indexHTMLStr), userInitDataP]).then(function(result){
-            var doc = result[0]
+            var doc = result[0].document;
+            var dispose = result[0].dispose;
+            
             var initData = result[1];
 
             renderDocumentWithData(doc, initData, TerritoireListScreen);
             res.send( serializeDocumentToHTML(doc) );
+            dispose();
         })
         .catch(function(err){ console.error('/territoires', err, err.stack); });
     }
@@ -276,12 +279,15 @@ app.get('/oracles', function(req, res){
 
         // Create a fresh document every time
         Promise.all([makeDocument(indexHTMLStr), userInitDataP]).then(function(result){
-            var doc = result[0]
+            var doc = result[0].document;
+            var dispose = result[0].dispose;
+            
             var initData = result[1];
 
             renderDocumentWithData(doc, initData, OraclesScreen);
 
             res.send( serializeDocumentToHTML(doc) );
+            dispose();
         })
         .catch(function(err){ console.error('/oracles', err); });
     }

@@ -12,7 +12,10 @@ module.exports = function(url){
                 return;
             }
             
-            makeDocument(body, url).then(function(doc){
+            makeDocument(body, url).then(function(o){
+                var doc = o.document;
+                var dispose = o.dispose;
+                
                 var links = doc.body.querySelectorAll('a[href]');
 
                 var uniqueLinks = new Set(Array.prototype.map.call(links, function(a){
@@ -25,11 +28,14 @@ module.exports = function(url){
                 // console.log('uniqueLinks', urlToExplore, uniqueLinks.size);
 
                 resolve({
-                    html: doc.body.outerHTML,
+                    fullHTML: body,
+                    mainTextContent: doc.body.outerHTML,
                     title: doc.title,
                     "date_published": null,
                     links: uniqueLinks
                 });
+                
+                dispose();
             })
             .catch(reject);
         })

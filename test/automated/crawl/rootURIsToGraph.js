@@ -6,7 +6,7 @@ var persistCrawlResult = require('../../../crawl/persistCrawlResult');
 
 module.exports = function(roots, words){
     return crawl(roots, words)
-        .then(persistCrawlResult)
+        // .then(persistCrawlResult) // not needed anymore given the crawl is saved progressively
         .then(function(){
             return db.complexQueries.getGraphFromRootURIs(new Set(roots));
         });

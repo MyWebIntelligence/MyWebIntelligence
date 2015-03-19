@@ -14,7 +14,7 @@
     "watch": "watchify client/index.js -o client/browserify-bundle.js -d -v",
     "lint": "eslint ./",
     "build-test-crawl-docker-image": "docker build --tag=\"mywi/test-crawl\" --file=test/automated/crawl/Dockerfile .",
-    "test-crawl": "docker run --add-host a.web:127.0.0.1 -v ~/projects/MyWebIntelligence:/usr/mywi mywi/test-crawl /usr/bin/supervisord -c /usr/mywi/test/automated/crawl/supervisord.conf"
+    "test-crawl": "docker run --add-host a.web:127.0.0.1 mywi/test-crawl /usr/bin/supervisord -c /usr/mywi/test/automated/crawl/supervisord.conf"
   },
   "repository": {
     "type": "git",
@@ -44,7 +44,7 @@
     "es6-set": "~0.1.1",
     "express": "~4.10.7",
     "express-session": "~1.10.1",
-    "jsdom": "~2.0.0",
+    "jsdom": "3.x",
     "multer": "^0.1.7",
     "passport": "~0.2.1",
     "passport-google-oauth": "~0.1.5",

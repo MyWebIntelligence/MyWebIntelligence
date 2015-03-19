@@ -3,13 +3,6 @@
 var request = require('request');
 var parseURL = require('url').parse;
 
-/*
-    // Content type filtering
-    if (!/html/.test(response.headers["content-type"])) {
-      error = new Error('Invalid content-type');
-      errInfo.contentType = response.headers["content-type"];
-    }
-*/
 
 var MAXIMUM_IN_PROGRESS_BY_HOSTNAME = 20;
 
@@ -19,6 +12,8 @@ var pendingByHostname = new Map/*<hostname, Set<url>>*/()
 var resolveRejectPromiseByUrl = new Map/*<url, {resolve, reject, promise}>*/()
 
 function sendTheHTTPRequest(url){
+    console.log('Fetch', url);
+    
     var hostname = parseURL(url).hostname;
     
     request({
@@ -28,7 +23,7 @@ function sendTheHTTPRequest(url){
             "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
             "User-Agent": "My Web Intelligence crawler"
         }
-    }, function(error, response, body){
+    }, function(error, response, httpBody){
         // response came back, so not in flight anymore
         inFlightByHostname.get(hostname).delete(url);
         if(inFlightByHostname.get(hostname).size === 0) // all request for this domain have returned
@@ -72,9 +67,10 @@ function sendTheHTTPRequest(url){
                 }
                 else{
                     resolve({
-                        html: body,
+                        html: httpBody,
                         originalURL: url,
-                        URLAfterRedirects : response.request.uri.href
+                        // TODO the canonical URL should also take link@rel=canonical into account
+                        canonicalURL : response.request.uri.href 
                     });
                 }
             }

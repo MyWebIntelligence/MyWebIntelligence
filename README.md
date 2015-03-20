@@ -76,7 +76,9 @@ npm run test-crawl
 ## Installing on your own server
 
 * Install [Docker](https://docs.docker.com/installation/#installation)
-    * Quick way on Ubuntu: `curl -sSL https://get.docker.com/ubuntu/ | sudo sh`
+   * Quick way on Ubuntu: `curl -sSL https://get.docker.com/ubuntu/ | sudo sh`
+* Install [Node.js](https://nodejs.org/)
+   * Quick way on Ubuntu: `curl -sL https://deb.nodesource.com/setup | sudo bash -` then `sudo apt-get install -y nodejs`
 
 ````sh
 git clone https://github.com/MyWebIntelligence/MyWebIntelligence.git
@@ -94,7 +96,7 @@ cd MyWebIntelligence
     * `cp crawl/config.sample.json crawl/config.json`
     * add your Parser API key token in the `"Readability-parser-API-key"` field
 
-
+* Build then run the production Docker image
 
 ````sh
 npm run build

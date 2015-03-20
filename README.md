@@ -47,17 +47,14 @@ Client-side is built with
 TODO figure out and document relationship with Trello
 
 
-## Getting started
+## As a developer
 
-* Install Node.js
+### Install
+
+* Install Node.js, Docker
 * `npm install`
-* For Google Login
-** Create Google project in the [Google Console](https://console.developers.google.com)
-** Activate Google+ API for your project
-** Create `config/google-credentials.json` file with credentials
-* `npm run build`
+* `npm run bundle`
 * `npm start`
-
 
 ### Test
 
@@ -74,6 +71,37 @@ Build the Docker image then run tests in it
 ````bash
 npm run build-test-crawl-docker-image
 npm run test-crawl
+
+
+## Installing on your own server
+
+* Install [Docker](https://docs.docker.com/installation/#installation)
+    * Quick way on Ubuntu: `curl -sSL https://get.docker.com/ubuntu/ | sudo sh`
+
+````sh
+git clone https://github.com/MyWebIntelligence/MyWebIntelligence.git
+cd MyWebIntelligence
+````
+
+* (Optional) To get Google login
+    * Create a Google project in the [Google Console](https://console.developers.google.com)
+    * Activate Google+ API for your project
+    * `cp config/google-credentials.sample.json crawl/google-credentials.json`
+    * Fill in credentials in `crawl/google-credentials.json`
+
+* (Optional) Create a [Readability account](https://www.readability.com/login/?next=/settings/account)
+    * [Create API keys](https://www.readability.com/settings/account) (need to verify email for that)
+    * `cp crawl/config.sample.json crawl/config.json`
+    * add your Parser API key token in the `"Readability-parser-API-key"` field
+
+
+
+````sh
+npm run build
+npm run start-prod
+````
+
+
 ````
 
 

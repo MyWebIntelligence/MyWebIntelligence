@@ -1,9 +1,8 @@
 .git
-database/_storage
+database/_storage/*
 design
 doc
 test/manual
-crawl/config.json
 *.md
 
 node_modules/browserify

@@ -15,8 +15,6 @@ catch(e){
     console.warn('Continuing without support for the Readability API');
 }
 
-console.log('readabilityParserKey', readabilityParserKey);
-
 
 var READABILITY_PARSER_BASE_URL = "https://readability.com/api/content/v1/parser";
 

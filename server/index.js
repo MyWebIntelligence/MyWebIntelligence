@@ -45,7 +45,7 @@ var serializedUsers = new Map();
 passport.use(new GoogleStrategy({
     clientID: googleCredentials["CLIENT_ID"],
     clientSecret: googleCredentials["CLIENT_SECRET"],
-    callbackURL: "http://localhost:3333/auth/google/callback"
+    callbackURL: googleCredentials["CALLBACK_URL"]
 }, function(accessToken, refreshToken, profile, done){
     var googleUser = profile._json;
 

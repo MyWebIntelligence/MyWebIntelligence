@@ -71,7 +71,7 @@ Build the Docker image then run tests in it
 ````bash
 npm run build-test-crawl-docker-image
 npm run test-crawl
-
+````
 
 ## Installing on your own server
 

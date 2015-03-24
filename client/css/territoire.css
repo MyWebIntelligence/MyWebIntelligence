@@ -2,6 +2,21 @@ main.territoire{
 
 }
 
+main.territoire section.exports{
+    display: flex;
+    flex-direction: row;
+}
+main.territoire section.exports a{
+    border: 1px solid #777;
+    border-radius: 1em;
+    margin: 0 1em;
+    padding: 1em;
+    text-decoration: none;
+    color: black;
+    background-color: beige;
+    display: block;
+}
+
 main.territoire ul.queries{
     text-align: center;
 }

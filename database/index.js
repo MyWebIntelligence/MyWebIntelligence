@@ -16,6 +16,21 @@ var pageNodeDesc = {
     },*/
     "url": {
         type: "string"
+    },
+    "title": {
+        type: "string"
+    },
+    "excerpt": {
+        type: "string"
+    }/*,
+    "publication_date": {
+        type: "string"
+    }*/,
+    "content": {
+        type: "string"
+    },
+    "content_length": {
+        type: "integer"
     }
 };
 
@@ -104,7 +119,7 @@ module.exports = {
         getGraphFromRootURIs: function(rootURIs){
             //console.log('getGraphFromRootURIs', rootURIs._toArray());
             
-            var nodes = new Set/*<url>*/(); // these are only canonical urls
+            var nodes = new Map/*<url, expression>*/(); // these are only canonical urls
             var potentialEdges = new Set();
             
             // (alias => canonical URL) map
@@ -118,7 +133,7 @@ module.exports = {
                     expressions.forEach(function(expr){
                         var uri = expr.uri;
                         
-                        nodes.add(uri);
+                        nodes.set(uri, expr);
                         
                         if(Array.isArray(expr.aliases)){
                             expr.aliases.forEach(function(a){
@@ -169,10 +184,17 @@ module.exports = {
                 
                     var urlToNodeName = new Map();
                 
-                    nodes.forEach(function(url){
+                    nodes.forEach(function(expr, url){
                         var name = nextNodeName();
                         
-                        pageGraph.addNode(name, {url: url});
+                        pageGraph.addNode(name, {
+                            url: url,
+                            title: expr.title,
+                            excerpt: expr["meta-description"],
+                            //publication_date: expr.publication_date,
+                            content: expr.mainText,
+                            content_length: expr.mainText.length
+                        });
                         
                         urlToNodeName.set(url, name);
                     });
@@ -185,7 +207,7 @@ module.exports = {
                         var targetNode = pageGraph.getNode(urlToNodeName.get(target));
                         
                         if(sourceNode && targetNode)
-                            pageGraph.addEdge(sourceNode, targetNode);
+                            pageGraph.addEdge(sourceNode, targetNode, { width: 1 });
                     });
                     
                     return pageGraph;
@@ -205,6 +227,29 @@ module.exports = {
                 .then(function(qRes){
                     return self.getGraphFromRootURIs( new Set(qRes.results) );
                 });
+        },
+        
+        getTerritoireGraph: function(territoireId){
+            console.log('getTerritoireGraph', territoireId);
+            
+            var self = this;
+            
+            return Queries.findByBelongsTo(territoireId)
+                .then(function(queries){
+                    return Promise.all(queries.map(function(q){
+                        return QueryResults.findLatestByQueryId(q.id);
+                    }));
+                })
+                .then(function(queriesResults){
+                    var roots = [];
+                
+                    queriesResults.forEach(function(qRes){
+                        roots = roots.concat(qRes.results);
+                    });
+                
+                    return self.getGraphFromRootURIs( new Set(roots) );
+                });
         }
+            
     }
 };

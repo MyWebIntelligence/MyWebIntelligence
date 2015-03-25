@@ -61,7 +61,7 @@ module.exports = function(url, html){
             mainText: mainContent.textContent.trim(),
             title: document.title,
             references: uniqueLinks,
-            "meta-description": metaDesc && metaDesc.getAttribute('content')
+            "meta-description": (metaDesc && metaDesc.getAttribute('content')) || ''
         };
         
         // free memory

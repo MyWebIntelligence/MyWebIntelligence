@@ -9,9 +9,11 @@
  * @exports GDFModel
  */
 
-var NULL = 'NULL';
+var csv = require('fast-csv');
 
 var DOM = require('./DOMBuilder.js');
+
+var NULL = 'NULL';
 
 /**
  * Like Object.keys, but for enumerated properties
@@ -400,56 +402,6 @@ function GraphModel(nodeAttributes, edgeAttributes, options){
             return new Set(edgesList.slice(0));
         },
 
-        // Typing the graph certainly broke the GDF export. TODO test and fix if necessary
-        /**
-         * @param wStream WritableStream
-         * This function assumes the writable stream is open and ready to receive writes
-         * This function will only call wStream.write(str). It is left to the caller
-         * to check for errors and also to call wStream.end()
-         */
-        /*exportToStreamAsGDF: function(wStream){
-            var NODEDEF_BASE = "nodedef> ";
-            var EDGEDEF_BASE = "edgedef> ";
-
-            // == GRAPH NODES ==
-            var allNodeOptions = ['name'].concat(enumerablePropNames(nodeOptions));
-            wStream.write(NODEDEF_BASE + allNodeOptions.join(',') + '\n');
-
-            // One line per node
-            Object.keys(nodes).forEach(function(name){
-                var n = nodes[name];
-                // traversing allNodeOptions with map garantees same enumeration order
-                wStream.write(allNodeOptions
-                        .map(function(opt){
-                            return n[opt] === null ? NULL: n[opt];
-                        })
-                        .join(',') + '\n');
-            });
-
-            // == GRAPH EDGES ==
-            var allEdgeOptions = ['node1', 'node2'].concat(enumerablePropNames(edgeOptions));
-            wStream.write(EDGEDEF_BASE + allEdgeOptions.join(',') + '\n');
-
-            var edges = this.allEdges();
-
-            // One line per edge
-            edges.forEach(function(edge,i,a){
-                // traversing allEdgeOptions with map garantees same enumeration order
-                wStream.write(allEdgeOptions
-                    .map(function(opt){
-                        if(opt === 'node1' || opt === 'node2')
-                            return edge[opt].name;
-                        else
-                            return edge[opt] === null ? NULL: edge[opt];
-                    })
-                    .join(','));
-
-                // no linefeed for the last edge
-                if(i !== a.length-1)
-                    wStream.write('\n');
-            });
-        },*/
-
         exportAsGEXF: function(){
             var PREAMBULE = '<?xml version="1.0" encoding="UTF-8"?>\n';
 
@@ -538,6 +490,16 @@ function GraphModel(nodeAttributes, edgeAttributes, options){
                 ]);
 
             return PREAMBULE + graph;
+        },
+        
+        exportNodesCSVStream: function(){
+            // first line
+            
+            return csv
+                .write(
+                    Object.keys(nodes).map(function(n){return nodes[n];}),
+                    {headers: true}
+                )
         }
     };
 }

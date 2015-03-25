@@ -17,6 +17,10 @@ module.exports = makeJSONDatabaseModel('QueryResults', {
     },
     findLatestByQueryId: function(queryId){
         return this.getAll().then(function(arr){
+            console.log('findLatestByQueryId', queryId, arr.length, arr.filter(function(queryResult){
+                return queryResult.query_id === queryId;
+            }).length);
+            
             return arr.filter(function(queryResult){
                 return queryResult.query_id === queryId;
             }).reduce(function(latest, res){

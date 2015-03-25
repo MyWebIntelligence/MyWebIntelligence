@@ -14,6 +14,7 @@ var multer = require('multer');
 var passport = require('passport');
 var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
 var React = require('react');
+var serializeDocumentToHTML = require('jsdom').serializeDocument;
 
 var makeDocument = require('../common/makeDocument');
 var database = require('../database');
@@ -24,7 +25,7 @@ var OraclesScreen = React.createFactory(require('../client/components/OraclesScr
 
 var googleCredentials = require('../config/google-credentials.json');
 
-function serializeDocumentToHTML(doc){ return '<!doctype html>\n'+doc.documentElement.outerHTML; }
+
 
 
 // Doesn't make sense to start the server if this file doesn't exist. *Sync is fine.
@@ -190,6 +191,67 @@ app.delete('/territoire/:id', function(req, res){
     }); 
 });
 
+
+
+app.get('/territoire/:id/expressions.gexf', function(req, res){
+    var user = serializedUsers.get(req.session.passport.user);
+    var id = Number(req.params.id);
+    console.log('expressions.gexf', user.id, 'territoire id', id);
+    
+    var territoireP = database.Territoires.findById(id);
+    console.time('graph from db');
+    var graphP = database.complexQueries.getTerritoireGraph(id);
+    
+    Promise.all([territoireP, graphP]).then(function(result){
+        console.timeEnd('graph from db')
+        var territoire = result[0];
+        var graph = result[1];
+        
+        // convert the file to GEXF
+        // send with proper content-type
+        res.set('Content-Type', "application/gexf+xml");
+        res.set('Content-disposition', 'attachment; filename="' + territoire.name+'-pages.gexf"');
+        console.time('as gexf');
+        res.status(200).send(graph.exportAsGEXF());
+        console.timeEnd('as gexf');
+    }).catch(function(err){
+        console.error('expressions.gexf error', err, err.stack)
+        
+        res.status(500).send('database problem '+ err);
+    }); 
+});
+
+app.get('/territoire/:id/expressions.csv', function(req, res){
+    var user = serializedUsers.get(req.session.passport.user);
+    var id = Number(req.params.id);
+    console.log('expressions.gexf', user.id, 'territoire id', id);
+    
+    var territoireP = database.Territoires.findById(id);
+    console.time('graph from db');
+    var graphP = database.complexQueries.getTerritoireGraph(id);
+    
+    Promise.all([territoireP, graphP]).then(function(result){
+        console.timeEnd('graph from db')
+        var territoire = result[0];
+        var graph = result[1];
+        
+        // convert the file to GEXF
+        // send with proper content-type
+        res.set('Content-Type', "text/csv");
+        res.set('Content-disposition', 'attachment; filename="' + territoire.name+'-pages.csv"');
+        
+        res.status(200);
+        graph.exportNodesCSVStream().pipe(res);
+    }).catch(function(err){
+        console.error('expressions.gexf error', err, err.stack)
+        
+        res.status(500).send('database problem '+ err);
+    }); 
+});
+
+
+
+
 // to create a query
 app.post('/territoire/:id/query', function(req, res){
     var user = serializedUsers.get(req.session.passport.user);
@@ -240,33 +302,6 @@ app.delete('/query/:id', function(req, res){
 });
 
 
-app.get('/query/:id/crawl-result.gexf', function(req, res){
-    var user = serializedUsers.get(req.session.passport.user);
-    var id = Number(req.params.id);
-    console.log('Getting crawl result', user.id, 'query id', id);
-    
-    var queryP = database.Queries.findById(id)
-    console.time('graph from db')
-    var graphP = database.complexQueries.getQueryGraph(id)
-    
-    Promise.all([queryP, graphP]).then(function(result){
-        console.timeEnd('graph from db')
-        var query = result[0];
-        var graph = result[1];
-        
-        // convert the file to GEXF
-        // send with proper content-type
-        res.set('Content-Type', "application/gexf+xml");
-        res.set('Content-disposition', 'attachment; filename="' + query.name+'.gexf"');
-        console.time('as gexf');
-        res.status(200).send(graph.exportAsGEXF());
-        console.timeEnd('as gexf');
-    }).catch(function(err){
-        console.error('crawl-result.gexf error', err, err.stack)
-        
-        res.status(500).send('database problem '+ err);
-    }); 
-});
 
 
 app.get('/oracles', function(req, res){

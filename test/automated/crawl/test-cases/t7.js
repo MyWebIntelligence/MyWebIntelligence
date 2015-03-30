@@ -27,7 +27,7 @@ describe('(2, 1) graph', function(){
             .then(function(graph){
                 assert.strictEqual(graph.nodes.size, 2, "should have two nodes");
                 assert.strictEqual(graph.edges.size, 1, "should have one edge");
-                var edge = graph.edges._toArray()[0];
+                var edge = graph.edges.toJSON()[0];
             
                 assert.strictEqual(edge.node1.url, roots[0], "correct source URL");
                 assert.strictEqual(edge.node2.url, 'http://a.web'+webDesc[path][0], "correct target URL");

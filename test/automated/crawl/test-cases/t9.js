@@ -27,7 +27,7 @@ describe('(2, 1) graph', function(){
             .then(function(graph){
                 assert.strictEqual(graph.nodes.size, 2, "should have two nodes");
                 assert.strictEqual(graph.edges.size, 1, "should have two edges");
-                var nodes = graph.nodes._toArray();
+                var nodes = graph.nodes.toJSON();
             
                 assert.ok(nodes[0].url === 'http://a.web/end/2' || nodes[1].url === 'http://a.web/end/2', "One node is /end/2");
                 assert.ok(nodes[0].url === roots[0] || nodes[1].url === roots[0], "One node is the root path");

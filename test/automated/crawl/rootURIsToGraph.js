@@ -2,7 +2,7 @@
 
 var db = require('../../../database');
 var crawl = require('../../../crawl');
-var persistCrawlResult = require('../../../crawl/persistCrawlResult');
+//var persistCrawlResult = require('../../../crawl/persistCrawlResult');
 
 module.exports = function(roots, words){
     return crawl(roots, words)

@@ -8,33 +8,8 @@ var OracleCredentials = require('./models/OracleCredentials');
 var QueryResults = require('./models/QueryResults');
 var Expressions = require('./models/Expressions');
 
-var GraphModel = require('../common/graph/GraphModel');
-var pageNodeDesc = {
-    // Node attributes description
-    /*"domain": {
-        type: "string"
-    },*/
-    "url": {
-        type: "string"
-    },
-    "title": {
-        type: "string"
-    },
-    "excerpt": {
-        type: "string"
-    }/*,
-    "publication_date": {
-        type: "string"
-    }*/,
-    "content": {
-        type: "string"
-    },
-    "content_length": {
-        type: "integer"
-    }
-};
+var PageGraph = require('../common/graph/PageGraph');
 
-var pageEdgeDesc = {};
 
 
 module.exports = {
@@ -117,7 +92,7 @@ module.exports = {
             uris: Set<string>
         */
         getGraphFromRootURIs: function(rootURIs){
-            //console.log('getGraphFromRootURIs', rootURIs._toArray());
+            //console.log('getGraphFromRootURIs', rootURIs.toJSON());
             
             var nodes = new Map/*<url, expression>*/(); // these are only canonical urls
             var potentialEdges = new Set();
@@ -171,7 +146,7 @@ module.exports = {
             
             return buildGraph(rootURIs)
                 .then(function(){
-                    var pageGraph = new GraphModel(pageNodeDesc, pageEdgeDesc);
+                    var pageGraph = new PageGraph();
                 
                     var nextNodeName = (function(){
                         var next = 0;
@@ -207,7 +182,7 @@ module.exports = {
                         var targetNode = pageGraph.getNode(urlToNodeName.get(target));
                         
                         if(sourceNode && targetNode)
-                            pageGraph.addEdge(sourceNode, targetNode, { width: 1 });
+                            pageGraph.addEdge(sourceNode, targetNode, { weight: 1 });
                     });
                     
                     return pageGraph;

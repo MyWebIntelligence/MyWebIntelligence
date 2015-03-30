@@ -38,7 +38,7 @@ module.exports = React.createClass({
                 React.DOM.section({className: 'exports'}, [
                     React.DOM.a({href: "/territoire/"+territoire.id+"/expressions.csv"}, 'Download Pages CSV'),
                     React.DOM.a({href: "/territoire/"+territoire.id+"/expressions.gexf"}, 'Download Pages GEXF'),
-                    React.DOM.a({href: "/territoire/"+territoire.id+"/expression-domains.gexf"}, 'Download Domains GEXF')
+                    React.DOM.a({href: "/territoire/"+territoire.id+"/domains.gexf"}, 'Download Domains GEXF')
                 ]),
                 
                 props.territoire.queries ? React.DOM.ul({className: 'queries'}, props.territoire.queries.map(function(q){

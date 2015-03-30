@@ -19,6 +19,7 @@ var serializeDocumentToHTML = require('jsdom').serializeDocument;
 var makeDocument = require('../common/makeDocument');
 var database = require('../database');
 var onQueryCreated = require('./onQueryCreated');
+var pageGraphToDomainGraph = require('../common/graph/pageGraphToDomainGraph');
 
 var TerritoireListScreen = React.createFactory(require('../client/components/TerritoireListScreen'));
 var OraclesScreen = React.createFactory(require('../client/components/OraclesScreen'));
@@ -224,7 +225,7 @@ app.get('/territoire/:id/expressions.gexf', function(req, res){
 app.get('/territoire/:id/expressions.csv', function(req, res){
     var user = serializedUsers.get(req.session.passport.user);
     var id = Number(req.params.id);
-    console.log('expressions.gexf', user.id, 'territoire id', id);
+    console.log('expressions.csv', user.id, 'territoire id', id);
     
     var territoireP = database.Territoires.findById(id);
     console.time('graph from db');
@@ -249,6 +250,33 @@ app.get('/territoire/:id/expressions.csv', function(req, res){
     }); 
 });
 
+app.get('/territoire/:id/domains.gexf', function(req, res){
+    var user = serializedUsers.get(req.session.passport.user);
+    var id = Number(req.params.id);
+    console.log('domains.gexf', user.id, 'territoire id', id);
+    
+    var territoireP = database.Territoires.findById(id);
+    console.time('graph from db');
+    var graphP = database.complexQueries.getTerritoireGraph(id).then(pageGraphToDomainGraph);
+    
+    Promise.all([territoireP, graphP]).then(function(result){
+        console.timeEnd('graph from db')
+        var territoire = result[0];
+        var graph = result[1];
+        
+        // convert the file to GEXF
+        // send with proper content-type
+        res.set('Content-Type', "application/gexf+xml");
+        res.set('Content-disposition', 'attachment; filename="' + territoire.name+'-domains.gexf"');
+        console.time('as gexf');
+        res.status(200).send(graph.exportAsGEXF());
+        console.timeEnd('as gexf');
+    }).catch(function(err){
+        console.error('expressions.gexf error', err, err.stack)
+        
+        res.status(500).send('database problem '+ err);
+    }); 
+});
 
 
 

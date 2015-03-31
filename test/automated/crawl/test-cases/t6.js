@@ -25,7 +25,7 @@ describe('(2, 0) graph', function(){
             .then(function(graph){
                 assert.strictEqual(graph.nodes.size, 2, "should have two nodes");
                 assert.strictEqual(graph.edges.size, 0, "should have no edge");
-                var oneNode = graph.nodes._toArray()[0];
+                var oneNode = graph.nodes.toJSON()[0];
             
                 assert.ok(oneNode.url === roots[0] || oneNode.url === roots[1], "node should have the correct URL");
             });

@@ -57,11 +57,11 @@ module.exports = function(url, html){
         var ret = {
             uri: url,
             //fullHTML: html,
-            mainHTML: mainContent.outerHTML,
+            mainHTML: mainContent.innerHTML,
             mainText: mainContent.textContent.trim(),
             title: document.title,
             references: uniqueLinks,
-            "meta-description": metaDesc && metaDesc.getAttribute('content')
+            "meta-description": (metaDesc && metaDesc.getAttribute('content')) || ''
         };
         
         // free memory

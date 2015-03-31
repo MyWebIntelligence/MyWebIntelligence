@@ -22,6 +22,7 @@ module.exports = React.createClass({
     
     render: function() {
         var props = this.props;
+        var territoire = props.territoire;
         console.log('Territoire view', props);
         
         var state = this.state;
@@ -33,14 +34,19 @@ module.exports = React.createClass({
             }),
             
             React.DOM.main({className: 'territoire'}, [
-                React.DOM.h1({}, "Territoire "+props.territoire.name),
+                React.DOM.h1({}, "Territoire "+territoire.name),
+                React.DOM.section({className: 'exports'}, [
+                    React.DOM.a({href: "/territoire/"+territoire.id+"/expressions.csv"}, 'Download Pages CSV'),
+                    React.DOM.a({href: "/territoire/"+territoire.id+"/expressions.gexf"}, 'Download Pages GEXF'),
+                    React.DOM.a({href: "/territoire/"+territoire.id+"/domains.gexf"}, 'Download Domains GEXF')
+                ]),
+                
                 props.territoire.queries ? React.DOM.ul({className: 'queries'}, props.territoire.queries.map(function(q){
                     return React.DOM.li({}, [
                         React.DOM.h2({}, q.name),
                         (q.oracleResults ?
                             React.DOM.span({className: 'oracle-results'}, q.oracleResults.length) :
-                            undefined),
-                        React.DOM.a({href: "/query/"+q.id+"/crawl-result.gexf"}, 'Download GEXF')
+                            undefined)
                     ]);
                 })) : undefined
             ])

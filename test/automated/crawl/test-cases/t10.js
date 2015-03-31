@@ -27,7 +27,7 @@ describe('(3, 2) graph', function(){
             .then(function(graph){
                 assert.strictEqual(graph.nodes.size, 3, "should have 3 nodes");
                 assert.strictEqual(graph.edges.size, 2, "should have 2 edges");
-                var nodes = graph.nodes._toArray();
+                var nodes = graph.nodes.toJSON();
                 assert.ok(nodes.find(function(n){
                     return n.url === roots[0]
                 }), "One node is "+roots[0]);

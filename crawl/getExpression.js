@@ -36,9 +36,9 @@ module.exports = function(url){
                             return expr;
                         }
                         else{
-                            return makeExpression(canonicalURL, fetchedDocument.html).then(function(expr){
-                                expr.aliases = [fetchedDocument.originalURL];
-                                return expr;
+                            return makeExpression(canonicalURL, fetchedDocument.html).then(function(madeExpr){
+                                madeExpr.aliases = [fetchedDocument.originalURL];
+                                return madeExpr;
                             });
                         }
                     });

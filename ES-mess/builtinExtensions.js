@@ -5,17 +5,6 @@
     Always add things prefixed with _. This prevents collision with future standard methods.
 */
 
-// necessary because Promise.all of the Promise polyfill doesn't accept Sets as iterables.
-Set.prototype._toArray = function _toArray(){
-    var a = [];
-    
-    this.forEach(function(e){
-        a.push(e);
-    })
-    
-    return a;
-}
-
 
 Set.prototype._randomSubset = function _randomSubset(size){
     if(size > this.size)
@@ -46,9 +35,9 @@ Set.prototype._pick = function _pick(){
 
 
 Set.prototype.toJSON = function toJSON(){
-    var arr = [];
-    this.forEach(function(e){ arr.push(e); });
-    return arr;
+    var a = [];
+    this.forEach(function(e){ a.push(e); });
+    return a;
 };
 
 

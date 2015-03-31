@@ -38,16 +38,16 @@ interface FetchedDocument{
 module.exports = function(initialUrls, originalWords){
     originalWords = originalWords || new Set();
     
-    //console.log('crawl call', initialUrls.size, originalWords._toArray());
+    //console.log('crawl call', initialUrls.size, originalWords.toJSON());
     
-    var todo = new Set(initialUrls._toArray().map(stripURLHash)); // clone
+    var todo = new Set(initialUrls.toJSON().map(stripURLHash)); // clone
     var doing = new Set();
     var done = new Set();
     // var results = new Map(); // Map<urlAfterRedirect, result>()
     
     function crawl(depth){
         //console.log('internal crawl', depth, '|', todo.size, doing.size, done.size);
-        return Promise.all(todo._toArray().map(function(u){
+        return Promise.all(todo.toJSON().map(function(u){
             todo.delete(u);
             doing.add(u);
 

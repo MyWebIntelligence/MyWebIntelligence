@@ -78,11 +78,28 @@ module.exports = {
                 }));
             });
             
-            return Promise.all([territoireP, relevantQueries, queryReadyP]).then(function(res){
+            var resultListP = this.getTerritoireGraph(territoireId)
+                .then(function(pageGraph){
+                    var results = [];
+                    
+                    pageGraph.nodes.forEach(function(n){
+                        results.push({
+                            title: n.title,
+                            url: n.url,
+                            excerpt: n.excerpt
+                        });
+                    });
+                    
+                    return results;
+                });
+            
+            return Promise.all([territoireP, relevantQueries, resultListP, queryReadyP]).then(function(res){
                 var territoire = res[0];
                 var queries = res[1];
+                var resultList = res[2];
                 
                 territoire.queries = queries;
+                territoire.resultList = resultList
                 
                 return territoire;
             });

@@ -7,46 +7,12 @@ var TerritoiresList = React.createFactory(require('./TerritoiresList'));
 
 /*
 
-interface MyWIUserId extends Number{ __MyWIUserId: MyWIUserId }
-
-interface MyWIUser{
-    id: MyWIUserId
-    name: string
-    pictureURL: string
-    territoires : MyWITerritoire[]
-}
-
-interface MyWITerritoireId extends Number{ __MyWITerritoireId: MyWITerritoireId }
-
-interface MyWITerritoire{
-    id: MyWITerritoireId
-    name: string
-    description: string 
-    queries: MyWIQuery[]
-}
-
-interface MyWIQueryId extends Number{ __MyWIQueryId: MyWIQueryId }
-
-interface MyWIQuery{
-    id: MyWIQueryId,
-    name: string
-    q: string
-    lang: string // enum
-    nbPage: number // still not convinced of this one.
-    oracle: MyWIOracleId
-}
-
-interface MyWIOracleId extends Number{ __MyWIOracleId: MyWIOracleId }
-
-
-interface TerritoiresScreenProps{
+interface TerritoiresListScreenProps{
     currentUser: MyWIUser
     serverAPI: MyWIServerAPI,
     moveToOraclesScreen: () => void
     moveToTerritoireViewScreen: (territoire: MyWITerritoire) => void
 }
-
-
 
 */
 

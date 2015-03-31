@@ -34,19 +34,21 @@ module.exports = React.createClass({
             }),
             
             React.DOM.main({className: 'territoire'}, [
-                React.DOM.h1({}, "Territoire "+territoire.name),
-                React.DOM.section({className: 'exports'}, [
+                //React.DOM.h1({}, ),
+                React.DOM.h1({className: 'exports'}, [
+                    "Territoire "+territoire.name,
                     React.DOM.a({href: "/territoire/"+territoire.id+"/expressions.csv"}, 'Download Pages CSV'),
                     React.DOM.a({href: "/territoire/"+territoire.id+"/expressions.gexf"}, 'Download Pages GEXF'),
                     React.DOM.a({href: "/territoire/"+territoire.id+"/domains.gexf"}, 'Download Domains GEXF')
                 ]),
                 
-                props.territoire.queries ? React.DOM.ul({className: 'queries'}, props.territoire.queries.map(function(q){
+                territoire.resultList ? React.DOM.ul({className: 'result-list'}, territoire.resultList.map(function(r){
                     return React.DOM.li({}, [
-                        React.DOM.h2({}, q.name),
-                        (q.oracleResults ?
-                            React.DOM.span({className: 'oracle-results'}, q.oracleResults.length) :
-                            undefined)
+                        React.DOM.a({ href: r.url, target: '_blank' }, [
+                            React.DOM.h3({}, r.title),
+                            React.DOM.h4({}, r.url)
+                        ]),
+                        React.DOM.div({ className: 'excerpt' }, r.excerpt)
                     ]);
                 })) : undefined
             ])

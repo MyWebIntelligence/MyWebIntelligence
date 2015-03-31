@@ -398,7 +398,7 @@ app.get('/oracle-credentials', function(req, res){
     }
 });
 
-app.get('/territoire-screen-data/:id', function(req, res){
+app.get('/territoire-view-data/:id', function(req, res){
     var user = serializedUsers.get(req.session.passport.user);
     if(!user || !user.id){
         res.redirect('/');

@@ -48,25 +48,30 @@ module.exports = React.createClass({
                         classPrefix: 'tabs-'
                     }, [
                         // Pages tab content
-                        territoire.resultList ? React.DOM.ul({className: 'result-list'}, territoire.resultList.map(function(r){
-                            return React.DOM.li({}, [
-                                React.DOM.a({ href: r.url, target: '_blank' }, [
-                                    React.DOM.h3({}, r.title),
-                                    React.DOM.h4({}, r.url)
-                                ]),
-                                React.DOM.div({ className: 'excerpt' }, r.excerpt)
-                            ]);
-                        })) : undefined,
+                        territoire.resultListByPage ? React.DOM.ul(
+                            {className: 'result-list'}, 
+                            territoire.resultListByPage.map(function(r){
+                                return React.DOM.li({}, [
+                                    React.DOM.a({ href: r.url, target: '_blank' }, [
+                                        React.DOM.h3({}, r.title),
+                                        React.DOM.h4({}, r.url)
+                                    ]),
+                                    React.DOM.div({ className: 'excerpt' }, r.excerpt)
+                                ]);
+                            })
+                        ) : undefined,
                         // Domains tab content
-                        territoire.resultList ? React.DOM.ul({className: 'result-list'}, territoire.resultList.slice(0, 2).map(function(r){
-                            return React.DOM.li({}, [
-                                React.DOM.a({ href: r.url, target: '_blank' }, [
-                                    React.DOM.h3({}, r.title),
-                                    React.DOM.h4({}, r.url)
-                                ]),
-                                React.DOM.div({ className: 'excerpt' }, r.excerpt)
-                            ]);
-                        })) : undefined
+                        territoire.resultListByDomain ? React.DOM.ul(
+                            {className: 'result-list'},
+                            territoire.resultListByDomain.map(function(r){
+                                return React.DOM.li({}, [
+                                    React.DOM.a({ href: r.url, target: '_blank' }, [
+                                        React.DOM.h3({}, r.domain)
+                                    ]),
+                                    React.DOM.div({ className: 'excerpt' }, r.count)
+                                ]);
+                            })
+                        ) : undefined
                     ]),
                     
                     React.DOM.div({className: 'exports'}, [
@@ -76,10 +81,6 @@ module.exports = React.createClass({
                     ])
                 
                 ])
-                
-                
-                
-                
                 
             ])
         

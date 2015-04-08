@@ -9,6 +9,7 @@ var QueryResults = require('./models/QueryResults');
 var Expressions = require('./models/Expressions');
 
 var PageGraph = require('../common/graph/PageGraph');
+var pageGraphToDomainGraph = require('../common/graph/pageGraphToDomainGraph');
 
 
 
@@ -78,11 +79,44 @@ module.exports = {
                 }));
             });
             
-            return Promise.all([territoireP, relevantQueries, queryReadyP]).then(function(res){
+            var pageGraphP = this.getTerritoireGraph(territoireId)
+            
+            var resultListByPageP = pageGraphP.then(function(pageGraph){
+                var results = [];
+
+                pageGraph.nodes.forEach(function(n){
+                    results.push({
+                        title: n.title,
+                        url: n.url,
+                        excerpt: n.excerpt
+                    });
+                });
+
+                return results;
+            });
+            
+            var resultListByDomainP = pageGraphP.then(pageGraphToDomainGraph).then(function(domainGraph){
+                var results = [];
+
+                domainGraph.nodes.forEach(function(n){
+                    results.push({
+                        domain: n.title,
+                        url: 'http://'+n.title+'/',
+                        count: n.nb_expressions
+                    });
+                });
+
+                return results;
+            });
+            
+            return Promise.all([
+                territoireP, relevantQueries, resultListByPageP, resultListByDomainP, queryReadyP
+            ]).then(function(res){
                 var territoire = res[0];
-                var queries = res[1];
                 
-                territoire.queries = queries;
+                territoire.queries = res[1];
+                territoire.resultListByPage = res[2];
+                territoire.resultListByDomain = res[3];
                 
                 return territoire;
             });

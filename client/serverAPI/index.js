@@ -56,6 +56,6 @@ module.exports = {
         return sendReq('GET', '/oracle-credentials');
     },
     getTerritoireViewData: function(territoire){
-        return sendReq('GET', '/territoire-screen-data/'+territoire.id);
+        return sendReq('GET', '/territoire-view-data/'+territoire.id);
     }
 };

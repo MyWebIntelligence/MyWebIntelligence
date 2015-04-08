@@ -1,0 +1,22 @@
+nav.tabs-tab-container {
+    border-style: solid;
+    border-color: #CCC;
+    border-width: 0;
+    border-bottom-width: 1px;
+    padding: 1em 0;
+}
+
+nav.tabs-tab-container .tabs-tab {
+    padding: 1em;
+    outline: 1px solid #CCC;
+    background-color: white;
+    cursor: pointer;
+}
+
+nav.tabs-tab-container .tabs-tab:hover {
+    background-color: #EEE;
+}
+
+nav.tabs-tab-container .tabs-tab.tabs-active-tab {
+    background-color: #DDD;
+}

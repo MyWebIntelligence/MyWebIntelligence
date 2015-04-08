@@ -5,7 +5,27 @@ var stripURLHash = require('../common/stripURLHash');
 
 var getReadabilityAPIMainContent = require('./getReadabilityAPIMainContent');
 
-
+/*
+    These links usually end up being resources that are heavy to download and that we cannot process yet.
+    They will be ignored
+*/
+var EXCLUDED_FILE_EXTENSIONS = [
+    // documents
+    '.pdf',
+    '.doc',
+    '.docx',
+    '.ppt',
+    '.pptx',
+    '.xls',
+    '.xlsx',
+    
+    // archives
+    '.zip',
+    '.tar.gz',
+    '.tar',
+    '.gz',
+    '.rar'
+];
 
 function extractMainContent(o){
     // TODO eventually, use Mozilla's readability
@@ -44,11 +64,21 @@ module.exports = function(url, html){
             // remove non-http links, like javascript: and mailto: links
             .filter(function(u){ return /^https?/.test(u); })
             .map(stripURLHash)
-
+            // exclude URLs that are likely to end up being resources that we cannot process
+            .filter(function(u){
+                // the url doesn't end with any of the excluded file extensions
+                // equivalent to: every extension does not terminate the url
+                return EXCLUDED_FILE_EXTENSIONS.every(function(ext){
+                    return !u.endWith(ext);
+                });
+            });
+        
         var uniqueLinks = new Set(urls);
 
         // remove self-references
         uniqueLinks.delete(url);
+        
+        
 
         // meta description
         var metaDesc = document.querySelector('meta[name="description"]');

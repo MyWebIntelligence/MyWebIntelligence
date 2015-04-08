@@ -2,6 +2,8 @@
 
 var React = require('react');
 
+var Tabs = require('react-tabs-component');
+
 var Header = require('./Header');
 
 /*
@@ -34,21 +36,52 @@ module.exports = React.createClass({
             }),
             
             React.DOM.main({className: 'territoire'}, [
-                React.DOM.h1({}, "Territoire "+territoire.name),
-                React.DOM.section({className: 'exports'}, [
-                    React.DOM.a({href: "/territoire/"+territoire.id+"/expressions.csv"}, 'Download Pages CSV'),
-                    React.DOM.a({href: "/territoire/"+territoire.id+"/expressions.gexf"}, 'Download Pages GEXF'),
-                    React.DOM.a({href: "/territoire/"+territoire.id+"/domains.gexf"}, 'Download Domains GEXF')
+                //React.DOM.h1({}, ),
+                React.DOM.h1({}, [
+                    "Territoire "+territoire.name
                 ]),
                 
-                props.territoire.queries ? React.DOM.ul({className: 'queries'}, props.territoire.queries.map(function(q){
-                    return React.DOM.li({}, [
-                        React.DOM.h2({}, q.name),
-                        (q.oracleResults ?
-                            React.DOM.span({className: 'oracle-results'}, q.oracleResults.length) :
-                            undefined)
-                    ]);
-                })) : undefined
+                React.DOM.div({className: 'tabs-and-exports'}, [
+                    new Tabs({
+                        defaultTabNum: 0,
+                        tabNames: ['Pages', 'Domains'],
+                        classPrefix: 'tabs-'
+                    }, [
+                        // Pages tab content
+                        territoire.resultListByPage ? React.DOM.ul(
+                            {className: 'result-list'}, 
+                            territoire.resultListByPage.map(function(r){
+                                return React.DOM.li({}, [
+                                    React.DOM.a({ href: r.url, target: '_blank' }, [
+                                        React.DOM.h3({}, r.title),
+                                        React.DOM.h4({}, r.url)
+                                    ]),
+                                    React.DOM.div({ className: 'excerpt' }, r.excerpt)
+                                ]);
+                            })
+                        ) : undefined,
+                        // Domains tab content
+                        territoire.resultListByDomain ? React.DOM.ul(
+                            {className: 'result-list'},
+                            territoire.resultListByDomain.map(function(r){
+                                return React.DOM.li({}, [
+                                    React.DOM.a({ href: r.url, target: '_blank' }, [
+                                        React.DOM.h3({}, r.domain)
+                                    ]),
+                                    React.DOM.div({ className: 'excerpt' }, r.count)
+                                ]);
+                            })
+                        ) : undefined
+                    ]),
+                    
+                    React.DOM.div({className: 'exports'}, [
+                        React.DOM.a({href: "/territoire/"+territoire.id+"/expressions.csv"}, 'Download Pages CSV'),
+                        React.DOM.a({href: "/territoire/"+territoire.id+"/expressions.gexf"}, 'Download Pages GEXF'),
+                        React.DOM.a({href: "/territoire/"+territoire.id+"/domains.gexf"}, 'Download Domains GEXF')
+                    ])
+                
+                ])
+                
             ])
         
         ]);

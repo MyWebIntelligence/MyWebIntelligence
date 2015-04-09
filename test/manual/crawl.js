@@ -17,15 +17,18 @@ var URLs = new Set([
 var keywords = new Set(['graph']);
 
 database.Expressions.deleteAll().then(function(){
-    rootURIsToGraph(URLs, keywords)
-        .then(function(graph){
-            console.log('rootURIsToGraph result', graph.nodes.size, graph.edges.size);
+    
+    setTimeout(function(){
+        rootURIsToGraph(URLs, keywords)
+            .then(function(graph){
+                console.log('rootURIsToGraph result', graph.nodes.size, graph.edges.size);
 
-            console.log(graph.exportAsGEXF());
-        })
-        .catch(function(err){
-            console.error('rootURIsToGraph error', err, err.stack);
-        });
+                console.log(graph.exportAsGEXF());
+            })
+            .catch(function(err){
+                console.error('rootURIsToGraph error', err, err.stack);
+            });
+    }, 3000);
         
 })
 

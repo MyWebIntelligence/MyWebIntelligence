@@ -3,7 +3,7 @@
 var database = require('../database');
 
 var approve = require('./approve');
-var getExpression = require('./getExpression');
+var getExpression = require('./getExpression-scheduler');
 
 var stripURLHash = require('../common/stripURLHash');
 
@@ -100,8 +100,6 @@ module.exports = function(initialUrls, originalWords){
 
         }));
     }
-    
-    // http://www.passeportsante.net/fr/Maux/Problemes/Fiche.aspx?doc=asthme_pm
     
     return crawl(0).then(function(){
         /*return {

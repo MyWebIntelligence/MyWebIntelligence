@@ -26,6 +26,7 @@ var OraclesScreen = React.createFactory(require('../client/components/OraclesScr
 
 var googleCredentials = require('../config/google-credentials.json');
 
+process.title = "MyWI server";
 
 
 

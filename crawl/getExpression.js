@@ -9,7 +9,7 @@ var database = require('../database');
     Fetch the URL (to get redirects and the body)
     Extract core content (from readability or otherwise).
 */
-module.exports = function(url){
+module.exports = function getExpression(url){
     return database.Expressions.findByURIAndAliases(new Set([url])).then(function(expressions){
         if(expressions[0]){ // url already has an entry in the database
             // to not resave a document extracted as is from the DB.

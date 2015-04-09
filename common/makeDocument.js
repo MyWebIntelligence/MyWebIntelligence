@@ -1,6 +1,5 @@
 "use strict";
 
-var Promise = require('es6-promise').Promise;
 var jsdom = require('jsdom');
 
 

@@ -1,7 +1,5 @@
 "use strict";
 
-var Promise = require('es6-promise').Promise;
-
 var Queries = require('./Queries');
 
 var makeJSONDatabaseModel = require('../makeJSONDatabaseModel');

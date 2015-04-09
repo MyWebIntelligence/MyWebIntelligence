@@ -1,6 +1,5 @@
 "use strict";
 
-var Promise = require('es6-promise').Promise;
 var promisify = require('es6-promisify');
 
 var fs = require('fs');

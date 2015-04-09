@@ -10,7 +10,8 @@ module.exports = function pageGraphToDomainGraph(pageGraph){
     
     function getCorrespondingDomainNode(pn){
         return expressionDomain(pn.url).then(function(ed){
-            var idyfiedExpressionDomain = ed.replace(/\./g, '_');
+            // adding '_' at the beginning because sometimes domain names begin with numbers
+            var idyfiedExpressionDomain = '_' + ed.replace(/(\.|\-)/g, '_');
             
             var domainNode = domainGraph.getNode(idyfiedExpressionDomain);
             

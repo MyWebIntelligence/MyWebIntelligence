@@ -24,7 +24,13 @@ var EXCLUDED_FILE_EXTENSIONS = [
     '.tar.gz',
     '.tar',
     '.gz',
-    '.rar'
+    '.rar',
+    
+    // images
+    '.png',
+    '.eps',
+    '.jpg',
+    '.jpeg'
 ];
 
 function extractMainContent(o){
@@ -69,7 +75,7 @@ module.exports = function(url, html){
                 // the url doesn't end with any of the excluded file extensions
                 // equivalent to: every extension does not terminate the url
                 return EXCLUDED_FILE_EXTENSIONS.every(function(ext){
-                    return !u.endWith(ext);
+                    return !u.endsWith(ext);
                 });
             });
         

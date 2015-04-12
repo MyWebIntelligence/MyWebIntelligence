@@ -1,14 +1,15 @@
 "use strict";
 
 var db = require('../../../database');
-var crawl = require('../../../crawl');
-//var persistCrawlResult = require('../../../crawl/persistCrawlResult');
+var crawl = require('../../../server/startCrawl');
 
 module.exports = function(roots, words){
-    return crawl(roots, words)
-        // .then(persistCrawlResult) // not needed anymore given the crawl is saved progressively
-        .then(function(){
-            return db.complexQueries.getGraphFromRootURIs(new Set(roots));
-        });
+    return new Promise(function(resolve){
+        crawl(roots, words);
+        
+        setTimeout(function(){
+            resolve(db.complexQueries.getGraphFromRootURIs(new Set(roots)));
+        }, 1500);
+    });
 };
 

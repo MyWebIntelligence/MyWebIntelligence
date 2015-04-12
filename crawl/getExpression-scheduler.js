@@ -1,7 +1,9 @@
 "use strict";
 
 var os = require('os');
-var fork = require('child_process').fork;
+var child_process = require('child_process');
+var fork = child_process.fork;
+var exec = child_process.exec;
 
 var app = require('express')();
 var compression = require('compression');
@@ -19,6 +21,7 @@ var postURLByWorker = new WeakMap();
     HTTP used for the purpose of async message based IPC with children
 */
 var PORT = 10000;
+// Strictly listen on localhost so the endpoint is not accessible from the outside world
 var HOST = '127.0.0.1';
 
 app.use(compression());
@@ -72,6 +75,10 @@ var getExpressionWorkers = os.cpus().slice(0, os.cpus().length-1).map(function(c
         port: port,
         answerURL: answerURL
     });
+    
+    // Setting super-low priority so this CPU-intensive task doesn't get in the way of the server or
+    // other more important tasks
+    exec('renice -n 19 '+ worker.pid);
     
     postURLByWorker.set(worker, 'http://'+HOST+':'+port+'/');
     pendingURLByWorker.set(worker, new Set());

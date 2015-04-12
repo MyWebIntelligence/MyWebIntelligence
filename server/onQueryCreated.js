@@ -2,7 +2,7 @@
 
 var db = require('../database');
 var interogateOracle = require('../oracles/interogateOracle');
-var crawl = require('../crawl');
+var startCrawl = require('./startCrawl');
 
 
 module.exports = function onQueryCreated(query, user){
@@ -27,8 +27,9 @@ module.exports = function onQueryCreated(query, user){
                 results: queryResults.toJSON(),
                 created_at: new Date()
             });
+            
             // don't wait for the results to be stored in database to start crawling
-            return crawl(queryResults, new Set(query.q.split(" ")));
+            return startCrawl(queryResults, new Set(query.q.split(" ")));
         })
         .catch(function(err){
             console.error('onQueryCreated error', err, err.stack);

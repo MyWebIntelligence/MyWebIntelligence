@@ -5,7 +5,6 @@ MAINTAINER David Bruant <bruant.d@gmail.com>
 RUN mkdir /usr/mywi
 
 WORKDIR /usr/mywi
-ENV NODE_ENV production
 
 COPY . .
 

@@ -66,7 +66,9 @@ app.listen(PORT, HOST, function(){
 
 var answerURL = 'http://'+HOST+':'+PORT+'/';
 
-var getExpressionWorkers = os.cpus().slice(0, os.cpus().length-1).map(function(cpu, i){
+var MAXIMUM_NICENESS = 19;
+
+var getExpressionWorkers = os.cpus().map(function(cpu, i){
     var worker = fork( require.resolve('./getExpression-child-process.js'), {silent: false} );
     
     var port = PORT + i +  1;
@@ -78,7 +80,7 @@ var getExpressionWorkers = os.cpus().slice(0, os.cpus().length-1).map(function(c
     
     // Setting super-low priority so this CPU-intensive task doesn't get in the way of the server or
     // other more important tasks
-    exec('renice -n 19 '+ worker.pid);
+    exec( ['renice', '-n', MAXIMUM_NICENESS, worker.pid].join(' ') );
     
     postURLByWorker.set(worker, 'http://'+HOST+':'+port+'/');
     pendingURLByWorker.set(worker, new Set());

@@ -10,6 +10,7 @@
         "curly": 0,
         "no-use-before-define": "no-func",
         "no-native-reassign": 1,
+        "no-process-exit": 0,
         
         "eol-last": 1,
         "no-space-before-semi": 1,

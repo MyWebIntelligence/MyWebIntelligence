@@ -23,29 +23,28 @@ interface ApproveOptions{
 // var EVAPORATION_FACTOR = 0.5;
 // var approvalProbability = 1;
 
-var ACCEPTED_DEPTH = 1;
+var MAXIMUM_DEPTH = 2;
 
 module.exports = function approve(options){
     var depth = options.depth;
     var wordsToMatch = options.wordsToMatch;
     var mainText = options.expression.mainText;
     
-    if(depth <= ACCEPTED_DEPTH)
+    // oracle
+    if(depth === 0)
         return true;
     
-    if(depth > ACCEPTED_DEPTH)
+    if(depth >= MAXIMUM_DEPTH)
         return false;
     
     
     var allWordOccurences = 0;
     wordsToMatch.forEach(function(word){
-        allWordOccurences += (mainText.match(new RegExp(word, "g")) || []).length;
+        allWordOccurences += (mainText.match(new RegExp(word, "gi")) || []).length;
     });
-    var averageOccurencesPerWord = allWordOccurences/wordsToMatch.size;
     
-    if(averageOccurencesPerWord > depth)
+    if(allWordOccurences >= wordsToMatch.size)
         return true;
-    
     
     return false;
 };

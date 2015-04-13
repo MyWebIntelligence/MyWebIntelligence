@@ -57,7 +57,9 @@ module.exports = makeJSONDatabaseModel('Oracles', {
             return self._save(all);
         });
     }),
-    deleteAll: function(){
-        return this._save({});
-    }
+    deleteAll: makePromiseQueuer(function(){
+        var self = this;
+        
+        return self._save({});
+    })
 });

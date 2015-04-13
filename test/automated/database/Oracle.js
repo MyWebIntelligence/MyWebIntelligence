@@ -10,7 +10,6 @@ require('chai-as-promised');
 var db = require('../../../database/index.js');
 
 
-
 var deleteAllOracles = db.Oracles.deleteAll.bind(db.Oracles);
 
 describe('Oracles', function(){
@@ -32,6 +31,8 @@ describe('Oracles', function(){
         }
     ];
     
+    before(deleteAllOracles);
+    
     
     describe('create', function(){
 
@@ -44,6 +45,7 @@ describe('Oracles', function(){
                     return db.Oracles.getAll().then(function(all){
                         assert.isTrue(Array.isArray(all));
                         assert.strictEqual(all.length, 1);
+                        console.log('all oracles', all);
                         assert.strictEqual(all[0].name, "Google Custom Search Engine");
                         
                     });
@@ -79,7 +81,7 @@ describe('Oracles', function(){
     });
 
     describe('update', function(){
-        it('should update one territoire', function(){
+        it('should update one oracle', function(){
             var id1, id2;
             var NEW_NAME = "Whaddup";
 
@@ -106,7 +108,7 @@ describe('Oracles', function(){
     });
 
     describe('delete', function(){
-        it('should delete one territoire', function(){            
+        it('should delete one oracle', function(){            
             return db.Oracles.create( oracleData[0] )
             .then(function(o){
                 return db.Oracles.delete(o.id);
@@ -145,4 +147,5 @@ describe('Oracles', function(){
         after(deleteAllOracles);
     });
 
+    after(deleteAllOracles);
 })

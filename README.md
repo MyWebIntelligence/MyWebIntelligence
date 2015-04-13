@@ -88,7 +88,8 @@ cd MyWebIntelligence
 * (Optional) To get Google login
     * Create a Google project in the [Google Console](https://console.developers.google.com)
     * Activate Google+ API for your project
-    * `cp config/google-credentials.sample.json crawl/google-credentials.json`
+    * Create OAuth2 credentials
+    * `cp config/google-credentials.sample.json config/google-credentials.json`
     * Fill in credentials in `crawl/google-credentials.json`
 
 * (Optional) Create a [Readability account](https://www.readability.com/login/?next=/settings/account)

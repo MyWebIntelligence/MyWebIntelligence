@@ -40,16 +40,24 @@ module.exports = function prepareGCSEOracle(credentials){
                         return;
                     }
 
-                    var bodyObj = JSON.parse(body)
-                    var linksArray = bodyObj.items.map(function(item){
-                        return item.link;
-                    });
-                    
                     if (response.statusCode < 400) {
+                        var bodyObj = JSON.parse(body);
+                        
+                        // when there are no result, apparently, there is no .items
+                        if(!Array.isArray(bodyObj.items))
+                            bodyObj.items = [];
+                        
+                        var linksArray = bodyObj.items.map(function(item){
+                            return item.link;
+                        });
                         resolve(new Set(linksArray));
                     }
                     else{
-                        reject(new Error('HTTP status '+response.statusCode));
+                        console.error('HTTP status err', url, response.statusCode, body);
+                        reject(Object.assign(new Error('HTTP status error'), {
+                            status: response.statusCode,
+                            url: url
+                        }));
                     }
 
                 });

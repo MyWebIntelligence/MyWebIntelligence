@@ -1,6 +1,7 @@
 "use strict";
 
 require('../ES-mess');
+process.title = "MyWI server";
 
 var resolve = require('path').resolve;
 var fs = require('fs');
@@ -25,9 +26,6 @@ var TerritoireListScreen = React.createFactory(require('../client/components/Ter
 var OraclesScreen = React.createFactory(require('../client/components/OraclesScreen'));
 
 var googleCredentials = require('../config/google-credentials.json');
-
-process.title = "MyWI server";
-
 
 
 // Doesn't make sense to start the server if this file doesn't exist. *Sync is fine.
@@ -122,7 +120,6 @@ app.get('/auth/google/callback',
 /*
     Application routes
 */
-//var territoiresData = require('./territoires.json');
 
 function renderDocumentWithData(doc, data, reactFactory){
     doc.querySelector('body').innerHTML = React.renderToString( reactFactory(data) );
@@ -421,4 +418,8 @@ var server = app.listen(PORT, function(){
     var port = server.address().port;
 
     console.log('Listening at http://%s:%s', host, port);
+});
+
+process.on('uncaughtException', function(e){
+    console.error('uncaughtException', e, e.stack);
 });

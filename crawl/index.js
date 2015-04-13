@@ -1,10 +1,10 @@
 "use strict";
 
 require('../ES-mess');
+process.title = "MyWI crawler";
 
 var crawl = require('./core-crawl');
 
-process.title = "MyWI crawler";
 
 process.on('message', function(message){
     var initialUrls = new Set(message.urls);

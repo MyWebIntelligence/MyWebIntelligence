@@ -7,9 +7,9 @@ var parseURL = require('url').parse;
 var MAXIMUM_IN_PROGRESS_BY_HOSTNAME = 20;
 
 var inFlightByHostname = new Map/*<hostname, Set<url>>*/();
-var pendingByHostname = new Map/*<hostname, Set<url>>*/()
+var pendingByHostname = new Map/*<hostname, Set<url>>*/();
 
-var resolveRejectPromiseByUrl = new Map/*<url, {resolve, reject, promise}>*/()
+var resolveRejectPromiseByUrl = new Map/*<url, {resolve, reject, promise}>*/();
 
 function sendTheHTTPRequest(url){
     console.log('Fetch', url);

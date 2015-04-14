@@ -12,3 +12,15 @@ process.on('message', function(message){
 
     crawl(initialUrls, originalWords);
 });
+
+process.on('uncaughtException', function(e){
+    console.error('uncaughtException getExpression', process.pid, e, e.stack);
+    process.exit();
+});
+
+/*
+process.on('SIGINT', function(){
+    server.close();
+    process.exit();
+});
+*/

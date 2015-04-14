@@ -92,6 +92,10 @@ app.post('*', function(req, res){
     res.send('');
 });
 
+process.on('uncaughtException', function(e){
+    console.error('uncaughtException getExpression', process.pid, e, e.stack);
+    process.exit();
+});
 
 process.on('SIGINT', function(){
     server.close();

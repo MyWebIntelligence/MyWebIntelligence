@@ -11,8 +11,9 @@ var request = require('request');
 
 var getExpression = require('./getExpression');
 
-console.log('process on!', process.pid);
+console.log('# getExpression process', process.pid);
 
+var ONE_HOUR = 60*60*1000; // ms
 
 var answerURL;
 var server;
@@ -26,36 +27,46 @@ process.once('message', function(m){
     server = app.listen(port, '127.0.0.1');
 });
 
-
-
-var THROTTLING_WINDOW = 60;
+var THROTTLING_WINDOW = 1000;
 var inFlightURLs = new Set/*<url>*/();
 var pendingURLs = new Set/*<url>*/();
 
 function processURL(url){
     
     inFlightURLs.add(url);
+    var requestDefaultOptions = {
+        url: answerURL,
+        json: true,
+        gzip: true,
+        timeout: 24*ONE_HOUR
+    };
+    function defaultRequestCallback(error){
+        if(error)
+            console.error('POST to scheduler error', url, error);
+    }
     
     return getExpression(url)
         .then(function(expression){
-            request.post({
-                url: answerURL,
-                json: true,
-                body: {
-                    url: url,
-                    expression: expression
-                }
-            });
+            request.post(Object.assign(
+                {
+                    body: {
+                        url: url,
+                        expression: expression
+                    }
+                }, 
+                requestDefaultOptions
+            ), defaultRequestCallback);
         })
         .catch(function(err){
-            request.post({
-                url: answerURL,
-                json: true,
-                body: {
-                    url: url,
-                    error: String(err)
-                }
-            });
+            request.post(Object.assign(
+                {
+                    body: {
+                        url: url,
+                        error: String(err)
+                    }
+                },
+                requestDefaultOptions
+            ), defaultRequestCallback);
 
             console.log('child error', url, err/*, err.stack*/);
         
@@ -93,7 +104,7 @@ app.post('*', function(req, res){
 });
 
 process.on('uncaughtException', function(e){
-    console.error('uncaughtException getExpression', process.pid, e, e.stack);
+    console.error('# uncaughtException getExpression', process.pid, Date.now() % ONE_HOUR, e, e.stack);
     process.exit();
 });
 

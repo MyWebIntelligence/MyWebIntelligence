@@ -17,6 +17,8 @@ var promiseResolveRejectByURL = new Map();
 var pendingURLByWorker = new WeakMap();
 var postURLByWorker = new WeakMap();
 
+var ONE_HOUR = 60*60*1000; // ms
+
 /*
     HTTP used for the purpose of async message based IPC with children
 */
@@ -130,9 +132,13 @@ module.exports = function getExpression(url){
                 // send work
                 request.post({
                     url: postURLByWorker.get(mostAvailableWorker),
-                    method: 'POST',
                     json: true,
-                    body: {url: url}
+                    body: {url: url},
+                    gzip: true,
+                    timeout: 24*ONE_HOUR
+                }, function defaultRequestCallback(error){
+                    if(error)
+                        console.error('processURL error', url, error);
                 });
 
                 var pendingURLs = pendingURLByWorker.get(mostAvailableWorker);

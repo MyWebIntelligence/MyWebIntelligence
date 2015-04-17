@@ -12,7 +12,7 @@
     "start": "node server/index.js",
     "build": "docker build --tag=\"mywi/base\" .",
     "start-prod": "docker run -d -p=3333:3333 -e \"NODE_ENV=production\" mywi/base node server/index.js",
-    "start-dev": "docker run -p=3333:3333 -e \"NODE_ENV=development\" -m=\"800m\" mywi/base node server/index.js",
+    "start-dev": "docker run -p=3333:3333 -e \"NODE_ENV=development\" -m=\"700m\" mywi/base node server/index.js",
     "bundle": "browserify client/index.js -o client/browserify-bundle.js -d",
     "watch": "watchify client/index.js -o client/browserify-bundle.js -d -v",
     "lint": "eslint ./",

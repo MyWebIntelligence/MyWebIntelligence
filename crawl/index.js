@@ -20,9 +20,7 @@ process.on('uncaughtException', function(e){
     process.exit();
 });
 
-/*
 process.on('SIGINT', function(){
-    server.close();
+    console.log('SIGINT', process.pid);
     process.exit();
 });
-*/

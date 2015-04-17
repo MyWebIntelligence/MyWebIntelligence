@@ -3,72 +3,41 @@
 require('../ES-mess');
 process.title = "MyWI getExpression worker";
 
-var app = require('express')();
-var compression = require('compression');
-var bodyParser = require('body-parser');
+var fs = require('fs');
 
-var request = require('request');
-
+var Channel = require('../common/lengthed-message-protocol/Channel');
 var getExpression = require('./getExpression');
 
 console.log('# getExpression process', process.pid);
 
 var ONE_HOUR = 60*60*1000; // ms
 
-var answerURL;
-var server;
+var PIPE_FD = 3;
+var THROTTLING_WINDOW = 30;
 
-// initial message is sync IPC for port and answer URL. All other communication will be via HTTP
-process.once('message', function(m){
-    var port = m.port;
-    answerURL = m.answerURL;
-    
-    console.log('child', process.pid, port);
-    server = app.listen(port, '127.0.0.1');
-});
-
-var THROTTLING_WINDOW = 1000;
 var inFlightURLs = new Set/*<url>*/();
 var pendingURLs = new Set/*<url>*/();
 
+var channel = new Channel(fs.createReadStream(undefined, {fd: PIPE_FD}), fs.createWriteStream(undefined, {fd: PIPE_FD}));
+
+
 function processURL(url){
-    
     inFlightURLs.add(url);
-    var requestDefaultOptions = {
-        url: answerURL,
-        json: true,
-        gzip: true,
-        timeout: 24*ONE_HOUR
-    };
-    function defaultRequestCallback(error){
-        if(error)
-            console.error('POST to scheduler error', url, error);
-    }
     
     return getExpression(url)
         .then(function(expression){
-            request.post(Object.assign(
-                {
-                    body: {
-                        url: url,
-                        expression: expression
-                    }
-                }, 
-                requestDefaultOptions
-            ), defaultRequestCallback);
+            channel.send(JSON.stringify({
+                url: url,
+                expression: expression
+            }));
         })
         .catch(function(err){
-            request.post(Object.assign(
-                {
-                    body: {
-                        url: url,
-                        error: String(err)
-                    }
-                },
-                requestDefaultOptions
-            ), defaultRequestCallback);
-
-            console.log('child error', url, err/*, err.stack*/);
+            console.log('child error', url, err, err.stack);
+        
+            channel.send(JSON.stringify({
+                url: url,
+                error: String(err)
+            }));
         
             return; // symbolic. Just to make explicit the next .then is a "finally"
         })
@@ -84,23 +53,16 @@ function processURL(url){
         
 }
 
-
-
-app.use(compression());
-app.use(bodyParser.json());
-
-app.post('*', function(req, res){
+channel.on('message', function(buff){
     //console.log('POST', process.pid, req.body);
+    var msg = JSON.parse(buff.toString());
     
-    var url = req.body.url;
+    var url = msg.url;
     
     if(inFlightURLs.size < THROTTLING_WINDOW)
         processURL(url);
     else
         pendingURLs.add(url);
-    
-    // acknowledging that the URL has been received
-    res.send('');
 });
 
 process.on('uncaughtException', function(e){
@@ -109,6 +71,6 @@ process.on('uncaughtException', function(e){
 });
 
 process.on('SIGINT', function(){
-    server.close();
+    console.log('SIGINT', process.pid);
     process.exit();
 });

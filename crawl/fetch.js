@@ -1,10 +1,12 @@
 "use strict";
 
-var request = require('request');
+var http = require('http');
 var parseURL = require('url').parse;
 
+var request = require('request');
 
 var MAXIMUM_IN_PROGRESS_BY_HOSTNAME = 20;
+http.globalAgent.maxSockets = MAXIMUM_IN_PROGRESS_BY_HOSTNAME;
 
 var inFlightByHostname = new Map/*<hostname, Set<url>>*/();
 var pendingByHostname = new Map/*<hostname, Set<url>>*/();
@@ -16,13 +18,14 @@ function sendTheHTTPRequest(url){
     
     var hostname = parseURL(url).hostname;
     
-    request({
+    request.get({
         url: url,
         headers: {
             // Firefox Accept header
             "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
             "User-Agent": "My Web Intelligence crawler"
-        }
+        },
+        gzip: true
     }, function(error, response, httpBody){
         // response came back, so not in flight anymore
         inFlightByHostname.get(hostname).delete(url);

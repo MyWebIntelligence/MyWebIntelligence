@@ -51,7 +51,7 @@ module.exports = function(url, html){
     // Promise<HTMLElement>
     var mainContentP = getReadabilityAPIMainContent(url)
         .catch(function(e){
-            console.warn(e);
+            console.warn('Readability API issue. extracting content from main document', url, e);
             return fullJSDOMDocumentP.then(extractMainContent)
         });
     
@@ -106,6 +106,10 @@ module.exports = function(url, html){
             mainContentDispose();
         
         return ret;
+    })
+    .catch(function(e){
+        console.error('makeExpression error', url, e, e.stack);
+        throw e;
     });
     
 };

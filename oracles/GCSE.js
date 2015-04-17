@@ -7,7 +7,7 @@ var makeSearchString = require('../common/makeSearchString');
 var GCSE_BASE_URL = "https://www.googleapis.com/customsearch/v1?";
 
 var MAX_GCSE_NUM = 10;
-var STARTS = [1, 11, 21, 31, 41, 51, 61, 71, 81, 91];
+var STARTS = [1, 11, 21, 31/*, 41, 51, 61, 71, 81, 91*/];
 
 module.exports = function prepareGCSEOracle(credentials){
     var apiKey = credentials["API key"];

@@ -104,7 +104,14 @@ npm run build
 npm run start-prod
 ````
 
+### notes
 
+```bash
+docker pull postgres:9.4
+docker run --name mywipostgres -e POSTGRES_PASSWORD=password POSTGRES_USER=user -d postgres:9.4
+docker run -e POSTGRES_PASSWORD=password -p 5555:5432 -d postgres:9.4
+
+```
 
 ## Licence
 

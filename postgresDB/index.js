@@ -25,14 +25,13 @@ function serializeValueForDB(v){
         return "'"+ serializeArrayForDB(v) +"'";
     else
         return typeof v === 'string' ?
-            "'"+ v +"'" :
+            "'"+ v.replace(/\'/g, "''") +"'" :
             String(v);
 }
 
 
 module.exports = {
     create: function(expressionData){
-        //  (uri, mainHTML, mainText, title, \"references\", meta_description) VALUES ('http://a.b/c', '<span>a</span>', 'a', 'titre', '{\"http://a.b/d\", \"http://a.b/e\"}', 'desc');"
         return databaseReadyP.then(function(db){
             var keys = Object.keys(expressionData);
             var serializedKeys = keys.map(function(k){ return '"'+k+'"'; });
@@ -50,7 +49,7 @@ module.exports = {
                 "("+serializedValues.join(', ')+")"
             ].join(' ') + ';';
 
-            console.log('query', query);
+            //console.log('query', query);
             
             return new Promise(function(resolve, reject){
                 db.query(query, function(err, result){
@@ -84,7 +83,7 @@ module.exports = {
                 "("+uriDisjunction+")"
             ].join(' ') + ';';
             
-            console.log('query', query);
+            //console.log('query', query);
             
             return new Promise(function(resolve, reject){
                 db.query(query, function(err, result){
@@ -104,7 +103,7 @@ module.exports = {
                 "uri = "+serializeValueForDB(uri)
             ].join(' ') + ';';
             
-            console.log('query', query);
+            //console.log('query', query);
             
             return new Promise(function(resolve, reject){
                 db.query(query, function(err, result){
@@ -136,7 +135,7 @@ module.exports = {
                 "id = "+expressionData.id
             ].join(' ') + ';';
 
-            console.log('query', query);
+            //console.log('query', query);
 
             return new Promise(function(resolve, reject){
                 db.query(query, function(err, result){
@@ -144,35 +143,11 @@ module.exports = {
                 });
             });
         });
+    },
+    
+    deleteAll: function(){
+        return Promise.resolve();
     }
     
     
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

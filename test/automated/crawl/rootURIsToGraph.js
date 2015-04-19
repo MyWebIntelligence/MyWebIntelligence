@@ -9,7 +9,7 @@ module.exports = function(roots, words){
         
         setTimeout(function(){
             resolve(db.complexQueries.getGraphFromRootURIs(new Set(roots)));
-        }, 1500);
+        }, 60*1000);
     });
 };
 

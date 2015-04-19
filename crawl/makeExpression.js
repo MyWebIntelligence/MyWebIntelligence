@@ -93,11 +93,11 @@ module.exports = function(url, html){
         var ret = {
             uri: url,
             //fullHTML: html,
-            mainHTML: mainContent.innerHTML,
-            mainText: mainContent.textContent.trim(),
+            main_html: mainContent.innerHTML,
+            main_text: mainContent.textContent.trim(),
             title: document.title,
             references: uniqueLinks,
-            "meta-description": (metaDesc && metaDesc.getAttribute('content')) || ''
+            "meta_description": (metaDesc && metaDesc.getAttribute('content')) || ''
         };
         
         // free memory

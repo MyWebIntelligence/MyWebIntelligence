@@ -4,6 +4,8 @@ require('./ES-mess/index.js');
 
 var Expressions = require('./postgresDB/index');
 
+console.log('node env', process.env.NODE_ENV);
+
 var createdP = Expressions.create({
     uri: "http://a.b/c",
     //fullHTML: html,

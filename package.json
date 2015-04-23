@@ -12,7 +12,7 @@
     "start": "node server/index.js",
     "build": "docker build --tag=\"mywi/base\" .",
     "start-db-container": "docker rm mywipostgres; docker run --name mywipostgres -p 5555:5432 -e POSTGRES_PASSWORD=password -d postgres:9.4",
-    "start-prod": "docker run -d -p=3333:3333 -e \"NODE_ENV=production\" mywi/base node server/index.js",
+    "start-prod": "docker run -d -p=3333:3333 -e \"NODE_ENV=production\" --link mywipostgres:mywipostgres mywi/base node server/index.js",
     "start-dev": "docker run -p=3333:3333 -v $PWD/node_modules:/usr/mywi/node_modules -e \"NODE_ENV=dev-docker\" -m=\"800m\" --link mywipostgres:mywipostgres mywi/base node server/index.js",
     "bundle": "browserify client/index.js -o client/browserify-bundle.js -d",
     "watch": "watchify client/index.js -o client/browserify-bundle.js -d -v",

@@ -25,7 +25,7 @@ module.exports = {
                 "("+serializedValues.join(', ')+")"
             ].join(' ') + ';';
 
-            console.log('Expressions create query', query);
+            //console.log('Expressions create query', query);
             
             return new Promise(function(resolve, reject){
                 db.query(query, function(err, result){

@@ -66,7 +66,7 @@ module.exports = {
                 serializedMultipleValues
             ].join(' ') + ';';
 
-            console.log('query', query);
+            //console.log('query', query);
 
             return new Promise(function(resolve, reject){
                 db.query(query, function(err, result){

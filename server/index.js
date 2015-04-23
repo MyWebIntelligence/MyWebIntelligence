@@ -28,7 +28,7 @@ var OraclesScreen = React.createFactory(require('../client/components/OraclesScr
 
 var googleCredentials = require('../config/google-credentials.json');
 
-if(process.env.NODE_ENV !== "production")
+// if(process.env.NODE_ENV !== "production") // commented for now. TODO Find proper way to handle both prod & dev envs
     dropAllTables();
 
 

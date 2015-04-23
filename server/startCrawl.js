@@ -1,19 +1,18 @@
 "use strict";
 
-var fork = require('child_process').fork;
+var database = require('../database');
+var crawl = require('../crawl')
 
-var crawlerProcess = fork( require.resolve('../crawl') );
+
 
 /*
     urls: Set<url>
-    words: Set<string>
 */
-module.exports = function startCrawl(urls, words){
-    
-    // sync communication, but in practice, it should be so rare that the runtime cost will be very small
-    crawlerProcess.send({
-        urls: urls.toJSON(),
-        words: words.toJSON()
-    });
+module.exports = function startCrawl(urls){
+    console.log('start crawl', urls.size);
+    return Promise.all([
+        database.GetExpressionTasks.createTasksTodo(urls),
+        crawl()
+    ]);
     
 };

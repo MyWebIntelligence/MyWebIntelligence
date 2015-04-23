@@ -1,55 +1,31 @@
 "use strict";
 
-var connectToDB = require('./connectToDB');
-var createTables = require('./createTables');
+var databaseReadyP = require('./databaseReadyP');
 
-var databaseP = connectToDB();
-var databaseReadyP = databaseP
-    .then(createTables)
-    .then(function(){ return databaseP; });
-
-
-function serializeArrayForDB(arr){
-    return '{'+arr.map(function(v){
-        if(Array.isArray(v))
-            return "'"+ serializeArrayForDB(v) +"'";
-        else
-            return typeof v === 'string' ?
-                '"'+ v +'"' :
-                String(v);
-    })+'}'
-}
-
-function serializeValueForDB(v){
-    if(Array.isArray(v))
-        return "'"+ serializeArrayForDB(v) +"'";
-    else
-        return typeof v === 'string' ?
-            "'"+ v.replace(/\'/g, "''") +"'" :
-            String(v);
-}
+var serializeValueForDB = require('./serializeValueForDB');
+var serializeObjectForDB = require('./serializeObjectForDB');
 
 
 module.exports = {
     create: function(expressionData){
         return databaseReadyP.then(function(db){
-            var keys = Object.keys(expressionData);
-            var serializedKeys = keys.map(function(k){ return '"'+k+'"'; });
-            
-            var serializedValues = keys.map(function(k){
-                var v = expressionData[k];
-                return serializeValueForDB(v);
-            });
+            var res = serializeObjectForDB(Object.assign(
+                {},
+                expressionData,
+                {references: expressionData.references.toJSON()}
+            ));
+            var serializedKeys = res.serializedKeys;
+            var serializedValues = res.serializedValues;
             
             var query = [
                 "INSERT INTO",
                 "expressions",
-                "("+serializedKeys.join(', ')+")",
+                "("+serializedKeys+")",
                 "VALUES",
                 "("+serializedValues.join(', ')+")"
             ].join(' ') + ';';
 
-            //console.log('query', query);
+            console.log('Expressions create query', query);
             
             return new Promise(function(resolve, reject){
                 db.query(query, function(err, result){
@@ -146,8 +122,8 @@ module.exports = {
     },
     
     deleteAll: function(){
+        // doesn't delete anything yet
         return Promise.resolve();
     }
-    
     
 };

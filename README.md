@@ -108,7 +108,8 @@ npm run start-prod
 
 ```bash
 docker pull postgres:9.4
-docker run --name mywipostgres --rm -e POSTGRES_PASSWORD=password -p 5555:5432 -d postgres:9.4
+docker rm mywipostgres
+docker run --name mywipostgres -e POSTGRES_PASSWORD=password -d postgres:9.4
 
 ```
 

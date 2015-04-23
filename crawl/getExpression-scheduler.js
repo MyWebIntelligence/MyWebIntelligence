@@ -11,7 +11,7 @@ var MAXIMUM_NICENESS = 19;
 // initial getExpressions creation
 /*var getExpressionWorkers = */
 os.cpus().slice(0, 1).map(function(){
-    var worker = fork(require.resolve('./getExpression-child-process.js')); 
+    var worker = fork(require.resolve('./getExpression-worker.js')); 
     
     // Setting super-low priority so this CPU-intensive task doesn't get in the way of the server or
     // other more important tasks

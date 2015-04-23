@@ -4,30 +4,53 @@ require('../../ES-mess');
 process.title = 'crawl + graph';
 
 var db = require('../../database');
+var dropAllTables = require('../../postgresDB/dropAllTables')
 var onQueryCreated = require('../../server/onQueryCreated');
+
+var gcseCreds = require('./gcse-credentials.json');
 
 var cleanDBP = Promise.all([
     db.QueryResults.deleteAll(),
-    db.Aliases.deleteAll(),
-    db.Expressions.deleteAll(),
-    db.References.deleteAll()
+    dropAllTables()
 ]);
 
 var oP = cleanDBP.then(function(){
+    console.log('clean db');
     return db.Oracles.findByOracleNodeModuleName('GCSE');
 });
-
-// WARNING : this is harcoded. Baaaaad!
 // need a user with GCSE credentials
-var uP = db.Users.findById(68451720);
+var uP = db.Users.create({
+    name: 'David'
+});
+var ocP = Promise.all([uP, oP]).then(function(res){
+    console.log('users and oracle ready');
+
+    var u = res[0];
+    var o = res[1];
+    
+    return db.OracleCredentials.create(Object.assign(
+        {},
+        gcseCreds,
+        {
+            "oracleId": o.id,
+            "userId": u.id
+        }
+    ));
+}).catch(function(err){
+    console.log('obj creation error', err);
+})
 
 var queryId;
 
 
-oP.then(function(oracle){
+ocP.then(function(){
+        return oP;
+    })
+    .then(function(oracle){
         return oracle.id;
     })
     .then(function(GCSEOracleId){
+        console.log('MANUAL', 1, GCSEOracleId);
         return db.Queries.create({
             "name": "Asthme",
             "q": "Asthme",
@@ -41,7 +64,10 @@ oP.then(function(oracle){
         });
     })
     .then(function(query){
+        console.log('MANUAL', 2, query);
+    
         return uP.then(function(user){
+            console.log('MANUAL', 3, user);
             if(!user)
                 throw new Error('no user');
             console.time('onQueryCreated');
@@ -50,23 +76,29 @@ oP.then(function(oracle){
     })
     .then(function(){
         console.timeEnd('onQueryCreated');
+        console.log('MANUAL', 4);
     
-        console.time('getting graph');
-        return db.complexQueries.getQueryGraph(queryId);
-    })
-    .then(function(graph){
-        console.timeEnd('getting graph');
-        console.log('graph', graph.nodes.size, graph.edges.size);
-    })
-    .then(function(){
-        return Promise.all([
-            db.Queries.delete(queryId)
-        ]);
+        setTimeout(function(){
+            console.time('getting graph');
+            db.complexQueries.getQueryGraph(queryId)
+                .then(function(graph){
+                    console.timeEnd('getting graph');
+                    console.log('graph', graph.nodes.size, graph.edges.size);
+                })
+                .then(function(){
+                    return Promise.all([
+                        db.Queries.delete(queryId)
+                    ]);
+                })
+                .catch(function(err){
+                    console.error('onQueryCreated manual test error', error); 
+                });
+        
+        }, 30*1000);
+        
     })
     .catch(function(err){
         console.error('onQueryCreated manual test error', error); 
     });
-
-
 
 

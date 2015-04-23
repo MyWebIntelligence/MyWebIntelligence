@@ -1,6 +1,6 @@
 "use strict";
 
-var databaseReadyP = require('./databaseReadyP');
+var databaseP = require('./databaseClientP');
 
 var serializeValueForDB = require('./serializeValueForDB');
 var serializeObjectForDB = require('./serializeObjectForDB');
@@ -8,7 +8,7 @@ var serializeObjectForDB = require('./serializeObjectForDB');
 
 module.exports = {
     create: function(expressionData){
-        return databaseReadyP.then(function(db){
+        return databaseP.then(function(db){
             var res = serializeObjectForDB(Object.assign(
                 {},
                 expressionData,
@@ -36,7 +36,7 @@ module.exports = {
     },
     
     findByURIAndAliases: function(uris){
-        return databaseReadyP.then(function(db){
+        return databaseP.then(function(db){
             var uriDisjunction = uris.toJSON()
                 .map(function(uri){
                     var serializedURIForDB = serializeValueForDB(uri);
@@ -70,7 +70,7 @@ module.exports = {
     },
     
     findByCanonicalURI: function(uri){
-        return databaseReadyP.then(function(db){
+        return databaseP.then(function(db){
             
             var query = [
                 "SELECT * FROM",
@@ -91,7 +91,7 @@ module.exports = {
     
     update: function(expressionData){
         // UPDATE weather SET temp_lo = temp_lo+1, temp_hi = temp_lo+15, prcp = DEFAULT WHERE city = 'San Francisco' AND date = '2003-07-03';
-        return databaseReadyP.then(function(db){
+        return databaseP.then(function(db){
             var keys = Object.keys(expressionData);
             var serializedSETs = keys.map(function(k){
                 if(k === 'id')

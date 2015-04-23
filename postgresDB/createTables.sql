@@ -12,6 +12,8 @@ CREATE TABLE IF NOT EXISTS expressions (
 );
 
 
+CREATE TYPE get_expression_tasks_status AS ENUM ('todo', 'getting expression');
+
 CREATE TABLE IF NOT EXISTS get_expression_tasks (
     id          SERIAL PRIMARY KEY,
     uri         varchar(2000) UNIQUE NOT NULL,

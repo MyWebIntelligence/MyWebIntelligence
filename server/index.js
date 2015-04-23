@@ -19,7 +19,8 @@ var serializeDocumentToHTML = require('jsdom').serializeDocument;
 
 var makeDocument = require('../common/makeDocument');
 var database = require('../database');
-var dropAllTables = require('../postgresDB/dropAllTables')
+var dropAllTables = require('../postgresDB/dropAllTables');
+var createTables = require('../postgresDB/createTables');
 var onQueryCreated = require('./onQueryCreated');
 var pageGraphToDomainGraph = require('../common/graph/pageGraphToDomainGraph');
 
@@ -29,7 +30,7 @@ var OraclesScreen = React.createFactory(require('../client/components/OraclesScr
 var googleCredentials = require('../config/google-credentials.json');
 
 // if(process.env.NODE_ENV !== "production") // commented for now. TODO Find proper way to handle both prod & dev envs
-    dropAllTables();
+    dropAllTables().then(createTables);
 
 
 // Doesn't make sense to start the server if this file doesn't exist. *Sync is fine.

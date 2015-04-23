@@ -28,7 +28,7 @@ database.Expressions.deleteAll().then(function(){
             .catch(function(err){
                 console.error('rootURIsToGraph error', err, err.stack);
             });
-    }, 3000);
+    }, 3*1000);
         
 })
 

@@ -19,6 +19,7 @@ var serializeDocumentToHTML = require('jsdom').serializeDocument;
 
 var makeDocument = require('../common/makeDocument');
 var database = require('../database');
+var dropAllTables = require('../postgresDB/dropAllTables')
 var onQueryCreated = require('./onQueryCreated');
 var pageGraphToDomainGraph = require('../common/graph/pageGraphToDomainGraph');
 
@@ -26,6 +27,9 @@ var TerritoireListScreen = React.createFactory(require('../client/components/Ter
 var OraclesScreen = React.createFactory(require('../client/components/OraclesScreen'));
 
 var googleCredentials = require('../config/google-credentials.json');
+
+if(process.env.NODE_ENV !== "production")
+    dropAllTables();
 
 
 // Doesn't make sense to start the server if this file doesn't exist. *Sync is fine.

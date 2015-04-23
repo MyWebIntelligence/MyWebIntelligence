@@ -5,103 +5,74 @@ var child_process = require('child_process');
 var fork = child_process.fork;
 var exec = child_process.exec;
 
-var app = require('express')();
-var compression = require('compression');
-var bodyParser = require('body-parser');
-
-var request = require('request');
-
-var database = require('../database');
-
-var promiseResolveRejectByURL = new Map();
-var pendingURLByWorker = new WeakMap();
-var postURLByWorker = new WeakMap();
-
-/*
-    HTTP used for the purpose of async message based IPC with children
-*/
-var PORT = 10000;
-// Strictly listen on localhost so the endpoint is not accessible from the outside world
-var HOST = '127.0.0.1';
-
-app.use(compression());
-app.use(bodyParser.json({limit: Infinity}));
-
-app.post('*', function(req, res){
-    //console.log('receiving POST from child', req.body);
-    
-    var response = req.body;
-    var url = response.url;
-    
-    if(response.error){
-        console.error('resp ERR', url, response.error);
-    }
-    else{
-        var expression = response.expression;
-
-        console.log('resp', url);
-
-        var resolve = promiseResolveRejectByURL.get(url).resolve;
-        resolve(expression);
-    }
-
-    promiseResolveRejectByURL.delete(url);
-    // deleting from all workers is inefficient, but lazy to keep track across HTTP reqs. Use cap URL for that purpose
-    getExpressionWorkers.forEach(function(worker){
-        pendingURLByWorker.get(worker).delete(url);
-    });
-
-    console.log(getExpressionWorkers.map(function(w){ return pendingURLByWorker.get(w).size }));
-    
-    // acknowledging that the result has been received
-    res.send('');
-});
+var MAXIMUM_NICENESS = 19;
 
 
-
-app.listen(PORT, HOST, function(){
-    console.log('listening');
-});
-
-
-var answerURL = 'http://'+HOST+':'+PORT+'/';
-
-var getExpressionWorkers = os.cpus().slice(0, os.cpus().length-1).map(function(cpu, i){
-    var worker = fork( require.resolve('./getExpression-child-process.js'), {silent: false} );
-    
-    var port = PORT + i +  1;
-    
-    worker.send({
-        port: port,
-        answerURL: answerURL
-    });
+// initial getExpressions creation
+/*var getExpressionWorkers = */
+os.cpus().slice(0, 1).map(function(){
+    var worker = fork(require.resolve('./getExpression-worker.js')); 
     
     // Setting super-low priority so this CPU-intensive task doesn't get in the way of the server or
     // other more important tasks
-    exec('renice -n 19 '+ worker.pid);
-    
-    postURLByWorker.set(worker, 'http://'+HOST+':'+port+'/');
-    pendingURLByWorker.set(worker, new Set());
-    
+    exec( ['renice', '-n', MAXIMUM_NICENESS, worker.pid].join(' ') );
+        
     return worker;
 });
+
+
+// TODO handle when the worker dies, maybe kill workers every once in a while
+
+
+
+
+/*
+channel.on('message', function(buff){
+        // console.log('receiving  child', req.body);
+        var response = JSON.parse(buff.toString());
+        
+        var url = response.url;
+
+        if(response.error){
+            console.error('resp ERR', url, response.error);
+        }
+        else{
+            var expression = response.expression;
+
+            console.log('resp', url);
+
+            var resolve = promiseResolveRejectByURL.get(url).resolve;
+            resolve(expression);
+        }
+
+        promiseResolveRejectByURL.delete(url);
+        // deleting from all workers is inefficient, but lazy to keep track across HTTP reqs. Use cap URL for that purpose
+        getExpressionWorkers.forEach(function(w){
+            pendingURLByWorker.get(w).delete(url);
+        });
+
+        console.log(getExpressionWorkers.map(function(w){ return pendingURLByWorker.get(w).size }));
+    });
+
+*/
 
 
 /*
     Fetch the URL (to get redirects and the body)
     Extract core content (from readability or otherwise).
 */
+/*
 module.exports = function getExpression(url){
     // console.log('scheduler', url);
     
     if(promiseResolveRejectByURL.has(url))
         return promiseResolveRejectByURL.get(url).promise;
     
-    /*
-        This test (whether there is an existing expression) belongs to getExpression.
-        However, in the filedb, reads (in workers) and writes (in "main thread") collide resulting in
-        "SyntaxError: Unexpected end of input" errors
-    */
+    
+    //    This test (whether there is an existing expression) belongs to getExpression.
+    //    However, in the filedb, reads (in workers) and writes (in "main thread") collide resulting in
+    //    "SyntaxError: Unexpected end of input" errors
+    
     return database.Expressions.findByURIAndAliases(new Set([url])).then(function(expressions){
         
         if(expressions[0]){ // url already has an entry in the database
@@ -124,14 +95,9 @@ module.exports = function getExpression(url){
                         curr;
                 });
 
-                //console.log('most available', mostAvailableWorker.pid, url);
-                // send work
-                request.post({
-                    url: postURLByWorker.get(mostAvailableWorker),
-                    method: 'POST',
-                    json: true,
-                    body: {url: url}
-                });
+                var channel = channelByWorker.get(mostAvailableWorker);
+                
+                channel.send(JSON.stringify({url: url}));
 
                 var pendingURLs = pendingURLByWorker.get(mostAvailableWorker);
                 pendingURLs.add(url);
@@ -147,3 +113,4 @@ module.exports = function getExpression(url){
         }
     });
 };
+*/

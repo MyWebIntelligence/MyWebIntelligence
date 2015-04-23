@@ -21,17 +21,6 @@ var READABILITY_PARSER_BASE_URL = "https://readability.com/api/content/v1/parser
 var ONE_HOUR = 60*60*1000; // ms
 var last429;
 
-/*
-interface Expression{
-    fullHTML: html,
-    mainHTML: mainContent.outerHTML,
-    mainText: mainContent.textContent,
-    title: document.title,
-    links: uniqueLinks,
-    "meta-description": metaDesc && metaDesc.getAttribute('content')
-}
-*/
-
 module.exports = function getReadabilityAPIMainContent(url){
     
     if(!readabilityParserKey)

@@ -1,14 +1,9 @@
 "use strict";
 
 require('../ES-mess');
+require('./getExpression-scheduler');
 
-var crawl = require('./core-crawl');
-
-process.title = "MyWI crawler";
-
-process.on('message', function(message){
-    var initialUrls = new Set(message.urls);
-    var originalWords = new Set(message.words);
-
-    crawl(initialUrls, originalWords);
-});
+module.exports = function(){
+    // no-op for now. Eventually, this may wake processes up, maybe create some processes or something
+    return Promise.resolve();
+};

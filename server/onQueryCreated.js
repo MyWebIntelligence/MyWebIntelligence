@@ -22,14 +22,15 @@ module.exports = function onQueryCreated(query, user){
             }
         })
         .then(function(queryResults){
-            db.QueryResults.create({
-                query_id: query.id,
-                results: queryResults.toJSON(),
-                created_at: new Date()
-            });
-            
-            // don't wait for the results to be stored in database to start crawling
-            return startCrawl(queryResults, new Set(query.q.split(" ")));
+            return Promise.all([
+                db.QueryResults.create({
+                    query_id: query.id,
+                    results: queryResults.toJSON(),
+                    created_at: new Date()
+                }),
+                // don't wait for the results to be stored in database to start crawling
+                startCrawl(queryResults)
+            ]);
         })
         .catch(function(err){
             console.error('onQueryCreated error', err, err.stack);

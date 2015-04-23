@@ -28,7 +28,7 @@ var MAXIMUM_DEPTH = 2;
 module.exports = function approve(options){
     var depth = options.depth;
     var wordsToMatch = options.wordsToMatch;
-    var mainText = options.expression.mainText;
+    var mainText = options.expression.main_text;
     
     // oracle
     if(depth === 0)

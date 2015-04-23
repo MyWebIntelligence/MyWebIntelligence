@@ -1,12 +1,16 @@
 "use strict";
 
+// JSON database models
 var Users = require('./models/Users');
 var Territoires = require('./models/Territoires');
 var Queries = require('./models/Queries');
 var Oracles = require('./models/Oracles');
 var OracleCredentials = require('./models/OracleCredentials');
 var QueryResults = require('./models/QueryResults');
-var Expressions = require('./models/Expressions');
+
+// PostGREs models
+var Expressions = require('../postgresDB/Expressions');
+var GetExpressionTasks = require('../postgresDB/GetExpressionTasks');
 
 var PageGraph = require('../common/graph/PageGraph');
 var pageGraphToDomainGraph = require('../common/graph/pageGraphToDomainGraph');
@@ -21,6 +25,7 @@ module.exports = {
     OracleCredentials: OracleCredentials,
     QueryResults: QueryResults,
     Expressions : Expressions,
+    GetExpressionTasks: GetExpressionTasks,
     
     clearAll: function(){
         var self = this;
@@ -199,10 +204,10 @@ module.exports = {
                         pageGraph.addNode(name, {
                             url: url,
                             title: expr.title,
-                            excerpt: expr["meta-description"],
+                            excerpt: expr["meta_description"],
                             //publication_date: expr.publication_date,
-                            content: expr.mainText,
-                            content_length: expr.mainText.length
+                            content: expr.main_text,
+                            content_length: expr.main_text.length
                         });
                         
                         urlToNodeName.set(url, name);

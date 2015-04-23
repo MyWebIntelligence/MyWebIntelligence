@@ -10,13 +10,14 @@ var stripURLHash = require('../common/stripURLHash');
 
 /*
 interface Expression{
-    fullHTML: string
-    mainHTML: string // stipped HTML containing only the useful content
-    mainText: string // textual content of 'html'
+    full_html: string
+    main_html: string // stipped HTML containing only the useful content
+    main_text: string // textual content of 'html'
     title: string // <title> or <h1>
     meta: Map<string, string>
     links: Set<string>
     aliases: Set<string>
+    meta_description: string
 }
 
 // ignoring intermediate redirects

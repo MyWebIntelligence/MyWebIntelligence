@@ -164,6 +164,13 @@ module.exports = {
                         
                         if(Array.isArray(expr.references)){
                             expr.references.forEach(function(refURL){
+                                if(!nodes.has(refURL)){
+                                    // create shallow node
+                                    nodes.set(refURL, {
+                                        uri: refURL
+                                    });
+                                }
+                                
                                 potentialEdges.add({
                                     source: uri,
                                     target: refURL
@@ -203,11 +210,11 @@ module.exports = {
                         
                         pageGraph.addNode(name, {
                             url: url,
-                            title: expr.title,
-                            excerpt: expr["meta_description"],
+                            title: expr.title || '',
+                            excerpt: expr["meta_description"]  || '',
                             //publication_date: expr.publication_date,
-                            content: expr.main_text,
-                            content_length: expr.main_text.length
+                            content: expr.main_text  || '',
+                            content_length: (expr.main_text || '').length
                         });
                         
                         urlToNodeName.set(url, name);

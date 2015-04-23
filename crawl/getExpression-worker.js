@@ -45,6 +45,7 @@ function pickATask(){
         })
         .catch(function(err){
             console.error('pick a task error', err);
+            setTimeout(pickATask, RETRY_DELAY);
         });
     
 }

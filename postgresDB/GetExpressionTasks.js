@@ -1,6 +1,6 @@
 "use strict";
 
-var databaseReadyP = require('./databaseReadyP');
+var databaseP = require('./databaseClientP');
 
 var serializeValueForDB = require('./serializeValueForDB');
 var serializeObjectForDB = require('./serializeObjectForDB');
@@ -9,7 +9,7 @@ var serializeObjectValues = require('./serializeObjectValues');
 
 module.exports = {
     create: function(data){
-        return databaseReadyP.then(function(db){
+        return databaseP.then(function(db){
             var res = serializeObjectForDB(data);
             var serializedKeys = res.serializedKeys;
             var serializedValues = res.serializedValues;
@@ -40,7 +40,7 @@ module.exports = {
         if(urls.size === 0)
             return Promise.resolve(); // don't bother the db
         
-        return databaseReadyP.then(function(db){
+        return databaseP.then(function(db){
 
             var dataArray = urls.toJSON().map(function(url){
                 return {
@@ -78,7 +78,7 @@ module.exports = {
     },
     
     pickATask: function(){
-        return databaseReadyP.then(function(db){
+        return databaseP.then(function(db){
             // http://stackoverflow.com/a/11568880            
             
             var query = [
@@ -102,7 +102,7 @@ module.exports = {
     },
     
     delete: function(id){
-        return databaseReadyP.then(function(db){
+        return databaseP.then(function(db){
             var query = [
                 "DELETE FROM",
                 "get_expression_tasks",
@@ -123,7 +123,7 @@ module.exports = {
     },
     
     /*findByCanonicalURI: function(uri){
-        return databaseReadyP.then(function(db){
+        return databaseP.then(function(db){
             
             var query = [
                 "SELECT * FROM",
@@ -144,7 +144,7 @@ module.exports = {
     
     /*update: function(expressionData){
         // UPDATE weather SET temp_lo = temp_lo+1, temp_hi = temp_lo+15, prcp = DEFAULT WHERE city = 'San Francisco' AND date = '2003-07-03';
-        return databaseReadyP.then(function(db){
+        return databaseP.then(function(db){
             var keys = Object.keys(expressionData);
             var serializedSETs = keys.map(function(k){
                 if(k === 'id')

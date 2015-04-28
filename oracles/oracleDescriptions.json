@@ -4,11 +4,9 @@
         "oracleNodeModuleName": "GCSE",
         "options": [
             {
-                "name": "language",
-                "type": [
-                    "fr",
-                    "en"
-                ]
+                "id": "add24MonthHistory", 
+                "name": "add 24-month history",
+                "type": "boolean"
             }
         ],
         "needsCredentials": {
@@ -21,6 +19,7 @@
         "oracleNodeModuleName": "URLList",
         "options": [
             {
+                "id": "list",
                 "name": "list",
                 "type": "list"
             }

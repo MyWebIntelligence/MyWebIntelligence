@@ -48,6 +48,7 @@
     "express-session": "~1.10.1",
     "fast-csv": "^0.6.0",
     "jsdom": "3.x",
+    "moment": "^2.10.2",
     "multer": "^0.1.7",
     "passport": "~0.2.1",
     "passport-google-oauth": "~0.1.5",

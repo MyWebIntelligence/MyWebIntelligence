@@ -57,11 +57,11 @@ module.exports = React.createClass({
                     var oracleOptions = Object.create(null);
                     
                     Array.from(oracleOptionInputs).forEach(function(input){
-                        var name = input.name;
+                        var id = input.name;
                         var value;
                         
                         var type = selectedOracle.options.find(function(opt){
-                            return opt.name === name;
+                            return opt.id === id;
                         }).type;
                         
                         if(type === 'list'){
@@ -70,10 +70,15 @@ module.exports = React.createClass({
                             });
                         }
                         else{
-                            value = input.value;
+                            if(type === 'boolean'){
+                                value = input.checked;
+                            }
+                            else{
+                                value = input.value;
+                            }
                         }
                         
-                        oracleOptions[name] = value;
+                        oracleOptions[id] = value;
                     });
                     
                     formData.oracleOptions = JSON.stringify(oracleOptions);
@@ -136,13 +141,13 @@ module.exports = React.createClass({
                     React.DOM.h1({}, "Oracle options"),
                     
                     selectedOracle.options.map(function(opt){
-                        var name = opt.name;
+                        var id = opt.id;
                         var input;
                         
                         if(Array.isArray(opt.type)){ // enum
                             input = React.DOM.select({
-                                name: name,
-                                defaultValue: queryOracleOptions[name]
+                                name: id,
+                                defaultValue: queryOracleOptions[id]
                             }, opt.type.map(function(v){
                                 return React.DOM.option({value: v}, v);
                             }));
@@ -150,10 +155,22 @@ module.exports = React.createClass({
                         else{
                             if(opt.type === 'list'){
                                 input = React.DOM.textarea({
-                                    name: name,
-                                    defaultValue: queryOracleOptions[name],
+                                    name: id,
+                                    defaultValue: queryOracleOptions[id],
                                     rows: 5
                                 })
+                            }
+                            else{
+                                if(opt.type === 'boolean'){
+                                    input = React.DOM.input({
+                                        name: id,
+                                        defaultChecked: queryOracleOptions[id],
+                                        type: 'checkbox'
+                                    });
+                                }
+                                else{
+                                    console.error('unknown oracle option type', opt.type, selectedOracle.name, opt.name, opt.id);
+                                }
                             }
                         }
                         

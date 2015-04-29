@@ -8,7 +8,7 @@ var makeSearchString = require('../common/makeSearchString');
 var GCSE_BASE_URL = "https://www.googleapis.com/customsearch/v1?";
 
 var MAX_GCSE_NUM = 10;
-var STARTS = [1/*, 11, 21, 31, 41, 51, 61, 71, 81, 91*/];
+var STARTS = [1, 11, 21, 31, 41, 51, 61, 71, 81, 91];
 
 function makeArray(length, val){
     // should be array#fill
@@ -129,7 +129,7 @@ module.exports = function prepareGCSEOracle(credentials){
         
         if(oracleOptions && oracleOptions.add24MonthHistory){
             // 8*3 month === 24 month
-            var rangeResults = makeRangesFromNow(90, 3).map(function(range){
+            var rangeResults = makeRangesFromNow(90, 4).map(function(range){
                 return getGCSEResultsForAllStarts({
                     query: q,
                     dateRange: range

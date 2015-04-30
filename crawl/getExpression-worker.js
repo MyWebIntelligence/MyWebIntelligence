@@ -20,7 +20,7 @@ function pickATask(){
     database.GetExpressionTasks.pickATask()
         .then(function(task){
             if(task){
-                console.log('found task', process.pid, task);
+                //console.log('found task', process.pid, task);
                 var url = task.uri;
 
                 return getExpression(url)
@@ -39,7 +39,7 @@ function pickATask(){
                     });     
             }
             else{
-                console.log('no task', process.pid, 'retrying after', (RETRY_DELAY/1000).toFixed(1), 's');
+                //console.log('no task', process.pid, 'retrying after', (RETRY_DELAY/1000).toFixed(1), 's');
                 setTimeout(pickATask, RETRY_DELAY);
             }
         })

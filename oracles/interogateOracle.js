@@ -36,7 +36,7 @@ module.exports = function(oracle, q, oracleOptions, credentials){
             oracleModules.get(oracle.oracleNodeModuleName);
         
         return oracleFunction(q, oracleOptions).then(function(searchResults){
-            console.log('GCSE oracle results for', q, searchResults.size);
+            console.log('oracle results for', q, searchResults.size);
             return searchResults;
         });
     });

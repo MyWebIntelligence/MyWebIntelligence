@@ -230,32 +230,22 @@ function GraphModel(nodeAttributes, edgeAttributes, options){
 
 
 
-    var nodes = Object.create(null);
+    var nodeByName = Object.create(null);
     var edges = new WeakMap(); // for efficient search by nodes
     var edgesList = []; // to return the list
-
-    /**
-     *
-     * @param n {GraphNode}
-     */
-    function nodeInGraph(n){
-        return Object.keys(nodes).some(function(name){
-            return nodes[name] === n;
-        });
-    }
 
     return {
         addNode: function(name, optargs){
             if(typeof name !== 'string')
                 throw new TypeError("First argument of GraphModel.addNode should be a string ("+typeof name+")");
 
-            if(name in nodes)
+            if(name in nodeByName)
                 throw new Error("Node "+name+" already exists");
 
             var opts = makeAttributes(nodeAttributes, optargs);
 
             var node = new GraphNode(name, opts);
-            nodes[name] = node;
+            nodeByName[name] = node;
 
             return node;
         },
@@ -271,27 +261,27 @@ function GraphModel(nodeAttributes, edgeAttributes, options){
             if(typeof name !== 'string')
                 throw new TypeError("First argument of GraphModel.getNode should be a string ("+typeof name+")");
 
-            return nodes[name];
+            return nodeByName[name];
         },
 
         get nodes(){
-            return new Set(Object.keys(nodes).map(function(name){
-                return nodes[name];
+            return new Set(Object.keys(nodeByName).map(function(name){
+                return nodeByName[name];
             }));
         },
 
         addEdge: function(node1, node2, attributesArgs){
             // Input validation
             if(typeof node1 === 'string'){
-                if(node1 in nodes)
-                    node1 = nodes[node1];
+                if(node1 in nodeByName)
+                    node1 = nodeByName[node1];
                 else
                     throw new Error("There is no node named: "+node1);
             }
 
             if(typeof node2 === 'string'){
-                if(node2 in nodes)
-                    node2 = nodes[node2];
+                if(node2 in nodeByName)
+                    node2 = nodeByName[node2];
                 else
                     throw new Error("There is no node named: "+node2);
             }
@@ -301,9 +291,9 @@ function GraphModel(nodeAttributes, edgeAttributes, options){
             if(typeof node2 !== 'object')
                 throw new TypeError("SeallEdgescond argument of addEdge should be a string or an object ("+typeof node2+")");
 
-            if(!nodeInGraph(node1))
+            if(!(node1.name in nodeByName))
                 throw new Error(node1 +" is not in the graph");
-            if(!nodeInGraph(node2))
+            if(!(node2.name in nodeByName))
                 throw new Error(node2 +" is not in the graph");
 
             attributesArgs = attributesArgs || {};
@@ -424,8 +414,8 @@ function GraphModel(nodeAttributes, edgeAttributes, options){
             })();
 
 
-            var graphNodes = Object.keys(nodes).map(function(nodeName){
-                var n = nodes[nodeName];
+            var graphNodes = Object.keys(nodeByName).map(function(nodeName){
+                var n = nodeByName[nodeName];
 
                 var attrvalues = Object.keys(n)
                     .filter(function(attrName){
@@ -497,7 +487,7 @@ function GraphModel(nodeAttributes, edgeAttributes, options){
             
             return csv
                 .write(
-                    Object.keys(nodes).map(function(n){return nodes[n];}),
+                    Object.keys(nodeByName).map(function(n){return nodeByName[n];}),
                     {headers: true}
                 )
         }

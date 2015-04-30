@@ -22,8 +22,16 @@ interface TerritoireListItemProps{
 
 module.exports = React.createClass({
     getInitialState: function(){
+        var openQueryForms = new Set();
+        var t = this.props.territoire;
+        
+        // if territoire has no query, open the form to create one right away
+        if(t.queries.length === 0){ 
+            openQueryForms.add('+');
+        }
+        
         return {
-            openQueryForms: new Set(),
+            openQueryForms: openQueryForms,
             editMode: false
         };
     },
@@ -149,7 +157,7 @@ module.exports = React.createClass({
                     ]);
                 }).concat([
                     React.DOM.li({
-                        className: 'add' + (state.openQueryForms.has('+') ? ' open' : '')
+                        className: ['add', (state.openQueryForms.has('+') ? 'open' : '')].join(' ')
                     }, [
                         React.DOM.button({
                             onClick: function(){

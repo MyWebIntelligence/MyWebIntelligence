@@ -25,7 +25,8 @@ interface TerritoireListProps{
 
 module.exports = React.createClass({
     getInitialState: function(){
-        return { newTerritoireFormOpen: false };
+        console.log('this.props.territoires.length', this.props.territoires.length)
+        return { newTerritoireFormOpen: this.props.territoires.length === 0 };
     },
     
     render: function(){

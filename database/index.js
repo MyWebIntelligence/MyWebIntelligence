@@ -1,5 +1,7 @@
 "use strict";
 
+var StringMap = require('stringmap');
+
 // JSON database models
 var Users = require('./models/Users');
 var Territoires = require('./models/Territoires');
@@ -133,16 +135,21 @@ module.exports = {
         getGraphFromRootURIs: function(rootURIs){
             //console.log('getGraphFromRootURIs', rootURIs.toJSON());
             
-            var nodes = new Map/*<url, expression>*/(); // these are only canonical urls
+            var nodes = new StringMap/*<url, expression>*/(); // these are only canonical urls
             var potentialEdges = new Set();
             
             // (alias => canonical URL) map
-            var urlToCanonical = new Map/*<url, url>*/();
+            var urlToCanonical = new StringMap/*<url, url>*/();
             
             function buildGraph(urls){
+                console.time('buildGraph');
+                //var dbtimeKey = ['findByURIAndAliases', urls.size, 'urls'].join(' ');
+                //console.time(dbtimeKey)
                 return Expressions.findByURIAndAliases(urls).then(function(expressions){
+                    //console.timeEnd(dbtimeKey)
                     //console.log('building graph, found expressions', expressions.length, expressions.map(function(e){ return e.uri}));
-                    
+                    //var timeKey = ['process', expressions.length, 'expressions'].join(' ');
+                    //console.time(timeKey);
                     // fill in nodes
                     expressions.forEach(function(expr){
                         var uri = expr.uri;
@@ -186,12 +193,15 @@ module.exports = {
                     if(nextURLs.size >= 1){
                         return buildGraph(nextURLs);
                     }
+                    //console.timeEnd(timeKey);
 
                 });
             }
             
             return buildGraph(rootURIs)
                 .then(function(){
+                    console.timeEnd('buildGraph');
+                    console.time('PageGraph');
                     var pageGraph = new PageGraph();
                 
                     var nextNodeName = (function(){
@@ -203,7 +213,7 @@ module.exports = {
                     })();
                     
                 
-                    var urlToNodeName = new Map();
+                    var urlToNodeName = new StringMap();
                 
                     nodes.forEach(function(expr, url){
                         var name = nextNodeName();
@@ -230,6 +240,8 @@ module.exports = {
                         if(sourceNode && targetNode)
                             pageGraph.addEdge(sourceNode, targetNode, { weight: 1 });
                     });
+                    
+                    console.timeEnd('PageGraph');
                     
                     return pageGraph;
                 });

@@ -2,7 +2,7 @@
 
 var React = require('react');
 
-var Tabs = require('react-tabs-component');
+var Tabs = require('./external/Tabs.js');
 
 var Header = require('./Header');
 

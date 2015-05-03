@@ -9,7 +9,7 @@ var Header = require('./Header');
 /*
 
 interface TerritoireViewScreenProps{
-    currentUser: MyWIUser,
+    user: MyWIUser,
     territoire: MyWITerritoire
     moveToOraclesScreen: () => void
 }
@@ -31,8 +31,8 @@ module.exports = React.createClass({
         
         return React.DOM.div({className: "react-wrapper"}, [
             new Header({
-                 user: state.currentUser,
-                 moveToOraclesScreen: props.moveToOracleScreen
+                 user: state.user,
+                 oracleHref: "/oracles"
             }),
             
             React.DOM.main({className: 'territoire'}, [

@@ -38,7 +38,9 @@ module.exports = React.createClass({
         var state = this.state;
         
         return React.DOM.div({className: "react-wrapper"}, [
-            new Header({user: props.user}),
+            new Header({
+                user: props.user
+            }),
             React.DOM.main({className: 'oracles'}, [
                 React.DOM.h1({}, "Oracles"),
                 React.DOM.ul({className: 'oracles'}, props.oracles.map(function(o){

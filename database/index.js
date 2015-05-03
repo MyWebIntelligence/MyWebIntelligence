@@ -64,7 +64,7 @@ module.exports = {
                 
                 return Promise.all(territoiresReadyPs).then(function(){
                     return {
-                        currentUser: user,
+                        user: user,
                         oracles: oracles
                     };
                 });

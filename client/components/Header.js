@@ -5,8 +5,8 @@ var React = require('react');
 /*
 
 interface HeaderProps{
-    user: MyWIUser
-    moveToOraclesScreen: () => void
+    user: MyWIUser,
+    oracleHref: string
 }
 
 */
@@ -14,7 +14,7 @@ interface HeaderProps{
 module.exports = React.createClass({
     getInitialState: function() {
         return {
-            currentUser: this.props.user
+            user: this.props.user
         };
     },
     
@@ -22,19 +22,15 @@ module.exports = React.createClass({
         var props = this.props;
         var state = this.state;
         
-        var headerChildren = [React.DOM.span({}, "My Web Intelligence")];
+        var headerChildren = [React.DOM.a({href:"/"}, "My Web Intelligence")];
         
         if(props.user){
             headerChildren.push(React.DOM.div({className: "user-infos"}, [
                 React.DOM.a({
-                    href: "/oracles",
-                    onClick: function(e){
-                        e.preventDefault();
-                        props.moveToOraclesScreen();
-                    }
+                    href: props.oracleHref
                 }, "Oracles"),
-                React.DOM.img({className:"avatar", src: state.currentUser.pictureURL}),
-                React.DOM.span({className:"username"}, state.currentUser.name)
+                React.DOM.img({className:"avatar", src: state.user.pictureURL}),
+                React.DOM.span({className:"username"}, state.user.name)
             ]));
         }
         

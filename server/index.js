@@ -190,19 +190,21 @@ app.get('/territoire/:id', function(req, res){
         res.redirect('/');
     }
     else{
+        var userInitDataP = database.complexQueries.getUserInitData(user.id);
         var territoireScreenDataP = database.complexQueries.getTerritoireScreenData(territoireId);
 
         // Create a fresh document every time
-        Promise.all([makeDocument(indexHTMLStr), territoireScreenDataP])
+        Promise.all([makeDocument(indexHTMLStr), userInitDataP, territoireScreenDataP])
             .then(function(result){
                 var doc = result[0].document;
                 var dispose = result[0].dispose;
 
-                var territoireScreenData = result[1];
+                var initData = result[1];
+                var territoireScreenData = result[2];
 
-                renderDocumentWithData(doc, {
+                renderDocumentWithData(doc, Object.assign(initData, {
                     territoire: territoireScreenData
-                }, TerritoireViewScreen);
+                }), TerritoireViewScreen);
 
                 res.send( serializeDocumentToHTML(doc) );
                 dispose();

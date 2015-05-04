@@ -3,12 +3,6 @@
 if(typeof HTMLElement.prototype.remove !== 'function')
     throw 'Add HTMLElement.prototype.remove polyfill';
 
-if(!Object.assign)
-    throw 'add Object.assign polyfill';
-
-if(!Array.prototype.findIndex)
-    throw 'add Array.prototype.findIndex polyfill';
-
 var React = require('react');
 var page = require('page');
 

@@ -56,7 +56,7 @@ module.exports = React.createClass({
                     
                     var oracleOptions = Object.create(null);
                     
-                    Array.from(oracleOptionInputs).forEach(function(input){
+                    Array.prototype.forEach.call(oracleOptionInputs, function(input){
                         var id = input.name;
                         var value;
                         

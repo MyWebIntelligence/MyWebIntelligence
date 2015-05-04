@@ -26,6 +26,8 @@ var pageGraphToDomainGraph = require('../common/graph/pageGraphToDomainGraph');
 
 var TerritoireListScreen = React.createFactory(require('../client/components/TerritoireListScreen'));
 var OraclesScreen = React.createFactory(require('../client/components/OraclesScreen'));
+var TerritoireViewScreen = React.createFactory(require('../client/components/TerritoireViewScreen'));
+
 
 var googleCredentials = require('../config/google-credentials.json');
 
@@ -122,9 +124,9 @@ app.get('/auth/google/callback',
 );
 
 
-/*
-    Application routes
-*/
+/***
+    HTML routes
+***/
 
 function renderDocumentWithData(doc, data, reactFactory){
     doc.querySelector('body').innerHTML = React.renderToString( reactFactory(data) );
@@ -153,6 +155,74 @@ app.get('/territoires', function(req, res){
         .catch(function(err){ console.error('/territoires', err, err.stack); });
     }
 });
+
+
+app.get('/oracles', function(req, res){
+    var user = serializedUsers.get(req.session.passport.user);
+    if(!user || !user.id){
+        res.redirect('/');
+    }
+    else{
+        var userInitDataP = database.complexQueries.getUserInitData(user.id);
+
+        // Create a fresh document every time
+        Promise.all([makeDocument(indexHTMLStr), userInitDataP]).then(function(result){
+            var doc = result[0].document;
+            var dispose = result[0].dispose;
+            
+            var initData = result[1];
+
+            renderDocumentWithData(doc, initData, OraclesScreen);
+
+            res.send( serializeDocumentToHTML(doc) );
+            dispose();
+        })
+        .catch(function(err){ console.error('/oracles', err); });
+    }
+});
+
+
+app.get('/territoire/:id', function(req, res){
+    var user = serializedUsers.get(req.session.passport.user);
+    var territoireId = Number(req.params.id);
+    
+    if(!user || !user.id){
+        res.redirect('/');
+    }
+    else{
+        var userInitDataP = database.complexQueries.getUserInitData(user.id);
+        var territoireScreenDataP = database.complexQueries.getTerritoireScreenData(territoireId);
+
+        // Create a fresh document every time
+        Promise.all([makeDocument(indexHTMLStr), userInitDataP, territoireScreenDataP])
+            .then(function(result){
+                var doc = result[0].document;
+                var dispose = result[0].dispose;
+
+                var initData = result[1];
+                var territoireScreenData = result[2];
+
+                renderDocumentWithData(doc, Object.assign(initData, {
+                    territoire: territoireScreenData
+                }), TerritoireViewScreen);
+
+                res.send( serializeDocumentToHTML(doc) );
+                dispose();
+            })
+            .catch(function(err){
+                console.error('/territoire/:id problem', territoireId, err, err.stack);
+                res.status(500).send(['/territoire/:id problem', territoireId, err].join(' '));
+            });
+    }
+
+});
+
+
+
+
+/***
+    data/JSON routes
+***/
 
 app.post('/territoire', function(req, res){
     var user = serializedUsers.get(req.session.passport.user);
@@ -333,33 +403,6 @@ app.delete('/query/:id', function(req, res){
 });
 
 
-
-
-app.get('/oracles', function(req, res){
-    var user = serializedUsers.get(req.session.passport.user);
-    if(!user || !user.id){
-        res.redirect('/');
-    }
-    else{
-        var userInitDataP = database.complexQueries.getUserInitData(user.id);
-
-        // Create a fresh document every time
-        Promise.all([makeDocument(indexHTMLStr), userInitDataP]).then(function(result){
-            var doc = result[0].document;
-            var dispose = result[0].dispose;
-            
-            var initData = result[1];
-
-            renderDocumentWithData(doc, initData, OraclesScreen);
-
-            res.send( serializeDocumentToHTML(doc) );
-            dispose();
-        })
-        .catch(function(err){ console.error('/oracles', err); });
-    }
-});
-
-
 app.post('/oracle-credentials', function(req, res){
     var user = serializedUsers.get(req.session.passport.user);
     if(!user || !user.id){
@@ -415,7 +458,9 @@ app.get('/territoire-view-data/:id', function(req, res){
     }).catch(function(err){
         res.status(500).send('database problem '+ err);
     });
-})
+});
+
+
 
 
 var server = app.listen(PORT, function(){

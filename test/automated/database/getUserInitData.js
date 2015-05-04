@@ -93,10 +93,10 @@ describe('Complex queries: getUserInitData', function(){
     
     it('should return the user description (with territoires: []) and oracles', function(){
         return getUserInitData(users[0].id).then(function(result){
-            assert.ok('currentUser' in result);
-            assert.equal(result.currentUser.name, "David Bruant");
-            assert.ok(Array.isArray(result.currentUser.territoires));
-            assert.equal(result.currentUser.territoires.length, 0);
+            assert.ok('user' in result);
+            assert.equal(result.user.name, "David Bruant");
+            assert.ok(Array.isArray(result.user.territoires));
+            assert.equal(result.user.territoires.length, 0);
             
             assert.ok(Array.isArray(result.oracles));
             assert.equal(result.oracles.length, 2);
@@ -117,26 +117,26 @@ describe('Complex queries: getUserInitData', function(){
         it('', function(){
             
             return getUserInitData(users[0].id).then(function(result){
-                assert.ok('currentUser' in result);
-                assert.equal(result.currentUser.name, "David Bruant");
+                assert.ok('user' in result);
+                assert.equal(result.user.name, "David Bruant");
 
                 assert.ok(Array.isArray(result.oracles));
                 assert.equal(result.oracles.length, 2);
 
 
-                assert.ok(Array.isArray(result.currentUser.territoires));
-                assert.equal(result.currentUser.territoires.length, 2);
-                var firstTerritoireName = result.currentUser.territoires[0].name
+                assert.ok(Array.isArray(result.user.territoires));
+                assert.equal(result.user.territoires.length, 2);
+                var firstTerritoireName = result.user.territoires[0].name
                 
                 assert.ok(
                     firstTerritoireName === territoireData[0].name ||
                     firstTerritoireName === territoireData[1].name ||
                     firstTerritoireName === territoireData[2].name);
                 
-                assert.ok(Array.isArray(result.currentUser.territoires[0].queries));
-                assert.equal(result.currentUser.territoires[0].queries.length, 0);
-                assert.ok(Array.isArray(result.currentUser.territoires[1].queries));
-                assert.equal(result.currentUser.territoires[1].queries.length, 0);
+                assert.ok(Array.isArray(result.user.territoires[0].queries));
+                assert.equal(result.user.territoires[0].queries.length, 0);
+                assert.ok(Array.isArray(result.user.territoires[1].queries));
+                assert.equal(result.user.territoires[1].queries.length, 0);
             });
         
         });
@@ -175,17 +175,17 @@ describe('Complex queries: getUserInitData', function(){
         it('', function(){
             
             return getUserInitData(users[0].id).then(function(result){
-                assert.ok('currentUser' in result);
-                assert.equal(result.currentUser.name, "David Bruant");
+                assert.ok('user' in result);
+                assert.equal(result.user.name, "David Bruant");
 
                 assert.ok(Array.isArray(result.oracles));
                 assert.equal(result.oracles.length, 2);
                 
-                assert.ok(Array.isArray(result.currentUser.territoires));
-                assert.equal(result.currentUser.territoires.length, 2);
+                assert.ok(Array.isArray(result.user.territoires));
+                assert.equal(result.user.territoires.length, 2);
                 
-                var t1 = result.currentUser.territoires[0];
-                var t2 = result.currentUser.territoires[1];
+                var t1 = result.user.territoires[0];
+                var t2 = result.user.territoires[1];
                 
                 assert.ok(Array.isArray(t1.queries));
                 assert.ok(Array.isArray(t2.queries));
@@ -193,7 +193,7 @@ describe('Complex queries: getUserInitData', function(){
                 assert.ok(t1.queries.length === 2 || t2.queries.length === 2, "one of the terrioire has 2 queries");
                 assert.ok(t1.queries.length === 0 || t2.queries.length === 0, "one of the terrioire has 0 queries");
                 
-                var territoireWithQueries = result.currentUser.territoires.find(function(t){
+                var territoireWithQueries = result.user.territoires.find(function(t){
                     return t.queries.length === 2;
                 })
                 

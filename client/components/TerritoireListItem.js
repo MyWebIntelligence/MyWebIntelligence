@@ -80,12 +80,7 @@ module.exports = React.createClass({
         else{
             children = [
                 React.DOM.a({
-                    href: "/territoire/"+t.id,
-                    onClick: function(e){
-                        e.preventDefault();
-                        
-                        props.moveToTerritoireViewScreen(t);
-                    }
+                    href: "/territoire/"+t.id
                 }, [
                     React.DOM.h1({className: "name"}, t.name),
                     React.DOM.p({className: "description"}, t.description)

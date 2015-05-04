@@ -3,3 +3,4 @@ node_modules
 client/browserify-bundle.js
 test/**/*.js
 ES-mess
+client/components/external

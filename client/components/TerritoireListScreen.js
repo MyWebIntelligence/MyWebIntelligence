@@ -8,10 +8,8 @@ var TerritoiresList = React.createFactory(require('./TerritoiresList'));
 /*
 
 interface TerritoiresListScreenProps{
-    currentUser: MyWIUser
+    user: MyWIUser
     serverAPI: MyWIServerAPI,
-    moveToOraclesScreen: () => void
-    moveToTerritoireViewScreen: (territoire: MyWITerritoire) => void
 }
 
 */
@@ -19,8 +17,9 @@ interface TerritoiresListScreenProps{
 
 module.exports = React.createClass({
     getInitialState: function() {
+        console.log('TerritoiresListScreen', 'getInitialState', this.props);
         return {
-            currentUser: this.props.currentUser
+            user: this.props.user
         }
     },
     
@@ -32,101 +31,101 @@ module.exports = React.createClass({
         var mainChildren = [
             React.DOM.h1({}, "Territoires"),
             new TerritoiresList({
-                territoires: state.currentUser.territoires,
+                territoires: state.user.territoires,
                 oracles: props.oracles,
                 onTerritoireListChange: function(newTerritoireList){
-                    state.currentUser.territoires = newTerritoireList;
+                    state.user.territoires = newTerritoireList;
                     self.setState({
-                        currentUser: state.currentUser
+                        user: state.user
                     })
                 },
                 createTerritoire: function(territoireData){
                     var temporaryTerritoire = Object.assign({queries: []}, territoireData);
 
                     // add at the beginning of the array so it appears first
-                    state.currentUser.territoires.unshift(temporaryTerritoire);
+                    state.user.territoires.unshift(temporaryTerritoire);
 
-                    // some element of the state.currentUser.territoires array was mutated
+                    // some element of the state.user.territoires array was mutated
                     self.setState({
-                        currentUser: state.currentUser
+                        user: state.user
                     });
 
                     props.serverAPI.createTerritoire(territoireData).then(function(serverTerritoire){
-                        var index = state.currentUser.territoires.findIndex(function(t){
+                        var index = state.user.territoires.findIndex(function(t){
                             return t === temporaryTerritoire;
                         });
 
                         serverTerritoire.queries = [];
-                        state.currentUser.territoires[index] = serverTerritoire;
+                        state.user.territoires[index] = serverTerritoire;
 
-                        // some element of the state.currentUser.territoires array was mutated
+                        // some element of the state.user.territoires array was mutated
                         self.setState({
-                            currentUser: state.currentUser
+                            user: state.user
                         });
 
                     }).catch(function(err){
                         console.error('TODO add error message to UI '+err);
 
-                        /*var index = state.currentUser.territoires.findIndex(function(t){
+                        /*var index = state.user.territoires.findIndex(function(t){
                             return t === territoire;
                         });
 
-                        state.currentUser.territoires.unshift(index, 1);
+                        state.user.territoires.unshift(index, 1);
 
-                        // some element of the state.currentUser.territoires array was mutated
+                        // some element of the state.user.territoires array was mutated
                         self.setState({
-                            currentUser: state.currentUser,
+                            user: state.user,
                             currentTerritoire: state.currentTerritoire
                         });*/
                     });
 
                 },
                 onTerritoireChange: function(territoireDelta){
-                    var relevantTerritoireIndex = state.currentUser.territoires.findIndex(function(t){
+                    var relevantTerritoireIndex = state.user.territoires.findIndex(function(t){
                         return t.id === territoireDelta.id;
                     });
 
                     var temporaryTerritoire = Object.assign(
                         {},          
-                        state.currentUser.territoires[relevantTerritoireIndex],
+                        state.user.territoires[relevantTerritoireIndex],
                         territoireDelta
                     );
 
-                    state.currentUser.territoires[relevantTerritoireIndex] = temporaryTerritoire;
+                    state.user.territoires[relevantTerritoireIndex] = temporaryTerritoire;
 
-                    // some element of the state.currentUser.territoires array was mutated
+                    // some element of the state.user.territoires array was mutated
                     self.setState({
-                        currentUser: state.currentUser
+                        user: state.user
                     });
 
                     props.serverAPI.updateTerritoire(territoireDelta).then(function(updatedTerritoire){
                         console.log('update of', territoireDelta, 'went well', updatedTerritoire);
 
-                        var newRelevantTerritoireIndex = state.currentUser.territoires.findIndex(function(t){
+                        var newRelevantTerritoireIndex = state.user.territoires.findIndex(function(t){
                             return t.id === territoireDelta.id;
                         });
 
-                        state.currentUser.territoires[newRelevantTerritoireIndex] = Object.assign(temporaryTerritoire, updatedTerritoire);
+                        state.user.territoires[newRelevantTerritoireIndex] = Object.assign(temporaryTerritoire, updatedTerritoire);
 
                         self.setState({
-                            currentUser: state.currentUser
+                            user: state.user
                         });
                     }).catch(function(err){
                         console.error('TODO add error message to UI '+err);
                     });
                 },
                 deleteTerritoire: function(t){
-                    var index = state.currentUser.territoires.indexOf(t);
-                    state.currentUser.territoires.splice(index, 1);
+                    var index = state.user.territoires.indexOf(t);
+                    state.user.territoires.splice(index, 1);
 
-                    // some element of the state.currentUser.territoires array was mutated
+                    // some element of the state.user.territoires array was mutated
                     self.setState({
-                        currentUser: state.currentUser
+                        user: state.user
                     });
 
                     props.serverAPI.deleteTerritoire(t).then(function(){
                         self.setState({
-                            currentUser: state.currentUser
+                            user: state.user
                         });
                     });// .catch() // TODO add back + error message
                 },
@@ -134,9 +133,9 @@ module.exports = React.createClass({
                     var temporaryQuery = Object.assign({}, queryData);
 
                     territoire.queries.push(temporaryQuery);
-                    // some element of the state.currentUser.territoires array was mutated
+                    // some element of the state.user.territoires array was mutated
                     self.setState({
-                        currentUser: state.currentUser
+                        user: state.user
                     });
 
                     props.serverAPI.createQueryInTerritoire(queryData, territoire).then(function(serverQuery){
@@ -146,7 +145,7 @@ module.exports = React.createClass({
                         territoire.queries[index] = serverQuery;
 
                         self.setState({
-                            currentUser: state.currentUser
+                            user: state.user
                         });
 
                     })// .catch() // TODO error message
@@ -164,9 +163,9 @@ module.exports = React.createClass({
 
                     territoire.queries[relevantQueryIndex] = temporaryQuery;
 
-                    // some element of the state.currentUser.territoires array was mutated
+                    // some element of the state.user.territoires array was mutated
                     self.setState({
-                        currentUser: state.currentUser
+                        user: state.user
                     });
 
                     props.serverAPI.updateQuery(queryDelta).then(function(updatedQuery){
@@ -179,7 +178,7 @@ module.exports = React.createClass({
                         territoire.queries[newRelevantQueryIndex] = Object.assign(temporaryQuery, updatedQuery);
 
                         self.setState({
-                            currentUser: state.currentUser
+                            user: state.user
                         });
                     }).catch(function(err){
                         console.error('TODO add error message to UI '+err);
@@ -189,18 +188,17 @@ module.exports = React.createClass({
                     var index = territoire.queries.indexOf(query);
                     territoire.queries.splice(index, 1);
 
-                    // some element of the state.currentUser.territoires array was mutated
+                    // some element of the state.user.territoires array was mutated
                     self.setState({
-                        currentUser: state.currentUser
+                        user: state.user
                     });
 
                     props.serverAPI.deleteQuery(query).then(function(){
                         self.setState({
-                            currentUser: state.currentUser
+                            user: state.user
                         });
                     });// .catch() // TODO add back + error message
-                },
-                moveToTerritoireViewScreen: props.moveToTerritoireViewScreen
+                }
             })
         ];
         
@@ -208,8 +206,8 @@ module.exports = React.createClass({
         return React.DOM.div({className: "react-wrapper"}, [
             
             new Header({
-                user: state.currentUser,
-                moveToOraclesScreen: props.moveToOracleScreen
+                user: state.user,
+                oracleHref: "/oracles"
             }),
             
             React.DOM.main({className: 'territoire-list'}, mainChildren)

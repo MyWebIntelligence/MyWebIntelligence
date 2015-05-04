@@ -52,7 +52,7 @@ interface MyWIOracle{
 }
 
 interface InitData{
-    currentUser: {
+    user: {
         territoires: MyWITerritoire[]
     }
     oracles: MyWIOracle[]

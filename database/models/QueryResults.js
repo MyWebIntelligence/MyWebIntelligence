@@ -17,13 +17,17 @@ module.exports = makeJSONDatabaseModel('QueryResults', {
     },
     findLatestByQueryId: function(queryId){
         return this.getAll().then(function(arr){
-            return arr.filter(function(queryResult){
+            var queryResults = arr.filter(function(queryResult){
                 return queryResult.query_id === queryId;
-            }).reduce(function(latest, res){
-                return Date.parse(latest.created_at) > Date.parse(res.created_at) ?
-                    latest :
-                    res;
             });
+            
+            return queryResults.length === 0 ?
+                undefined :
+                queryResults.reduce(function(latest, res){
+                    return Date.parse(latest.created_at) > Date.parse(res.created_at) ?
+                        latest :
+                        res;
+                });
         });
     },
     create: makePromiseQueuer(function(QueryResultData){

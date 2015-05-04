@@ -11,6 +11,11 @@ header{
     justify-content: space-between;
 }
 
+header a.top{
+    color: black;
+    text-decoration: none;
+}
+
 header .user-infos{
     font-size: 0.7em;
 }

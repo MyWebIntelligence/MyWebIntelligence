@@ -22,7 +22,12 @@ module.exports = React.createClass({
         var props = this.props;
         var state = this.state;
         
-        var headerChildren = [React.DOM.a({href:"/"}, "My Web Intelligence")];
+        var headerChildren = [
+            React.DOM.a({
+                className: "top",
+                href: state.user ? "/territoires" : "/"
+            }, "My Web Intelligence")
+        ];
         
         if(props.user){
             headerChildren.push(React.DOM.div({className: "user-infos"}, [

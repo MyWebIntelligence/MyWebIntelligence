@@ -42,3 +42,4 @@ Set.prototype.toJSON = function toJSON(){
 
 
 
+Promise._allResolved = require('../common/allResolved');

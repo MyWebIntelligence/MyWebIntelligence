@@ -73,7 +73,7 @@ module.exports = function prepareGCSEOracle(credentials){
     function getGCSEResultsForAllStarts(options){
         var results = new Set();
         
-        return Promise.all(STARTS.map(function(start){
+        return Promise._allResolved(STARTS.map(function(start){
             var url = makeGCSESearchURL(Object.assign(
                 {
                     start: start,

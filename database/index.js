@@ -81,7 +81,7 @@ module.exports = {
             var queryReadyP = relevantQueries.then(function(queries){
                 return Promise.all(queries.map(function(q){
                     return QueryResults.findLatestByQueryId(q.id).then(function(queryResults){
-                        q.oracleResults = queryResults.results;
+                        q.oracleResults = queryResults && queryResults.results;
                     });
                 }));
             });
@@ -258,7 +258,7 @@ module.exports = {
             
             return QueryResults.findLatestByQueryId(queryId)
                 .then(function(qRes){
-                    return self.getGraphFromRootURIs( new Set(qRes.results) );
+                    return self.getGraphFromRootURIs( new Set(qRes ? qRes.results : []) );
                 });
         },
         
@@ -277,7 +277,7 @@ module.exports = {
                     var roots = [];
                 
                     queriesResults.forEach(function(qRes){
-                        roots = roots.concat(qRes.results);
+                        roots = roots.concat(qRes ? qRes.results : []);
                     });
                 
                     return self.getGraphFromRootURIs( new Set(roots) );

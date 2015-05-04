@@ -26,12 +26,10 @@ module.exports = React.createClass({
         var props = this.props;
         var territoire = props.territoire;
         console.log('Territoire view', props);
-        
-        var state = this.state;
-        
+                
         return React.DOM.div({className: "react-wrapper"}, [
             new Header({
-                 user: state.user,
+                 user: props.user,
                  oracleHref: "/oracles"
             }),
             
@@ -75,9 +73,18 @@ module.exports = React.createClass({
                     ]),
                     
                     React.DOM.div({className: 'exports'}, [
-                        React.DOM.a({href: "/territoire/"+territoire.id+"/expressions.csv"}, 'Download Pages CSV'),
-                        React.DOM.a({href: "/territoire/"+territoire.id+"/expressions.gexf"}, 'Download Pages GEXF'),
-                        React.DOM.a({href: "/territoire/"+territoire.id+"/domains.gexf"}, 'Download Domains GEXF')
+                        React.DOM.a({
+                            href: "/territoire/"+territoire.id+"/expressions.csv",
+                            download: true
+                        }, 'Download Pages CSV'),
+                        React.DOM.a({
+                            href: "/territoire/"+territoire.id+"/expressions.gexf",
+                            download: true
+                        }, 'Download Pages GEXF'),
+                        React.DOM.a({
+                            href: "/territoire/"+territoire.id+"/domains.gexf",
+                            download: true
+                        }, 'Download Domains GEXF')
                     ])
                 
                 ])

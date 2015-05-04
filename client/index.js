@@ -88,10 +88,12 @@ page("/territoire/:id", function displayTerritoireViewScreen(context){
     });
     console.log('/territoire/:id', territoireId, data.user.territoires, t);
     
-    var screenData = {
-        territoire: t,
-        oracles: data.oracles
-    };
+    var screenData = Object.assign(
+        {
+            territoire: t
+        },
+        data
+    );
     
     // render right away even with super-partial data
     React.render(new TerritoireViewScreen(screenData), document.body);

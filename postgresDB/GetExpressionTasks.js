@@ -133,7 +133,7 @@ module.exports = {
                 "related_territoire_id = " + serializeValueForDB(territoireId)
             ].join(' ') + ';';
             
-            console.log('query', territoireId, query);
+            // console.log('query', territoireId, query);
             
             return new Promise(function(resolve, reject){
                 db.query(query, function(err, result){

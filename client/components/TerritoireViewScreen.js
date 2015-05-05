@@ -10,13 +10,43 @@ var Header = require('./Header');
 
 interface TerritoireViewScreenProps{
     user: MyWIUser,
-    territoire: MyWITerritoire
+    territoire: MyWITerritoire,
+    refresh: function(){}: void
 }
 
 */
 
 
 module.exports = React.createClass({
+    
+    refreshTimeout: undefined,
+    scheduleRefreshIfNecessary: function(){        
+        var props = this.props;
+        var t = props.territoire;
+        var crawlTodoCount = t && t.progressIndicators && t.progressIndicators.crawlTodoCount;
+        
+        console.log("scheduleRefreshIfNecessary", crawlTodoCount);
+        
+        if(crawlTodoCount && crawlTodoCount >= 1){
+            this.refreshTimeout = setTimeout(function(){
+                this.refreshTimeout = undefined;
+                props.refresh();
+            }, 5*1000);
+        }
+    },
+    
+    // maybe schedule a refresh on mount and when receiving props
+    componentDidMount: function(){
+        this.scheduleRefreshIfNecessary();
+    },
+    componentDidUpdate: function(){
+        this.scheduleRefreshIfNecessary();
+    },
+    
+    componentWillUnmount: function(){
+        clearTimeout(this.refreshTimeout);
+    },
+    
     getInitialState: function() {
         return {}
     },

@@ -11,7 +11,6 @@ interface TerritoireListItemProps{
     oracles: MyWIOracle[]
     onTerritoireChange : (t: MyWITerritoire) => void
     deleteTerritoire: (t: MyWITerritoire) => void
-    moveToTerritoireViewScreen: (t: MyWITerritoire) => void
     
     createQueryInTerritoire: (q: MyWIQueryData, t: MyWITerritoire) => void
     removeQueryFromTerritoire: (q: MyWIQueryData, t: MyWITerritoire) => void

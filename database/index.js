@@ -71,14 +71,32 @@ module.exports = {
             });
         },
         
+        getProgressIndicators: function(territoireId){
+            var queryResultsP = this.getTerritoireQueryResults(territoireId);
+            var crawlTodoCountP = GetExpressionTasks.getCrawlTodoCount(territoireId);
+            
+            crawlTodoCountP.then(function(res){
+                console.log('crawlTodoCountP', res)
+            }).catch(function(err){
+                console.error('crawlTodoCountP err', err);
+            })
+            
+            return Promise.all([ queryResultsP, crawlTodoCountP ]).then(function(res){
+                return {
+                    queriesResultsCount: res[0].size,
+                    crawlTodoCount: res[1]
+                }
+            });
+        },
+        
         /*
             Query search results
         */
         getTerritoireScreenData: function(territoireId){
             var territoireP = Territoires.findById(territoireId);
-            var relevantQueries = Queries.findByBelongsTo(territoireId);
+            var relevantQueriesP = Queries.findByBelongsTo(territoireId);
             
-            var queryReadyP = relevantQueries.then(function(queries){
+            var queryReadyP = relevantQueriesP.then(function(queries){
                 return Promise.all(queries.map(function(q){
                     return QueryResults.findLatestByQueryId(q.id).then(function(queryResults){
                         q.oracleResults = queryResults && queryResults.results;
@@ -95,7 +113,9 @@ module.exports = {
                     results.push({
                         title: n.title,
                         url: n.url,
-                        excerpt: n.excerpt
+                        excerpt: n.excerpt,
+                        depth: n.depth,
+                        expressionId: n.expressionId
                     });
                 });
 
@@ -116,14 +136,18 @@ module.exports = {
                 return results;
             });
             
+            // timing of this query will make the values certainly out-of-sync with when 
+            var progressIndicatorsP = this.getProgressIndicators(territoireId);
+            
             return Promise.all([
-                territoireP, relevantQueries, resultListByPageP, resultListByDomainP, queryReadyP
+                territoireP, relevantQueriesP, resultListByPageP, resultListByDomainP, progressIndicatorsP, queryReadyP
             ]).then(function(res){
                 var territoire = res[0];
                 
                 territoire.queries = res[1];
                 territoire.resultListByPage = res[2];
                 territoire.resultListByDomain = res[3];
+                territoire.progressIndicators = res[4];
                 
                 return territoire;
             });
@@ -141,7 +165,7 @@ module.exports = {
             // (alias => canonical URL) map
             var urlToCanonical = new StringMap/*<url, url>*/();
             
-            function buildGraph(urls){
+            function buildGraph(urls, depth){
                 console.time('buildGraph');
                 //var dbtimeKey = ['findByURIAndAliases', urls.size, 'urls'].join(' ');
                 //console.time(dbtimeKey)
@@ -154,7 +178,9 @@ module.exports = {
                     expressions.forEach(function(expr){
                         var uri = expr.uri;
                         
-                        nodes.set(uri, expr);
+                        nodes.set(uri, Object.assign({
+                            depth: depth
+                        }, expr));
                         
                         if(Array.isArray(expr.aliases)){
                             expr.aliases.forEach(function(a){
@@ -174,7 +200,8 @@ module.exports = {
                                 if(!nodes.has(refURL)){
                                     // create shallow node
                                     nodes.set(refURL, {
-                                        uri: refURL
+                                        uri: refURL,
+                                        depth: -1
                                     });
                                 }
                                 
@@ -191,14 +218,14 @@ module.exports = {
                     
                     
                     if(nextURLs.size >= 1){
-                        return buildGraph(nextURLs);
+                        return buildGraph(nextURLs, depth+1);
                     }
                     //console.timeEnd(timeKey);
 
                 });
             }
             
-            return buildGraph(rootURIs)
+            return buildGraph(rootURIs, 0)
                 .then(function(){
                     console.timeEnd('buildGraph');
                     console.time('PageGraph');
@@ -224,7 +251,9 @@ module.exports = {
                             excerpt: expr["meta_description"]  || '',
                             //publication_date: expr.publication_date,
                             content: expr.main_text  || '',
-                            content_length: (expr.main_text || '').length
+                            content_length: (expr.main_text || '').length,
+                            depth: expr.depth,
+                            expressionId: typeof expr.id === "number" ? expr.id : -1
                         });
                         
                         urlToNodeName.set(url, name);
@@ -262,10 +291,7 @@ module.exports = {
                 });
         },
         
-        getTerritoireGraph: function(territoireId){
-            console.log('getTerritoireGraph', territoireId);
-            
-            var self = this;
+        getTerritoireQueryResults: function(territoireId){
             
             return Queries.findByBelongsTo(territoireId)
                 .then(function(queries){
@@ -274,14 +300,24 @@ module.exports = {
                     }));
                 })
                 .then(function(queriesResults){
-                    var roots = [];
+                    var terrResults = [];
                 
                     queriesResults.forEach(function(qRes){
-                        roots = roots.concat(qRes ? qRes.results : []);
+                        terrResults = terrResults.concat(qRes ? qRes.results : []);
                     });
                 
-                    return self.getGraphFromRootURIs( new Set(roots) );
+                    return new Set(terrResults);
                 });
+        }, 
+        
+        getTerritoireGraph: function(territoireId){
+            console.log('getTerritoireGraph', territoireId);
+            
+            var self = this;
+            
+            return this.getTerritoireQueryResults(territoireId).then(function(roots){
+                return self.getGraphFromRootURIs( roots );
+            });
         }
             
     }

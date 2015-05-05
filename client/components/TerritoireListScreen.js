@@ -17,7 +17,6 @@ interface TerritoiresListScreenProps{
 
 module.exports = React.createClass({
     getInitialState: function() {
-        console.log('TerritoiresListScreen', 'getInitialState', this.props);
         return {
             user: this.props.user
         }

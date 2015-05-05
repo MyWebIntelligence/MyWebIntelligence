@@ -24,6 +24,12 @@ var pageNodeDesc = {
     },
     "content_length": {
         type: "integer"
+    },
+    "depth": {
+        type: "integer"
+    },
+    "expressionId": {
+        type: "integer"
     }
 };
 

@@ -6,7 +6,7 @@ var startCrawl = require('./startCrawl');
 
 
 module.exports = function onQueryCreated(query, user){
-    console.log("onQueryCreated", query.name, user.name);
+    console.log("onQueryCreated", query.name, query.belongs_to, user.name);
     
     return db.Oracles.findById(query.oracle_id)
         .then(function(oracle){
@@ -29,7 +29,7 @@ module.exports = function onQueryCreated(query, user){
                     created_at: new Date()
                 }),
                 // don't wait for the results to be stored in database to start crawling
-                startCrawl(queryResults)
+                startCrawl(queryResults, query.belongs_to)
             ]);
         })
         .catch(function(err){

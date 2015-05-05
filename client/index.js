@@ -80,29 +80,34 @@ page("/territoire/:id", function displayTerritoireViewScreen(context){
     var t = data.user.territoires.find(function(terr){
         return terr.id === territoireId;
     });
-    console.log('/territoire/:id', territoireId, data.user.territoires, t);
+    // console.log('/territoire/:id', territoireId, data.user.territoires, t);
     
-    var screenData = Object.assign(
-        {
-            territoire: t
-        },
-        data
-    );
+    var screenData = {};
     
-    // render right away even with super-partial data
-    React.render(new TerritoireViewScreen(screenData), document.body);
+    function refresh(){
+        console.log('refresh');
+        return serverAPI.getTerritoireViewData(t).then(function(terrViewData){
+            console.log('getTerritoireViewData', t, terrViewData);
+            render(terrViewData)
+        });
+    }
     
-    serverAPI.getTerritoireViewData(t).then(function(terrViewData){
-        console.log('getTerritoireViewData', t, terrViewData);
-        
+    function render(terrViewData){
         screenData = Object.assign(
-            {},
+            {refresh: refresh},
             screenData,
             {territoire: terrViewData}
         );
-        
+
         React.render(new TerritoireViewScreen(screenData), document.body);
-    });
+    }
+    
+    
+    // render right away even with super-partial data
+    render(t);
+    
+    // ask for refresh right away to get useful data
+    refresh();
 });
 
 

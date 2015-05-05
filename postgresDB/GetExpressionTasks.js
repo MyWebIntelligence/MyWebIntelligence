@@ -34,7 +34,7 @@ module.exports = {
     /*
         urls is a Set<url>
     */
-    createTasksTodo: function(urls){
+    createTasksTodo: function(urls, territoireId){
         console.log('createTasksTodo', urls.size);
         
         if(urls.size === 0)
@@ -45,7 +45,8 @@ module.exports = {
             var dataArray = urls.toJSON().map(function(url){
                 return {
                     uri: url,
-                    status: 'todo'
+                    status: 'todo',
+                    related_territoire_id: territoireId
                 };
             });
 
@@ -120,6 +121,27 @@ module.exports = {
                 });
             });
         });
+    },
+    
+    getCrawlTodoCount: function(territoireId){
+        
+        return databaseP.then(function(db){
+            var query = [
+                "SELECT count(*) FROM",
+                "get_expression_tasks",
+                "WHERE",
+                "related_territoire_id = " + serializeValueForDB(territoireId)
+            ].join(' ') + ';';
+            
+            // console.log('query', territoireId, query);
+            
+            return new Promise(function(resolve, reject){
+                db.query(query, function(err, result){
+                    if(err) reject(err); else resolve( Number(result.rows[0].count) );
+                });
+            });
+        });
+        
     },
     
     /*findByCanonicalURI: function(uri){

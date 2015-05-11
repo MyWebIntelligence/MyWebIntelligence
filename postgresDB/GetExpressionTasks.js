@@ -79,7 +79,7 @@ module.exports = {
     },
     
     pickTasks: function(count){
-        console.log('pickTasks', count);
+        // console.log('pickTasks', count);
         
         return databaseP.then(function(db){
             // http://stackoverflow.com/a/11568880            
@@ -94,7 +94,7 @@ module.exports = {
                 "RETURNING *"
             ].join(' ') + ';';
             
-            console.log('pickTasks query', query);
+            // console.log('pickTasks query', query);
             
             return new Promise(function(resolve, reject){
                 db.query(query, function(err, result){

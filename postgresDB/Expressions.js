@@ -63,7 +63,7 @@ module.exports = {
                 "("+uriDisjunction+")"
             ].join(' ') + ';';
             
-            //console.log('query', query);
+            // console.log('query', query);
             
             return new Promise(function(resolve, reject){
                 db.query(query, function(err, result){
@@ -104,7 +104,7 @@ module.exports = {
                 "id IN ("+ids.toJSON().map(serializeValueForDB).join(',')+')'
             ].join(' ') + ';';
             
-            //console.log('query', query);
+            console.log('getExpressionsWithContent query', query);
             
             return new Promise(function(resolve, reject){
                 db.query(query, function(err, result){
@@ -112,7 +112,7 @@ module.exports = {
                 });
             });
         });
-    }
+    },
     
     update: function(expressionData){
         // UPDATE weather SET temp_lo = temp_lo+1, temp_hi = temp_lo+15, prcp = DEFAULT WHERE city = 'San Francisco' AND date = '2003-07-03';
@@ -148,7 +148,7 @@ module.exports = {
     
     deleteAll: function(){
         // doesn't delete anything yet
-        return Promise.resolve();
+        return Promise.reject('not implemented');
     }
     
 };

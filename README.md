@@ -52,9 +52,23 @@ TODO figure out and document relationship with Trello
 ### Install
 
 * Install Node.js, Docker
-* `npm install`
-* `npm run bundle`
-* `npm start`
+```bash
+npm install
+```
+
+#### First time
+
+Start the database
+
+```bash
+npm run start-db-container
+```
+
+
+```bash
+npm run bundle
+npm start-dev
+```
 
 ### Test
 

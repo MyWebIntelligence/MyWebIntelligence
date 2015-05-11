@@ -106,6 +106,26 @@ module.exports = {
             
             var pageGraphP = this.getTerritoireGraph(territoireId)
             
+            throw 'TODO: hydrate';
+            .then(function(){
+                    console.timeEnd('buildGraph');
+                    console.time('hydrateExpressions');
+                    var ids = new Set();
+                
+                    nodes.forEach(function(expr){
+                        if(expr.id !== undefined)
+                            ids.add(expr.id);
+                    });
+                    
+                    return Expressions.getExpressionsWithContent(ids).then(function(expressions){
+                        expressions.forEach(function(completeExpression){
+                            var uri = completeExpression.uri;
+                            var currentExpression = nodes.get(uri);
+                            nodes.set(uri, Object.assign(currentExpression, completeExpression));
+                        });
+                    });
+                })
+            
             var resultListByPageP = pageGraphP.then(function(pageGraph){
                 var results = [];
 
@@ -122,19 +142,25 @@ module.exports = {
                 return results;
             });
             
-            var resultListByDomainP = pageGraphP.then(pageGraphToDomainGraph).then(function(domainGraph){
-                var results = [];
+            var resultListByDomainP = pageGraphP
+                .then(function(pageGraph){
+                    console.time('pageGraphToDomainGraph');
+                    return pageGraphToDomainGraph(pageGraph);
+                })
+                .then(function(domainGraph){
+                    console.timeEnd('pageGraphToDomainGraph');
+                    var results = [];
 
-                domainGraph.nodes.forEach(function(n){
-                    results.push({
-                        domain: n.title,
-                        url: 'http://'+n.title+'/',
-                        count: n.nb_expressions
+                    domainGraph.nodes.forEach(function(n){
+                        results.push({
+                            domain: n.title,
+                            url: 'http://'+n.title+'/',
+                            count: n.nb_expressions
+                        });
                     });
-                });
 
-                return results;
-            });
+                    return results;
+                });
             
             // timing of this query will make the values certainly out-of-sync with when 
             var progressIndicatorsP = this.getProgressIndicators(territoireId);
@@ -227,7 +253,7 @@ module.exports = {
             
             return buildGraph(rootURIs, 0)
                 .then(function(){
-                    console.timeEnd('buildGraph');
+                    console.timEnd('hydrateExpressions');
                     console.time('PageGraph');
                     var pageGraph = new PageGraph();
                 
@@ -248,9 +274,6 @@ module.exports = {
                         pageGraph.addNode(name, {
                             url: url,
                             title: expr.title || '',
-                            excerpt: expr["meta_description"]  || '',
-                            //publication_date: expr.publication_date,
-                            content: expr.main_text  || '',
                             content_length: (expr.main_text || '').length,
                             depth: expr.depth,
                             expressionId: typeof expr.id === "number" ? expr.id : -1

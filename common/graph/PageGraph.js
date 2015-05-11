@@ -12,16 +12,10 @@ var pageNodeDesc = {
     },
     "title": {
         type: "string"
-    },
-    "excerpt": {
-        type: "string"
-    }/*,
+    },/*
     "publication_date": {
         type: "string"
-    }*/,
-    "content": {
-        type: "string"
-    },
+    },*/
     "content_length": {
         type: "integer"
     },

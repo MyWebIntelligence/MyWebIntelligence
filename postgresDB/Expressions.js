@@ -5,6 +5,10 @@ var databaseP = require('./databaseClientP');
 var serializeValueForDB = require('./serializeValueForDB');
 var serializeObjectForDB = require('./serializeObjectForDB');
 
+/*
+    Expressions contain large bodies of content. This API is designed so that most "get/find" methods only return "structure" fields.
+    To get the content, use getExpressionsWithContent(ids)
+*/
 
 module.exports = {
     create: function(expressionData){
@@ -53,7 +57,7 @@ module.exports = {
             
             
             var query = [
-                "SELECT * FROM",
+                'SELECT id, uri, "references", "aliases" FROM',
                 "expressions",
                 "WHERE",
                 "("+uriDisjunction+")"
@@ -73,7 +77,7 @@ module.exports = {
         return databaseP.then(function(db){
             
             var query = [
-                "SELECT * FROM",
+                'SELECT id, uri, "references", "aliases" FROM',
                 "expressions",
                 "WHERE",
                 "uri = "+serializeValueForDB(uri)
@@ -88,6 +92,27 @@ module.exports = {
             });
         });
     },
+    
+    /* ids: set of ids */
+    getExpressionsWithContent: function(ids){
+        return databaseP.then(function(db){
+            
+            var query = [
+                'SELECT * FROM',
+                "expressions",
+                "WHERE",
+                "id IN ("+ids.toJSON().map(serializeValueForDB).join(',')+')'
+            ].join(' ') + ';';
+            
+            //console.log('query', query);
+            
+            return new Promise(function(resolve, reject){
+                db.query(query, function(err, result){
+                    if(err) reject(err); else resolve(result.rows);
+                });
+            });
+        });
+    }
     
     update: function(expressionData){
         // UPDATE weather SET temp_lo = temp_lo+1, temp_hi = temp_lo+15, prcp = DEFAULT WHERE city = 'San Francisco' AND date = '2003-07-03';

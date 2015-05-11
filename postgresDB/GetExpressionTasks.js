@@ -78,7 +78,9 @@ module.exports = {
         });
     },
     
-    pickATask: function(){
+    pickTasks: function(count){
+        console.log('pickTasks', count);
+        
         return databaseP.then(function(db){
             // http://stackoverflow.com/a/11568880            
             
@@ -88,15 +90,15 @@ module.exports = {
                 "SET",
                 "status = 'getting expression'",
                 "WHERE",
-                "id = (SELECT id FROM get_expression_tasks WHERE status = 'todo' LIMIT 1 FOR UPDATE)",
+                "id IN (SELECT id FROM get_expression_tasks WHERE status = 'todo' LIMIT "+count+" FOR UPDATE)",
                 "RETURNING *"
             ].join(' ') + ';';
             
-            //console.log('pickATask query', query);
+            console.log('pickTasks query', query);
             
             return new Promise(function(resolve, reject){
                 db.query(query, function(err, result){
-                    if(err) reject(err); else resolve(result.rows.length >= 1 ? result.rows[0] : undefined);
+                    if(err) reject(err); else resolve(result.rows);
                 });
             });
         });

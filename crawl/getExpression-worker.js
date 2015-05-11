@@ -4,54 +4,76 @@ require('../ES-mess');
 process.title = "MyWI getExpression worker";
 
 var getExpression = require('./getExpression');
-
 var database = require('../database');
 
 console.log('# getExpression process', process.pid);
 
-var ONE_HOUR = 60*60*1000;
+var SECOND = 1000; // ms
+var ONE_HOUR = 60*60*SECOND;
 
-var RETRY_DELAY = 10*1000;// ms
+var TASK_PICK_INTERVAL_DELAY = 10*SECOND;
+var MAX_CONCURRENT_TASKS = 10;
+var GET_EXPRESSION_MAX_DELAY = 2*60*SECOND;
 
 
-function pickATask(){
-    console.log('pickATask!', process.pid);
+var inFlightTasks = new Set();
+
+// main interval
+// pick tasks independently of tasks successes, failures and hang
+setInterval(function(){
+    console.log('interval', inFlightTasks.size);
     
-    database.GetExpressionTasks.pickATask()
-        .then(function(task){
-            if(task){
-                //console.log('found task', process.pid, task);
-                var url = task.uri;
-
-                return getExpression(url)
-                    .then(function(expression){
-                        return database.Expressions.create(expression);
-                    })
-                    .catch(function(err){
-                        console.log('getExpression error', url, err, err.stack);
-
-                        return; // symbolic. Just to make explicit the next .then is a "finally"
-                    })
-                    // in any case "finally"
-                    .then(function(){
-                        database.GetExpressionTasks.delete(task.id);
-                        pickATask();
-                    });     
-            }
-            else{
-                //console.log('no task', process.pid, 'retrying after', (RETRY_DELAY/1000).toFixed(1), 's');
-                setTimeout(pickATask, RETRY_DELAY);
-            }
-        })
-        .catch(function(err){
-            console.error('pick a task error', err);
-            setTimeout(pickATask, RETRY_DELAY);
-        });
+    if(inFlightTasks.size < MAX_CONCURRENT_TASKS){
+        var taskToPickCount = MAX_CONCURRENT_TASKS - inFlightTasks.size;
+        
+        database.GetExpressionTasks.pickTasks(taskToPickCount)
+            .then(function(tasks){
+                tasks.forEach(processTask);
+            })
+            .catch(function(err){
+                console.error('pickTasks error', err);
+            });
+    }
     
+}, TASK_PICK_INTERVAL_DELAY);
+
+
+function deleteTask(task){
+    // the two actions are purposefully not synchronized
+    inFlightTasks.delete(task);
+    return database.GetExpressionTasks.delete(task.id);
 }
 
-// startup
-pickATask();
+function processTask(task){
+    inFlightTasks.add(task);
+        
+    var url = task.uri;
+    
+    var expressionP = getExpression(url);
+    // getExpression fights against a timer
+    var timerP = new Promise(function(resolve){
+        setTimeout(resolve, GET_EXPRESSION_MAX_DELAY);
+    });
+    
+    expressionP
+        .then(function(expression){
+            return database.Expressions.create(expression);
+        })
+        .catch(function(err){
+            console.log('getExpression error', url, err, err.stack);
+
+            return; // symbolic. Just to make explicit the next .then is a "finally"
+        })
+        // in any case ("finally")
+        .then(function(){
+            return deleteTask(task);
+        });
+    
+    timerP.then(function(){
+        return deleteTask(task);
+    })
+}
+
 
 
 process.on('uncaughtException', function(e){

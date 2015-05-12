@@ -14,10 +14,9 @@ var QueryResults = require('./models/QueryResults');
 var Expressions = require('../postgresDB/Expressions');
 var GetExpressionTasks = require('../postgresDB/GetExpressionTasks');
 
-var PageGraph = require('../common/graph/PageGraph');
 var pageGraphToDomainGraph = require('../common/graph/pageGraphToDomainGraph');
-
-
+var abstractGraphToPageGraph = require('../common/graph/abstractGraphToPageGraph');
+var getGraphExpressions = require('../common/graph/getGraphExpressions')(Expressions);
 
 module.exports = {
     Users: Users,
@@ -75,12 +74,6 @@ module.exports = {
             var queryResultsP = this.getTerritoireQueryResults(territoireId);
             var crawlTodoCountP = GetExpressionTasks.getCrawlTodoCount(territoireId);
             
-            crawlTodoCountP.then(function(res){
-                console.log('crawlTodoCountP', res)
-            }).catch(function(err){
-                console.error('crawlTodoCountP err', err);
-            })
-            
             return Promise.all([ queryResultsP, crawlTodoCountP ]).then(function(res){
                 return {
                     queriesResultsCount: res[0].size,
@@ -93,6 +86,9 @@ module.exports = {
             Query search results
         */
         getTerritoireScreenData: function(territoireId){
+            console.log('getTerritoireScreenData', territoireId);
+            var MAX_EXCERPT_LENGTH = 300;
+            
             var territoireP = Territoires.findById(territoireId);
             var relevantQueriesP = Queries.findByBelongsTo(territoireId);
             
@@ -104,40 +100,69 @@ module.exports = {
                 }));
             });
             
-            var pageGraphP = this.getTerritoireGraph(territoireId)
+            var abstractPageGraphP = this.getTerritoireGraph(territoireId);
             
-            var resultListByPageP = pageGraphP.then(function(pageGraph){
-                var results = [];
-
-                pageGraph.nodes.forEach(function(n){
-                    results.push({
-                        title: n.title,
-                        url: n.url,
-                        excerpt: n.excerpt,
-                        depth: n.depth,
-                        expressionId: n.expressionId
-                    });
+            var expressionByIdP = abstractPageGraphP
+                .then(getGraphExpressions);
+            
+            var pageGraphP = Promise.all([abstractPageGraphP, expressionByIdP])
+                .then(function(res){
+                    var abstractPageGraph = res[0];
+                    var expressionById = res[1];
+                    return abstractGraphToPageGraph(abstractPageGraph, expressionById);
                 });
 
-                return results;
-            });
             
-            var resultListByDomainP = pageGraphP.then(pageGraphToDomainGraph).then(function(domainGraph){
-                var results = [];
+            var resultListByPageP = Promise.all([abstractPageGraphP, expressionByIdP])
+                .then(function(res){
+                    var abstractPageGraph = res[0];
+                    var expressionById = res[1];
+                    var results = [];
 
-                domainGraph.nodes.forEach(function(n){
-                    results.push({
-                        domain: n.title,
-                        url: 'http://'+n.title+'/',
-                        count: n.nb_expressions
+                    abstractPageGraph.nodes.forEach(function(n){
+                        var expressionId = String(n.id); // strinigfy because expressionById is a StringMap        
+                        var expression = Object.assign(
+                            {}, 
+                            n,
+                            expressionById.get(expressionId)
+                        );
+                        
+                        results.push({
+                            title: expression.title,
+                            url: expression.uri,
+                            excerpt: (expression.meta_description && expression.meta_description.slice(0, MAX_EXCERPT_LENGTH))
+                                    || (expression.main_text && expression.main_text.slice(0, MAX_EXCERPT_LENGTH)),
+                            depth: expression.depth,
+                            expressionId: expression.id
+                        });
                     });
-                });
 
-                return results;
-            });
+                    return results;
+                });
+            
+            var resultListByDomainP = pageGraphP
+                .then(function(pageGraph){
+                    console.time('pageGraphToDomainGraph');
+                    return pageGraphToDomainGraph(pageGraph);
+                })
+                .then(function(domainGraph){
+                    console.timeEnd('pageGraphToDomainGraph');
+                    var results = [];
+
+                    domainGraph.nodes.forEach(function(n){
+                        results.push({
+                            domain: n.title,
+                            url: 'http://'+n.title+'/',
+                            count: n.nb_expressions
+                        });
+                    });
+
+                    return results;
+                });
             
             // timing of this query will make the values certainly out-of-sync with when 
             var progressIndicatorsP = this.getProgressIndicators(territoireId);
+            
             
             return Promise.all([
                 territoireP, relevantQueriesP, resultListByPageP, resultListByDomainP, progressIndicatorsP, queryReadyP
@@ -153,14 +178,20 @@ module.exports = {
             });
         },
         
+        
+        
+        
         /*
             uris: Set<string>
+            @returns an abstract graph
+            Nodes are url => (partial) expression 
+            Edges are {source: Node, target: Node}
         */
         getGraphFromRootURIs: function(rootURIs){
             //console.log('getGraphFromRootURIs', rootURIs.toJSON());
             
             var nodes = new StringMap/*<url, expression>*/(); // these are only canonical urls
-            var potentialEdges = new Set();
+            var edges = new Set();
             
             // (alias => canonical URL) map
             var urlToCanonical = new StringMap/*<url, url>*/();
@@ -205,7 +236,7 @@ module.exports = {
                                     });
                                 }
                                 
-                                potentialEdges.add({
+                                edges.add({
                                     source: uri,
                                     target: refURL
                                 });
@@ -225,55 +256,18 @@ module.exports = {
                 });
             }
             
-            return buildGraph(rootURIs, 0)
-                .then(function(){
-                    console.timeEnd('buildGraph');
-                    console.time('PageGraph');
-                    var pageGraph = new PageGraph();
-                
-                    var nextNodeName = (function(){
-                        var next = 0;
-
-                        return function(){
-                            return 'n'+(next++);
-                        };
-                    })();
-                    
-                
-                    var urlToNodeName = new StringMap();
-                
-                    nodes.forEach(function(expr, url){
-                        var name = nextNodeName();
-                        
-                        pageGraph.addNode(name, {
-                            url: url,
-                            title: expr.title || '',
-                            excerpt: expr["meta_description"]  || '',
-                            //publication_date: expr.publication_date,
-                            content: expr.main_text  || '',
-                            content_length: (expr.main_text || '').length,
-                            depth: expr.depth,
-                            expressionId: typeof expr.id === "number" ? expr.id : -1
-                        });
-                        
-                        urlToNodeName.set(url, name);
-                    });
-                    
-                    potentialEdges.forEach(function(e){
-                        var source = urlToCanonical.get(e.source) || e.source;
-                        var target = urlToCanonical.get(e.target) || e.target;
-                        
-                        var sourceNode = pageGraph.getNode(urlToNodeName.get(source));
-                        var targetNode = pageGraph.getNode(urlToNodeName.get(target));
-                        
-                        if(sourceNode && targetNode)
-                            pageGraph.addEdge(sourceNode, targetNode, { weight: 1 });
-                    });
-                    
-                    console.timeEnd('PageGraph');
-                    
-                    return pageGraph;
+            return buildGraph(rootURIs, 0).then(function(){
+                // edges may contain non-canonical URLs in the target because of how it's built. Converting before returning
+                edges.forEach(function(e){
+                    e.target = urlToCanonical.get(e.target) || e.target;
                 });
+                
+                return {
+                    nodes: nodes,
+                    edges: edges
+                };
+            })
+                
         },
         
         /*

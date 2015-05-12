@@ -5,6 +5,10 @@ var databaseP = require('./databaseClientP');
 var serializeValueForDB = require('./serializeValueForDB');
 var serializeObjectForDB = require('./serializeObjectForDB');
 
+/*
+    Expressions contain large bodies of content. This API is designed so that most "get/find" methods only return "structure" fields.
+    To get the content, use getExpressionsWithContent(ids)
+*/
 
 module.exports = {
     create: function(expressionData){
@@ -53,13 +57,13 @@ module.exports = {
             
             
             var query = [
-                "SELECT * FROM",
+                'SELECT id, uri, "references", "aliases" FROM',
                 "expressions",
                 "WHERE",
                 "("+uriDisjunction+")"
             ].join(' ') + ';';
             
-            //console.log('query', query);
+            // console.log('query', query);
             
             return new Promise(function(resolve, reject){
                 db.query(query, function(err, result){
@@ -73,7 +77,7 @@ module.exports = {
         return databaseP.then(function(db){
             
             var query = [
-                "SELECT * FROM",
+                'SELECT id, uri, "references", "aliases" FROM',
                 "expressions",
                 "WHERE",
                 "uri = "+serializeValueForDB(uri)
@@ -84,6 +88,27 @@ module.exports = {
             return new Promise(function(resolve, reject){
                 db.query(query, function(err, result){
                     if(err) reject(err); else resolve(result.rows[0]);
+                });
+            });
+        });
+    },
+    
+    /* ids: set of ids */
+    getExpressionsWithContent: function(ids){
+        return databaseP.then(function(db){
+            
+            var query = [
+                'SELECT * FROM',
+                "expressions",
+                "WHERE",
+                "id IN ("+ids.toJSON().map(serializeValueForDB).join(',')+')'
+            ].join(' ') + ';';
+            
+            console.log('getExpressionsWithContent query', query);
+            
+            return new Promise(function(resolve, reject){
+                db.query(query, function(err, result){
+                    if(err) reject(err); else resolve(result.rows);
                 });
             });
         });
@@ -123,7 +148,7 @@ module.exports = {
     
     deleteAll: function(){
         // doesn't delete anything yet
-        return Promise.resolve();
+        return Promise.reject('not implemented');
     }
     
 };

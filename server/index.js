@@ -334,9 +334,17 @@ app.get('/territoire/:id/domains.gexf', function(req, res){
     
     var territoireP = database.Territoires.findById(id);
     console.time('graph from db');
-    var graphP = database.complexQueries.getTerritoireGraph(id).then(pageGraphToDomainGraph);
     
-    Promise.all([territoireP, graphP]).then(function(result){
+    var graphP = database.complexQueries.getTerritoireGraph(id);
+    var expressionsByIdP = graphP.then(getGraphExpressions);
+
+    var domainGraphP = Promise.all([graphP, expressionsByIdP])
+        .then(function(results){
+            return abstractGraphToPageGraph(results[0], results[1]);
+        })
+        .then(pageGraphToDomainGraph);
+    
+    Promise.all([territoireP, domainGraphP]).then(function(result){
         console.timeEnd('graph from db')
         var territoire = result[0];
         var graph = result[1];

@@ -14,63 +14,9 @@ var QueryResults = require('./models/QueryResults');
 var Expressions = require('../postgresDB/Expressions');
 var GetExpressionTasks = require('../postgresDB/GetExpressionTasks');
 
-var PageGraph = require('../common/graph/PageGraph');
 var pageGraphToDomainGraph = require('../common/graph/pageGraphToDomainGraph');
-
-
-function abstractGraphToPageGraph(abGraph, expressionById){
-    console.time('PageGraph');
-    var nodes = abGraph.nodes;
-    var edges = abGraph.edges;
-    
-    var pageGraph = new PageGraph();
-
-    var nextNodeName = (function(){
-        var next = 0;
-
-        return function(){
-            return 'n'+(next++);
-        };
-    })();
-
-    var urlToNodeName = new StringMap();
-
-    nodes.forEach(function(expr, url){
-        var expressionId = String(expr.id); // strinigfy because expressionById is a StringMap        
-        var expression = Object.assign(
-            {}, 
-            expr,
-            expressionById.get(expressionId)
-        );
-        
-        var name = nextNodeName();
-
-        pageGraph.addNode(name, {
-            url: url,
-            depth: expression.depth,
-            title: expression.title || '',
-            expressionId: typeof expression.id === "number" ? expression.id : -1
-        });
-
-        urlToNodeName.set(url, name);
-    });
-
-    edges.forEach(function(e){
-        var source = e.source;
-        var target = e.target;
-
-        var sourceNode = pageGraph.getNode(urlToNodeName.get(source));
-        var targetNode = pageGraph.getNode(urlToNodeName.get(target));
-
-        if(sourceNode && targetNode)
-            pageGraph.addEdge(sourceNode, targetNode, { weight: 1 });
-    });
-
-    console.timeEnd('PageGraph');
-
-    return pageGraph;
-}
-
+var abstractGraphToPageGraph = require('../common/graph/abstractGraphToPageGraph');
+var getGraphExpressions = require('../common/graph/getGraphExpressions')(Expressions);
 
 module.exports = {
     Users: Users,
@@ -157,24 +103,7 @@ module.exports = {
             var abstractPageGraphP = this.getTerritoireGraph(territoireId);
             
             var expressionByIdP = abstractPageGraphP
-                .then(function(graph){
-                    var expressionsById = new StringMap/*<id, expression>*/();
-                    var ids = new Set();
-                
-                    graph.nodes.forEach(function(node){
-                        var id = node.id;
-                        if(id !== undefined)
-                            ids.add(id);
-                    });
-                    
-                    return ids.size > 0 ? Expressions.getExpressionsWithContent(ids).then(function(expressions){
-                        expressions.forEach(function(completeExpression){
-                            expressionsById.set(String(completeExpression.id), completeExpression);
-                        });
-                        
-                        return expressionsById;
-                    }) : expressionsById;
-                });
+                .then(getGraphExpressions);
             
             var pageGraphP = Promise.all([abstractPageGraphP, expressionByIdP])
                 .then(function(res){
@@ -233,14 +162,6 @@ module.exports = {
             
             // timing of this query will make the values certainly out-of-sync with when 
             var progressIndicatorsP = this.getProgressIndicators(territoireId);
-            
-            
-            territoireP.catch(function(err){ console.error('db error territoireP', err); });
-            relevantQueriesP.catch(function(err){ console.error('db error relevantQueriesP', err); });
-            abstractPageGraphP.catch(function(err){ console.error('db error abstractPageGraphP', err); });
-            expressionByIdP.catch(function(err){ console.error('db error expressionByIdP', err); });
-            progressIndicatorsP.catch(function(err){ console.error('db error progressIndicatorsP', err); });
-            queryReadyP.catch(function(err){ console.error('db error queryReadyP', err); });
             
             
             return Promise.all([

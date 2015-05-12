@@ -23,6 +23,8 @@ var dropAllTables = require('../postgresDB/dropAllTables');
 var createTables = require('../postgresDB/createTables');
 var onQueryCreated = require('./onQueryCreated');
 var pageGraphToDomainGraph = require('../common/graph/pageGraphToDomainGraph');
+var abstractGraphToPageGraph = require('../common/graph/abstractGraphToPageGraph');
+var getGraphExpressions = require('../common/graph/getGraphExpressions')(database.Expressions);
 
 var TerritoireListScreen = React.createFactory(require('../client/components/TerritoireListScreen'));
 var OraclesScreen = React.createFactory(require('../client/components/OraclesScreen'));
@@ -265,8 +267,6 @@ app.delete('/territoire/:id', function(req, res){
     }); 
 });
 
-
-
 app.get('/territoire/:id/expressions.gexf', function(req, res){
     var user = serializedUsers.get(req.session.passport.user);
     var id = Number(req.params.id);
@@ -275,18 +275,22 @@ app.get('/territoire/:id/expressions.gexf', function(req, res){
     var territoireP = database.Territoires.findById(id);
     console.time('graph from db');
     var graphP = database.complexQueries.getTerritoireGraph(id);
+    var expressionsByIdP = graphP.then(getGraphExpressions)
     
-    Promise.all([territoireP, graphP]).then(function(result){
+    Promise.all([territoireP, graphP, expressionsByIdP]).then(function(result){
         console.timeEnd('graph from db')
         var territoire = result[0];
-        var graph = result[1];
+        var abstractGraph = result[1];
+        var expressionsById = result[2];
+        
+        var pageGraph = abstractGraphToPageGraph(abstractGraph, expressionsById);
         
         // convert the file to GEXF
         // send with proper content-type
         res.set('Content-Type', "application/gexf+xml");
         res.set('Content-disposition', 'attachment; filename="' + territoire.name+'-pages.gexf"');
         console.time('as gexf');
-        res.status(200).send(graph.exportAsGEXF());
+        res.status(200).send(pageGraph.exportAsGEXF());
         console.timeEnd('as gexf');
     }).catch(function(err){
         console.error('expressions.gexf error', err, err.stack)
@@ -352,7 +356,6 @@ app.get('/territoire/:id/domains.gexf', function(req, res){
 });
 
 
-
 // to create a query
 app.post('/territoire/:id/query', function(req, res){
     var user = serializedUsers.get(req.session.passport.user);
@@ -389,7 +392,6 @@ app.post('/query/:id', function(req, res){
 
 });
 
-
 app.delete('/query/:id', function(req, res){
     var user = serializedUsers.get(req.session.passport.user);
     var id = Number(req.params.id);
@@ -401,7 +403,6 @@ app.delete('/query/:id', function(req, res){
         res.status(500).send('database problem '+ err);
     }); 
 });
-
 
 app.post('/oracle-credentials', function(req, res){
     var user = serializedUsers.get(req.session.passport.user);
@@ -459,7 +460,6 @@ app.get('/territoire-view-data/:id', function(req, res){
         res.status(500).send('database problem '+ err);
     });
 });
-
 
 
 

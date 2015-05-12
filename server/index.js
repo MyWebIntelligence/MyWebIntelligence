@@ -17,6 +17,8 @@ var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
 var React = require('react');
 var serializeDocumentToHTML = require('jsdom').serializeDocument;
 
+var csv = require('fast-csv');
+
 var makeDocument = require('../common/makeDocument');
 var database = require('../database');
 var dropAllTables = require('../postgresDB/dropAllTables');
@@ -46,7 +48,7 @@ var PORT = 3333;
 var app = express();
 app.disable("x-powered-by");
 
-app.use(bodyParser.json()); // for parsing application/json
+app.use(bodyParser.json({limit: "2mb"})); // for parsing application/json
 app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
 app.use(multer()); // for parsing multipart/form-data
 
@@ -307,11 +309,12 @@ app.get('/territoire/:id/expressions.csv', function(req, res){
     var territoireP = database.Territoires.findById(id);
     console.time('graph from db');
     var graphP = database.complexQueries.getTerritoireGraph(id);
+    var expressionsByIdP = graphP.then(getGraphExpressions);
     
-    Promise.all([territoireP, graphP]).then(function(result){
+    Promise.all([territoireP, expressionsByIdP]).then(function(result){
         console.timeEnd('graph from db')
         var territoire = result[0];
-        var graph = result[1];
+        var expressionsById = result[1];
         
         // convert the file to GEXF
         // send with proper content-type
@@ -319,7 +322,23 @@ app.get('/territoire/:id/expressions.csv', function(req, res){
         res.set('Content-disposition', 'attachment; filename="' + territoire.name+'-pages.csv"');
         
         res.status(200);
-        graph.exportNodesCSVStream().pipe(res);
+        
+        var expressions = expressionsById.map(function(expression){
+            return {
+                id: expression.id,
+                url: expression.uri,
+                title: expression.title,
+                core_content: expression.main_text,
+                meta_description: expression.meta_description
+            };
+        });
+        
+        var csvStream = csv.write(
+            expressions,
+            {headers: true}
+        );
+        
+        csvStream.pipe(res);
     }).catch(function(err){
         console.error('expressions.gexf error', err, err.stack)
         

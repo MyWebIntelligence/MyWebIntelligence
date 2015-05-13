@@ -59,14 +59,14 @@ function processTask(task){
     
     expressionP
         .then(function(expression){        
-            var expressionP
+            var savedExpressionP
             var tasksCreatedP;
             
             //console.log('before approve', task.depth, expression.references.size)
         
             if(approve({depth: task.depth, expression: expression})){
                 
-                expressionP = expression.id === undefined ?
+                savedExpressionP = expression.id === undefined ?
                     database.Expressions.create(expression) :
                     database.Expressions.update(expression);
                 
@@ -80,7 +80,7 @@ function processTask(task){
                 );
             }
         
-            return Promise.all([expressionP, tasksCreatedP]);
+            return Promise.all([savedExpressionP, tasksCreatedP]);
             // if for the same URL, 2 database.Expressions.create calls happen, one may fail because of URI UNIQUE.
             // this is harmless
         })

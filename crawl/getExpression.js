@@ -11,9 +11,9 @@ var database = require('../database');
 */
 module.exports = function getExpression(url){
     // check if it's already in the database
-    return database.Expressions.findByCanonicalURI(url).then(function(expr){
+    return database.Expressions.findByCanonicalURI(url).then(function(ex){
     
-        return expr ? expr : fetch(url).then(function(fetchedDocument){
+        return ex ? ex : fetch(url).then(function(fetchedDocument){
             //console.log('Fetched', fetchedDocument);
 
             var canonicalURL = fetchedDocument.canonicalURL;

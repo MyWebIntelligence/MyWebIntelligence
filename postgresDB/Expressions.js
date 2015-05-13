@@ -53,29 +53,29 @@ module.exports = {
     
     findByURIAndAliases: function(uris){
         return databaseP.then(function(db){
-            var uriDisjunction = uris.toJSON()
-                .map(function(uri){
-                    var serializedURIForDB = serializeValueForDB(uri);
-                    
-                    return [
-                        serializedURIForDB,
-                        ' = uri',
-                        'OR',
-                        serializedURIForDB,
-                        '= ANY("aliases")'
-                    ].join(' ');
-                })
-                .join(' OR ');
             
+            var parenthezisedURIs = uris.toJSON().map(function(uri){
+                return '('+serializeValueForDB(uri)+')'
+            });
+            
+            var valuesExpr = [
+                '(VALUES',
+                parenthezisedURIs.join(', '),
+                ')',
+                'v(url)'
+            ].join(' ');
             
             var query = [
                 'SELECT id, uri, "references", "aliases" FROM',
-                "expressions",
+                "expressions, ",
+                valuesExpr,
                 "WHERE",
-                "("+uriDisjunction+")"
+                "url = uri",
+                "OR",
+                'url = ANY("aliases")'
             ].join(' ') + ';';
             
-            // console.log('query', query);
+            //console.log('findByURIAndAliases query', query);
             
             return new Promise(function(resolve, reject){
                 db.query(query, function(err, result){

@@ -23,21 +23,17 @@ interface ApproveOptions{
 // var EVAPORATION_FACTOR = 0.5;
 // var approvalProbability = 1;
 
-var MAXIMUM_DEPTH = 2;
+var MAXIMUM_DEPTH = 1;
 
 module.exports = function approve(options){
     var depth = options.depth;
-    var wordsToMatch = options.wordsToMatch;
-    var mainText = options.expression.main_text;
+    //var wordsToMatch = options.wordsToMatch;
+    //var mainText = options.expression.main_text;
     
-    // oracle
-    if(depth === 0)
+    if(depth <= MAXIMUM_DEPTH)
         return true;
     
-    if(depth >= MAXIMUM_DEPTH)
-        return false;
-    
-    
+    /* // text-based heuristics unused for now
     var allWordOccurences = 0;
     wordsToMatch.forEach(function(word){
         allWordOccurences += (mainText.match(new RegExp(word, "gi")) || []).length;
@@ -45,6 +41,7 @@ module.exports = function approve(options){
     
     if(allWordOccurences >= wordsToMatch.size)
         return true;
+    */
     
     return false;
 };

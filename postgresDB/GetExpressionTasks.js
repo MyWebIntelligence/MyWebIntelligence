@@ -31,11 +31,13 @@ module.exports = {
             });
         })
     },
+    
     /*
         urls is a Set<url>
     */
-    createTasksTodo: function(urls, territoireId){
-        console.log('createTasksTodo', urls.size);
+    createTasksTodo: function(urls, territoireId, depth){
+        depth = depth || 0;
+        //console.log('createTasksTodo', urls.size, depth);
         
         if(urls.size === 0)
             return Promise.resolve(); // don't bother the db
@@ -46,7 +48,8 @@ module.exports = {
                 return {
                     uri: url,
                     status: 'todo',
-                    related_territoire_id: territoireId
+                    related_territoire_id: territoireId,
+                    depth: depth
                 };
             });
 

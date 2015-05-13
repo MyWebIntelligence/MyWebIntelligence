@@ -4,6 +4,8 @@ require('../ES-mess');
 process.title = "MyWI getExpression worker";
 
 var getExpression = require('./getExpression');
+var approve = require('./approve');
+
 var database = require('../database');
 
 console.log('# getExpression process', process.pid);
@@ -56,8 +58,31 @@ function processTask(task){
     });
     
     expressionP
-        .then(function(expression){
-            return database.Expressions.create(expression);
+        .then(function(expression){        
+            var expressionP
+            var tasksCreatedP;
+            
+            //console.log('before approve', task.depth, expression.references.size)
+        
+            if(approve({depth: task.depth, expression: expression})){
+                
+                expressionP = expression.id === undefined ?
+                    database.Expressions.create(expression) :
+                    database.Expressions.update(expression);
+                
+                //throw 'TODO filter out references that already have a corresponding expression either as uri or alias';
+
+                
+                tasksCreatedP = database.GetExpressionTasks.createTasksTodo(
+                    new Set(expression.references),
+                    task.related_territoire_id,
+                    task.depth+1
+                );
+            }
+        
+            return Promise.all([expressionP, tasksCreatedP]);
+            // if for the same URL, 2 database.Expressions.create calls happen, one may fail because of URI UNIQUE.
+            // this is harmless
         })
         .catch(function(err){
             console.log('getExpression error', url, err, err.stack);

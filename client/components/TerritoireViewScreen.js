@@ -72,7 +72,7 @@ module.exports = React.createClass({
                         React.DOM.span({title: "Crawl todo"}, territoire.progressIndicators.crawlTodoCount),
                         '-',
                         React.DOM.span({title: "Expressions"}, territoire.resultListByPage.filter(function(r){
-                            return r.depth >= 0;
+                            return r.depth !== 10000;
                         }).length)
                     ]) : undefined
                 ]),
@@ -87,7 +87,7 @@ module.exports = React.createClass({
                         territoire.resultListByPage ? React.DOM.ul(
                             {className: 'result-list'}, 
                             territoire.resultListByPage.map(function(r){
-                                if(r.depth === -1) // shallow node
+                                if(r.depth === 10000) // shallow node
                                     return undefined;
                                 
                                 // node backed by actual expression

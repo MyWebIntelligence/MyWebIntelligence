@@ -12,6 +12,12 @@ var domainNodeDesc = {
     },*/
     "nb_expressions": {
         type: "integer"
+    },
+    "base_url": {
+        type: "string"
+    },
+    "depth": {
+        type: "integer"
     }
 };
 

@@ -10,34 +10,37 @@ var database = require('../database');
     Extract core content (from readability or otherwise).
 */
 module.exports = function getExpression(url){
+    // check if it's already in the database
+    return database.Expressions.findByCanonicalURI(url).then(function(ex){
     
-    return fetch(url).then(function(fetchedDocument){
-        //console.log('Fetched', fetchedDocument);
+        return ex ? ex : fetch(url).then(function(fetchedDocument){
+            //console.log('Fetched', fetchedDocument);
 
-        var canonicalURL = fetchedDocument.canonicalURL;
+            var canonicalURL = fetchedDocument.canonicalURL;
 
-        if(canonicalURL !== fetchedDocument.originalURL){
-            // it's unlikely, but there may already be an entry for the canonicalURL
-            return database.Expressions.findByCanonicalURI(canonicalURL).then(function(expr){
-                if(expr){
-                    // new alias found apparently
-                    if(!Array.isArray(expr.aliases))
-                        expr.aliases = [];
+            if(canonicalURL !== fetchedDocument.originalURL){
+                // it's unlikely, but there may already be an entry for the canonicalURL
+                return database.Expressions.findByCanonicalURI(canonicalURL).then(function(expr){
+                    if(expr){
+                        // new alias found apparently
+                        if(!Array.isArray(expr.aliases))
+                            expr.aliases = [];
 
-                    expr.aliases.push(fetchedDocument.originalURL);
+                        expr.aliases.push(fetchedDocument.originalURL);
 
-                    return expr;
-                }
-                else{
-                    return makeExpression(canonicalURL, fetchedDocument.html).then(function(madeExpr){
-                        madeExpr.aliases = [fetchedDocument.originalURL];
-                        return madeExpr;
-                    });
-                }
-            });
-        }
-        else{
-            return makeExpression(canonicalURL, fetchedDocument.html);
-        }
+                        return expr;
+                    }
+                    else{
+                        return makeExpression(canonicalURL, fetchedDocument.html).then(function(madeExpr){
+                            madeExpr.aliases = [fetchedDocument.originalURL];
+                            return madeExpr;
+                        });
+                    }
+                });
+            }
+            else{
+                return makeExpression(canonicalURL, fetchedDocument.html);
+            }
+        });
     });
 };

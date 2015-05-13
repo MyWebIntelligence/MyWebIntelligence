@@ -83,12 +83,9 @@ module.exports = function(url, html){
 
         // remove self-references
         uniqueLinks.delete(url);
-        
-        
 
         // meta description
         var metaDesc = document.querySelector('meta[name="description"]');
-        
         
         var ret = {
             uri: url,

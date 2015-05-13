@@ -10,8 +10,20 @@ var serializeObjectForDB = require('./serializeObjectForDB');
     To get the content, use getExpressionsWithContent(ids)
 */
 
+function uniformizeExpression(e){
+    if(e === undefined)
+        return undefined;
+    else{
+        e.references = new Set(e.references);
+        return e;
+    }
+}
+
 module.exports = {
     create: function(expressionData){
+        if(typeof expressionData.id === "number")
+            throw new Error('Expression.create. Data already has an id '+expressionData.id+' '+expressionData.uri)
+            
         return databaseP.then(function(db){
             var res = serializeObjectForDB(Object.assign(
                 {},
@@ -33,7 +45,7 @@ module.exports = {
             
             return new Promise(function(resolve, reject){
                 db.query(query, function(err, result){
-                    if(err) reject(err); else resolve(result);
+                    if(err) reject(err); else resolve(uniformizeExpression(result));
                 });
             });
         })
@@ -41,33 +53,33 @@ module.exports = {
     
     findByURIAndAliases: function(uris){
         return databaseP.then(function(db){
-            var uriDisjunction = uris.toJSON()
-                .map(function(uri){
-                    var serializedURIForDB = serializeValueForDB(uri);
-                    
-                    return [
-                        serializedURIForDB,
-                        ' = uri',
-                        'OR',
-                        serializedURIForDB,
-                        '= ANY("aliases")'
-                    ].join(' ');
-                })
-                .join(' OR ');
             
+            var parenthezisedURIs = uris.toJSON().map(function(uri){
+                return '('+serializeValueForDB(uri)+')'
+            });
+            
+            var valuesExpr = [
+                '(VALUES',
+                parenthezisedURIs.join(', '),
+                ')',
+                'v(url)'
+            ].join(' ');
             
             var query = [
                 'SELECT id, uri, "references", "aliases" FROM',
-                "expressions",
+                "expressions, ",
+                valuesExpr,
                 "WHERE",
-                "("+uriDisjunction+")"
+                "url = uri",
+                "OR",
+                'url = ANY("aliases")'
             ].join(' ') + ';';
             
-            // console.log('query', query);
+            //console.log('findByURIAndAliases query', query);
             
             return new Promise(function(resolve, reject){
                 db.query(query, function(err, result){
-                    if(err) reject(err); else resolve(result.rows);
+                    if(err) reject(err); else resolve(result.rows.map(uniformizeExpression));
                 });
             });
         });
@@ -87,7 +99,8 @@ module.exports = {
             
             return new Promise(function(resolve, reject){
                 db.query(query, function(err, result){
-                    if(err) reject(err); else resolve(result.rows[0]);
+                    if(err) reject(err);
+                    else resolve(uniformizeExpression(result.rows[0]));
                 });
             });
         });
@@ -104,11 +117,11 @@ module.exports = {
                 "id IN ("+ids.toJSON().map(serializeValueForDB).join(',')+')'
             ].join(' ') + ';';
             
-            console.log('getExpressionsWithContent query', query);
+            //console.log('getExpressionsWithContent query', query);
             
             return new Promise(function(resolve, reject){
                 db.query(query, function(err, result){
-                    if(err) reject(err); else resolve(result.rows);
+                    if(err) reject(err); else resolve(result.rows.map(uniformizeExpression));
                 });
             });
         });

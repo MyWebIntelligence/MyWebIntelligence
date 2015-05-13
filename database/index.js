@@ -198,6 +198,8 @@ module.exports = {
             
             function buildGraph(urls, depth){
                 console.time('buildGraph');
+                //console.log('buildGraph', urls.size, depth);
+
                 //var dbtimeKey = ['findByURIAndAliases', urls.size, 'urls'].join(' ');
                 //console.time(dbtimeKey)
                 return Expressions.findByURIAndAliases(urls).then(function(expressions){
@@ -221,13 +223,18 @@ module.exports = {
                     });
                     
                     var nextURLs = new Set();
+                    //console.log('building nextURLs', nodes.keys(), urlToCanonical.keys());
                     
                     // add references
                     expressions.forEach(function(expr){
                         var uri = expr.uri;
                         
-                        if(Array.isArray(expr.references)){
+                        if(expr.references){
                             expr.references.forEach(function(refURL){
+                                // do the nodes.has(refURL) test *before* creating a shallow node below
+                                if(!nodes.has(refURL) && !urlToCanonical.has(refURL))
+                                    nextURLs.add(refURL);
+                                
                                 if(!nodes.has(refURL)){
                                     // create shallow node
                                     nodes.set(refURL, {
@@ -240,14 +247,12 @@ module.exports = {
                                     source: uri,
                                     target: refURL
                                 });
-                                
-                                if(!nodes.has(refURL) && !urlToCanonical.has(refURL))
-                                    nextURLs.add(refURL);
+
                             });
                         }
                     });
                     
-                    
+                    //console.log('buildGraph nextURLs.size', nextURLs.size);
                     if(nextURLs.size >= 1){
                         return buildGraph(nextURLs, depth+1);
                     }
@@ -262,6 +267,7 @@ module.exports = {
                     e.target = urlToCanonical.get(e.target) || e.target;
                 });
                 
+                console.timeEnd('buildGraph');
                 return {
                     nodes: nodes,
                     edges: edges

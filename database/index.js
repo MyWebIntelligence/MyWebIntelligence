@@ -188,6 +188,8 @@ module.exports = {
             Edges are {source: Node, target: Node}
         */
         getGraphFromRootURIs: function(rootURIs){
+            var PERIPHERIC_DEPTH = 10000;
+            
             //console.log('getGraphFromRootURIs', rootURIs.toJSON());
             
             var nodes = new StringMap/*<url, expression>*/(); // these are only canonical urls
@@ -239,7 +241,7 @@ module.exports = {
                                     // create shallow node
                                     nodes.set(refURL, {
                                         uri: refURL,
-                                        depth: -1
+                                        depth: PERIPHERIC_DEPTH
                                     });
                                 }
                                 

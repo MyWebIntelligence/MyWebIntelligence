@@ -18,9 +18,14 @@ module.exports = function pageGraphToDomainGraph(pageGraph){
             if(!domainNode){
                 domainNode = domainGraph.addNode(idyfiedExpressionDomain, {
                     title: ed,
-                    nb_expressions: 0
+                    nb_expressions: 0,
+                    base_url: 'http://'+ed,
+                    depth: pn.depth
                 });
             }
+            
+            if(pn.depth < domainNode.depth)
+                domainNode.depth = pn.depth;
             
             domainNode.nb_expressions++;
             pageNodeToDomainNode.set(pn, domainNode);

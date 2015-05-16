@@ -2,18 +2,21 @@
 
 CREATE TABLE IF NOT EXISTS expressions (
     id           SERIAL PRIMARY KEY,
-    uri          varchar(2000) UNIQUE NOT NULL, -- http://stackoverflow.com/questions/417142/what-is-the-maximum-length-of-a-url-in-different-browsers
     main_html    text,
     main_text    text,
     title        varchar(2000),
-    "references"  varchar(2000)[],
-    "aliases"    varchar(2000)[],
     meta_description   text
 );
 
-CREATE INDEX expressions_uri ON expressions (uri);
--- CREATE INDEX expressions_aliases ON expressions ("aliases");
--- CREATE INDEX expressions_references ON expressions ("references");
+CREATE TABLE IF NOT EXISTS resources (
+    id             SERIAL PRIMARY KEY,
+    url            varchar(2000) UNIQUE NOT NULL, -- http://stackoverflow.com/questions/417142/what-is-the-maximum-length-of-a-url-in-different-browsers
+    alias_of       integer UNIQUE REFERENCES resources (id), -- nullable if it doesn't alias anything
+    expression_id  integer UNIQUE REFERENCES expressions (id) -- NULL initially and when uri is an alias
+);
+-- Per http://www.postgresql.org/docs/9.4/static/indexes-unique.html Postgresql already create all the necessary indices via the UNIQUE constraints
+
+
 
 
 CREATE TYPE get_expression_tasks_status AS ENUM ('todo', 'getting expression');

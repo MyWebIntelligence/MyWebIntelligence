@@ -12,6 +12,7 @@ var QueryResults = require('./models/QueryResults');
 
 // PostGREs models
 var Expressions = require('../postgresDB/Expressions');
+var Resources = require('../postgresDB/Resources');
 var GetExpressionTasks = require('../postgresDB/GetExpressionTasks');
 
 var pageGraphToDomainGraph = require('../common/graph/pageGraphToDomainGraph');
@@ -26,6 +27,7 @@ module.exports = {
     OracleCredentials: OracleCredentials,
     QueryResults: QueryResults,
     Expressions : Expressions,
+    Resources: Resources,
     GetExpressionTasks: GetExpressionTasks,
     
     clearAll: function(){

@@ -195,20 +195,17 @@ module.exports = {
             
             //console.log('getGraphFromRootURIs', rootURIs.toJSON());
             
-            var nodes = new StringMap/*<resourceId, resource>*/(); // these are only canonical urls
+            var nodes = new StringMap/*<ResourceIdStr, resource>*/(); // these are only canonical urls
             var edges = new Set();
             
             // (alias => canonical URL) map
-            var urlToCanonical = new StringMap/*<url, url>*/();
+            var urlToCanonical = new StringMap/*<ResourceIdStr, ResourceIdStr>*/();
             
             function buildGraph(resourceIds, depth){
                 console.time('buildGraph');
 
                 return Resources.findByIds(resourceIds).then(function(resources){
-                    //console.timeEnd(dbtimeKey)
                     console.log('building graph, found resources', resources.length);
-                    //var timeKey = ['process', expressions.length, 'expressions'].join(' ');
-                    //console.time(timeKey);
                     
                     // find which resource have an expression 
                     var resourcesWithExpression = resources.filter(function(r){
@@ -220,6 +217,13 @@ module.exports = {
                     
                     
                     // find which resource are an alias
+                    var aliasResources = resources.filter(function(r){
+                        return r.alias_of !== null;
+                    });
+                    var aliasTargetIds = new Set(aliasResources.map(function(r){
+                        return r.alias_of;
+                    }));
+                    
                     
                     
                     // fill in nodes
@@ -267,6 +271,10 @@ module.exports = {
                     }*/
                     //console.timeEnd(timeKey);
 
+                    // for aliases, depth doesn't change
+                    if(aliasTargetIds.size >= 1)
+                        return buildGraph(aliasTargetIds, depth);
+                    
                 });
             }
             

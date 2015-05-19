@@ -78,6 +78,9 @@ module.exports = {
         })
     },
     
+    /*
+        returns Promise<ResourceId> for the target ResourceId (to later associate an expression if necessary)
+    */
     addAlias: function(fromResourceId, toURL){
         var self = this;
         
@@ -101,13 +104,14 @@ module.exports = {
                             alias_of: targetResourceId
                         })
                         .where(resources.id.equal(fromResourceId))
+                        .returning('id')
                         .toQuery();
 
                     //console.log('Resources addAlias update query', query);
 
                     return new Promise(function(resolve, reject){
-                        db.query(query, function(err, result){
-                            if(err) reject(err); else resolve(result.rows);
+                        db.query(query, function(err){
+                            if(err) reject(err); else resolve(targetResourceId);
                         });
                     });
                 })

@@ -191,52 +191,48 @@ module.exports = {
         */
         getGraphFromRootURIs: function(rootURIs){
             
-            var PERIPHERIC_DEPTH = 10000;
+            //var PERIPHERIC_DEPTH = 10000;
             
             //console.log('getGraphFromRootURIs', rootURIs.toJSON());
             
-            var nodes = new StringMap/*<url, expression>*/(); // these are only canonical urls
+            var nodes = new StringMap/*<resourceId, resource>*/(); // these are only canonical urls
             var edges = new Set();
             
             // (alias => canonical URL) map
             var urlToCanonical = new StringMap/*<url, url>*/();
             
-            function buildGraph(urls, depth){
+            function buildGraph(resourceIds, depth){
                 console.time('buildGraph');
-                //console.log('buildGraph', urls.size, depth);
 
-                //var dbtimeKey = ['Resources.findByURLs', urls.size, 'urls'].join(' ');
-                //console.time(dbtimeKey)
-                return Resources.findByURLs(urls).then(function(resources){
+                return Resources.findByIds(resourceIds).then(function(resources){
                     //console.timeEnd(dbtimeKey)
                     console.log('building graph, found resources', resources.length);
                     //var timeKey = ['process', expressions.length, 'expressions'].join(' ');
                     //console.time(timeKey);
                     
+                    // find which resource have an expression 
+                    var resourcesWithExpression = resources.filter(function(r){
+                        return r.expression_id !== null;
+                    });
+                    // find their links
                     
+                    console.log('resourcesWithExpression', resourcesWithExpression.length, '/', resources.length);
                     
-                    // find which resource have an expression // find the links
                     
                     // find which resource are an alias
                     
                     
                     // fill in nodes
-                    resources.forEach(function(expr){
-                        var uri = expr.uri;
+                    resourcesWithExpression.forEach(function(res){
+                        var idKey = String(res.id);
                         
-                        nodes.set(uri, Object.assign({
+                        nodes.set(idKey, Object.assign({
                             depth: depth
-                        }, expr));
-                        
-                        if(Array.isArray(expr.aliases)){
-                            expr.aliases.forEach(function(a){
-                                urlToCanonical.set(a, uri);
-                            });
-                        }
+                        }, res));
                     });
                     
-                    var nextURLs = new Set();
-                    //console.log('building nextURLs', nodes.keys(), urlToCanonical.keys());
+                    /*var nextResourceIds = new Set();
+                    //console.log('building nextResourceIds', nodes.keys(), urlToCanonical.keys());
                     
                     // add references
                     resources.forEach(function(expr){
@@ -246,7 +242,7 @@ module.exports = {
                             expr.references.forEach(function(refURL){
                                 // do the nodes.has(refURL) test *before* creating a shallow node below
                                 if(!nodes.has(refURL) && !urlToCanonical.has(refURL))
-                                    nextURLs.add(refURL);
+                                    nextResourceIds.add(refURL);
                                 
                                 if(!nodes.has(refURL)){
                                     // create shallow node
@@ -263,29 +259,36 @@ module.exports = {
 
                             });
                         }
-                    });
+                    });*/
                     
-                    //console.log('buildGraph nextURLs.size', nextURLs.size);
-                    if(nextURLs.size >= 1){
-                        return buildGraph(nextURLs, depth+1);
-                    }
+                    //console.log('buildGraph nextResourceIds.size', nextResourceIds.size);
+                    /*if(nextResourceIds.size >= 1){
+                        return buildGraph(nextResourceIds, depth+1);
+                    }*/
                     //console.timeEnd(timeKey);
 
                 });
             }
             
-            return buildGraph(rootURIs, 0).then(function(){
-                // edges may contain non-canonical URLs in the target because of how it's built. Converting before returning
-                edges.forEach(function(e){
-                    e.target = urlToCanonical.get(e.target) || e.target;
-                });
+            return Resources.findByURLs(rootURIs).then(function(resources){
+                var ids = new Set( resources.map(function(r){ return r.id; }) );
                 
-                console.timeEnd('buildGraph');
-                return {
-                    nodes: nodes,
-                    edges: edges
-                };
-            })
+                return buildGraph(ids, 0).then(function(){
+                    // edges may contain non-canonical URLs in the target because of how it's built. Converting before returning
+                    edges.forEach(function(e){
+                        e.target = urlToCanonical.get(e.target) || e.target;
+                    });
+
+                    console.timeEnd('buildGraph');
+                    return {
+                        nodes: nodes,
+                        edges: edges
+                    };
+                })
+            });
+            
+            
+            
                 
         },
         

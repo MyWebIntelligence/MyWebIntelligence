@@ -1,7 +1,7 @@
 "use strict";
 
 var db = require('../../../database');
-var crawl = require('../../../server/startCrawl');
+//var crawl = require('../../../server/startCrawl');
 
 module.exports = function(roots, words){
     return new Promise(function(resolve){

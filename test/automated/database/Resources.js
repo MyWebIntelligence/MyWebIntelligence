@@ -104,7 +104,11 @@ describe('Resources', function(){
                             return r;
                         })
                         .then(function(r1){
-                            return db.Resources.findById( url0resourceId ).then(function(r0){                                
+                            return db.Resources.findByIds( new Set([url0resourceId]) ).then(function(resources){
+                                assert.isArray(resources)
+                                assert.strictEqual(resources.length, 1)
+                                var r0 = resources[0];
+                                
                                 assert.strictEqual(r0.url, urls[0]);
                                 assert.strictEqual(r0.alias_of, r1.id);
                                 assert.strictEqual(r0.expression_id, null);

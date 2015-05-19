@@ -58,21 +58,21 @@ module.exports = {
     },
     
     /*
-        id is a ResourcesId
+        ids is a Set<ResourcesId>
     */
-    findById: function(id){
+    findByIds: function(ids){
         return databaseP.then(function(db){
             var query = resources
                 .select('*')
                 .from(resources)
-                .where(resources.id.equal(id))
+                .where(resources.id.in(ids.toJSON()))
                 .toQuery();
 
             //console.log('Resources findById query', query);
             
             return new Promise(function(resolve, reject){
                 db.query(query, function(err, result){
-                    if(err) reject(err); else resolve(result.rows[0]);
+                    if(err) reject(err); else resolve(result.rows);
                 });
             });
         })

@@ -24,7 +24,7 @@ describe('Complex Queries: getGraphFromRootURIs - Zero graph', function(){
     it('should return a graph with no node and no edge', function(){
         return db.complexQueries.getGraphFromRootURIs(new Set(roots))
             .then(function(graph){
-                assert.strictEqual(graph.nodes.size, 0, "should have no node");
+                assert.strictEqual(graph.nodes.size(), 0, "should have no node");
                 assert.strictEqual(graph.edges.size, 0, "should have no edge");
             });
     });

@@ -72,12 +72,12 @@ function processTask(task){
                 
                 //throw 'TODO filter out references that already have a corresponding expression either as uri or alias';
 
-                
-                tasksCreatedP = database.GetExpressionTasks.createTasksTodo(
+                // Don't recreate tasks for now. Will re-enable when a better approval algorithm is implemented.
+                tasksCreatedP = Promise.resolve()/*database.GetExpressionTasks.createTasksTodo(
                     new Set(expression.references),
                     task.related_territoire_id,
                     task.depth+1
-                );
+                );*/
             }
         
             return Promise.all([savedExpressionP, tasksCreatedP]);

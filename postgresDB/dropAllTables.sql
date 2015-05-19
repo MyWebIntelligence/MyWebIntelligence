@@ -1,5 +1,6 @@
 -- Destruction --
 
+DROP TABLE IF EXISTS links;
 DROP TABLE IF EXISTS resources;
 DROP TABLE IF EXISTS expressions;
 DROP TABLE IF EXISTS get_expression_tasks;

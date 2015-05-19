@@ -75,6 +75,7 @@ npm start-dev
 #### General
 
 ```bash
+npm run start-test-db-container
 npm test
 ```
 

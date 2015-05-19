@@ -36,15 +36,39 @@ module.exports = {
         })
     },
     
-    findByURL: function(url){
+    /*
+        urls is a Set<url>
+    */
+    findByURLs: function(urls){
         return databaseP.then(function(db){
             var query = resources
                 .select('*')
                 .from(resources)
-                .where(resources.url.equals(url))
+                .where(resources.url.in(urls.toJSON()))
                 .toQuery();
 
             //console.log('Resources findByURL query', query);
+            
+            return new Promise(function(resolve, reject){
+                db.query(query, function(err, result){
+                    if(err) reject(err); else resolve(result.rows);
+                });
+            });
+        })
+    },
+    
+    /*
+        id is a ResourcesId
+    */
+    findById: function(id){
+        return databaseP.then(function(db){
+            var query = resources
+                .select('*')
+                .from(resources)
+                .where(resources.id.equal(id))
+                .toQuery();
+
+            //console.log('Resources findById query', query);
             
             return new Promise(function(resolve, reject){
                 db.query(query, function(err, result){
@@ -52,6 +76,61 @@ module.exports = {
                 });
             });
         })
+    },
+    
+    addAlias: function(fromResourceId, toURL){
+        var self = this;
+        
+        // find the target by URL or create one if none exists  
+        return this.findByURLs(new Set([toURL]))
+            .then(function getTargetResourceId(res){
+                var targetResource = res[0];
+
+                if(!targetResource){
+                    return self.create(new Set([toURL])).then(function(resourceIds){
+                        return resourceIds[0].id;
+                    });
+                }
+
+                return targetResource.id;
+            })
+            .then(function(targetResourceId){
+                return databaseP.then(function(db){
+                    var query = resources
+                        .update({
+                            alias_of: targetResourceId
+                        })
+                        .where(resources.id.equal(fromResourceId))
+                        .toQuery();
+
+                    //console.log('Resources addAlias update query', query);
+
+                    return new Promise(function(resolve, reject){
+                        db.query(query, function(err, result){
+                            if(err) reject(err); else resolve(result.rows);
+                        });
+                    });
+                })
+            });
+    },
+    
+    associateWithExpression: function(resourceId, expressionId){
+        return databaseP.then(function(db){
+            var query = resources
+                .update({
+                    expression_id: expressionId
+                })
+                .where(resources.id.equal(resourceId))
+                .toQuery();
+
+            //console.log('Resources addAlias update query', query);
+
+            return new Promise(function(resolve, reject){
+                db.query(query, function(err, result){
+                    if(err) reject(err); else resolve(result.rows);
+                });
+            });
+        });
     },
     
     deleteAll: function(){

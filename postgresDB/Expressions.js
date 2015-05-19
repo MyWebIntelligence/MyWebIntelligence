@@ -1,14 +1,20 @@
 "use strict";
 
+var sql = require('sql');
+
 var databaseP = require('./databaseClientP');
 
 var serializeValueForDB = require('./serializeValueForDB');
-var serializeObjectForDB = require('./serializeObjectForDB');
 
 /*
     Expressions contain large bodies of content. This API is designed so that most "get/find" methods only return "structure" fields.
     To get the content, use getExpressionsWithContent(ids)
 */
+
+var expressions = sql.define({
+    name: 'expressions',
+    columns: ['id', 'main_html', 'main_text', 'title', 'meta_description']
+});
 
 function uniformizeExpression(e){
     if(e === undefined)
@@ -20,32 +26,22 @@ function uniformizeExpression(e){
 }
 
 module.exports = {
+    // expressionData is an array
     create: function(expressionData){
         if(typeof expressionData.id === "number")
             throw new Error('Expression.create. Data already has an id '+expressionData.id+' '+expressionData.uri)
             
         return databaseP.then(function(db){
-            var res = serializeObjectForDB(Object.assign(
-                {},
-                expressionData,
-                {references: expressionData.references.toJSON()}
-            ));
-            var serializedKeys = res.serializedKeys;
-            var serializedValues = res.serializedValues;
-            
-            var query = [
-                "INSERT INTO",
-                "expressions",
-                "("+serializedKeys+")",
-                "VALUES",
-                "("+serializedValues.join(', ')+")"
-            ].join(' ') + ';';
+            var query = expressions
+                .insert(expressionData)
+                .returning('id')
+                .toQuery();
 
             //console.log('Expressions create query', query);
             
             return new Promise(function(resolve, reject){
                 db.query(query, function(err, result){
-                    if(err) reject(err); else resolve(uniformizeExpression(result));
+                    if(err) reject(err); else resolve(result.rows);
                 });
             });
         })

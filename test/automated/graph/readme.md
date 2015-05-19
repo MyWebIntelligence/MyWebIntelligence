@@ -1,7 +1,6 @@
-# Crawling tests
+# Graph tests
 
-DISABLED for now.
-
+These tests act as if the web was crawled and stored in the db. They verify the resulting graph matches expectations.
 
 
 ## Tests
@@ -38,5 +37,8 @@ DISABLED for now.
 
 11) /1 -> /2 -> /end/3
     => (3, 2) graph
+
+
+
 
 

@@ -8,7 +8,7 @@
   },
   "scripts": {
     "postinstall": "cp git-hooks/pre-commit .git/hooks/pre-commit; chmod a+x .git/hooks/pre-commit",
-    "test": "mocha test/automated/database/* test/automated/regexp-not-only-spaces.js",
+    "test": "mocha test/automated/database/* test/automated/graph/test-cases/* test/automated/*",
     "start": "node server/index.js",
     "build": "docker build --tag=\"mywi/base\" .",
     "start-db-container": "docker rm mywipostgres; docker run --name mywipostgres -p 5555:5432 -e POSTGRES_PASSWORD=password -d postgres:9.4",

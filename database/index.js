@@ -190,6 +190,7 @@ module.exports = {
             Edges are {source: Node, target: Node}
         */
         getGraphFromRootURIs: function(rootURIs){
+            
             var PERIPHERIC_DEPTH = 10000;
             
             //console.log('getGraphFromRootURIs', rootURIs.toJSON());
@@ -204,15 +205,23 @@ module.exports = {
                 console.time('buildGraph');
                 //console.log('buildGraph', urls.size, depth);
 
-                //var dbtimeKey = ['findByURIAndAliases', urls.size, 'urls'].join(' ');
+                //var dbtimeKey = ['Resources.findByURLs', urls.size, 'urls'].join(' ');
                 //console.time(dbtimeKey)
-                return Expressions.findByURIAndAliases(urls).then(function(expressions){
+                return Resources.findByURLs(urls).then(function(resources){
                     //console.timeEnd(dbtimeKey)
-                    //console.log('building graph, found expressions', expressions.length, expressions.map(function(e){ return e.uri}));
+                    console.log('building graph, found resources', resources.length);
                     //var timeKey = ['process', expressions.length, 'expressions'].join(' ');
                     //console.time(timeKey);
+                    
+                    
+                    
+                    // find which resource have an expression // find the links
+                    
+                    // find which resource are an alias
+                    
+                    
                     // fill in nodes
-                    expressions.forEach(function(expr){
+                    resources.forEach(function(expr){
                         var uri = expr.uri;
                         
                         nodes.set(uri, Object.assign({
@@ -230,7 +239,7 @@ module.exports = {
                     //console.log('building nextURLs', nodes.keys(), urlToCanonical.keys());
                     
                     // add references
-                    expressions.forEach(function(expr){
+                    resources.forEach(function(expr){
                         var uri = expr.uri;
                         
                         if(expr.references){

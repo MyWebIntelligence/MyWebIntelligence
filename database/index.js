@@ -13,6 +13,7 @@ var QueryResults = require('./models/QueryResults');
 // PostGREs models
 var Expressions = require('../postgresDB/Expressions');
 var Resources = require('../postgresDB/Resources');
+var Links = require('../postgresDB/Links');
 var GetExpressionTasks = require('../postgresDB/GetExpressionTasks');
 
 var pageGraphToDomainGraph = require('../common/graph/pageGraphToDomainGraph');
@@ -27,6 +28,7 @@ module.exports = {
     OracleCredentials: OracleCredentials,
     QueryResults: QueryResults,
     Expressions : Expressions,
+    Links : Links,
     Resources: Resources,
     GetExpressionTasks: GetExpressionTasks,
     
@@ -198,36 +200,20 @@ module.exports = {
             var nodes = new StringMap/*<ResourceIdStr, resource>*/(); // these are only canonical urls
             var edges = new Set();
             
-            // (alias => canonical URL) map
-            var urlToCanonical = new StringMap/*<ResourceIdStr, ResourceIdStr>*/();
+            // (alias => canonical ResourceId) map
+            var aliasToCanonicalResourceId = new StringMap/*<ResourceIdStr, ResourceIdStr>*/();
             
             function buildGraph(resourceIds, depth){
                 console.time('buildGraph');
 
-                return Resources.findByIds(resourceIds).then(function(resources){
+                return Resources.findValidByIds(resourceIds).then(function(resources){
                     console.log('building graph, found resources', resources.length);
                     
-                    // find which resource have an expression 
-                    var resourcesWithExpression = resources.filter(function(r){
-                        return r.expression_id !== null;
-                    });
-                    // find their links
-                    
-                    console.log('resourcesWithExpression', resourcesWithExpression.length, '/', resources.length);
-                    
-                    
-                    // find which resource are an alias
-                    var aliasResources = resources.filter(function(r){
-                        return r.alias_of !== null;
-                    });
-                    var aliasTargetIds = new Set(aliasResources.map(function(r){
-                        return r.alias_of;
-                    }));
-                    
-                    
-                    
-                    // fill in nodes
-                    resourcesWithExpression.forEach(function(res){
+                    // create nodes for non-alias
+                    resources.forEach(function(res){
+                        if(res.alias_of !== null)
+                            return;
+                        
                         var idKey = String(res.id);
                         
                         nodes.set(idKey, Object.assign({
@@ -235,56 +221,60 @@ module.exports = {
                         }, res));
                     });
                     
-                    /*var nextResourceIds = new Set();
-                    //console.log('building nextResourceIds', nodes.keys(), urlToCanonical.keys());
                     
-                    // add references
-                    resources.forEach(function(expr){
-                        var uri = expr.uri;
-                        
-                        if(expr.references){
-                            expr.references.forEach(function(refURL){
-                                // do the nodes.has(refURL) test *before* creating a shallow node below
-                                if(!nodes.has(refURL) && !urlToCanonical.has(refURL))
-                                    nextResourceIds.add(refURL);
-                                
-                                if(!nodes.has(refURL)){
-                                    // create shallow node
-                                    nodes.set(refURL, {
-                                        uri: refURL,
-                                        depth: PERIPHERIC_DEPTH
-                                    });
-                                }
-                                
+                    // find which resource have an expression 
+                    var resourcesWithExpression = resources.filter(function(r){
+                        return r.expression_id !== null;
+                    });
+                    console.log('resourcesWithExpression', resourcesWithExpression.length, '/', resources.length);
+
+                    // find which resource are an alias
+                    var aliasResources = resources.filter(function(r){
+                        return r.alias_of !== null;
+                    });
+                    var aliasTargetIds = new Set(aliasResources.map(function(r){
+                        aliasToCanonicalResourceId.set(String(r.id), String(r.alias_of));
+                        return r.alias_of;
+                    }));
+                    var aliasRetryBuildGraphP = aliasTargetIds.size >= 1 ?
+                        buildGraph(aliasTargetIds, depth) : // same depth on purpose
+                        Promise.resolve();
+                    
+                    
+                    var nextDepthGraphP = Links.findBySources(new Set(resourcesWithExpression.map(function(r){
+                        return r.id;
+                    })))
+                        .then(function(links){
+                            var nextResourceIds = new Set();
+
+                            links.forEach(function(l){
+                                var targetIdStr = String(l.target);
+
+                                if(!nodes.has(targetIdStr) && !aliasToCanonicalResourceId.has(targetIdStr))
+                                    nextResourceIds.add(targetIdStr);
+
                                 edges.add({
-                                    source: uri,
-                                    target: refURL
+                                    source: String(l.source),
+                                    target: targetIdStr
                                 });
-
                             });
-                        }
-                    });*/
-                    
-                    //console.log('buildGraph nextResourceIds.size', nextResourceIds.size);
-                    /*if(nextResourceIds.size >= 1){
-                        return buildGraph(nextResourceIds, depth+1);
-                    }*/
-                    //console.timeEnd(timeKey);
 
-                    // for aliases, depth doesn't change
-                    if(aliasTargetIds.size >= 1)
-                        return buildGraph(aliasTargetIds, depth);
+                            if(nextResourceIds.size >= 1)
+                                return buildGraph(nextResourceIds, depth+1);
+                        });
                     
+                    return Promise.all([aliasRetryBuildGraphP, nextDepthGraphP]);
                 });
             }
             
-            return Resources.findByURLs(rootURIs).then(function(resources){
+            return Resources.findValidByURLs(rootURIs).then(function(resources){
                 var ids = new Set( resources.map(function(r){ return r.id; }) );
                 
                 return buildGraph(ids, 0).then(function(){
                     // edges may contain non-canonical URLs in the target because of how it's built. Converting before returning
                     edges.forEach(function(e){
-                        e.target = urlToCanonical.get(e.target) || e.target;
+                        e.target = Number(aliasToCanonicalResourceId.get(e.target) || e.target);
+                        e.source = Number(e.source);
                     });
 
                     console.timeEnd('buildGraph');

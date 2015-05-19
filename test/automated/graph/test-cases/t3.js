@@ -17,14 +17,40 @@ var roots = [
     "https://github.com/MyWebIntelligence/MyWebIntelligence"
 ];
 
-describe('Complex Queries: getGraphFromRootURIs - 1 Query result with no expression returns a (0, 0) graph', function(){
+describe('Complex Queries: getGraphFromRootURIs - 1 Query result with 404 expression returns a (0, 0) graph', function(){
     
     before(function(){
         return dropAllTables()
             .then(createTables)
             .then(function(){
+                var resourceId;
+            
                 return db.Resources.create(new Set(roots))
+                    .then(function(rs){
+                        resourceId = rs[0].id;
+                    
+                        return db.Resources.updateHttpStatus(resourceId, 404).then(function(){
+                            return db.Expressions.create([{
+                                title: 'TITLE'
+                            }])
+                        });
+                    })
+                    .then(function(expressionsIds){
+                        return db.Resources.associateWithExpression(resourceId, expressionsIds[0].id);
+                    })
             });
+        
+        
+        /*
+            var resourceId;
+                var expressionId;
+            
+                return db.Resources.create(new Set(roots))
+                    
+                
+                ;
+        
+        */
     });
     
     it('should return a graph with no node and no edge', function(){

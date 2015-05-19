@@ -11,6 +11,7 @@ CREATE TABLE IF NOT EXISTS expressions (
 CREATE TABLE IF NOT EXISTS resources (
     id             SERIAL PRIMARY KEY,
     url            text UNIQUE NOT NULL, -- http://stackoverflow.com/questions/417142/what-is-the-maximum-length-of-a-url-in-different-browsers
+    http_status    smallint,
     alias_of       integer UNIQUE REFERENCES resources (id), -- nullable if it doesn't alias anything
     expression_id  integer UNIQUE REFERENCES expressions (id) -- NULL initially and when uri is an alias
 );

@@ -31,7 +31,7 @@ describe('Resources', function(){
                     assert.equal(resourceIds.length, 1);
                     assert.equal(typeof resourceIds[0].id, "number");
                 
-                    return db.Resources.findByURLs( new Set([url]) ).then(function(resources){
+                    return db.Resources.findValidByURLs( new Set([url]) ).then(function(resources){
                         assert.isArray(resources);
                         assert.equal(resources.length, 1);
                         assert.strictEqual(resources[0].id, resourceIds[0].id);
@@ -58,7 +58,7 @@ describe('Resources', function(){
                     assert.equal(resourceIds.length, 2);
                     assert.notStrictEqual(resourceIds[0].id, resourceIds[1].id)
                 
-                    return db.Resources.findByURLs( new Set(urls) ).then(function(resources){
+                    return db.Resources.findValidByURLs( new Set(urls) ).then(function(resources){
                         assert.isArray(resources);
                         assert.equal(resources.length, 2);
                         assert.ok(resources.some(function(r){
@@ -93,7 +93,7 @@ describe('Resources', function(){
             
             return db.Resources.addAlias( url0resourceId, urls[1] )
                 .then(function(){                
-                    return db.Resources.findByURLs( new Set([urls[1]]) )
+                    return db.Resources.findValidByURLs( new Set([urls[1]]) )
                         .then(function(rs){
                             var r = rs[0];
                             assert.equal(typeof r.id, "number");
@@ -104,7 +104,7 @@ describe('Resources', function(){
                             return r;
                         })
                         .then(function(r1){
-                            return db.Resources.findByIds( new Set([url0resourceId]) ).then(function(resources){
+                            return db.Resources.findValidByIds( new Set([url0resourceId]) ).then(function(resources){
                                 assert.isArray(resources)
                                 assert.strictEqual(resources.length, 1)
                                 var r0 = resources[0];
@@ -127,7 +127,7 @@ describe('Resources', function(){
             'http://a.web/1'
         ];
         var expressionData = {
-            title: 'yo'
+            title: 'yo',
         };
         
         var resourceId;
@@ -137,6 +137,7 @@ describe('Resources', function(){
             return Promise.all([
                 db.Resources.create( new Set(urls) ).then(function(r){
                     resourceId = r[0].id;
+                    return db.Resources.updateHttpStatus(resourceId, 200);
                 }),
                 db.Expressions.create([expressionData]).then(function(e){
                     expressionId = e[0].id;
@@ -148,7 +149,7 @@ describe('Resources', function(){
             
             return db.Resources.associateWithExpression( resourceId, expressionId )
                 .then(function(){                
-                    return db.Resources.findByURLs( new Set(urls) )
+                    return db.Resources.findValidByURLs( new Set(urls) )
                         .then(function(rs){
                             var r = rs[0];
                             assert.strictEqual(r.url, urls[0]);

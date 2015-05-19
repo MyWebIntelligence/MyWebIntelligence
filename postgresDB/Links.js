@@ -31,6 +31,24 @@ module.exports = {
         })
     },
     
+    /* sourceIds is a Set<SourceId> */
+    findBySources: function(sourceIds){
+        return databaseP.then(function(db){
+            var query = links
+                .select('*')
+                .where(links.source.in(sourceIds.toJSON()))
+                .toQuery();
+
+            //console.log('Links create query', query);
+            
+            return new Promise(function(resolve, reject){
+                db.query(query, function(err, result){
+                    if(err) reject(err); else resolve(result.rows);
+                });
+            });
+        })
+    },
+    
     deleteAll: function(){
         return databaseP.then(function(db){
             var query = links

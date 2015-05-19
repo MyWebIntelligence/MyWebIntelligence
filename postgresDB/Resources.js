@@ -7,7 +7,7 @@ var databaseP = require('./databaseClientP');
 
 var resources = sql.define({
     name: 'resources',
-    columns: ['id', 'url', 'alias_of', 'expression_id']
+    columns: ['id', 'url', 'http_status', 'alias_of', 'expression_id']
 });
 
 
@@ -23,7 +23,7 @@ module.exports = {
                         url: url
                     };
                 }))
-                .returning('id')
+                .returning('*')
                 .toQuery();
 
             //console.log('Resources create query', query);
@@ -39,12 +39,16 @@ module.exports = {
     /*
         urls is a Set<url>
     */
-    findByURLs: function(urls){
+    findValidByURLs: function(urls){
         return databaseP.then(function(db){
             var query = resources
                 .select('*')
                 .from(resources)
-                .where(resources.url.in(urls.toJSON()))
+                .where(
+                    resources.url.in(urls.toJSON()).and(
+                        resources.http_status.lt(400).or(resources.http_status.isNull())
+                    )
+                )
                 .toQuery();
 
             //console.log('Resources findByURL query', query);
@@ -60,12 +64,16 @@ module.exports = {
     /*
         ids is a Set<ResourcesId>
     */
-    findByIds: function(ids){
+    findValidByIds: function(ids){
         return databaseP.then(function(db){
             var query = resources
                 .select('*')
                 .from(resources)
-                .where(resources.id.in(ids.toJSON()))
+                .where(
+                    resources.id.in(ids.toJSON()).and(
+                        resources.http_status.lt(400).or(resources.http_status.isNull())
+                    )
+                )
                 .toQuery();
 
             //console.log('Resources findById query', query);
@@ -85,7 +93,7 @@ module.exports = {
         var self = this;
         
         // find the target by URL or create one if none exists  
-        return this.findByURLs(new Set([toURL]))
+        return this.findValidByURLs(new Set([toURL]))
             .then(function getTargetResourceId(res){
                 var targetResource = res[0];
 
@@ -116,6 +124,25 @@ module.exports = {
                     });
                 })
             });
+    },
+    
+    updateHttpStatus: function(resourceId, status){
+        return databaseP.then(function(db){
+            var query = resources
+                .update({
+                    http_status: status
+                })
+                .where(resources.id.equal(resourceId))
+                .toQuery();
+
+            //console.log('Resources addAlias update query', query);
+
+            return new Promise(function(resolve, reject){
+                db.query(query, function(err, result){
+                    if(err) reject(err); else resolve(result.rows);
+                });
+            });
+        });
     },
     
     associateWithExpression: function(resourceId, expressionId){

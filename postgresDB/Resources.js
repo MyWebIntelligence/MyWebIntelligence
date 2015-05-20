@@ -7,9 +7,12 @@ var databaseP = require('./databaseClientP');
 
 var resources = sql.define({
     name: 'resources',
-    columns: ['id', 'url', 'http_status', 'alias_of', 'expression_id']
+    columns: ['id', 'url', 'http_status', 'alias_of', 'expression_id', 'content_type', 'other_error']
 });
 
+
+var isValidResourceExpression = resources.other_error.isNull()
+    .and(resources.http_status.lt(400).or(resources.http_status.isNull()))
 
 module.exports = {
     /*
@@ -39,6 +42,49 @@ module.exports = {
     /*
         urls is a Set<url>
     */
+    update: function(resourceId, resourceData){
+        return databaseP.then(function(db){
+            var query = resources
+                .update(resourceData)
+                .where(resources.id.equal(resourceId))
+                .toQuery();
+
+            //console.log('Resources create query', query);
+            
+            return new Promise(function(resolve, reject){
+                db.query(query, function(err, result){
+                    if(err) reject(err); else resolve(result.rows);
+                });
+            });
+        })
+    },
+    
+    /*
+        urls is a Set<url>
+    */
+    findByURLs: function(urls){
+        return databaseP.then(function(db){
+            var query = resources
+                .select('*')
+                .from(resources)
+                .where(
+                    resources.url.in(urls.toJSON())
+                )
+                .toQuery();
+
+            //console.log('Resources findByURL query', query);
+            
+            return new Promise(function(resolve, reject){
+                db.query(query, function(err, result){
+                    if(err) reject(err); else resolve(result.rows);
+                });
+            });
+        })
+    },
+    
+    /*
+        urls is a Set<url>
+    */
     findValidByURLs: function(urls){
         return databaseP.then(function(db){
             var query = resources
@@ -46,12 +92,12 @@ module.exports = {
                 .from(resources)
                 .where(
                     resources.url.in(urls.toJSON()).and(
-                        resources.http_status.lt(400).or(resources.http_status.isNull())
+                        isValidResourceExpression
                     )
                 )
                 .toQuery();
 
-            //console.log('Resources findByURL query', query);
+            //console.log('Resources findValidByURLs query', query);
             
             return new Promise(function(resolve, reject){
                 db.query(query, function(err, result){
@@ -71,7 +117,7 @@ module.exports = {
                 .from(resources)
                 .where(
                     resources.id.in(ids.toJSON()).and(
-                        resources.http_status.lt(400).or(resources.http_status.isNull())
+                        isValidResourceExpression
                     )
                 )
                 .toQuery();

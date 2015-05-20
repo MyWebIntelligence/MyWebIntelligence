@@ -4,15 +4,15 @@ var database = require('../database');
 var crawl = require('../crawl')
 
 /*
-    urls: Set<url>
+    resourceIds: Set<ResourceId>
 */
-module.exports = function startCrawl(urls, territoireId){
+module.exports = function startCrawl(resourceIds, territoireId){
     if(!territoireId)
         throw new TypeError('missing territoireId');
     
-    console.log('start crawl', territoireId, urls.size);
+    console.log('start crawl', territoireId, resourceIds.size);
     return Promise.all([
-        database.GetExpressionTasks.createTasksTodo(urls, territoireId),
+        database.GetExpressionTasks.createTasksTodo(resourceIds, territoireId),
         crawl()
     ]);
     

@@ -7,6 +7,9 @@ var getExpression = require('./getExpression');
 var approve = require('./approve');
 
 var database = require('../database');
+var isValidResource = require('./isValidResource');
+
+//var errlog = console.error.bind(console);
 
 console.log('# getExpression process', process.pid);
 
@@ -46,57 +49,111 @@ function deleteTask(task){
     return database.GetExpressionTasks.delete(task.id);
 }
 
+
+
 function processTask(task){
     inFlightTasks.add(task);
-        
-    var url = task.uri;
     
-    var expressionP = getExpression(url);
     // getExpression fights against a timer
-    var timerP = new Promise(function(resolve){
+    (new Promise(function(resolve){
         setTimeout(resolve, GET_EXPRESSION_MAX_DELAY);
+    })).then(function(){
+        return deleteTask(task);
     });
     
-    expressionP
-        .then(function(expression){        
-            var savedExpressionP
-            var tasksCreatedP;
-            
-            //console.log('before approve', task.depth, expression.references.size)
-        
-            if(approve({depth: task.depth, expression: expression})){
-                
-                savedExpressionP = expression.id === undefined ?
-                    database.Expressions.create(expression) :
-                    database.Expressions.update(expression);
-                
-                //throw 'TODO filter out references that already have a corresponding expression either as uri or alias';
+    
+    database.Resources.findValidByIds(new Set([task.resource_id]))
+        .then(function(resources){
+            var resource = resources[0];
+            var url = resource.url;
 
-                // Don't recreate tasks for now. Will re-enable when a better approval algorithm is implemented.
-                tasksCreatedP = Promise.resolve()/*database.GetExpressionTasks.createTasksTodo(
-                    new Set(expression.references),
-                    task.related_territoire_id,
-                    task.depth+1
-                );*/
-            }
-        
-            return Promise.all([savedExpressionP, tasksCreatedP]);
-            // if for the same URL, 2 database.Expressions.create calls happen, one may fail because of URI UNIQUE.
-            // this is harmless
-        })
-        .catch(function(err){
-            console.log('getExpression error', url, err, err.stack);
+            // there is already a "complete" resource, do nothing.
+            if(typeof resource.http_status === 'number' || resource.other_error !== null)
+                return;
 
-            return; // symbolic. Just to make explicit the next .then is a "finally"
+            return getExpression(url)
+                .then(function(resExprLink){
+                    //console.log('resExprLink', resExprLink);
+
+                    var resourceIdP = resExprLink.resource.url !== url ?
+                        database.Resources.addAlias(task.resource_id, resExprLink.resource.url) :
+                        Promise.resolve(task.resource_id);
+
+                    return resourceIdP.then(function(resourceId){
+                        console.log('resourceId', resourceId, resExprLink.resource.url)
+                        
+                        var resourceUpdatedP = database.Resources.update(resourceId, resExprLink.resource);
+                        var expressionUpdatedP;
+                        var linksUpdatedP;
+                        var tasksCreatedP;
+
+                        if(isValidResource(resExprLink.resource)){
+                            console.log('valid', resExprLink.resource.url)
+                            
+                            expressionUpdatedP = database.Expressions.create(resExprLink.expression).then(function(expressions){
+                                var expression = expressions[0];
+                                return database.Resources.associateWithExpression(resourceId, expression.id);
+                            });
+                            
+                            console.log('resExprLink.links', resExprLink.links.size);
+
+                            linksUpdatedP = database.Resources.findByURLs(resExprLink.links).then(function(linkResources){
+                                var existingLinkResourceIds = new Set(linkResources.map(function(r){ return r.id }));
+
+                                var linkURLResourceToCreate = new Set();
+                                resExprLink.links.forEach(function(u){
+                                    if(!existingLinkResourceIds.has(u))
+                                        linkURLResourceToCreate.add(u);
+                                });
+                                
+                                console.log("existingLinkResourceIds", existingLinkResourceIds.size);
+                                console.log("linkURLResourceToCreate", linkURLResourceToCreate.size);
+
+                                return database.Resources.create(linkURLResourceToCreate).then(function(linkCreatedResources){
+                                    var createdLinkResourceIds = linkCreatedResources.map(function(r){ return r.id });
+
+                                    var linkResourceIds = existingLinkResourceIds.toJSON().concat(createdLinkResourceIds);
+
+                                    var links = linkResourceIds.map(function(rid){
+                                        return {
+                                            source: resourceId,
+                                            target: rid
+                                        };
+                                    });
+
+                                    return database.Links.create(links);
+                                });
+
+                            });
+
+                            if(approve({depth: task.depth, expression: resExprLink.expression})){
+
+                                //throw 'TODO filter out references that already have a corresponding expression either as uri or alias';
+
+                                // Don't recreate tasks for now. Will re-enable when a better approval algorithm is implemented.
+                                tasksCreatedP = Promise.resolve()/*database.GetExpressionTasks.createTasksTodo(
+                                    new Set(expression.references),
+                                    task.related_territoire_id,
+                                    task.depth+1
+                                );*/
+                            }
+                        }
+
+                        return Promise.all([resourceUpdatedP, expressionUpdatedP, linksUpdatedP, tasksCreatedP]);
+                    });
+                })
+                .catch(function(err){
+                    console.log('getExpression error', url, err, err.stack);
+
+                    return; // symbolic. Just to make explicit the next .then is a "finally"
+                })
         })
+        .catch(function(){})
         // in any case ("finally")
         .then(function(){
             return deleteTask(task);
         });
     
-    timerP.then(function(){
-        return deleteTask(task);
-    })
 }
 
 

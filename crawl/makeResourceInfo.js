@@ -88,13 +88,14 @@ module.exports = function(url, html){
         var metaDesc = document.querySelector('meta[name="description"]');
         
         var ret = {
-            uri: url,
-            //fullHTML: html,
-            main_html: mainContent.innerHTML,
-            main_text: mainContent.textContent.trim(),
-            title: document.title,
-            references: uniqueLinks,
-            "meta_description": (metaDesc && metaDesc.getAttribute('content')) || ''
+            expression: {
+                //fullHTML: html,
+                main_html: mainContent.innerHTML,
+                main_text: mainContent.textContent.trim(),
+                title: document.title,
+                "meta_description": (metaDesc && metaDesc.getAttribute('content'))
+            },
+            links: uniqueLinks
         };
         
         // free memory

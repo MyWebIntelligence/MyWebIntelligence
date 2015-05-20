@@ -28,6 +28,7 @@ module.exports = function onQueryCreated(query, user){
                     results: queryResults.toJSON(),
                     created_at: new Date()
                 }),
+                db.Resources.create(queryResults),
                 // don't wait for the results to be stored in database to start crawling
                 startCrawl(queryResults, query.belongs_to)
             ]);

@@ -124,20 +124,21 @@ module.exports = {
                     var results = [];
 
                     abstractPageGraph.nodes.forEach(function(n){
-                        var expressionId = String(n.id); // strinigfy because expressionById is a StringMap        
-                        var expression = Object.assign(
+                        var expressionId = String(n.expression_id); // strinigfy because expressionById is a StringMap        
+                        var resExpr = Object.assign(
                             {}, 
-                            n,
-                            expressionById.get(expressionId)
+                            expressionById.get(expressionId),
+                            n // last so resExpr.id is a ResourceId
                         );
                         
                         results.push({
-                            title: expression.title,
-                            url: expression.uri,
-                            excerpt: (expression.meta_description && expression.meta_description.slice(0, MAX_EXCERPT_LENGTH))
-                                    || (expression.main_text && expression.main_text.slice(0, MAX_EXCERPT_LENGTH)),
-                            depth: expression.depth,
-                            expressionId: expression.id
+                            title: resExpr.title,
+                            url: resExpr.url,
+                            excerpt: (resExpr.meta_description && resExpr.meta_description.slice(0, MAX_EXCERPT_LENGTH))
+                                    || (resExpr.main_text && resExpr.main_text.slice(0, MAX_EXCERPT_LENGTH)),
+                            depth: resExpr.depth,
+                            resourceId: resExpr.id,
+                            expressionId: resExpr.expression_id
                         });
                     });
 

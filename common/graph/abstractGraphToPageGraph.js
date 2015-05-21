@@ -38,9 +38,12 @@ module.exports = function abstractGraphToPageGraph(abGraph, expressionById){
             expressionId: typeof expression.id === "number" ? expression.id : -1
         });
 
-        urlToNodeName.set(res.url, name);
+        var urlToNodeNameKey = String(res.id);
+        //console.log(urlToNodeNameKey);
+        
+        urlToNodeName.set(urlToNodeNameKey, name);
     });
-
+    
     edges.forEach(function(e){
         var sourceIdStr = String(e.source);
         var targetIdStr = String(e.target);
@@ -48,10 +51,11 @@ module.exports = function abstractGraphToPageGraph(abGraph, expressionById){
         var sourceNode = pageGraph.getNode(urlToNodeName.get(sourceIdStr));
         var targetNode = pageGraph.getNode(urlToNodeName.get(targetIdStr));
 
-        if(sourceNode && targetNode)
+        if(sourceNode && targetNode){
             pageGraph.addEdge(sourceNode, targetNode, { weight: 1 });
+        }
     });
-
+    
     console.timeEnd('PageGraph');
 
     return pageGraph;

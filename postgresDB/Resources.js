@@ -100,7 +100,7 @@ module.exports = {
             // in findByURLOrCreate, by the time the create happens, the resource might have been already created
             // by someone else, so the promise might be rejected with "duplicate key contraint nia nia nia" error
             // on error, just give another try. Give up if this one doesn't work.
-            resourceP = resourceP.catch(function(){
+            return resourceP.catch(function(){
                 return self.findByURLOrCreate(url);
             });
         });

@@ -35,18 +35,18 @@ module.exports = {
     /*
         urls is a Set<url>
     */
-    createTasksTodo: function(urls, territoireId, depth){
+    createTasksTodo: function(resourceIds, territoireId, depth){
         depth = depth || 0;
-        //console.log('createTasksTodo', urls.size, depth);
+        //console.log('createTasksTodo', resourceIds.size, depth);
         
-        if(urls.size === 0)
+        if(resourceIds.size === 0)
             return Promise.resolve(); // don't bother the db
         
         return databaseP.then(function(db){
 
-            var dataArray = urls.toJSON().map(function(url){
+            var dataArray = resourceIds.toJSON().map(function(resourceId){
                 return {
-                    uri: url,
+                    resource_id: resourceId,
                     status: 'todo',
                     related_territoire_id: territoireId,
                     depth: depth

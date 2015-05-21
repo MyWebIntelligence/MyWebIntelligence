@@ -2,9 +2,17 @@
 
 var pg = require('pg');
 
-var conString = process.env.NODE_ENV === 'dev-docker' || process.env.NODE_ENV === 'production' ?
-    "postgres://postgres:password@mywipostgres:5432/postgres" :
-    "postgres://postgres:password@localhost:5555/postgres";
+var conString;
+
+if(process.env.NODE_ENV === 'dev-docker' || process.env.NODE_ENV === 'production'){
+    conString = "postgres://postgres:password@mywipostgres:5432/postgres";
+}
+else{
+    if(process.env.NODE_ENV === 'test')
+        conString = "postgres://postgres:password@localhost:6666/postgres";
+    else
+        conString = "postgres://postgres:password@localhost:5555/postgres";
+}
 
 console.log('conString', conString);
 

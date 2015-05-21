@@ -54,7 +54,9 @@ module.exports = React.createClass({
     render: function() {
         var props = this.props;
         var territoire = props.territoire;
-                
+        
+        console.log('territoire', territoire);
+        
         return React.DOM.div({className: "react-wrapper"}, [
             new Header({
                  user: props.user,
@@ -72,7 +74,7 @@ module.exports = React.createClass({
                         React.DOM.span({title: "Crawl todo"}, territoire.progressIndicators.crawlTodoCount),
                         '-',
                         React.DOM.span({title: "Expressions"}, territoire.resultListByPage.filter(function(r){
-                            return r.depth !== 10000;
+                            return r.expressionId !== null;
                         }).length)
                     ]) : undefined
                 ]),
@@ -87,7 +89,7 @@ module.exports = React.createClass({
                         territoire.resultListByPage ? React.DOM.ul(
                             {className: 'result-list'}, 
                             territoire.resultListByPage.map(function(r){
-                                if(r.depth === 10000) // shallow node
+                                if(r.expressionId === null) // shallow node
                                     return undefined;
                                 
                                 // node backed by actual expression

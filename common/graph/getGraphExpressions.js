@@ -13,8 +13,8 @@ module.exports = function(Expressions){
         var ids = new Set();
 
         graph.nodes.forEach(function(node){
-            var id = node.id;
-            if(id !== undefined)
+            var id = node.expression_id;
+            if(id !== null)
                 ids.add(id);
         });
 

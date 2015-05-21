@@ -12,6 +12,8 @@ var QueryResults = require('./models/QueryResults');
 
 // PostGREs models
 var Expressions = require('../postgresDB/Expressions');
+var Resources = require('../postgresDB/Resources');
+var Links = require('../postgresDB/Links');
 var GetExpressionTasks = require('../postgresDB/GetExpressionTasks');
 
 var pageGraphToDomainGraph = require('../common/graph/pageGraphToDomainGraph');
@@ -26,6 +28,8 @@ module.exports = {
     OracleCredentials: OracleCredentials,
     QueryResults: QueryResults,
     Expressions : Expressions,
+    Links : Links,
+    Resources: Resources,
     GetExpressionTasks: GetExpressionTasks,
     
     clearAll: function(){
@@ -120,20 +124,21 @@ module.exports = {
                     var results = [];
 
                     abstractPageGraph.nodes.forEach(function(n){
-                        var expressionId = String(n.id); // strinigfy because expressionById is a StringMap        
-                        var expression = Object.assign(
+                        var expressionId = String(n.expression_id); // strinigfy because expressionById is a StringMap        
+                        var resExpr = Object.assign(
                             {}, 
-                            n,
-                            expressionById.get(expressionId)
+                            expressionById.get(expressionId),
+                            n // last so resExpr.id is a ResourceId
                         );
                         
                         results.push({
-                            title: expression.title,
-                            url: expression.uri,
-                            excerpt: (expression.meta_description && expression.meta_description.slice(0, MAX_EXCERPT_LENGTH))
-                                    || (expression.main_text && expression.main_text.slice(0, MAX_EXCERPT_LENGTH)),
-                            depth: expression.depth,
-                            expressionId: expression.id
+                            title: resExpr.title,
+                            url: resExpr.url,
+                            excerpt: (resExpr.meta_description && resExpr.meta_description.slice(0, MAX_EXCERPT_LENGTH))
+                                    || (resExpr.main_text && resExpr.main_text.slice(0, MAX_EXCERPT_LENGTH)),
+                            depth: resExpr.depth,
+                            resourceId: resExpr.id,
+                            expressionId: resExpr.expression_id
                         });
                     });
 
@@ -188,93 +193,101 @@ module.exports = {
             Edges are {source: Node, target: Node}
         */
         getGraphFromRootURIs: function(rootURIs){
-            var PERIPHERIC_DEPTH = 10000;
+            
+            //var PERIPHERIC_DEPTH = 10000;
             
             //console.log('getGraphFromRootURIs', rootURIs.toJSON());
             
-            var nodes = new StringMap/*<url, expression>*/(); // these are only canonical urls
+            var nodes = new StringMap/*<ResourceIdStr, resource>*/(); // these are only canonical urls
             var edges = new Set();
             
-            // (alias => canonical URL) map
-            var urlToCanonical = new StringMap/*<url, url>*/();
+            // (alias => canonical ResourceId) map
+            var aliasToCanonicalResourceId = new StringMap/*<ResourceIdStr, ResourceIdStr>*/();
             
-            function buildGraph(urls, depth){
+            function buildGraph(resourceIds, depth){
                 console.time('buildGraph');
-                //console.log('buildGraph', urls.size, depth);
 
-                //var dbtimeKey = ['findByURIAndAliases', urls.size, 'urls'].join(' ');
-                //console.time(dbtimeKey)
-                return Expressions.findByURIAndAliases(urls).then(function(expressions){
-                    //console.timeEnd(dbtimeKey)
-                    //console.log('building graph, found expressions', expressions.length, expressions.map(function(e){ return e.uri}));
-                    //var timeKey = ['process', expressions.length, 'expressions'].join(' ');
-                    //console.time(timeKey);
-                    // fill in nodes
-                    expressions.forEach(function(expr){
-                        var uri = expr.uri;
+                return Resources.findValidByIds(resourceIds).then(function(resources){
+                    console.log('building graph, found resources', resources.length);
+                    
+                    // create nodes for non-alias
+                    resources.forEach(function(res){
+                        if(res.alias_of !== null)
+                            return;
                         
-                        nodes.set(uri, Object.assign({
+                        var idKey = String(res.id);
+                        
+                        nodes.set(idKey, Object.assign({
                             depth: depth
-                        }, expr));
-                        
-                        if(Array.isArray(expr.aliases)){
-                            expr.aliases.forEach(function(a){
-                                urlToCanonical.set(a, uri);
-                            });
-                        }
+                        }, res));
                     });
                     
-                    var nextURLs = new Set();
-                    //console.log('building nextURLs', nodes.keys(), urlToCanonical.keys());
                     
-                    // add references
-                    expressions.forEach(function(expr){
-                        var uri = expr.uri;
-                        
-                        if(expr.references){
-                            expr.references.forEach(function(refURL){
-                                // do the nodes.has(refURL) test *before* creating a shallow node below
-                                if(!nodes.has(refURL) && !urlToCanonical.has(refURL))
-                                    nextURLs.add(refURL);
-                                
-                                if(!nodes.has(refURL)){
-                                    // create shallow node
-                                    nodes.set(refURL, {
-                                        uri: refURL,
-                                        depth: PERIPHERIC_DEPTH
-                                    });
-                                }
-                                
+                    // find which resource have an expression 
+                    var resourcesWithExpression = resources.filter(function(r){
+                        return r.expression_id !== null;
+                    });
+                    console.log('resourcesWithExpression', resourcesWithExpression.length, '/', resources.length);
+
+                    // find which resource are an alias
+                    var aliasResources = resources.filter(function(r){
+                        return r.alias_of !== null;
+                    });
+                    var aliasTargetIds = new Set(aliasResources.map(function(r){
+                        aliasToCanonicalResourceId.set(String(r.id), String(r.alias_of));
+                        return r.alias_of;
+                    }));
+                    var aliasRetryBuildGraphP = aliasTargetIds.size >= 1 ?
+                        buildGraph(aliasTargetIds, depth) : // same depth on purpose
+                        Promise.resolve();
+                    
+                    
+                    var nextDepthGraphP = Links.findBySources(new Set(resourcesWithExpression.map(function(r){
+                        return r.id;
+                    })))
+                        .then(function(links){
+                            var nextResourceIds = new Set();
+
+                            links.forEach(function(l){
+                                var targetIdStr = String(l.target);
+
+                                if(!nodes.has(targetIdStr) && !aliasToCanonicalResourceId.has(targetIdStr))
+                                    nextResourceIds.add(targetIdStr);
+
                                 edges.add({
-                                    source: uri,
-                                    target: refURL
+                                    source: String(l.source),
+                                    target: targetIdStr
                                 });
-
                             });
-                        }
-                    });
-                    
-                    //console.log('buildGraph nextURLs.size', nextURLs.size);
-                    if(nextURLs.size >= 1){
-                        return buildGraph(nextURLs, depth+1);
-                    }
-                    //console.timeEnd(timeKey);
 
+                            if(nextResourceIds.size >= 1)
+                                return buildGraph(nextResourceIds, depth+1);
+                        });
+                    
+                    return Promise.all([aliasRetryBuildGraphP, nextDepthGraphP]);
                 });
             }
             
-            return buildGraph(rootURIs, 0).then(function(){
-                // edges may contain non-canonical URLs in the target because of how it's built. Converting before returning
-                edges.forEach(function(e){
-                    e.target = urlToCanonical.get(e.target) || e.target;
-                });
+            return Resources.findValidByURLs(rootURIs).then(function(resources){
+                var ids = new Set( resources.map(function(r){ return r.id; }) );
                 
-                console.timeEnd('buildGraph');
-                return {
-                    nodes: nodes,
-                    edges: edges
-                };
-            })
+                return buildGraph(ids, 0).then(function(){
+                    // edges may contain non-canonical URLs in the target because of how it's built. Converting before returning
+                    edges.forEach(function(e){
+                        e.target = Number(aliasToCanonicalResourceId.get(e.target) || e.target);
+                        e.source = Number(e.source);
+                    });
+
+                    console.timeEnd('buildGraph');
+                    return {
+                        nodes: nodes,
+                        edges: edges
+                    };
+                })
+            });
+            
+            
+            
                 
         },
         

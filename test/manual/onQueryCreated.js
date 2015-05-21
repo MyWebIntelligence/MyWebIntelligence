@@ -2,51 +2,41 @@
 
 require('../../ES-mess');
 process.title = 'crawl + graph';
+process.env.NODE_ENV = 'test';
+
+var fs = require('fs');
+var path = require('path');
 
 var db = require('../../database');
-var dropAllTables = require('../../postgresDB/dropAllTables')
+var dropAllTables = require('../../postgresDB/dropAllTables');
+var createTables = require('../../postgresDB/createTables');
+
 var onQueryCreated = require('../../server/onQueryCreated');
 
-var gcseCreds = require('./gcse-credentials.json');
+//var gcseCreds = require('./gcse-credentials.json');
+var list = fs.readFileSync(path.join(__dirname, '../../list-30.txt')).toString();
+
 
 var cleanDBP = Promise.all([
     db.QueryResults.deleteAll(),
-    dropAllTables()
+    dropAllTables().then(createTables)
 ]);
 
 var oP = cleanDBP.then(function(){
     console.log('clean db');
-    return db.Oracles.findByOracleNodeModuleName('GCSE');
+    return db.Oracles.findByOracleNodeModuleName('URLList');
+}).catch(function(err){
+    console.error('clean db err', err);
 });
 // need a user with GCSE credentials
 var uP = db.Users.create({
     name: 'David'
 });
-var ocP = Promise.all([uP, oP]).then(function(res){
-    console.log('users and oracle ready');
-
-    var u = res[0];
-    var o = res[1];
-    
-    return db.OracleCredentials.create(Object.assign(
-        {},
-        gcseCreds,
-        {
-            "oracleId": o.id,
-            "userId": u.id
-        }
-    ));
-}).catch(function(err){
-    console.log('obj creation error', err);
-})
 
 var queryId;
 
 
-ocP.then(function(){
-        return oP;
-    })
-    .then(function(oracle){
+oP.then(function(oracle){
         return oracle.id;
     })
     .then(function(GCSEOracleId){
@@ -54,20 +44,16 @@ ocP.then(function(){
         return db.Queries.create({
             "name": "Asthme",
             "q": "Asthme",
-            "lang": "none",
-            "nbPage": 400,
             "oracle_id": GCSEOracleId,
-            "belongs_to": 'nope'
+            "belongs_to": 123456,
+            "oracleOptions": JSON.stringify({list: list.split('\n').slice(0, 3)})
         }).then(function(q){
             queryId = q.id;
             return q;
         });
     })
-    .then(function(query){
-        console.log('MANUAL', 2, query);
-    
+    .then(function(query){    
         return uP.then(function(user){
-            console.log('MANUAL', 3, user);
             if(!user)
                 throw new Error('no user');
             console.time('onQueryCreated');
@@ -76,9 +62,8 @@ ocP.then(function(){
     })
     .then(function(){
         console.timeEnd('onQueryCreated');
-        console.log('MANUAL', 4);
     
-        setTimeout(function(){
+        /*setTimeout(function(){
             console.time('getting graph');
             db.complexQueries.getQueryGraph(queryId)
                 .then(function(graph){
@@ -94,7 +79,7 @@ ocP.then(function(){
                     console.error('onQueryCreated manual test error', error); 
                 });
         
-        }, 30*1000);
+        }, 30*1000);*/
         
     })
     .catch(function(err){

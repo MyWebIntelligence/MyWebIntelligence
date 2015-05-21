@@ -21,32 +21,32 @@ module.exports = function abstractGraphToPageGraph(abGraph, expressionById){
 
     var urlToNodeName = new StringMap();
 
-    nodes.forEach(function(expr, url){
-        var expressionId = String(expr.id); // strinigfy because expressionById is a StringMap        
+    nodes.forEach(function(res){
+        var expressionId = String(res.expression_id); // strinigfy because expressionById is a StringMap
         var expression = Object.assign(
             {}, 
-            expr,
+            res,
             expressionById.get(expressionId)
         );
         
         var name = nextNodeName();
 
         pageGraph.addNode(name, {
-            url: url,
+            url: res.url,
             depth: expression.depth,
             title: expression.title || '',
             expressionId: typeof expression.id === "number" ? expression.id : -1
         });
 
-        urlToNodeName.set(url, name);
+        urlToNodeName.set(res.url, name);
     });
 
     edges.forEach(function(e){
-        var source = e.source;
-        var target = e.target;
+        var sourceIdStr = String(e.source);
+        var targetIdStr = String(e.target);
 
-        var sourceNode = pageGraph.getNode(urlToNodeName.get(source));
-        var targetNode = pageGraph.getNode(urlToNodeName.get(target));
+        var sourceNode = pageGraph.getNode(urlToNodeName.get(sourceIdStr));
+        var targetNode = pageGraph.getNode(urlToNodeName.get(targetIdStr));
 
         if(sourceNode && targetNode)
             pageGraph.addEdge(sourceNode, targetNode, { weight: 1 });

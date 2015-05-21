@@ -33,7 +33,7 @@ module.exports = {
             
             return new Promise(function(resolve, reject){
                 db.query(query, function(err, result){
-                    if(err) reject(err); else resolve(result.rows);
+                    if(err) reject(Object.assign(err, {query: query})); else resolve(result.rows);
                 });
             });
         })
@@ -57,6 +57,58 @@ module.exports = {
                 });
             });
         })
+    },
+    
+    findByURLOrCreate: function(url){
+        var self = this;
+        
+        return databaseP.then(function(db){
+            var query = resources
+                .select('*')
+                .from(resources)
+                .where(
+                    resources.url.equal(url)
+                )
+                .toQuery();
+
+            //console.log('Resources findByURL query', query);
+            
+            return (new Promise(function(resolve, reject){
+                db.query(query, function(err, result){
+                    if(err) reject(err); else resolve(result.rows);
+                });
+            }))
+                .then(function(resourcesObjs){
+                    var r = resourcesObjs[0];
+                
+                    return r ?
+                        r : 
+                        self.create(new Set([url])).then(function(ress){ return ress[0] });
+                });
+        });
+    },
+    
+    /*
+        urls is a Set<url>
+    */
+    findByURLsOrCreate: function(urls){
+        var self = this;
+        
+        var resourcesP = urls.toJSON().map(function(url){
+            var resourceP = self.findByURLOrCreate(url);
+            
+            // in findByURLOrCreate, by the time the create happens, the resource might have been already created
+            // by someone else, so the promise might be rejected with "duplicate key contraint nia nia nia" error
+            // on error, just give another try. Give up if this one doesn't work.
+            resourceP = resourceP.catch(function(){
+                return self.findByURLOrCreate(url);
+            });
+        });
+        
+        // best effort. If creating a resource for all wasn't possible, let it go.
+        return Promise._allResolved(resourcesP).then(function(ress){
+            return ress.filter(function(res){ return res !== undefined; });
+        });
     },
     
     /*

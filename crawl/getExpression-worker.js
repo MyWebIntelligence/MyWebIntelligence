@@ -9,7 +9,11 @@ var approve = require('./approve');
 var database = require('../database');
 var isValidResource = require('./isValidResource');
 
-//var errlog = console.error.bind(console);
+var errlog = function(context){
+    return function(err){
+        console.error(context, err);
+    }
+}
 
 console.log('# getExpression process', process.pid);
 
@@ -76,55 +80,35 @@ function processTask(task){
                     //console.log('resExprLink', resExprLink);
 
                     var resourceIdP = resExprLink.resource.url !== url ?
-                        database.Resources.addAlias(task.resource_id, resExprLink.resource.url) :
+                        database.Resources.addAlias(task.resource_id, resExprLink.resource.url).catch(errlog("addAlias")) :
                         Promise.resolve(task.resource_id);
 
-                    return resourceIdP.then(function(resourceId){
-                        console.log('resourceId', resourceId, resExprLink.resource.url)
-                        
-                        var resourceUpdatedP = database.Resources.update(resourceId, resExprLink.resource);
+                    return resourceIdP.then(function(resourceId){                        
+                        var resourceUpdatedP = database.Resources.update(resourceId, resExprLink.resource).catch(errlog("Resources.update"));
                         var expressionUpdatedP;
                         var linksUpdatedP;
                         var tasksCreatedP;
 
-                        if(isValidResource(resExprLink.resource)){
-                            console.log('valid', resExprLink.resource.url)
+                        if(isValidResource(resExprLink.resource)){                            
+                            expressionUpdatedP = database.Expressions.create(resExprLink.expression)
+                                .then(function(expressions){
+                                    var expression = expressions[0];
+                                    return database.Resources.associateWithExpression(resourceId, expression.id);
+                                }).catch(errlog("Expressions.create + associateWithExpression"));
                             
-                            expressionUpdatedP = database.Expressions.create(resExprLink.expression).then(function(expressions){
-                                var expression = expressions[0];
-                                return database.Resources.associateWithExpression(resourceId, expression.id);
-                            });
-                            
-                            console.log('resExprLink.links', resExprLink.links.size);
+                            linksUpdatedP = resExprLink.links.size >= 1 ? 
+                                database.Resources.findByURLsOrCreate(resExprLink.links)
+                                    .then(function(linkResources){
+                                        var linksData = linkResources.map(function(r){
+                                            return {
+                                                source: resourceId,
+                                                target: r.id
+                                            };
+                                        });
 
-                            linksUpdatedP = database.Resources.findByURLs(resExprLink.links).then(function(linkResources){
-                                var existingLinkResourceIds = new Set(linkResources.map(function(r){ return r.id }));
-
-                                var linkURLResourceToCreate = new Set();
-                                resExprLink.links.forEach(function(u){
-                                    if(!existingLinkResourceIds.has(u))
-                                        linkURLResourceToCreate.add(u);
-                                });
-                                
-                                console.log("existingLinkResourceIds", existingLinkResourceIds.size);
-                                console.log("linkURLResourceToCreate", linkURLResourceToCreate.size);
-
-                                return database.Resources.create(linkURLResourceToCreate).then(function(linkCreatedResources){
-                                    var createdLinkResourceIds = linkCreatedResources.map(function(r){ return r.id });
-
-                                    var linkResourceIds = existingLinkResourceIds.toJSON().concat(createdLinkResourceIds);
-
-                                    var links = linkResourceIds.map(function(rid){
-                                        return {
-                                            source: resourceId,
-                                            target: rid
-                                        };
-                                    });
-
-                                    return database.Links.create(links);
-                                });
-
-                            });
+                                        return database.Links.create(linksData).catch(errlog("Links.create"));
+                                    }).catch(errlog("Resources.findByURLsOrCreate link"))
+                                : undefined;
 
                             if(approve({depth: task.depth, expression: resExprLink.expression})){
 

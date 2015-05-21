@@ -47,61 +47,6 @@ module.exports = {
         })
     },
     
-    findByURIAndAliases: function(uris){
-        return databaseP.then(function(db){
-            
-            var parenthezisedURIs = uris.toJSON().map(function(uri){
-                return '('+serializeValueForDB(uri)+')'
-            });
-            
-            var valuesExpr = [
-                '(VALUES',
-                parenthezisedURIs.join(', '),
-                ')',
-                'v(url)'
-            ].join(' ');
-            
-            var query = [
-                'SELECT id, uri, "references", "aliases" FROM',
-                "expressions, ",
-                valuesExpr,
-                "WHERE",
-                "url = uri",
-                "OR",
-                'url = ANY("aliases")'
-            ].join(' ') + ';';
-            
-            //console.log('findByURIAndAliases query', query);
-            
-            return new Promise(function(resolve, reject){
-                db.query(query, function(err, result){
-                    if(err) reject(err); else resolve(result.rows.map(uniformizeExpression));
-                });
-            });
-        });
-    },
-    
-    findByCanonicalURI: function(uri){
-        return databaseP.then(function(db){
-            
-            var query = [
-                'SELECT id, uri, "references", "aliases" FROM',
-                "expressions",
-                "WHERE",
-                "uri = "+serializeValueForDB(uri)
-            ].join(' ') + ';';
-            
-            //console.log('query', query);
-            
-            return new Promise(function(resolve, reject){
-                db.query(query, function(err, result){
-                    if(err) reject(err);
-                    else resolve(uniformizeExpression(result.rows[0]));
-                });
-            });
-        });
-    },
-    
     /* ids: set of ids */
     getExpressionsWithContent: function(ids){
         return databaseP.then(function(db){

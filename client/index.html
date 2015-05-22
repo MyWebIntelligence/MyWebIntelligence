@@ -169,6 +169,14 @@
               };
             }
         </script>
+        
+        <script>
+            Set.prototype.toJSON = function toJSON(){
+                var a = [];
+                this.forEach(function(e){ a.push(e); });
+                return a;
+            };
+        </script>
 
 
         <script defer src="/browserify-bundle.js"></script>

@@ -16,14 +16,6 @@ var expressions = sql.define({
     columns: ['id', 'main_html', 'main_text', 'title', 'meta_description']
 });
 
-function uniformizeExpression(e){
-    if(e === undefined)
-        return undefined;
-    else{
-        e.references = new Set(e.references);
-        return e;
-    }
-}
 
 module.exports = {
     // expressionData is an array
@@ -62,7 +54,7 @@ module.exports = {
             
             return new Promise(function(resolve, reject){
                 db.query(query, function(err, result){
-                    if(err) reject(err); else resolve(result.rows.map(uniformizeExpression));
+                    if(err) reject(err); else resolve(result.rows);
                 });
             });
         });

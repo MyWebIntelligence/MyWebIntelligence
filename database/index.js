@@ -16,9 +16,9 @@ var Resources = require('../postgresDB/Resources');
 var Links = require('../postgresDB/Links');
 var GetExpressionTasks = require('../postgresDB/GetExpressionTasks');
 
-var pageGraphToDomainGraph = require('../common/graph/pageGraphToDomainGraph');
-var abstractGraphToPageGraph = require('../common/graph/abstractGraphToPageGraph');
 var getGraphExpressions = require('../common/graph/getGraphExpressions')(Expressions);
+var simplifyExpression = require('../server/simplifyExpression');
+
 
 module.exports = {
     Users: Users,
@@ -91,7 +91,6 @@ module.exports = {
         */
         getTerritoireScreenData: function(territoireId){
             console.log('getTerritoireScreenData', territoireId);
-            var MAX_EXCERPT_LENGTH = 300;
             
             var territoireP = Territoires.findById(territoireId);
             var relevantQueriesP = Queries.findByBelongsTo(territoireId);
@@ -107,62 +106,12 @@ module.exports = {
             var abstractPageGraphP = this.getTerritoireGraph(territoireId);
             
             var expressionByIdP = abstractPageGraphP
-                .then(getGraphExpressions);
-            
-            var pageGraphP = Promise.all([abstractPageGraphP, expressionByIdP])
-                .then(function(res){
-                    var abstractPageGraph = res[0];
-                    var expressionById = res[1];
-                    return abstractGraphToPageGraph(abstractPageGraph, expressionById);
-                });
-
-            
-            var resultListByPageP = Promise.all([abstractPageGraphP, expressionByIdP])
-                .then(function(res){
-                    var abstractPageGraph = res[0];
-                    var expressionById = res[1];
-                    var results = [];
-
-                    abstractPageGraph.nodes.forEach(function(n){
-                        var expressionId = String(n.expression_id); // strinigfy because expressionById is a StringMap        
-                        var resExpr = Object.assign(
-                            {}, 
-                            expressionById.get(expressionId),
-                            n // last so resExpr.id is a ResourceId
-                        );
-                        
-                        results.push({
-                            title: resExpr.title,
-                            url: resExpr.url,
-                            excerpt: (resExpr.meta_description && resExpr.meta_description.slice(0, MAX_EXCERPT_LENGTH))
-                                    || (resExpr.main_text && resExpr.main_text.slice(0, MAX_EXCERPT_LENGTH)),
-                            depth: resExpr.depth,
-                            resourceId: resExpr.id,
-                            expressionId: resExpr.expression_id
-                        });
+                .then(getGraphExpressions)
+                .then(function(expressionById){
+                    Object.keys(expressionById).forEach(function(id){
+                        expressionById[id] = simplifyExpression(expressionById[id]);
                     });
-
-                    return results;
-                });
-            
-            var resultListByDomainP = pageGraphP
-                .then(function(pageGraph){
-                    console.time('pageGraphToDomainGraph');
-                    return pageGraphToDomainGraph(pageGraph);
-                })
-                .then(function(domainGraph){
-                    console.timeEnd('pageGraphToDomainGraph');
-                    var results = [];
-
-                    domainGraph.nodes.forEach(function(n){
-                        results.push({
-                            domain: n.title,
-                            url: 'http://'+n.title+'/',
-                            count: n.nb_expressions
-                        });
-                    });
-
-                    return results;
+                    return expressionById;
                 });
             
             // timing of this query will make the values certainly out-of-sync with when 
@@ -170,14 +119,14 @@ module.exports = {
             
             
             return Promise.all([
-                territoireP, relevantQueriesP, resultListByPageP, resultListByDomainP, progressIndicatorsP, queryReadyP
+                territoireP, relevantQueriesP, abstractPageGraphP, progressIndicatorsP, expressionByIdP, queryReadyP
             ]).then(function(res){
                 var territoire = res[0];
                 
                 territoire.queries = res[1];
-                territoire.resultListByPage = res[2];
-                territoire.resultListByDomain = res[3];
-                territoire.progressIndicators = res[4];
+                territoire.graph = res[2];
+                territoire.progressIndicators = res[3];
+                territoire.expressionById = res[4];
                 
                 return territoire;
             });
@@ -281,7 +230,13 @@ module.exports = {
                     console.timeEnd('buildGraph');
                     return {
                         nodes: nodes,
-                        edges: edges
+                        edges: edges,
+                        toJSON: function(){
+                            return {
+                                nodes: nodes.values(),
+                                edges: edges
+                            }
+                        }
                     };
                 })
             });

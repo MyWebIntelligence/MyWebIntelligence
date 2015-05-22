@@ -17,16 +17,12 @@ var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
 var React = require('react');
 var serializeDocumentToHTML = require('jsdom').serializeDocument;
 
-var csv = require('fast-csv');
-
 var makeDocument = require('../common/makeDocument');
 var database = require('../database');
 var dropAllTables = require('../postgresDB/dropAllTables');
 var createTables = require('../postgresDB/createTables');
 var onQueryCreated = require('./onQueryCreated');
-var pageGraphToDomainGraph = require('../common/graph/pageGraphToDomainGraph');
-var abstractGraphToPageGraph = require('../common/graph/abstractGraphToPageGraph');
-var getGraphExpressions = require('../common/graph/getGraphExpressions')(database.Expressions);
+//var getGraphExpressions = require('../common/graph/getGraphExpressions')(database.Expressions);
 
 var TerritoireListScreen = React.createFactory(require('../client/components/TerritoireListScreen'));
 var OraclesScreen = React.createFactory(require('../client/components/OraclesScreen'));
@@ -269,6 +265,12 @@ app.delete('/territoire/:id', function(req, res){
     }); 
 });
 
+
+/*
+    Disable server-side exports since from now on exports will happen from the client side.
+    Keeping the code in case for now
+*/
+/*
 app.get('/territoire/:id/expressions.gexf', function(req, res){
     var user = serializedUsers.get(req.session.passport.user);
     var id = Number(req.params.id);
@@ -381,7 +383,7 @@ app.get('/territoire/:id/domains.gexf', function(req, res){
         res.status(500).send('database problem '+ err);
     }); 
 });
-
+*/
 
 // to create a query
 app.post('/territoire/:id/query', function(req, res){

@@ -1,7 +1,5 @@
 "use strict";
 
-var StringMap = require('stringmap');
-
 /*
     graph is an abstract page graph
 */
@@ -9,7 +7,7 @@ var StringMap = require('stringmap');
 module.exports = function(Expressions){
     
     return function(graph){
-        var expressionsById = new StringMap/*<id, expression>*/();
+        var expressionsById = Object.create(null);
         var ids = new Set();
 
         graph.nodes.forEach(function(node){
@@ -20,7 +18,7 @@ module.exports = function(Expressions){
 
         return ids.size > 0 ? Expressions.getExpressionsWithContent(ids).then(function(expressions){
             expressions.forEach(function(completeExpression){
-                expressionsById.set(String(completeExpression.id), completeExpression);
+                expressionsById[String(completeExpression.id)] = completeExpression;
             });
 
             return expressionsById;

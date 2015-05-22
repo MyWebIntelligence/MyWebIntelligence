@@ -3,8 +3,10 @@
 var React = require('react');
 
 var Tabs = require('./external/Tabs.js');
-
 var Header = require('./Header');
+
+var abstractGraphToPageGraph = require('../../common/graph/abstractGraphToPageGraph');
+var pageGraphToDomainGraph = require('../../common/graph/pageGraphToDomainGraph');
 
 /*
 
@@ -15,6 +17,40 @@ interface TerritoireViewScreenProps{
 }
 
 */
+
+function generateExpressionGEXF(abstractGraph, expressionById){
+    var pageGraph = abstractGraphToPageGraph(abstractGraph, expressionById);
+    
+    return pageGraph.exportAsGEXF();
+}
+
+function generateDomainGEXF(abstractGraph, expressionById){
+    var pageGraph = abstractGraphToPageGraph(abstractGraph, expressionById);
+    var domainGraphP = pageGraphToDomainGraph(pageGraph);
+    
+    return domainGraphP.then(function(domainGraph){
+        return domainGraph.exportAsGEXF();
+    })
+}
+
+
+
+function triggerDownload(content, name, type){
+    var blob = new Blob([content], {type: type});
+    var blobUrl = URL.createObjectURL(blob);
+
+    var a = document.createElement('a');
+    a.style.position = "absolute"; // getting off document flow
+    // making an effort to hide the element
+    a.style.zIndex = -1;
+    a.style.opacity = 0;
+    
+    a.setAttribute('href', blobUrl);
+    a.setAttribute('download', name);
+    document.body.appendChild(a)
+    a.click();
+    document.body.removeChild(a);
+}
 
 
 module.exports = React.createClass({
@@ -73,9 +109,7 @@ module.exports = React.createClass({
                         '-',
                         React.DOM.span({title: "Crawl todo"}, territoire.progressIndicators.crawlTodoCount),
                         '-',
-                        React.DOM.span({title: "Expressions"}, territoire.resultListByPage.filter(function(r){
-                            return r.expressionId !== null;
-                        }).length)
+                        React.DOM.span({title: "Expressions"}, Object.keys(territoire.expressionById || {}).length)
                     ]) : undefined
                 ]),
                 
@@ -86,19 +120,22 @@ module.exports = React.createClass({
                         classPrefix: 'tabs-'
                     }, [
                         // Pages tab content
-                        territoire.resultListByPage ? React.DOM.ul(
+                        Object.keys(territoire.expressionById || {}).length >= 1 ? React.DOM.ul(
                             {className: 'result-list'}, 
-                            territoire.resultListByPage.map(function(r){
-                                if(r.expressionId === null) // shallow node
-                                    return undefined;
+                            territoire.graph.nodes.map(function(node){
+                                var expressionId = node.expression_id;
+                                if(expressionId === null || expressionId === undefined)
+                                    return;
                                 
+                                var expression = territoire.expressionById[expressionId];
+                                                                
                                 // node backed by actual expression
-                                return React.DOM.li({"data-expression-id": r.expressionId}, [
-                                    React.DOM.a({ href: r.url, target: '_blank' }, [
-                                        React.DOM.h3({}, r.title),
-                                        React.DOM.h4({}, r.url)
+                                return React.DOM.li({"data-expression-id": expressionId}, [
+                                    React.DOM.a({ href: node.url, target: '_blank' }, [
+                                        React.DOM.h3({}, expression.title),
+                                        React.DOM.h4({}, node.url)
                                     ]),
-                                    React.DOM.div({ className: 'excerpt' }, r.excerpt)
+                                    React.DOM.div({ className: 'excerpt' }, expression.excerpt)
                                 ]);
                             })
                         ) : undefined,
@@ -117,17 +154,37 @@ module.exports = React.createClass({
                     ]),
                     
                     React.DOM.div({className: 'exports'}, [
-                        React.DOM.a({
+                        /*React.DOM.a({
                             href: "/territoire/"+territoire.id+"/expressions.csv",
                             download: true
-                        }, 'Download Pages CSV'),
+                        }, 'Download Pages CSV'),*/
                         React.DOM.a({
                             href: "/territoire/"+territoire.id+"/expressions.gexf",
-                            download: true
+                            download: territoire.name+'-pages.gexf',
+                            onClick: function(e){
+                                e.preventDefault();
+                                
+                                triggerDownload(
+                                    generateExpressionGEXF(territoire.graph, territoire.expressionById),
+                                    territoire.name+'-pages.gexf',
+                                    "application/gexf+xml"
+                                );
+                            }
                         }, 'Download Pages GEXF'),
                         React.DOM.a({
                             href: "/territoire/"+territoire.id+"/domains.gexf",
-                            download: true
+                            download: territoire.name+'-domains.gexf',
+                            onClick: function(e){
+                                e.preventDefault();
+                                
+                                generateDomainGEXF(territoire.graph, territoire.expressionById).then(function(domainsGEXF){
+                                    triggerDownload(
+                                        domainsGEXF,
+                                        territoire.name+'-domains.gexf',
+                                        "application/gexf+xml"
+                                    );
+                                });
+                            }
                         }, 'Download Domains GEXF')
                     ])
                 

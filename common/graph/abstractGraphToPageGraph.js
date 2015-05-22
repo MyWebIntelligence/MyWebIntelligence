@@ -26,7 +26,7 @@ module.exports = function abstractGraphToPageGraph(abGraph, expressionById){
         var expression = Object.assign(
             {}, 
             res,
-            expressionById.get(expressionId)
+            expressionById[expressionId]
         );
         
         var name = nextNodeName();

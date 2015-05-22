@@ -17,6 +17,8 @@ var Links = require('../postgresDB/Links');
 var GetExpressionTasks = require('../postgresDB/GetExpressionTasks');
 
 var getGraphExpressions = require('../common/graph/getGraphExpressions')(Expressions);
+var simplifyExpression = require('../server/simplifyExpression');
+
 
 module.exports = {
     Users: Users,
@@ -104,7 +106,13 @@ module.exports = {
             var abstractPageGraphP = this.getTerritoireGraph(territoireId);
             
             var expressionByIdP = abstractPageGraphP
-                .then(getGraphExpressions);
+                .then(getGraphExpressions)
+                .then(function(expressionById){
+                    Object.keys(expressionById).forEach(function(id){
+                        expressionById[id] = simplifyExpression(expressionById[id]);
+                    });
+                    return expressionById;
+                });
             
             // timing of this query will make the values certainly out-of-sync with when 
             var progressIndicatorsP = this.getProgressIndicators(territoireId);

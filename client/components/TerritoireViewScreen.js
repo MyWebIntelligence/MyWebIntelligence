@@ -154,10 +154,10 @@ module.exports = React.createClass({
                     ]),
                     
                     React.DOM.div({className: 'exports'}, [
-                        /*React.DOM.a({
+                        React.DOM.a({
                             href: "/territoire/"+territoire.id+"/expressions.csv",
                             download: true
-                        }, 'Download Pages CSV'),*/
+                        }, 'Download Pages CSV'),
                         React.DOM.a({
                             href: "/territoire/"+territoire.id+"/expressions.gexf",
                             download: territoire.name+'-pages.gexf',

@@ -10,11 +10,23 @@
     "postinstall": "cp git-hooks/pre-commit .git/hooks/pre-commit; chmod a+x .git/hooks/pre-commit",
     "test": "mocha test/automated/database/* test/automated/graph/test-cases/* test/automated/*",
     "start": "node server/index.js",
-    "build": "docker build --tag=\"mywi/base\" .",
-    "start-db-container": "docker rm mywipostgres; docker run --name mywipostgres -p 5555:5432 -e POSTGRES_PASSWORD=password -d postgres:9.4",
-    "start-test-db-container": "docker run -p 6666:5432 -e POSTGRES_PASSWORD=password -d postgres:9.4",
-    "start-prod": "docker run -d -p=3333:3333 -e \"NODE_ENV=production\" --link mywipostgres:mywipostgres mywi/base node server/index.js",
-    "start-dev": "docker run -p=3333:3333 -v $PWD/node_modules:/usr/mywi/node_modules -e \"NODE_ENV=dev-docker\" -m=\"800m\" --link mywipostgres:mywipostgres mywi/base node server/index.js",
+      
+    "build-test-container": "docker build --tag=\"mywi/test\" .",
+    "start-test-db-container": "docker run --name mywi-test-db -p 5600:5432 -e POSTGRES_PASSWORD=password -d postgres:9.4",
+    "start-test": "docker run -p=6666:3333 -e \"NODE_ENV=test\" --link mywi-test-db:mywi-test-db mywi/test node server/index.js",
+      
+    "build-dev-container": "docker build --tag=\"mywi/dev\" .",
+    "start-dev-db-container": "docker run --name mywi-dev-db -p 5500:5432 -e POSTGRES_PASSWORD=password -d postgres:9.4",
+    "start-dev": "docker run -p=5555:3333 -v $PWD/node_modules:/usr/mywi/node_modules -e \"NODE_ENV=dev-docker\" --link mywi-dev-db:mywi-dev-db mywi/dev node server/index.js",
+      
+    "build-experimental-container": "docker build --tag=\"mywi/experimental\" .",
+    "start-experimental-db-container": "docker rm mywi-experimental-db; docker run --name mywi-experimental-db -p 5400:5432 -e POSTGRES_PASSWORD=password -d postgres:9.4",
+    "start-experimental": "docker run -d -p=4444:3333 -e \"NODE_ENV=experimental\" --link mywi-experimental-db:mywi-experimental-db mywi/experimental node server/index.js",
+      
+    "build-stable-container": "docker build --tag=\"mywi/stable\" .",
+    "start-stable-db-container": "docker rm mywi-stable-db; docker run --name mywi-stable-db -p 5300:5432 -e POSTGRES_PASSWORD=password -d postgres:9.4",
+    "start-stable": "docker run -d -p=3333:3333 -e \"NODE_ENV=stable\" --link mywi-stable-db:mywi-stable-db mywi/stable node server/index.js",
+    
     "bundle": "jsx node_modules/react-tabs-component/ client/components/external/ Tabs && browserify client/index.js -o client/browserify-bundle.js -d",
     "watch": "watchify client/index.js -o client/browserify-bundle.js -d -v",
     "lint": "eslint ./",
@@ -73,3 +85,4 @@
     "watchify": "~2.2.1"
   }
 }
+

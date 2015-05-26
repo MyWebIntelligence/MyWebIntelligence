@@ -2,16 +2,19 @@
 
 var pg = require('pg');
 
-var conString;
-
-if(process.env.NODE_ENV === 'dev-docker' || process.env.NODE_ENV === 'production'){
-    conString = "postgres://postgres:password@mywipostgres:5432/postgres";
+var conStringByNODE_ENV = {
+    "test":         "postgres://postgres:password@localhost:5600/postgres",
+    "development":  "postgres://postgres:password@localhost:5500/postgres", // default NODE_ENV value
+    "dev-docker":   "postgres://postgres:password@mywi-dev-db:5432/postgres",
+    "experimental": "postgres://postgres:password@mywi-experimental-db:5432/postgres",
+    "stable":       "postgres://postgres:password@mywi-stable-db:5432/postgres"   
 }
-else{
-    if(process.env.NODE_ENV === 'test')
-        conString = "postgres://postgres:password@localhost:6666/postgres";
-    else
-        conString = "postgres://postgres:password@localhost:5555/postgres";
+
+var conString = conStringByNODE_ENV[process.env.NODE_ENV];
+
+if(!conString){
+    console.error('No connection string for NODE_ENV', process.env.NODE_ENV);
+    process.exit();
 }
 
 console.log('conString', conString);

@@ -21,26 +21,33 @@ var SECOND = 1000; // ms
 var ONE_HOUR = 60*60*SECOND;
 
 var TASK_PICK_INTERVAL_DELAY = 10*SECOND;
-var MAX_CONCURRENT_TASKS = 25;
-var GET_EXPRESSION_MAX_DELAY = 2*60*SECOND;
+var MAX_CONCURRENT_TASKS = 30;
+var GET_EXPRESSION_MAX_DELAY = 3*60*SECOND;
+
+var RESOURCE_OTHER_ERRORS = Object.freeze({
+    TIMEOUT: "timeout"
+});
 
 
 var inFlightTasks = new Set();
+var databaseTasksP;
 
 // main interval
 // pick tasks independently of tasks successes, failures and hang
 setInterval(function(){
     console.log('interval', inFlightTasks.size);
     
-    if(inFlightTasks.size < MAX_CONCURRENT_TASKS){
+    if(inFlightTasks.size < MAX_CONCURRENT_TASKS && !databaseTasksP){
         var taskToPickCount = MAX_CONCURRENT_TASKS - inFlightTasks.size;
         
-        database.GetExpressionTasks.pickTasks(taskToPickCount)
+        databaseTasksP = database.GetExpressionTasks.pickTasks(taskToPickCount)
             .then(function(tasks){
                 tasks.forEach(processTask);
+                databaseTasksP = undefined;
             })
             .catch(function(err){
                 console.error('pickTasks error', err);
+                databaseTasksP = undefined;
             });
     }
     
@@ -56,12 +63,19 @@ function deleteTask(task){
 
 
 function processTask(task){
+    var taskTimeout;
+    
     inFlightTasks.add(task);
     
     // getExpression fights against a timer
     (new Promise(function(resolve){
-        setTimeout(resolve, GET_EXPRESSION_MAX_DELAY);
+        taskTimeout = setTimeout(resolve, GET_EXPRESSION_MAX_DELAY);
     })).then(function(){
+        var resourceId = task.resource_id;
+        database.Resources.update(
+            resourceId,
+            {other_error: RESOURCE_OTHER_ERRORS.TIMEOUT}
+        )
         return deleteTask(task);
     });
     
@@ -84,7 +98,15 @@ function processTask(task){
                         Promise.resolve(task.resource_id);
 
                     return resourceIdP.then(function(resourceId){                        
-                        var resourceUpdatedP = database.Resources.update(resourceId, resExprLink.resource).catch(errlog("Resources.update"));
+                        var resourceUpdatedP = database.Resources.update(
+                            resourceId,
+                            Object.assign(
+                                {},
+                                {other_error: null}, // remove any previous other_error if there was one
+                                resExprLink.resource // take the other_error from here if there is one
+                            )
+                        )
+                            .catch(errlog("Resources.update"));
                         var expressionUpdatedP;
                         var linksUpdatedP;
                         var tasksCreatedP;
@@ -135,6 +157,7 @@ function processTask(task){
         .catch(function(){})
         // in any case ("finally")
         .then(function(){
+            clearTimeout(taskTimeout);
             return deleteTask(task);
         });
     

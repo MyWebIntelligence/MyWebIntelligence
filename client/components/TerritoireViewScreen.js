@@ -91,7 +91,7 @@ module.exports = React.createClass({
         var props = this.props;
         var territoire = props.territoire;
         
-        console.log('territoire', territoire);
+        //console.log('territoire', territoire);
         
         return React.DOM.div({className: "react-wrapper"}, [
             new Header({

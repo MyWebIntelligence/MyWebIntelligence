@@ -239,26 +239,7 @@ module.exports = {
                         }
                     };
                 })
-            });
-            
-            
-            
-                
-        },
-        
-        /*
-            This returns a graph of pages
-            The url is the URL after redirects
-        */
-        getQueryGraph: function(queryId){
-            console.log('getQueryGraph', queryId);
-            
-            var self = this;
-            
-            return QueryResults.findLatestByQueryId(queryId)
-                .then(function(qRes){
-                    return self.getGraphFromRootURIs( new Set(qRes ? qRes.results : []) );
-                });
+            });  
         },
         
         getTerritoireQueryResults: function(territoireId){

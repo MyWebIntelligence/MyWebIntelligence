@@ -1,11 +1,18 @@
 "use strict";
 
+var sql = require('sql');
+
 var databaseP = require('./databaseClientP');
 
 var serializeValueForDB = require('./serializeValueForDB');
 var serializeObjectForDB = require('./serializeObjectForDB');
 var serializeObjectKeysForDB = require('./serializeObjectKeysForDB');
 var serializeObjectValues = require('./serializeObjectValues');
+
+var getExpressionTasks = sql.define({
+    name: 'get_expression_tasks',
+    columns: ['id', 'resource_id', 'status', 'created_at', 'related_territoire_id', 'depth']
+});
 
 module.exports = {
     create: function(data){
@@ -149,25 +156,23 @@ module.exports = {
         
     },
     
-    /*findByCanonicalURI: function(uri){
+    getAll: function(){
         return databaseP.then(function(db){
             
-            var query = [
-                "SELECT * FROM",
-                "expressions",
-                "WHERE",
-                "uri = "+serializeValueForDB(uri)
-            ].join(' ') + ';';
+            var query = getExpressionTasks
+                .select('*')
+                .from(getExpressionTasks)
+                .toQuery();
             
             //console.log('query', query);
             
             return new Promise(function(resolve, reject){
                 db.query(query, function(err, result){
-                    if(err) reject(err); else resolve(result.rows[0]);
+                    if(err) reject(err); else resolve(result.rows);
                 });
             });
         });
-    },*/
+    },
     
     /*update: function(expressionData){
         // UPDATE weather SET temp_lo = temp_lo+1, temp_hi = temp_lo+15, prcp = DEFAULT WHERE city = 'San Francisco' AND date = '2003-07-03';

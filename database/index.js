@@ -157,7 +157,7 @@ module.exports = {
                 console.time('buildGraph');
 
                 return Resources.findValidByIds(resourceIds).then(function(resources){
-                    console.log('building graph, found resources', resources.length);
+                    // console.log('building graph, found resources', resources.length);
                     
                     // create nodes for non-alias
                     resources.forEach(function(res){
@@ -176,7 +176,7 @@ module.exports = {
                     var resourcesWithExpression = resources.filter(function(r){
                         return r.expression_id !== null;
                     });
-                    console.log('resourcesWithExpression', resourcesWithExpression.length, '/', resources.length);
+                    //console.log('resourcesWithExpression', resourcesWithExpression.length, '/', resources.length);
 
                     // find which resource are an alias
                     var aliasResources = resources.filter(function(r){

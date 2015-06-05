@@ -28,10 +28,9 @@ module.exports = function onQueryCreated(query, user){
                     results: queryResults.toJSON(),
                     created_at: new Date()
                 }),
-                db.Resources.create(queryResults).then(function(resources){
+                db.Resources.findByURLsOrCreate(queryResults).then(function(resources){
                     return startCrawl(new Set(resources.map(function(r){ return r.id; })), query.belongs_to);
                 })
-                // don't wait for the results to be stored in database to start crawling
             ]);
         })
         .catch(function(err){

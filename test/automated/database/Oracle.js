@@ -43,7 +43,7 @@ describe('Oracles', function(){
                     assert.equal(typeof o.id, "number");
                 
                     return db.Oracles.getAll().then(function(all){
-                        assert.isTrue(Array.isArray(all));
+                        assert.isArray(all);
                         assert.strictEqual(all.length, 1);
                         console.log('all oracles', all);
                         assert.strictEqual(all[0].name, "Google Custom Search Engine");

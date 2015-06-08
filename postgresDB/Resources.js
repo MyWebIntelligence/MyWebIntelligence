@@ -5,11 +5,7 @@ sql.setDialect('postgres');
 
 var databaseP = require('./databaseClientP');
 
-var resources = sql.define({
-    name: 'resources',
-    columns: ['id', 'url', 'http_status', 'alias_of', 'expression_id', 'content_type', 'other_error']
-});
-
+var resources = require('./declarations.js').resources;
 
 var isValidResourceExpression = resources.other_error.isNull()
     .and(resources.http_status.lt(400).or(resources.http_status.isNull()))

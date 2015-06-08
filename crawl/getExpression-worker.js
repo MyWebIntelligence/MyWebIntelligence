@@ -86,7 +86,7 @@ function processTask(task){
             var url = resource.url;
 
             // there is already a "complete" resource, do nothing.
-            if(typeof resource.http_status === 'number' || resource.other_error !== null)
+            if(resource.expression_id !== null || resource.other_error !== null)
                 return;
 
             return getExpression(url)

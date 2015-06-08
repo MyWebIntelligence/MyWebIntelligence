@@ -26,7 +26,8 @@
     "watch": "watchify client/index.js -o client/browserify-bundle.js -d -v",
     "lint": "eslint ./",
     "build-test-crawl-docker-image": "docker build --tag=\"mywi/test-crawl\" --file=test/automated/crawl/Dockerfile .",
-    "test-crawl": "docker run --add-host a.web:127.0.0.1 mywi/test-crawl /usr/bin/supervisord -c /usr/mywi/test/automated/crawl/supervisord.conf"
+    "test-crawl": "docker run --add-host a.web:127.0.0.1 mywi/test-crawl /usr/bin/supervisord -c /usr/mywi/test/automated/crawl/supervisord.conf",
+    "sql-generate": "node-sql-generate --dsn postgres://postgres:password@localhost:5500/postgres > ./postgresDB/declarations.js"
   },
   "repository": {
     "type": "git",

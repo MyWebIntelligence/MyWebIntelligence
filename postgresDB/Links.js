@@ -5,10 +5,7 @@ sql.setDialect('postgres');
 
 var databaseP = require('./databaseClientP');
 
-var links = sql.define({
-    name: 'links',
-    columns: ['source', 'target']
-});
+var links = require('./declarations.js').links;
 
 
 module.exports = {

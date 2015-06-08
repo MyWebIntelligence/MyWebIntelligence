@@ -12,7 +12,7 @@ module.exports = function startCrawl(resourceIds, territoireId){
     
     console.log('start crawl', territoireId, resourceIds.size);
     return Promise.all([
-        database.GetExpressionTasks.createTasksTodo(resourceIds, territoireId),
+        database.GetExpressionTasks.createTasksTodo(resourceIds, territoireId, 0),
         crawl()
     ]);
     

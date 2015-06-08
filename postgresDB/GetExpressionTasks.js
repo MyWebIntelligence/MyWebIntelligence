@@ -1,33 +1,21 @@
 "use strict";
 
 var sql = require('sql');
+sql.setDialect('postgres');
 
 var databaseP = require('./databaseClientP');
 
 var serializeValueForDB = require('./serializeValueForDB');
-var serializeObjectForDB = require('./serializeObjectForDB');
-var serializeObjectKeysForDB = require('./serializeObjectKeysForDB');
-var serializeObjectValues = require('./serializeObjectValues');
 
-var getExpressionTasks = sql.define({
-    name: 'get_expression_tasks',
-    columns: ['id', 'resource_id', 'status', 'created_at', 'related_territoire_id', 'depth']
-});
+var getExpressionTasks = require('./declarations.js').get_expression_tasks;
 
 module.exports = {
     create: function(data){
         return databaseP.then(function(db){
-            var res = serializeObjectForDB(data);
-            var serializedKeys = res.serializedKeys;
-            var serializedValues = res.serializedValues;
             
-            var query = [
-                "INSERT INTO",
-                "get_expression_tasks",
-                "("+serializedKeys+")",
-                "VALUES",
-                "("+serializedValues.join(', ')+")"
-            ].join(' ') + ';';
+            var query = getExpressionTasks
+                .insert(data)
+                .toQuery();
 
             //console.log('query', query);
             
@@ -51,40 +39,29 @@ module.exports = {
         
         return databaseP.then(function(db){
 
-            var dataArray = resourceIds.toJSON().map(function(resourceId){
-                return {
-                    resource_id: resourceId,
-                    status: 'todo',
-                    related_territoire_id: territoireId,
-                    depth: depth
-                };
-            });
-
-            var keys = Object.keys(dataArray[0]);
-            var serializedKeys = serializeObjectKeysForDB(keys);
-
-            var serializedMultipleValues = dataArray
-                .map(function(data){
-                    return "(" + serializeObjectValues(data, keys) + ")"
-                })
-                .join(', ');
-
-            var query = [
-                "INSERT INTO",
-                "get_expression_tasks",
-                "("+serializedKeys+")",
-                "VALUES",
-                serializedMultipleValues
-            ].join(' ') + ';';
-
-            //console.log('query', query);
-
-            return new Promise(function(resolve, reject){
-                db.query(query, function(err, result){
-                    if(err){ reject(err); console.error('createTasksTodo error', err) } else resolve(result);
+            var createdTasksPs = resourceIds.toJSON().map(function(resourceId){
+                var query = getExpressionTasks
+                    .insert({
+                        resource_id: resourceId,
+                        status: 'todo',
+                        related_territoire_id: territoireId,
+                        depth: depth
+                    })
+                    .toQuery();
+                
+                //console.log('query', query);
+                
+                return new Promise(function(resolve, reject){
+                    db.query(query, function(err, result){
+                        // some queries will fail with "duplicate key contraint nia nia nia" error because
+                        // resource_id is UNIQUE. That's ok. Impossible to know ahead of time.
+                        if(err){ reject(err); } else resolve(result);
+                    });
                 });
             });
+
             
+            return Promise._allResolved(createdTasksPs);
         });
     },
     
@@ -133,27 +110,6 @@ module.exports = {
                 });
             });
         });
-    },
-    
-    getCrawlTodoCount: function(territoireId){
-        
-        return databaseP.then(function(db){
-            var query = [
-                "SELECT count(*) FROM",
-                "get_expression_tasks",
-                "WHERE",
-                "related_territoire_id = " + serializeValueForDB(territoireId)
-            ].join(' ') + ';';
-            
-            // console.log('query', territoireId, query);
-            
-            return new Promise(function(resolve, reject){
-                db.query(query, function(err, result){
-                    if(err) reject(err); else resolve( Number(result.rows[0].count) );
-                });
-            });
-        });
-        
     },
     
     getAll: function(){

@@ -35,7 +35,7 @@ CREATE TYPE get_expression_tasks_status AS ENUM ('todo', 'getting expression');
 
 CREATE TABLE IF NOT EXISTS get_expression_tasks (
     id          SERIAL PRIMARY KEY,
-    resource_id integer REFERENCES resources (id) NOT NULL,
+    resource_id integer UNIQUE REFERENCES resources (id) NOT NULL,
     status      get_expression_tasks_status,
     created_at  timestamp without time zone default (now() at time zone 'utc'),
     related_territoire_id  integer NOT NULL, -- eventually should be a foreign key for the territoires table

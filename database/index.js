@@ -10,14 +10,22 @@ var Oracles = require('./models/Oracles');
 var OracleCredentials = require('./models/OracleCredentials');
 var QueryResults = require('./models/QueryResults');
 
+var databaseP = require('../postgresDB/databaseClientP');
+var declarations = require('../postgresDB/declarations.js');
+
 // PostGREs models
 var Expressions = require('../postgresDB/Expressions');
 var Resources = require('../postgresDB/Resources');
 var Links = require('../postgresDB/Links');
 var GetExpressionTasks = require('../postgresDB/GetExpressionTasks');
 
+
+
 var getGraphExpressions = require('../common/graph/getGraphExpressions')(Expressions);
 var simplifyExpression = require('../server/simplifyExpression');
+
+
+var getExpressionTasks = declarations.get_expression_tasks;
 
 
 module.exports = {
@@ -76,7 +84,7 @@ module.exports = {
         
         getProgressIndicators: function(territoireId){
             var queryResultsP = this.getTerritoireQueryResults(territoireId);
-            var crawlTodoCountP = GetExpressionTasks.getCrawlTodoCount(territoireId);
+            var crawlTodoCountP = this.getCrawlTodoCount(territoireId);
             
             return Promise.all([ queryResultsP, crawlTodoCountP ]).then(function(res){
                 return {
@@ -130,9 +138,7 @@ module.exports = {
                 
                 return territoire;
             });
-        },
-        
-        
+        }, 
         
         
         /*
@@ -269,7 +275,63 @@ module.exports = {
             return this.getTerritoireQueryResults(territoireId).then(function(roots){
                 return self.getGraphFromRootURIs( roots );
             });
-        }
+        },
+        
+        getCrawlTodoCount: function(territoireId){
             
+            var self = this;
+            
+            return databaseP.then(function(db){
+                
+                var queryByTerritoireId = getExpressionTasks
+                    .select( getExpressionTasks.resource_id )
+                    .from(getExpressionTasks)
+                    .where(getExpressionTasks.related_territoire_id.equal(territoireId))
+                    .toQuery();
+                
+                
+                var tasksForTerritoireIdP = new Promise(function(resolve, reject){
+                    db.query(queryByTerritoireId, function(err, result){
+                        if(err) reject(err); else resolve( result.rows );
+                    });
+                });
+                
+                var tasksForQueryResultsP = self.getTerritoireQueryResults(territoireId)
+                    .then(function(urls){
+                        return Resources.findByURLs(urls)
+                            .then(function(resources){
+                                return resources.map(function(r){ return r.id });
+                            });
+                    })
+                    .then(function(resourceIds){
+                        var queryByQueryResults = getExpressionTasks
+                            .select( getExpressionTasks.resource_id )
+                            .from(getExpressionTasks)
+                            .where(getExpressionTasks.resource_id.in(resourceIds))
+                            .toQuery();
+                        
+                        return new Promise(function(resolve, reject){
+                            db.query(queryByQueryResults, function(err, result){
+                                if(err) reject(err); else resolve( result.rows );
+                            });
+                        });
+                    });
+                
+                
+                return Promise.all([ tasksForTerritoireIdP, tasksForQueryResultsP ])
+                    .then(function(res){
+                        var rids0 = res[0].map(function(t){ return t.resource_id});
+                        var rids1 = res[1].map(function(t){ return t.resource_id});
+                    
+                        var uniqueTaskIds = new Set(rids0.concat(rids1));
+                    
+                        return uniqueTaskIds.size;
+                    })
+                
+            });
+            
+        }
+        
     }
+            
 };

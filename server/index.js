@@ -1,6 +1,7 @@
 "use strict";
 
 require('../ES-mess');
+require('better-log').install();
 process.title = "MyWI server";
 
 var resolve = require('path').resolve;

@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS links (
 );
 
 -- to find graph edges quickly
-CREATE INDEX links_source ON links ("source");
+CREATE INDEX ON links ("source");
 
 
 
@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXISTS get_expression_tasks (
     depth       integer NOT NULL
 );
 
-CREATE INDEX get_expression_tasks_related_territoire ON get_expression_tasks (related_territoire_id);
+CREATE INDEX ON get_expression_tasks (related_territoire_id);
 
 
 
@@ -55,7 +55,7 @@ CREATE TABLE IF NOT EXISTS social_signals (
     resource_id  integer REFERENCES resources (id)
 );
 
-CREATE INDEX social_signals_resource_id ON social_signals (resource_id);
+CREATE INDEX ON social_signals (resource_id);
 
 
 CREATE TABLE IF NOT EXISTS alexa_rank_cache (
@@ -64,7 +64,7 @@ CREATE TABLE IF NOT EXISTS alexa_rank_cache (
     download_date    timestamp without time zone NOT NULL
 );
 
-CREATE INDEX alexa_rank_cache_site_domain ON alexa_rank_cache (site_domain);
+CREATE INDEX ON alexa_rank_cache (site_domain);
 
 
 

@@ -1,7 +1,7 @@
 "use strict";
 
 require('../ES-mess');
-require('better-log').install();
+//require('better-log').install();
 
 /*
     Using zlib doesn't work. Alexa zip yields a "header check error"... sigh...
@@ -18,8 +18,14 @@ var through = require('through');
 var tmp = require('tmp');
 
 var database = require('../database');
+var dropAllTables = require('../postgresDB/dropAllTables');
+var createTables = require('../postgresDB/createTables');
 
-
+dropAllTables()
+    .then(createTables)
+    .catch(function(err){
+        console.error('drop or create error', err);
+    });
 
 var ALEXA_TOP_1M_URL = "http://s3.amazonaws.com/alexa-static/top-1m.csv.zip";
 
@@ -45,17 +51,27 @@ function unzipToStream(pathToZip){
 
 
 /*
-    * download as temporary file
-    * extract temporary zip with OS util
+    
+// 500 => 329.756ms
+// 1000 => 275.082ms
 */
+var CREATE_CHUNK_SIZE = 1000;
 
+function saveByChunk(entries){
+    return entries.length === 0 ? undefined : database.AlexaRankCache.create(entries.slice(0, CREATE_CHUNK_SIZE))
+        .then(function(){
+            return saveByChunk(entries.slice(CREATE_CHUNK_SIZE))
+        });
+}
 
+console.time('databaseFilled');
 var databaseFilledP = new Promise(function(resolve, reject){
 
     var tmpFile = tmp.fileSync().name;
     console.log('tmpFile', tmpFile);
     
     var entries = [];
+    
     
     request({
         method: 'GET',
@@ -74,16 +90,20 @@ var databaseFilledP = new Promise(function(resolve, reject){
                     headers: ['rank', 'site_domain']
                 }))
                 .pipe(through(function(row){
-                    row.rank = Number(row.rank);
-                    
-                    if(row.rank <= 50000)
+                    var rank = Number(row.rank);
+                
+                    // some entries are garbage. They should just be skipped.
+                    if(!Number.isNaN(rank)){ 
+                        row.rank = rank;
+
                         entries.push(Object.assign({
                             download_date: downloadDate
                         }, row));
+                    }
                         
                 }))
                 .on('end', function() {
-                    database.AlexaRankCache.create(entries)
+                    saveByChunk(entries)
                         .then(resolve)
                         .catch(reject);
                 
@@ -96,6 +116,7 @@ var databaseFilledP = new Promise(function(resolve, reject){
 databaseFilledP
     .then(function(){
         console.log('the end')
+        console.timeEnd('databaseFilled');
         process.kill();
     })
     .catch(function(error){
@@ -110,7 +131,7 @@ databaseFilledP
                 console.log('count', Number(count.alexa_rank_cache_count));
                 showCount();
             })
-    }, 5000)
+    }, 4000)
 })();
 
 

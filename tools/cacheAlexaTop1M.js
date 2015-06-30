@@ -18,14 +18,7 @@ var through = require('through');
 var tmp = require('tmp');
 
 var database = require('../database');
-var dropAllTables = require('../postgresDB/dropAllTables');
-var createTables = require('../postgresDB/createTables');
 
-dropAllTables()
-    .then(createTables)
-    .catch(function(err){
-        console.error('drop or create error', err);
-    });
 
 var ALEXA_TOP_1M_URL = "http://s3.amazonaws.com/alexa-static/top-1m.csv.zip";
 

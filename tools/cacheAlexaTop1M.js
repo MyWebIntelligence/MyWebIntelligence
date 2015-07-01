@@ -121,7 +121,7 @@ databaseFilledP
     setTimeout(function(){
         database.AlexaRankCache.count()
             .then(function(count){
-                console.log('count', Number(count.alexa_rank_cache_count));
+                console.log('count', count);
                 showCount();
             })
     }, 4000)

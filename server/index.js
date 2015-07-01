@@ -37,6 +37,16 @@ var googleCredentials = require('../config/google-credentials.json');
 // if(process.env.NODE_ENV !== "production") // commented for now. TODO Find proper way to handle both prod & dev envs
     //dropAllTables().then(createTables);
 
+database.AlexaRankCache.count()
+    .then(function(count){
+        console.log('Number of Alexa Rank cache entries', count);
+    })
+    .catch(function(err){
+        console.error('Error trying to get AlexaRank count', err, err.stack);
+    })
+
+
+
 
 // Doesn't make sense to start the server if this file doesn't exist. *Sync is fine.
 var indexHTMLStr = fs.readFileSync(resolve(__dirname, '../client/index.html'), {encoding: 'utf8'});

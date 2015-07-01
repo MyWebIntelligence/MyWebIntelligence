@@ -38,7 +38,7 @@ module.exports = {
             
             return new Promise(function(resolve, reject){
                 db.query(query, function(err, result){
-                    if(err) reject(Object.assign(err, {query: query})); else resolve(result.rows[0]);
+                    if(err) reject(Object.assign(err, {query: query})); else resolve(Number(result.rows[0].alexa_rank_cache_count));
                 });
             });
         })

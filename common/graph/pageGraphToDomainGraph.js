@@ -3,12 +3,28 @@
 var expressionDomain = require('../../expressionDomain');
 var DomainGraph = require('./DomainGraph');
 
-module.exports = function pageGraphToDomainGraph(pageGraph){
+var parse = require('url').parse;
+
+function getHostname(url){
+    return parse(url).hostname;
+}
+
+/*
+    Right now, only the top1M is saved in the database
+*/
+var MAX_ALEXA_RANK = 1000001;
+
+/*
+    pageGraph : PageGraph
+    alexaRanks: Immutable.Map<hostname, rank>
+*/
+module.exports = function pageGraphToDomainGraph(pageGraph, alexaRanks){
     var domainGraph = new DomainGraph();
     
     var pageNodeToDomainNode = new WeakMap();
     
     function getCorrespondingDomainNode(pn){
+        
         return expressionDomain(pn.url).then(function(ed){
             // adding '_' at the beginning because sometimes domain names begin with numbers
             var idyfiedExpressionDomain = '_' + ed.replace(/(\.|\-)/g, '_');
@@ -20,7 +36,8 @@ module.exports = function pageGraphToDomainGraph(pageGraph){
                     title: ed,
                     nb_expressions: 0,
                     base_url: 'http://'+ed,
-                    depth: pn.depth
+                    depth: pn.depth,
+                    global_alexarank: alexaRanks.get(getHostname(pn.url)) || MAX_ALEXA_RANK
                 });
             }
             
@@ -31,6 +48,8 @@ module.exports = function pageGraphToDomainGraph(pageGraph){
             pageNodeToDomainNode.set(pn, domainNode);
         });
     }
+    
+    
     
     return Promise.resolve().then(function(){
         

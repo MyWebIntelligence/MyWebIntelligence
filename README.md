@@ -58,12 +58,21 @@ npm install
 
 #### First time
 
-Start the database
+##### Start the database
 
 ```bash
-npm run start-db-container
+npm run build-db-container
+npm run start-dev-db-container
+npm run create-sql-tables
 ```
 
+##### Fill database with Alexa data
+
+```bash
+node tools/cacheAlexaTop1M.js
+```
+
+##### Start server
 
 ```bash
 npm run bundle
@@ -125,7 +134,6 @@ npm run start-prod
 docker pull postgres:9.4
 docker rm mywipostgres
 docker run --name mywipostgres -e POSTGRES_PASSWORD=password -d postgres:9.4
-
 ```
 
 ## Licence

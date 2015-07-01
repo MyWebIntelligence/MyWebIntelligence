@@ -18,6 +18,9 @@ var domainNodeDesc = {
     },
     "depth": {
         type: "integer"
+    },
+    "global_alexarank": {
+        type: "integer"
     }
 };
 

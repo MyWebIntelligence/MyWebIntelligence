@@ -57,5 +57,8 @@ module.exports = {
     },
     getTerritoireViewData: function(territoire){
         return sendReq('GET', '/territoire-view-data/'+territoire.id);
+    },
+    getAlexaRanks: function(hostnames){
+        return sendReq('GET', '/alexa-ranks?hostnames='+encodeURIComponent( JSON.stringify(hostnames.toJSON()) ));
     }
 };

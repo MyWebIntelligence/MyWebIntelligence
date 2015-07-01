@@ -14,7 +14,7 @@ var bodyParser = require('body-parser');
 var multer = require('multer'); 
 
 var csv = require('fast-csv');
-
+var tld = require('tldjs')
 var passport = require('passport');
 var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
 var React = require('react');
@@ -22,8 +22,8 @@ var serializeDocumentToHTML = require('jsdom').serializeDocument;
 
 var makeDocument = require('../common/makeDocument');
 var database = require('../database');
-var dropAllTables = require('../postgresDB/dropAllTables');
-var createTables = require('../postgresDB/createTables');
+//var dropAllTables = require('../postgresDB/dropAllTables');
+//var createTables = require('../postgresDB/createTables');
 var onQueryCreated = require('./onQueryCreated');
 var getGraphExpressions = require('../common/graph/getGraphExpressions')(database.Expressions);
 
@@ -35,7 +35,7 @@ var TerritoireViewScreen = React.createFactory(require('../client/components/Ter
 var googleCredentials = require('../config/google-credentials.json');
 
 // if(process.env.NODE_ENV !== "production") // commented for now. TODO Find proper way to handle both prod & dev envs
-    dropAllTables().then(createTables);
+    //dropAllTables().then(createTables);
 
 
 // Doesn't make sense to start the server if this file doesn't exist. *Sync is fine.
@@ -268,6 +268,50 @@ app.delete('/territoire/:id', function(req, res){
     }); 
 });
 
+
+app.get('/alexa-ranks', function(req, res){
+    // console.log('/alexa-ranks', req.query.hostnames, req.query)
+    
+    var hostnames = new Set(JSON.parse(decodeURIComponent(req.query.hostnames)));
+    
+    var domains = new Set();
+    var domainToHostnames = new Map();
+    
+    hostnames.forEach(function(h){
+        var domain = tld.getDomain(h);
+        
+        domains.add(domain);
+        
+        var domainHostnames = domainToHostnames.get(domain);
+        if(!domainHostnames){
+            domainHostnames = new Set();
+            domainToHostnames.set(domain, domainHostnames);
+        }
+        
+        domainHostnames.add(h);
+    });
+    
+    database.AlexaRankCache.findByDomains(domains)
+        .then(function(arEntries){
+            // console.log('Alexa ranks before sending', results)
+        
+            var results = [];
+        
+            arEntries.forEach(function(are){
+                var domain = are.site_domain;
+                
+                domainToHostnames.get(domain).forEach(function(hostname){
+                    results.push(Object.assign({}, are, {site_domain: hostname}))
+                });
+            });
+        
+            res.send(results);
+        })
+        .catch(function(err){
+            res.status(500).send('database problem '+ err);
+        });
+    
+});
 
 /*
     Disable server-side exports since from now on exports will happen from the client side.

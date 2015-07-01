@@ -44,8 +44,32 @@ module.exports = {
         })
     },
     
-    findByDomain: function(hostname){
-        throw 'TODO'+hostname;
+    /*
+        hostnames: Set<string>
+    */
+    findByDomains: function(hostnames){
+        // console.log('findByDomains', hostnames.toJSON().slice(0, 10))
+        
+        return Promise._allResolved(hostnames.toJSON().map(function(hostname){
+            return databaseP.then(function(db){
+                var query = alexaRankCache
+                    .select('*')
+                    .where(alexaRankCache.site_domain.equals(hostname))
+                    .toQuery();
+
+                // console.log('findByDomains query', query);
+
+                return new Promise(function(resolve, reject){
+                    db.query(query, function(err, result){
+                        if(err) reject(Object.assign(err, {query: query})); else resolve(result.rows[0]);
+                    });
+                }).catch(function(err){
+                    console.error('findByDomains error', hostname, err, err.stack)
+                });
+            });
+        })).then(function(res){
+            return res.filter(function(rank){ return !!rank })
+        })
     },
     
     deleteAll: function(){

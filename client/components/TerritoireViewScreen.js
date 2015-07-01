@@ -7,6 +7,9 @@ var Header = require('./Header');
 
 var abstractGraphToPageGraph = require('../../common/graph/abstractGraphToPageGraph');
 var pageGraphToDomainGraph = require('../../common/graph/pageGraphToDomainGraph');
+var getAbstractGraphHostnames = require('../../common/graph/getAbstractGraphHostnames');
+
+var getAlexaRanks = require('../serverAPI/getAlexaRanks')
 
 /*
 
@@ -24,15 +27,22 @@ function generateExpressionGEXF(abstractGraph, expressionById){
     return pageGraph.exportAsGEXF();
 }
 
+
 function generateDomainGEXF(abstractGraph, expressionById){
     var pageGraph = abstractGraphToPageGraph(abstractGraph, expressionById);
-    var domainGraphP = pageGraphToDomainGraph(pageGraph);
+    var graphHostname = getAbstractGraphHostnames(abstractGraph);
+    
+    var domainGraphP = getAlexaRanks(graphHostname)
+        .then(function(alexaRanks){
+            console.log("alexaRanks", alexaRanks.size, alexaRanks);
+            
+            return pageGraphToDomainGraph(pageGraph, alexaRanks);
+        });
     
     return domainGraphP.then(function(domainGraph){
         return domainGraph.exportAsGEXF();
     })
 }
-
 
 
 function triggerDownload(content, name, type){
@@ -177,13 +187,17 @@ module.exports = React.createClass({
                             onClick: function(e){
                                 e.preventDefault();
                                 
-                                generateDomainGEXF(territoire.graph, territoire.expressionById).then(function(domainsGEXF){
-                                    triggerDownload(
-                                        domainsGEXF,
-                                        territoire.name+'-domains.gexf',
-                                        "application/gexf+xml"
-                                    );
-                                });
+                                generateDomainGEXF(territoire.graph, territoire.expressionById, getAlexaRanks)
+                                    .then(function(domainsGEXF){
+                                        triggerDownload(
+                                            domainsGEXF,
+                                            territoire.name+'-domains.gexf',
+                                            "application/gexf+xml"
+                                        );
+                                    })
+                                    .catch(function(err){
+                                        console.error('generateDomainGEXF error', err, err.stack);
+                                    });
                             }
                         }, 'Download Domains GEXF')
                     ])

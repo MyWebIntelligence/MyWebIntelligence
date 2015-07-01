@@ -10,6 +10,11 @@ function getHostname(url){
 }
 
 /*
+    Right now, only the top1M is saved in the database
+*/
+var MAX_ALEXA_RANK = 1000001;
+
+/*
     pageGraph : PageGraph
     alexaRanks: Immutable.Map<hostname, rank>
 */
@@ -32,7 +37,7 @@ module.exports = function pageGraphToDomainGraph(pageGraph, alexaRanks){
                     nb_expressions: 0,
                     base_url: 'http://'+ed,
                     depth: pn.depth,
-                    global_alexarank: alexaRanks.get(getHostname(pn.url)) || -1
+                    global_alexarank: alexaRanks.get(getHostname(pn.url)) || MAX_ALEXA_RANK
                 });
             }
             

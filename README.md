@@ -61,7 +61,7 @@ npm install
 ##### Start the database
 
 ```bash
-npm run build-dev-db-container
+npm run build-db-container
 npm run start-dev-db-container
 npm run create-sql-tables
 ```

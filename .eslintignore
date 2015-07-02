@@ -5,4 +5,4 @@ test/**/*.js
 ES-mess
 client/components/external
 postgresDB/declarations.js
-postgresDB/_storage
+_storage

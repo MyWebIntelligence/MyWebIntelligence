@@ -27,9 +27,9 @@ function unzipToStream(pathToZip){
 
     var args = ["-c", pathToZip];
 
-    console.log('unzip', args.join(' '));
+    console.log('gunzip', args.join(' '));
 
-    var unzipProc = spawn('unzip', args);
+    var unzipProc = spawn('gunzip', args);
 
     unzipProc.on('exit', function(){
         console.log('unzip exit')

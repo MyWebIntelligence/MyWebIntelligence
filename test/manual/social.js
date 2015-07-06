@@ -2,11 +2,11 @@
 
 require('../../ES-mess')
 
-var fbShare = require('../../socialSignals/facebookShares');
-var fbLikes = require('../../socialSignals/facebookLikes');
-var twShares = require('../../socialSignals/twitterShares');
-var pr = require('../../socialSignals/googlePageRank');
-var lkShares = require('../../socialSignals/linkedinShares');
+var fbShare = require('../../crawl/automatedAnnotation/socialSignals/facebookShares');
+var fbLikes = require('../../crawl/automatedAnnotation/socialSignals/facebookLikes');
+var twShares = require('../../crawl/automatedAnnotation/socialSignals/twitterShares');
+var pr = require('../../crawl/automatedAnnotation/socialSignals/googlePageRank');
+var lkShares = require('../../crawl/automatedAnnotation/socialSignals/linkedinShares');
 
 var U = 'https://www.youtube.com/watch?v=KWZGAExj-es';
 

@@ -10,17 +10,13 @@
     "postinstall": "cp git-hooks/pre-commit .git/hooks/pre-commit; chmod a+x .git/hooks/pre-commit",
     "test": "mocha test/automated/database/* test/automated/graph/test-cases/* test/automated/*",
     "start": "node server/index.js",
-    
     "build-db-container": "docker build --tag=\"mywi/database\" ./postgresDB",
-      
     "build-test-container": "docker build --tag=\"mywi/test\" .",
     "start-test-db-container": "docker rm mywi-test-db; docker run --name mywi-test-db -p 5600:5432 -e POSTGRES_PASSWORD=password -d mywi/database",
     "start-test": "docker run -p=6666:3333 -e \"NODE_ENV=test\" --link mywi-test-db:mywi-test-db mywi/test node server/index.js",
-    
     "build-dev-container": "docker build --tag=\"mywi/dev\" .",
     "start-dev-db-container": "docker rm mywi-dev-db; docker run --name mywi-dev-db -p 5500:5432 -e POSTGRES_PASSWORD=password -v $PWD/_storage/etc:/etc/postgresql -v $PWD/_storage/log:/var/log/postgresql -v $PWD/_storage/data:/var/lib/postgresql -v $PWD/_storage/data/data:/var/lib/postgresql/data -d mywi/database",
     "start-dev": "docker run -p=5555:3333 -v $PWD/node_modules:/usr/mywi/node_modules -e \"NODE_ENV=dev-docker\" --link mywi-dev-db:mywi-dev-db mywi/dev node server/index.js",
-    
     "build-experimental-container": "docker build --tag=\"mywi/experimental\" .",
     "start-experimental-db-container": "docker rm mywi-experimental-db; docker run --name mywi-experimental-db -p 5400:5432 -e POSTGRES_PASSWORD=password -d mywi/database",
     "start-experimental": "docker run -d -p=4444:3333 -e \"NODE_ENV=experimental\" --link mywi-experimental-db:mywi-experimental-db mywi/experimental node server/index.js",
@@ -64,6 +60,7 @@
     "express": "~4.10.7",
     "express-session": "~1.10.1",
     "fast-csv": "^0.6.0",
+    "google-pagerank": "0.0.3",
     "immutable": "^3.7.4",
     "jsdom": "3.x",
     "moment": "^2.10.2",

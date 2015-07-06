@@ -1,35 +1,24 @@
 "use strict";
 
 require('../ES-mess');
-process.title = "MyWI getExpression worker";
-
-var getExpression = require('./getExpression');
-var approve = require('./approve');
+process.title = "MyWI Automated Annotation worker";
 
 var database = require('../database');
-var isValidResource = require('./isValidResource');
-//var createResourceTasks = require('../server/createResourceTasks');
 
-
-
-var errlog = function(context){
+/*var errlog = function(context){
     return function(err){
         console.error(context, err);
     }
-}
+}*/
 
-console.log('# getExpression process', process.pid);
+console.log('# Automated annotation process', process.pid);
 
 var SECOND = 1000; // ms
 var ONE_HOUR = 60*60*SECOND;
 
 var TASK_PICK_INTERVAL_DELAY = 10*SECOND;
 var MAX_CONCURRENT_TASKS = 30;
-var GET_EXPRESSION_MAX_DELAY = 3*60*SECOND;
-
-var RESOURCE_OTHER_ERRORS = Object.freeze({
-    TIMEOUT: "timeout"
-});
+var AUTOMATED_ANNOTATION_MAX_DELAY = 3*60*SECOND;
 
 
 var inFlightTasks = new Set();
@@ -38,12 +27,12 @@ var databaseTasksP;
 // main interval
 // pick tasks independently of tasks successes, failures and hang
 setInterval(function(){
-    console.log('getExpression interval', inFlightTasks.size);
+    console.log('Automated annotation interval', inFlightTasks.size);
     
     if(inFlightTasks.size < MAX_CONCURRENT_TASKS && !databaseTasksP){
         var taskToPickCount = MAX_CONCURRENT_TASKS - inFlightTasks.size;
         
-        databaseTasksP = database.GetExpressionTasks.pickTasks(taskToPickCount)
+        databaseTasksP = database.AutomatedAnnotationTasks.pickTasks(taskToPickCount)
             .then(function(tasks){
                 tasks.forEach(processTask);
                 databaseTasksP = undefined;
@@ -60,30 +49,30 @@ setInterval(function(){
 function deleteTask(task){
     // the two actions are purposefully not synchronized
     inFlightTasks.delete(task);
-    return database.GetExpressionTasks.delete(task.id);
+    return database.AutomatedAnnotationTasks.delete(task.id);
 }
 
 
 
 function processTask(task){
-    var taskTimeout;
+    //var taskTimeout;
     
     inFlightTasks.add(task);
     
     // getExpression fights against a timer
     (new Promise(function(resolve){
-        taskTimeout = setTimeout(resolve, GET_EXPRESSION_MAX_DELAY);
+        /*taskTimeout =*/ setTimeout(resolve, AUTOMATED_ANNOTATION_MAX_DELAY);
     })).then(function(){
-        var resourceId = task.resource_id;
+        /*var resourceId = task.resource_id;
         database.Resources.update(
             resourceId,
             {other_error: RESOURCE_OTHER_ERRORS.TIMEOUT}
-        )
+        )*/
         return deleteTask(task);
     });
     
     
-    database.Resources.findValidByIds(new Set([task.resource_id]))
+    /*database.Resources.findValidByIds(new Set([task.resource_id]))
         .then(function(resources){
             var resource = resources[0];
             var url = resource.url;
@@ -140,13 +129,7 @@ function processTask(task){
                                 //throw 'TODO filter out references that already have a corresponding expression either as uri or alias';
 
                                 // Don't recreate tasks for now. Will re-enable when a better approval algorithm is implemented.
-                                tasksCreatedP = Promise.resolve()/*createResourceTasks(
-                                    new Set(expression.references),
-                                    {
-                                        territoireId: task.related_territoire_id,
-                                        depth: task.depth+1
-                                    }
-                                );*/
+                                tasksCreatedP = Promise.resolve()
                             }
                         }
 
@@ -164,14 +147,14 @@ function processTask(task){
         .then(function(){
             clearTimeout(taskTimeout);
             return deleteTask(task);
-        });
+        });*/
     
 }
 
 
 
 process.on('uncaughtException', function(e){
-    console.error('# uncaughtException getExpression', process.pid, Date.now() % ONE_HOUR, e, e.stack);
+    console.error('# uncaughtException automated annotation', process.pid, Date.now() % ONE_HOUR, e, e.stack);
     process.exit();
 });
 

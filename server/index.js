@@ -31,6 +31,10 @@ var TerritoireListScreen = React.createFactory(require('../client/components/Ter
 var OraclesScreen = React.createFactory(require('../client/components/OraclesScreen'));
 var TerritoireViewScreen = React.createFactory(require('../client/components/TerritoireViewScreen'));
 
+// start tasks processors
+require('../crawl');
+require('../automatedAnnotation');
+
 
 var googleCredentials = require('../config/google-credentials.json');
 

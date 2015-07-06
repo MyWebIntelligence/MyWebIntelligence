@@ -1,4 +1,21 @@
--- Construction --
+-- Useful things --
+
+CREATE TABLE IF NOT EXISTS lifecycle(
+    created_at  timestamp without time zone DEFAULT current_timestamp,
+    updated_at  timestamp without time zone DEFAULT current_timestamp
+);
+
+-- http://www.revsys.com/blog/2006/aug/04/automatically-updating-a-timestamp-column-in-postgresql/
+CREATE OR REPLACE FUNCTION update_updated_at_column()	
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = now();
+    RETURN NEW;	
+END;
+$$ language 'plpgsql';
+
+
+-- Business --
 
 CREATE TABLE IF NOT EXISTS expressions (
     id           SERIAL PRIMARY KEY,
@@ -6,7 +23,9 @@ CREATE TABLE IF NOT EXISTS expressions (
     main_text    text,
     title        text,
     meta_description   text
-);
+) INHERITS(lifecycle);
+CREATE TRIGGER updated_at_expressions BEFORE UPDATE ON expressions FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
+
 
 CREATE TABLE IF NOT EXISTS resources (
     id             SERIAL PRIMARY KEY,
@@ -16,7 +35,9 @@ CREATE TABLE IF NOT EXISTS resources (
     http_status    smallint,
     content_type   varchar(50),
     other_error    text
-);
+) INHERITS(lifecycle);
+CREATE TRIGGER updated_at_resources BEFORE UPDATE ON resources FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
+
 -- Per http://www.postgresql.org/docs/9.4/static/indexes-unique.html Postgresql already create all the necessary indices via the UNIQUE constraints
 
 -- "links" is chosen because it's not a SQL reserved keyword like "references"
@@ -24,38 +45,43 @@ CREATE TABLE IF NOT EXISTS links (
     "source"      integer REFERENCES resources (id) NOT NULL,
     target        integer REFERENCES resources (id) NOT NULL,
     PRIMARY KEY ("source", target)
-);
-
+) INHERITS(lifecycle);
+CREATE TRIGGER updated_at_links BEFORE UPDATE ON links FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
 -- to find graph edges quickly
 CREATE INDEX ON links ("source");
 
 
 
 CREATE TYPE get_expression_tasks_status AS ENUM ('todo', 'getting expression');
-
 CREATE TABLE IF NOT EXISTS get_expression_tasks (
     id          SERIAL PRIMARY KEY,
     resource_id integer UNIQUE REFERENCES resources (id) NOT NULL,
     status      get_expression_tasks_status,
-    created_at  timestamp without time zone default (now() at time zone 'utc'),
     related_territoire_id  integer NOT NULL, -- eventually should be a foreign key for the territoires table
     depth       integer NOT NULL
-);
-
+) INHERITS(lifecycle);
+CREATE TRIGGER updated_at_get_expression_tasks BEFORE UPDATE ON get_expression_tasks FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
 CREATE INDEX ON get_expression_tasks (related_territoire_id);
 
 
-
-CREATE TYPE social_signals_types AS ENUM ('facebook_like', 'facebook_share', 'twitter_share');
-
-CREATE TABLE IF NOT EXISTS social_signals (
+CREATE TYPE annotation_types AS ENUM ('facebook_like', 'facebook_share', 'twitter_share');
+CREATE TABLE IF NOT EXISTS annotations (
     id           SERIAL PRIMARY KEY,
     fetched_at   timestamp without time zone  NOT NULL, 
-    type         social_signals_types NOT NULL,
-    resource_id  integer REFERENCES resources (id)
+    type         annotations_types NOT NULL,
+    resource_id  integer REFERENCES resources (id),
+    -- eventually add territoire id and user_id
 );
+CREATE INDEX ON annotations (resource_id);
 
-CREATE INDEX ON social_signals (resource_id);
+
+CREATE TYPE annotations_tasks_status AS ENUM ('todo', 'fetching signal');
+CREATE TABLE IF NOT EXISTS annotations_tasks (
+    id          SERIAL PRIMARY KEY,
+    annotations_id integer UNIQUE REFERENCES annotations (id) NOT NULL,
+    status      annotations_tasks_status
+) INHERITS(lifecycle);
+CREATE TRIGGER updated_at_annotations_tasks BEFORE UPDATE ON annotations_tasks FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
 
 
 CREATE TABLE IF NOT EXISTS alexa_rank_cache (
@@ -63,7 +89,6 @@ CREATE TABLE IF NOT EXISTS alexa_rank_cache (
     rank             integer NOT NULL,
     download_date    timestamp without time zone NOT NULL
 );
-
 CREATE INDEX ON alexa_rank_cache (site_domain);
 
 

@@ -2,8 +2,7 @@
 
 var db = require('../database');
 var interogateOracle = require('../oracles/interogateOracle');
-var startCrawl = require('./startCrawl');
-
+var createResourceTasks = require('./createResourceTasks');
 
 module.exports = function onQueryCreated(query, user){
     console.log("onQueryCreated", query.name, query.belongs_to, user.name);
@@ -22,15 +21,21 @@ module.exports = function onQueryCreated(query, user){
             }
         })
         .then(function(queryResults){
+        
             return Promise.all([
                 db.QueryResults.create({
                     query_id: query.id,
                     results: queryResults.toJSON(),
                     created_at: new Date()
                 }),
-                db.Resources.findByURLsOrCreate(queryResults).then(function(resources){
-                    return startCrawl(new Set(resources.map(function(r){ return r.id; })), query.belongs_to);
-                })
+                db.Resources.findByURLsOrCreate(queryResults)
+                    .then(function(resources){
+                        return createResourceTasks(new Set(resources.map(function(r){ return r.id; })), {
+                            territoireId: query.belongs_to,
+                            depth: 0
+                        });
+                    })
+                
             ]);
         })
         .catch(function(err){

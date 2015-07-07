@@ -4,6 +4,8 @@ require('../ES-mess');
 process.title = "MyWI Automated Annotation worker";
 
 var database = require('../database');
+var socialSignals = require('./socialSignals');
+
 
 /*var errlog = function(context){
     return function(err){
@@ -32,7 +34,7 @@ setInterval(function(){
     if(inFlightTasks.size < MAX_CONCURRENT_TASKS && !databaseTasksP){
         var taskToPickCount = MAX_CONCURRENT_TASKS - inFlightTasks.size;
         
-        databaseTasksP = database.AutomatedAnnotationTasks.pickTasks(taskToPickCount)
+        databaseTasksP = database.AnnotationTasks.pickTasks(taskToPickCount)
             .then(function(tasks){
                 tasks.forEach(processTask);
                 databaseTasksP = undefined;
@@ -49,19 +51,19 @@ setInterval(function(){
 function deleteTask(task){
     // the two actions are purposefully not synchronized
     inFlightTasks.delete(task);
-    return database.AutomatedAnnotationTasks.delete(task.id);
+    return database.AnnotationTasks.delete(task.id);
 }
 
 
 
 function processTask(task){
-    //var taskTimeout;
+    var taskTimeout;
     
     inFlightTasks.add(task);
     
     // getExpression fights against a timer
     (new Promise(function(resolve){
-        /*taskTimeout =*/ setTimeout(resolve, AUTOMATED_ANNOTATION_MAX_DELAY);
+        taskTimeout = setTimeout(resolve, AUTOMATED_ANNOTATION_MAX_DELAY);
     })).then(function(){
         /*var resourceId = task.resource_id;
         database.Resources.update(
@@ -72,82 +74,38 @@ function processTask(task){
     });
     
     
-    /*database.Resources.findValidByIds(new Set([task.resource_id]))
-        .then(function(resources){
-            var resource = resources[0];
-            var url = resource.url;
-
-            // there is already a "complete" resource, do nothing.
-            if(resource.expression_id !== null || resource.other_error !== null)
-                return;
-
-            return getExpression(url)
-                .then(function(resExprLink){
-                    //console.log('resExprLink', resExprLink);
-
-                    var resourceIdP = resExprLink.resource.url !== url ?
-                        database.Resources.addAlias(task.resource_id, resExprLink.resource.url).catch(errlog("addAlias")) :
-                        Promise.resolve(task.resource_id);
-
-                    return resourceIdP.then(function(resourceId){                        
-                        var resourceUpdatedP = database.Resources.update(
-                            resourceId,
-                            Object.assign(
-                                {},
-                                {other_error: null}, // remove any previous other_error if there was one
-                                resExprLink.resource // take the other_error from here if there is one
-                            )
-                        )
-                            .catch(errlog("Resources.update"));
-                        var expressionUpdatedP;
-                        var linksUpdatedP;
-                        var tasksCreatedP;
-
-                        if(isValidResource(resExprLink.resource)){                            
-                            expressionUpdatedP = database.Expressions.create(resExprLink.expression)
-                                .then(function(expressions){
-                                    var expression = expressions[0];
-                                    return database.Resources.associateWithExpression(resourceId, expression.id);
-                                }).catch(errlog("Expressions.create + associateWithExpression"));
-                            
-                            linksUpdatedP = resExprLink.links.size >= 1 ? 
-                                database.Resources.findByURLsOrCreate(resExprLink.links)
-                                    .then(function(linkResources){
-                                        var linksData = linkResources.map(function(r){
-                                            return {
-                                                source: resourceId,
-                                                target: r.id
-                                            };
-                                        });
-
-                                        return database.Links.create(linksData).catch(errlog("Links.create"));
-                                    }).catch(errlog("Resources.findByURLsOrCreate link"))
-                                : undefined;
-
-                            if(approve({depth: task.depth, expression: resExprLink.expression})){
-
-                                //throw 'TODO filter out references that already have a corresponding expression either as uri or alias';
-
-                                // Don't recreate tasks for now. Will re-enable when a better approval algorithm is implemented.
-                                tasksCreatedP = Promise.resolve()
-                            }
-                        }
-
-                        return Promise.all([resourceUpdatedP, expressionUpdatedP, linksUpdatedP, tasksCreatedP]);
-                    });
+    database.Annotations.findById(task.annotation_id)
+        .then(function(annotation){
+            // pick the correct function for the task type
+            var annotationFunction = socialSignals.get(task.type);
+            
+            // get the resource id + url
+            return database.Resources.findValidByIds(new Set([task.resource_id]))
+                .then(function(resources){
+                    var resource = resources[0];
+                    var url = resource.url;
+                    
+                    // save the result in the annotation
+                
+                    return annotationFunction(url)
+                        .then(function(value){
+                            return database.Annotations.update(annotation.id, {
+                                value: value
+                            });
+                        });
+                
+                
+                
                 })
-                .catch(function(err){
-                    console.log('getExpression error', url, err, err.stack);
+            
 
-                    return; // symbolic. Just to make explicit the next .then is a "finally"
-                })
         })
         .catch(function(){})
         // in any case ("finally")
         .then(function(){
             clearTimeout(taskTimeout);
             return deleteTask(task);
-        });*/
+        });
     
 }
 

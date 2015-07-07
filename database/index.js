@@ -19,6 +19,8 @@ var Resources = require('../postgresDB/Resources');
 var Links = require('../postgresDB/Links');
 var GetExpressionTasks = require('../postgresDB/GetExpressionTasks');
 var AlexaRankCache = require('../postgresDB/AlexaRankCache');
+var Annotations = require('../postgresDB/Annotations');
+var AnnotationTasks = require('../postgresDB/AnnotationTasks');
 
 
 var getGraphExpressions = require('../common/graph/getGraphExpressions')(Expressions);
@@ -40,6 +42,8 @@ module.exports = {
     Resources: Resources,
     AlexaRankCache: AlexaRankCache,
     GetExpressionTasks: GetExpressionTasks,
+    Annotations: Annotations,
+    AnnotationTasks: AnnotationTasks,
     
     clearAll: function(){
         var self = this;

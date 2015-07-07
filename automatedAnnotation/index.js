@@ -17,15 +17,3 @@ os.cpus().slice(0, 1).map(function(){
         
     return worker;
 });
-
-/*
-    urls: Set<url>
-*/
-module.exports = function addAutomatedAnnotationTasks(urls){
-    if(typeof urls === 'string'){
-        // single url. 
-        urls = new Set([urls]);
-    }
-    
-    
-};

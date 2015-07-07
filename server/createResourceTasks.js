@@ -3,7 +3,7 @@
 var database = require('../database');
 var socialSignals = require('../automatedAnnotation/socialSignals');
 
-var socialSignalTypes = Object.keys(socialSignals);
+var socialSignalTypes = socialSignals.keys().toArray();
 
 
 /*
@@ -16,6 +16,17 @@ module.exports = function(resourceIds, options){
     return Promise._allResolved([
         database.GetExpressionTasks.createTasksTodo(resourceIds, territoireId, depth)
     ].concat(socialSignalTypes.map(function(type){
-        return database.AnnotationTasks.createTasksTodo(resourceIds, type, territoireId);
+        return Promise._allResolved(resourceIds.toJSON().map(function(rid){
+            return database.Annotations.create({
+                type: type,
+                resource_id: rid,
+                territoire_id: territoireId
+            })
+                .then(function(aid){
+                    return database.AnnotationTasks.createTasksTodo(aid);
+
+                })
+        }));
+        
     })));
 };

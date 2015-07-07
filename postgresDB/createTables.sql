@@ -67,21 +67,23 @@ CREATE INDEX ON get_expression_tasks (related_territoire_id);
 CREATE TYPE annotation_types AS ENUM ('facebook_like', 'facebook_share', 'twitter_share');
 CREATE TABLE IF NOT EXISTS annotations (
     id           SERIAL PRIMARY KEY,
-    fetched_at   timestamp without time zone  NOT NULL, 
-    type         annotations_types NOT NULL,
-    resource_id  integer REFERENCES resources (id),
-    -- eventually add territoire id and user_id
+    type         annotation_types NOT NULL,
+    value        integer,
+    resource_id  integer REFERENCES resources (id) NOT NULL,
+    territoire_id  integer NOT NULL -- eventually should be a foreign key for the territoires table
+    
+    -- eventually add user_id
 );
 CREATE INDEX ON annotations (resource_id);
 
 
-CREATE TYPE annotations_tasks_status AS ENUM ('todo', 'fetching signal');
-CREATE TABLE IF NOT EXISTS annotations_tasks (
+CREATE TYPE annotation_tasks_status AS ENUM ('todo', 'in progress');
+CREATE TABLE IF NOT EXISTS annotation_tasks (
     id          SERIAL PRIMARY KEY,
-    annotations_id integer UNIQUE REFERENCES annotations (id) NOT NULL,
-    status      annotations_tasks_status
+    annotation_id integer UNIQUE REFERENCES annotations (id) NOT NULL,
+    status      annotation_tasks_status
 ) INHERITS(lifecycle);
-CREATE TRIGGER updated_at_annotations_tasks BEFORE UPDATE ON annotations_tasks FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
+CREATE TRIGGER updated_at_annotation_tasks BEFORE UPDATE ON annotation_tasks FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
 
 
 CREATE TABLE IF NOT EXISTS alexa_rank_cache (

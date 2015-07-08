@@ -15,4 +15,3 @@ DROP INDEX IF EXISTS get_expression_tasks_uri_key;
 DROP TYPE IF EXISTS get_expression_tasks_status;
 DROP TYPE IF EXISTS annotation_tasks_status;
 DROP TYPE IF EXISTS social_signals_types;
-DROP TYPE IF EXISTS annotation_types;

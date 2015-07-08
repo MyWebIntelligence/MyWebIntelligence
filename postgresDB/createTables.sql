@@ -64,17 +64,17 @@ CREATE TRIGGER updated_at_get_expression_tasks BEFORE UPDATE ON get_expression_t
 CREATE INDEX ON get_expression_tasks (related_territoire_id);
 
 
-CREATE TYPE annotation_types AS ENUM ('facebook_like', 'facebook_share', 'twitter_share');
 CREATE TABLE IF NOT EXISTS annotations (
     id           SERIAL PRIMARY KEY,
-    type         annotation_types NOT NULL,
+    type         text NOT NULL,
     value        integer,
     resource_id  integer REFERENCES resources (id) NOT NULL,
     territoire_id  integer NOT NULL -- eventually should be a foreign key for the territoires table
     
     -- eventually add user_id
-);
-CREATE INDEX ON annotations (resource_id);
+) INHERITS(lifecycle);
+CREATE TRIGGER updated_at_annotations BEFORE UPDATE ON annotations FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
+CREATE INDEX ON annotations (territoire_id, resource_id);
 
 
 CREATE TYPE annotation_tasks_status AS ENUM ('todo', 'in progress');

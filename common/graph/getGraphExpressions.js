@@ -4,6 +4,7 @@ var StringMap = require('stringmap');
 
 /*
     graph is an abstract page graph
+    The returned value is a dictionary object key'ed on expression_id
 */
 // an indirection to avoid a circular dependency with database/index.js
 module.exports = function(Expressions){

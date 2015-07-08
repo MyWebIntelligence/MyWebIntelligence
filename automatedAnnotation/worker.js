@@ -36,6 +36,7 @@ setInterval(function(){
         
         databaseTasksP = database.AnnotationTasks.pickTasks(taskToPickCount)
             .then(function(tasks){
+                //console.log('picked', tasks.length, tasks, 'tasks');
                 tasks.forEach(processTask);
                 databaseTasksP = undefined;
             })
@@ -74,33 +75,40 @@ function processTask(task){
     });
     
     
-    database.Annotations.findById(task.annotation_id)
+    return database.Annotations.findById(task.annotation_id)
         .then(function(annotation){
             // pick the correct function for the task type
-            var annotationFunction = socialSignals.get(task.type);
+            var annotationFunction = socialSignals.get(annotation.type);
             
+            //console.log('annotationFunction', annotation, annotation.type, typeof annotationFunction);
+        
             // get the resource id + url
             return database.Resources.findValidByIds(new Set([task.resource_id]))
                 .then(function(resources){
                     var resource = resources[0];
+                    if(!resource)
+                        return undefined; // Don't bother annotating invalid resources
+                
                     var url = resource.url;
                     
                     // save the result in the annotation
                 
                     return annotationFunction(url)
                         .then(function(value){
+                            console.log('Annotation', url, annotation.type, value);
+                        
                             return database.Annotations.update(annotation.id, {
                                 value: value
                             });
+                        })
+                        .catch(function(err){
+                            console.error('Annotation error', err, err.stack);
                         });
-                
-                
-                
-                })
-            
-
+                });
         })
-        .catch(function(){})
+        .catch(function(err){
+            console.error('processTask error', err, err.stack);
+        })
         // in any case ("finally")
         .then(function(){
             clearTimeout(taskTimeout);

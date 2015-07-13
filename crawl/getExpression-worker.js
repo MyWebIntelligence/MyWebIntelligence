@@ -38,9 +38,11 @@ var databaseTasksP;
 // main interval
 // pick tasks independently of tasks successes, failures and hang
 setInterval(function(){
+    
     console.log('getExpression interval', inFlightTasks.size);
     
     if(inFlightTasks.size < MAX_CONCURRENT_TASKS && !databaseTasksP){
+        
         var taskToPickCount = MAX_CONCURRENT_TASKS - inFlightTasks.size;
         
         databaseTasksP = database.GetExpressionTasks.pickTasks(taskToPickCount)

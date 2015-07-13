@@ -25,7 +25,7 @@ module.exports = function(url){
                 catch(e){ reject(e); return; }
                 
                 if(!('shares' in obj)){
-                    reject(new Error('Misformed Facebook share result'))
+                    resolve(0);
                     return;
                 }
                 

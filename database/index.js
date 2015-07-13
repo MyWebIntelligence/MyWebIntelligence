@@ -164,7 +164,7 @@ module.exports = {
                 resourceIds.add(node.id);
             });
 
-            return resourceIds.size > 0 ? Annotations.findByResourceIdsAndTerritoireId(resourceIds, territoireId)
+            return resourceIds.size > 0 ? Annotations.findLatestByResourceIdsAndTerritoireId(resourceIds, territoireId)
                 .then(function(annotations){
                     annotations.forEach(function(ann){
                         var resourceAnnotations = annotationByResourceId[ann.resource_id];

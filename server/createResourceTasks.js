@@ -14,8 +14,11 @@ module.exports = function(resourceIds, options){
     
     return Promise._allResolved([
         database.GetExpressionTasks.createTasksTodo(resourceIds, territoireId, depth)
-    ].concat(socialSignalTypes.map(function(type){
-        return Promise._allResolved(resourceIds.toJSON().map(function(rid){
+        
+        // resourceIds.toJSON().map, then socialSignalTypes.map allows to "shuffle" tasks so that 
+        // different services to get data are interrogated in ~Round-Robin fashion
+    ].concat(resourceIds.toJSON().map(function(rid){
+        return Promise._allResolved(socialSignalTypes.map(function(type){
             console.log('Create ann', type, rid, territoireId);
             return database.Annotations.create({
                 type: type,

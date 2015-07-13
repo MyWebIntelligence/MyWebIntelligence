@@ -67,7 +67,7 @@ CREATE INDEX ON get_expression_tasks (related_territoire_id);
 CREATE TABLE IF NOT EXISTS annotations (
     id           SERIAL PRIMARY KEY,
     type         text NOT NULL,
-    value        integer,
+    "value"      integer,
     resource_id  integer REFERENCES resources (id) NOT NULL,
     territoire_id  integer NOT NULL -- eventually should be a foreign key for the territoires table
     

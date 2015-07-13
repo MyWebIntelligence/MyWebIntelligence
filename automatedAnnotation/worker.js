@@ -31,6 +31,11 @@ var databaseTasksP;
 setInterval(function(){
     console.log('Automated annotation interval', inFlightTasks.size);
     
+    database.AnnotationTasks.getAll()
+        .then(function(tasks){
+            console.log('There are', tasks.length, 'tasks');
+        })
+    
     if(inFlightTasks.size < MAX_CONCURRENT_TASKS && !databaseTasksP){
         var taskToPickCount = MAX_CONCURRENT_TASKS - inFlightTasks.size;
         
@@ -83,8 +88,10 @@ function processTask(task){
             //console.log('annotationFunction', annotation, annotation.type, typeof annotationFunction);
         
             // get the resource id + url
-            return database.Resources.findValidByIds(new Set([task.resource_id]))
+            return database.Resources.findValidByIds(new Set([annotation.resource_id]))
                 .then(function(resources){
+                    //console.log('findValidByIds', annotation.resource_id)
+                
                     var resource = resources[0];
                     if(!resource)
                         return undefined; // Don't bother annotating invalid resources

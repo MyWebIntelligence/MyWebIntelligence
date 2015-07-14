@@ -138,7 +138,7 @@ module.exports = {
             
             
             return Promise.all([
-                territoireP, relevantQueriesP, abstractPageGraphP, progressIndicatorsP, expressionByIdP, queryReadyP, annotationByResourceIdP
+                territoireP, relevantQueriesP, abstractPageGraphP, progressIndicatorsP, expressionByIdP, annotationByResourceIdP, queryReadyP
             ]).then(function(res){
                 var territoire = res[0];
                 
@@ -147,7 +147,7 @@ module.exports = {
                 territoire.progressIndicators = res[3];
                 territoire.expressionById = res[4];
                 territoire.annotationByResourceId = res[5];
-                
+                            
                 return territoire;
             });
         }, 
@@ -163,19 +163,19 @@ module.exports = {
             graph.nodes.forEach(function(node){
                 resourceIds.add(node.id);
             });
-
+            
             return resourceIds.size > 0 ? Annotations.findLatestByResourceIdsAndTerritoireId(resourceIds, territoireId)
                 .then(function(annotations){
-                    annotations.forEach(function(ann){
+                    annotations.forEach(function(ann){                        
                         var resourceAnnotations = annotationByResourceId[ann.resource_id];
                         if(!resourceAnnotations){
                             resourceAnnotations = Object.create(null);
-                            annotationByResourceId[ann.resource_id] = resourceAnnotations
+                            annotationByResourceId[ann.resource_id] = resourceAnnotations;
                         }
                         
                         resourceAnnotations[ann.type] = ann.value;
                     });
-
+                
                     return annotationByResourceId;
                 }) : annotationByResourceId;
         },

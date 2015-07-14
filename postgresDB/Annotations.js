@@ -107,7 +107,7 @@ module.exports = {
                 )
                 .toQuery();
 
-            console.log('Annotations findLatestByResourceIdsAndTerritoireId query', query);
+            //console.log('Annotations findLatestByResourceIdsAndTerritoireId query', query);
             
             return new Promise(function(resolve, reject){
                 db.query(query, function(err, result){

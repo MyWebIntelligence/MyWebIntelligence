@@ -8,6 +8,9 @@ var parse = require('url').parse;
 function getHostname(url){
     return parse(url).hostname;
 }
+function getProtocol(url){
+    return parse(url).protocol;
+}
 
 /*
     Right now, only the top1M is saved in the database
@@ -21,43 +24,72 @@ var MAX_ALEXA_RANK = 1000001;
 module.exports = function pageGraphToDomainGraph(pageGraph, alexaRanks){
     var domainGraph = new DomainGraph();
     
-    var pageNodeToDomainNode = new WeakMap();
-    
-    function getCorrespondingDomainNode(pn){
+    function makeDomainNodes(graph){
         
-        return expressionDomain(pn.url).then(function(ed){
-            // adding '_' at the beginning because sometimes domain names begin with numbers
-            var idyfiedExpressionDomain = '_' + ed.replace(/(\.|\-)/g, '_');
-            
-            var domainNode = domainGraph.getNode(idyfiedExpressionDomain);
-            
-            if(!domainNode){
-                domainNode = domainGraph.addNode(idyfiedExpressionDomain, {
-                    title: ed,
-                    nb_expressions: 0,
-                    base_url: 'http://'+ed,
-                    depth: pn.depth,
-                    global_alexarank: alexaRanks.get(getHostname(pn.url)) || MAX_ALEXA_RANK
-                });
-            }
-            
-            if(pn.depth < domainNode.depth)
-                domainNode.depth = pn.depth;
-            
-            domainNode.nb_expressions++;
-            pageNodeToDomainNode.set(pn, domainNode);
-        });
+        var expressionDomainToPageNode = new Map();
+        
+        return Promise.all(graph.nodes.toJSON().map(function(pn){
+            return expressionDomain(pn.url).then(function(ed){
+                
+                var expressionDomainPageNodes = expressionDomainToPageNode.get(ed);
+                
+                if(!expressionDomainPageNodes){
+                    expressionDomainPageNodes = [];
+                    expressionDomainToPageNode.set(ed, expressionDomainPageNodes);
+                }
+                
+                expressionDomainPageNodes.push(pn);
+                
+            });
+        }))
+            .then(function(){
+                var pageNodeToDomainNode = new WeakMap();
+                
+                expressionDomainToPageNode.forEach(function(pageNodes, ed){
+                    // adding '_' at the beginning because sometimes domain names begin with numbers
+                    var idyfiedExpressionDomain = '_' + ed.replace(/(\.|\-)/g, '_');
+                    
+                    var protocol = pageNodes.reduce(function(acc, node){
+                        var p = getProtocol(node.url);
+                        return p === 'http' ? acc : p;
+                    }, 'http');
+                    
+                    var alexaRank = alexaRanks.get(getHostname(pageNodes[0].url)) || MAX_ALEXA_RANK;
+
+                    var minFacebookLike = pageNodes.reduce(function(acc, node){
+                        var fbLike = node.facebook_like;
+                        return fbLike < acc && fbLike !== -1 ? fbLike : acc;
+                    }, +Infinity);
+                    
+                    // depth is min(depth)
+                    var depth = pageNodes.reduce(function(acc, node){
+                        var d = node.depth;
+                        return d < acc && d !== -1 ? d : acc;
+                    }, +Infinity);
+                    
+                    var domainNode = domainGraph.addNode(idyfiedExpressionDomain, {
+                        title: ed,
+                        nb_expressions: pageNodes.length,
+                        base_url: protocol+'://'+getHostname(pageNodes[0].url),
+                        depth: depth,
+                        global_alexarank: alexaRank,
+                        inverse_global_alexarank: 1/alexaRank,
+                        min_facebook_like: minFacebookLike
+                    });
+                    
+                    pageNodes.forEach(function(pn){
+                        pageNodeToDomainNode.set(pn, domainNode);
+                    });
+                })
+                
+                return pageNodeToDomainNode;
+            });
     }
-    
     
     
     return Promise.resolve().then(function(){
         
-        var domainNodePs = pageGraph.nodes.toJSON().map(function(n){
-            return getCorrespondingDomainNode(n);
-        });
-        
-        return Promise.all(domainNodePs).then(function(){
+        return makeDomainNodes(pageGraph).then(function(pageNodeToDomainNode){
             var sourceToTargetToCount = new Map();
             
             pageGraph.edges.forEach(function(e){

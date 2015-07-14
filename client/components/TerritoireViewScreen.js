@@ -21,15 +21,15 @@ interface TerritoireViewScreenProps{
 
 */
 
-function generateExpressionGEXF(abstractGraph, expressionById){
-    var pageGraph = abstractGraphToPageGraph(abstractGraph, expressionById);
+function generateExpressionGEXF(abstractGraph, expressionById, annotationsById){
+    var pageGraph = abstractGraphToPageGraph(abstractGraph, expressionById, annotationsById);
     
     return pageGraph.exportAsGEXF();
 }
 
 
-function generateDomainGEXF(abstractGraph, expressionById){
-    var pageGraph = abstractGraphToPageGraph(abstractGraph, expressionById);
+function generateDomainGEXF(abstractGraph, expressionById, annotationsById){
+    var pageGraph = abstractGraphToPageGraph(abstractGraph, expressionById, annotationsById);
     var graphHostname = getAbstractGraphHostnames(abstractGraph);
     
     var domainGraphP = getAlexaRanks(graphHostname)
@@ -174,8 +174,10 @@ module.exports = React.createClass({
                             onClick: function(e){
                                 e.preventDefault();
                                 
+                                //console.log('before dl', territoire.annotationByResourceId, territoire);
+                                
                                 triggerDownload(
-                                    generateExpressionGEXF(territoire.graph, territoire.expressionById),
+                                    generateExpressionGEXF(territoire.graph, territoire.expressionById, territoire.annotationByResourceId),
                                     territoire.name+'-pages.gexf',
                                     "application/gexf+xml"
                                 );
@@ -187,7 +189,7 @@ module.exports = React.createClass({
                             onClick: function(e){
                                 e.preventDefault();
                                 
-                                generateDomainGEXF(territoire.graph, territoire.expressionById, getAlexaRanks)
+                                generateDomainGEXF(territoire.graph, territoire.expressionById, territoire.annotationByResourceId)
                                     .then(function(domainsGEXF){
                                         triggerDownload(
                                             domainsGEXF,

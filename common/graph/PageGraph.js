@@ -15,6 +15,26 @@ var pageNodeDesc = {
     },
     "expressionId": {
         type: "integer"
+    },
+    'facebook_like': {
+        type: "integer",
+        default: -1
+    },
+    'facebook_share': {
+        type: "integer",
+        default: -1
+    },
+    'twitter_share': {
+        type: "integer",
+        default: -1
+    },
+    'google_pagerank': {
+        type: "integer",
+        default: 12
+    },
+    'linkedin_share': {
+        type: "integer",
+        default: -1
     }
 };
 

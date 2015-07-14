@@ -21,6 +21,12 @@ var domainNodeDesc = {
     },
     "global_alexarank": {
         type: "integer"
+    },
+    "inverse_global_alexarank": {
+        type: "float"
+    },
+    "min_facebook_like": {
+        type: "integer"
     }
 };
 

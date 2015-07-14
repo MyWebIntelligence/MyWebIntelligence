@@ -84,7 +84,8 @@ npm start-dev
 
 ```bash
 npm run start-dev-db-container
-node server/index.js
+nodemon server/index.js
+npm run watch
 ```
 
 

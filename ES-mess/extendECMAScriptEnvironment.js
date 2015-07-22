@@ -1,4 +1,4 @@
 "use strict";
 
-require('es-env-polyfills');
+require('es6-shim');
 require('./builtinExtensions');

@@ -1,7 +1,10 @@
 "use strict";
 
+var stats = require('simple-statistics');
+
 var expressionDomain = require('../../expressionDomain');
 var DomainGraph = require('./DomainGraph');
+
 
 var parse = require('url').parse;
 
@@ -10,6 +13,14 @@ function getHostname(url){
 }
 function getProtocol(url){
     return parse(url).protocol;
+}
+
+function cleanValue(v, forbidden, replacement){
+    if(!Array.isArray(forbidden))
+        forbidden = [forbidden];
+    
+    // won't work if NaN € forbidden
+    return forbidden.includes(v) ? replacement : v;
 }
 
 /*
@@ -56,10 +67,26 @@ module.exports = function pageGraphToDomainGraph(pageGraph, alexaRanks){
                     
                     var alexaRank = alexaRanks.get(getHostname(pageNodes[0].url)) || MAX_ALEXA_RANK;
 
-                    var minFacebookLike = pageNodes.reduce(function(acc, node){
-                        var fbLike = node.facebook_like;
-                        return fbLike < acc && fbLike !== -1 ? fbLike : acc;
-                    }, +Infinity);
+                    var domainFbLikes = pageNodes
+                        .map(function(node){ return node.facebook_like; })
+                        .filter(function(likes){ return likes !== undefined && likes !== null && likes !== -1; });
+                    
+                    var domainFbShares = pageNodes
+                        .map(function(node){ return node.facebook_share; })
+                        .filter(function(shares){ return shares !== undefined && shares !== null && shares !== -1; });
+                    
+                    var domainTwitterShares = pageNodes
+                        .map(function(node){ return node.twitter_share; })
+                        .filter(function(shares){ return shares !== undefined && shares !== null && shares !== -1; });
+                    
+                    var domainLinkedinShares = pageNodes
+                        .map(function(node){ return node.linkedin_share; })
+                        .filter(function(shares){ return shares !== undefined && shares !== null && shares !== -1; });
+                    
+                    var domainGooglePagerank = pageNodes
+                        .map(function(node){ return node.google_pagerank; })
+                        .filter(function(gRank){ return gRank !== undefined && gRank !== null && gRank !== 12; });
+                    
                     
                     // depth is min(depth)
                     var depth = pageNodes.reduce(function(acc, node){
@@ -72,9 +99,29 @@ module.exports = function pageGraphToDomainGraph(pageGraph, alexaRanks){
                         nb_expressions: pageNodes.length,
                         base_url: protocol+'://'+getHostname(pageNodes[0].url),
                         depth: depth,
+                        
                         global_alexarank: alexaRank,
                         inverse_global_alexarank: 1/alexaRank,
-                        min_facebook_like: minFacebookLike
+                        
+                        min_facebook_like: cleanValue(stats.min(domainFbLikes), [undefined, null], -1),
+                        max_facebook_like: cleanValue(stats.max(domainFbLikes), [undefined, null], -1),
+                        median_facebook_like: cleanValue(stats.median(domainFbLikes), [undefined, null], -1),
+                        
+                        min_facebook_share: cleanValue(stats.min(domainFbShares), [undefined, null], -1),
+                        max_facebook_share: cleanValue(stats.max(domainFbShares), [undefined, null], -1),
+                        median_facebook_share: cleanValue(stats.median(domainFbShares), [undefined, null], -1),
+                        
+                        min_twitter_share: cleanValue(stats.min(domainTwitterShares), [undefined, null], -1),
+                        max_twitter_share: cleanValue(stats.max(domainTwitterShares), [undefined, null], -1),
+                        median_twitter_share: cleanValue(stats.median(domainTwitterShares), [undefined, null], -1),
+                        
+                        min_linkedin_share: cleanValue(stats.min(domainLinkedinShares), [undefined, null], -1),
+                        max_linkedin_share: cleanValue(stats.max(domainLinkedinShares), [undefined, null], -1),
+                        median_linkedin_share: cleanValue(stats.median(domainLinkedinShares), [undefined, null], -1),
+                        
+                        min_google_pagerank: cleanValue(stats.min(domainGooglePagerank), [undefined, null], 12),
+                        max_google_pagerank: cleanValue(stats.max(domainGooglePagerank), [undefined, null], 12),
+                        median_google_pagerank: cleanValue(stats.median(domainGooglePagerank), [undefined, null], 12)
                     });
                     
                     pageNodes.forEach(function(pn){

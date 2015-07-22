@@ -105,6 +105,7 @@ module.exports = {
                             annotations.created_at.equals(latestAnnotation.latest_date)
                         ) ) )
                 )
+                .where( annotations.value.isNotNull() )
                 .toQuery();
 
             //console.log('Annotations findLatestByResourceIdsAndTerritoireId query', query);

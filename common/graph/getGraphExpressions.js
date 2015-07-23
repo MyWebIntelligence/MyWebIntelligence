@@ -10,6 +10,8 @@ var StringMap = require('stringmap');
 module.exports = function(Expressions){
     
     return function(graph){
+        console.time('getGraphExpressions');
+        
         var expressionsById = Object.create(null);
         var ids = new Set();
 
@@ -29,6 +31,7 @@ module.exports = function(Expressions){
                 expressionsById[expr.id] = expr;
             });
 
+            console.timeEnd('getGraphExpressions');
             return expressionsById;
         }) : expressionsById;
     };

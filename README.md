@@ -52,6 +52,7 @@ TODO figure out and document relationship with Trello
 ### Install
 
 * Install Node.js, Docker
+
 ```bash
 npm install
 ```
@@ -78,6 +79,15 @@ node tools/cacheAlexaTop1M.js
 npm run bundle
 npm start-dev
 ```
+
+#### Daily routine
+
+```bash
+npm run start-dev-db-container
+nodemon server/index.js
+npm run watch
+```
+
 
 ### Test
 

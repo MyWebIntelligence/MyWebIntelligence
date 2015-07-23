@@ -4,7 +4,12 @@ var StringMap = require('stringmap');
 
 var PageGraph = require('./PageGraph');
 
-module.exports = function abstractGraphToPageGraph(abGraph, expressionById){
+
+/*
+    expressionById : StringMap<ExpressionId, Expression>
+    annotationsById : DictObject<ResourceId, DictObj<AnnotationType, value>>
+*/
+module.exports = function abstractGraphToPageGraph(abGraph, expressionById, annotationsById){
     console.time('PageGraph');
     var nodes = abGraph.nodes;
     var edges = abGraph.edges;
@@ -23,20 +28,27 @@ module.exports = function abstractGraphToPageGraph(abGraph, expressionById){
 
     nodes.forEach(function(res){
         var expressionId = String(res.expression_id); // strinigfy because expressionById is a StringMap
+        var resourceId = res.id;
+        
         var expression = Object.assign(
             {}, 
             res,
             expressionById[expressionId]
         );
         
+        var annotations = annotationsById[resourceId];
+        
         var name = nextNodeName();
 
-        pageGraph.addNode(name, {
-            url: res.url,
-            depth: expression.depth,
-            title: expression.title || '',
-            expressionId: typeof expression.id === "number" ? expression.id : -1
-        });
+        pageGraph.addNode(name, Object.assign(
+            {
+                url: res.url,
+                depth: expression.depth,
+                title: expression.title || '',
+                expressionId: typeof expression.id === "number" ? expression.id : -1
+            }, 
+            annotations
+        ));
 
         var urlToNodeNameKey = String(res.id);
         //console.log(urlToNodeNameKey);

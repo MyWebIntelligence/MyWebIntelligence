@@ -8,6 +8,9 @@ var approve = require('./approve');
 
 var database = require('../database');
 var isValidResource = require('./isValidResource');
+//var createResourceTasks = require('../server/createResourceTasks');
+
+
 
 var errlog = function(context){
     return function(err){
@@ -35,9 +38,11 @@ var databaseTasksP;
 // main interval
 // pick tasks independently of tasks successes, failures and hang
 setInterval(function(){
-    console.log('interval', inFlightTasks.size);
+    
+    console.log('getExpression interval', inFlightTasks.size);
     
     if(inFlightTasks.size < MAX_CONCURRENT_TASKS && !databaseTasksP){
+        
         var taskToPickCount = MAX_CONCURRENT_TASKS - inFlightTasks.size;
         
         databaseTasksP = database.GetExpressionTasks.pickTasks(taskToPickCount)
@@ -137,10 +142,12 @@ function processTask(task){
                                 //throw 'TODO filter out references that already have a corresponding expression either as uri or alias';
 
                                 // Don't recreate tasks for now. Will re-enable when a better approval algorithm is implemented.
-                                tasksCreatedP = Promise.resolve()/*database.GetExpressionTasks.createTasksTodo(
+                                tasksCreatedP = Promise.resolve()/*createResourceTasks(
                                     new Set(expression.references),
-                                    task.related_territoire_id,
-                                    task.depth+1
+                                    {
+                                        territoireId: task.related_territoire_id,
+                                        depth: task.depth+1
+                                    }
                                 );*/
                             }
                         }

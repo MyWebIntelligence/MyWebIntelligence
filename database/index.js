@@ -19,6 +19,8 @@ var Resources = require('../postgresDB/Resources');
 var Links = require('../postgresDB/Links');
 var GetExpressionTasks = require('../postgresDB/GetExpressionTasks');
 var AlexaRankCache = require('../postgresDB/AlexaRankCache');
+var Annotations = require('../postgresDB/Annotations');
+var AnnotationTasks = require('../postgresDB/AnnotationTasks');
 
 
 var getGraphExpressions = require('../common/graph/getGraphExpressions')(Expressions);
@@ -40,6 +42,8 @@ module.exports = {
     Resources: Resources,
     AlexaRankCache: AlexaRankCache,
     GetExpressionTasks: GetExpressionTasks,
+    Annotations: Annotations,
+    AnnotationTasks: AnnotationTasks,
     
     clearAll: function(){
         var self = this;
@@ -100,6 +104,7 @@ module.exports = {
         */
         getTerritoireScreenData: function(territoireId){
             console.log('getTerritoireScreenData', territoireId);
+            var self = this;
             
             var territoireP = Territoires.findById(territoireId);
             var relevantQueriesP = Queries.findByBelongsTo(territoireId);
@@ -123,12 +128,17 @@ module.exports = {
                     return expressionById;
                 });
             
+            var annotationByResourceIdP = abstractPageGraphP
+                .then(function(graph){
+                    return self.getGraphAnnotations(graph, territoireId);
+                });
+            
             // timing of this query will make the values certainly out-of-sync with when 
             var progressIndicatorsP = this.getProgressIndicators(territoireId);
             
             
             return Promise.all([
-                territoireP, relevantQueriesP, abstractPageGraphP, progressIndicatorsP, expressionByIdP, queryReadyP
+                territoireP, relevantQueriesP, abstractPageGraphP, progressIndicatorsP, expressionByIdP, annotationByResourceIdP, queryReadyP
             ]).then(function(res){
                 var territoire = res[0];
                 
@@ -136,11 +146,39 @@ module.exports = {
                 territoire.graph = res[2];
                 territoire.progressIndicators = res[3];
                 territoire.expressionById = res[4];
-                
+                territoire.annotationByResourceId = res[5];
+                            
                 return territoire;
             });
         }, 
         
+        /*
+            graph is an abstract graph
+        */
+        getGraphAnnotations: function getGraphAnnotations(graph, territoireId){
+            var annotationByResourceId = Object.create(null);
+
+            var resourceIds = new Set();
+            
+            graph.nodes.forEach(function(node){
+                resourceIds.add(node.id);
+            });
+            
+            return resourceIds.size > 0 ? Annotations.findLatestByResourceIdsAndTerritoireId(resourceIds, territoireId)
+                .then(function(annotations){
+                    annotations.forEach(function(ann){                        
+                        var resourceAnnotations = annotationByResourceId[ann.resource_id];
+                        if(!resourceAnnotations){
+                            resourceAnnotations = Object.create(null);
+                            annotationByResourceId[ann.resource_id] = resourceAnnotations;
+                        }
+                        
+                        resourceAnnotations[ann.type] = ann.value;
+                    });
+                
+                    return annotationByResourceId;
+                }) : annotationByResourceId;
+        },
         
         /*
             uris: Set<string>
@@ -161,7 +199,7 @@ module.exports = {
             var aliasToCanonicalResourceId = new StringMap/*<ResourceIdStr, ResourceIdStr>*/();
             
             function buildGraph(resourceIds, depth){
-                console.time('buildGraph');
+                //console.time('buildGraph');
 
                 return Resources.findValidByIds(resourceIds).then(function(resources){
                     // console.log('building graph, found resources', resources.length);
@@ -234,7 +272,7 @@ module.exports = {
                         e.source = Number(e.source);
                     });
 
-                    console.timeEnd('buildGraph');
+                    //console.timeEnd('buildGraph');
                     return {
                         nodes: nodes,
                         edges: edges,

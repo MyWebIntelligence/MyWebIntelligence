@@ -23,10 +23,6 @@ var Annotations = require('../postgresDB/Annotations');
 var AnnotationTasks = require('../postgresDB/AnnotationTasks');
 
 
-var getGraphExpressions = require('../common/graph/getGraphExpressions')(Expressions);
-var simplifyExpression = require('../server/simplifyExpression');
-
-
 var getExpressionTasks = declarations.get_expression_tasks;
 
 
@@ -99,71 +95,11 @@ module.exports = {
             });
         },
         
-        /*
-            Query search results
-        */
-        getTerritoireScreenData: function(territoireId){
-            console.log('getTerritoireScreenData', territoireId);
-            var self = this;
-            
-            var territoireP = Territoires.findById(territoireId);
-            var relevantQueriesP = Queries.findByBelongsTo(territoireId);
-            
-            var queryReadyP = relevantQueriesP.then(function(queries){
-                return Promise.all(queries.map(function(q){
-                    return QueryResults.findLatestByQueryId(q.id).then(function(queryResults){
-                        q.oracleResults = queryResults && queryResults.results;
-                    });
-                }));
-            });
-            
-            var abstractPageGraphP = this.getTerritoireGraph(territoireId);
-            
-            var expressionByIdP = abstractPageGraphP
-                .then(getGraphExpressions)
-                .then(function(expressionById){
-                    console.time('simplifyExpression');
-                    Object.keys(expressionById).forEach(function(id){
-                        expressionById[id] = simplifyExpression(expressionById[id]);
-                    });
-                    console.timeEnd('simplifyExpression');
-                    return expressionById;
-                });
-            
-            var annotationByResourceIdP = abstractPageGraphP
-                .then(function(graph){
-                    console.time('fetching annotations');
-                    return self.getGraphAnnotations(graph, territoireId);
-                });
-            annotationByResourceIdP.then(console.timeEnd.bind(console, 'fetching annotations'))
-            
-            // timing of this query will make the values certainly out-of-sync with when 
-            var progressIndicatorsP = this.getProgressIndicators(territoireId);
-            
-            console.time('getProgressIndicators');
-            progressIndicatorsP.then(console.timeEnd.bind(console, 'getProgressIndicators'))
-            
-            console.time('all data');
-            return Promise.all([
-                territoireP, relevantQueriesP, abstractPageGraphP, progressIndicatorsP, expressionByIdP, annotationByResourceIdP, queryReadyP
-            ]).then(function(res){
-                console.timeEnd('all data');
-                var territoire = res[0];
-                
-                territoire.queries = res[1];
-                territoire.graph = res[2];
-                territoire.progressIndicators = res[3];
-                territoire.expressionById = res[4];
-                territoire.annotationByResourceId = res[5];
-                            
-                return territoire;
-            });
-        }, 
         
         /*
             graph is an abstract graph
         */
-        getGraphAnnotations: function getGraphAnnotations(graph, territoireId){
+        getGraphAnnotations: function getGraphAnnotations(graph, territoireId){            
             var annotationByResourceId = Object.create(null);
 
             var resourceIds = new Set();

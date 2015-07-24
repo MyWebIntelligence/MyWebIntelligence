@@ -25,7 +25,9 @@ var database = require('../database');
 //var dropAllTables = require('../postgresDB/dropAllTables');
 //var createTables = require('../postgresDB/createTables');
 var onQueryCreated = require('./onQueryCreated');
-var getGraphExpressions = require('../common/graph/getGraphExpressions')(database.Expressions);
+var getGraphExpressions = require('../common/graph/getGraphExpressions');
+var getTerritoireScreenData = require('../database/getTerritoireScreenData');
+
 
 var TerritoireListScreen = React.createFactory(require('../client/components/TerritoireListScreen'));
 var OraclesScreen = React.createFactory(require('../client/components/OraclesScreen'));
@@ -208,7 +210,7 @@ app.get('/territoire/:id', function(req, res){
     }
     else{
         var userInitDataP = database.complexQueries.getUserInitData(user.id);
-        var territoireScreenDataP = database.complexQueries.getTerritoireScreenData(territoireId);
+        var territoireScreenDataP = getTerritoireScreenData(territoireId);
 
         // Create a fresh document every time
         Promise.all([makeDocument(indexHTMLStr), userInitDataP, territoireScreenDataP])
@@ -545,10 +547,11 @@ app.get('/territoire-view-data/:id', function(req, res){
     
     var territoireId = Number(req.params.id);
     
-    database.complexQueries.getTerritoireScreenData(territoireId).then(function(territoireData){
+    getTerritoireScreenData(territoireId).then(function(territoireData){
         res.status(200).send(territoireData);
     }).catch(function(err){
-        res.status(500).send('database problem '+ err);
+        console.error('database problem', err, err.stack);
+        res.status(500).send('database problem '+err);
     });
 });
 

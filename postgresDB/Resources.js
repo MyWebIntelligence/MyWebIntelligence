@@ -136,8 +136,7 @@ module.exports = {
     findValidByURLs: function(urls){
         return databaseP.then(function(db){
             var query = resources
-                .select('*')
-                .from(resources)
+                .select(resources.star())
                 .where(
                     resources.url.in(urls.toJSON()).and(
                         isValidResourceExpression
@@ -161,8 +160,7 @@ module.exports = {
     findValidByIds: function(ids){
         return databaseP.then(function(db){
             var query = resources
-                .select('*')
-                .from(resources)
+                .select(resources.star())
                 .where(
                     resources.id.in(ids.toJSON()).and(
                         isValidResourceExpression

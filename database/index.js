@@ -23,10 +23,6 @@ var Annotations = require('../postgresDB/Annotations');
 var AnnotationTasks = require('../postgresDB/AnnotationTasks');
 
 
-var getGraphExpressions = require('../common/graph/getGraphExpressions')(Expressions);
-var simplifyExpression = require('../server/simplifyExpression');
-
-
 var getExpressionTasks = declarations.get_expression_tasks;
 
 
@@ -99,63 +95,11 @@ module.exports = {
             });
         },
         
-        /*
-            Query search results
-        */
-        getTerritoireScreenData: function(territoireId){
-            console.log('getTerritoireScreenData', territoireId);
-            var self = this;
-            
-            var territoireP = Territoires.findById(territoireId);
-            var relevantQueriesP = Queries.findByBelongsTo(territoireId);
-            
-            var queryReadyP = relevantQueriesP.then(function(queries){
-                return Promise.all(queries.map(function(q){
-                    return QueryResults.findLatestByQueryId(q.id).then(function(queryResults){
-                        q.oracleResults = queryResults && queryResults.results;
-                    });
-                }));
-            });
-            
-            var abstractPageGraphP = this.getTerritoireGraph(territoireId);
-            
-            var expressionByIdP = abstractPageGraphP
-                .then(getGraphExpressions)
-                .then(function(expressionById){
-                    Object.keys(expressionById).forEach(function(id){
-                        expressionById[id] = simplifyExpression(expressionById[id]);
-                    });
-                    return expressionById;
-                });
-            
-            var annotationByResourceIdP = abstractPageGraphP
-                .then(function(graph){
-                    return self.getGraphAnnotations(graph, territoireId);
-                });
-            
-            // timing of this query will make the values certainly out-of-sync with when 
-            var progressIndicatorsP = this.getProgressIndicators(territoireId);
-            
-            
-            return Promise.all([
-                territoireP, relevantQueriesP, abstractPageGraphP, progressIndicatorsP, expressionByIdP, annotationByResourceIdP, queryReadyP
-            ]).then(function(res){
-                var territoire = res[0];
-                
-                territoire.queries = res[1];
-                territoire.graph = res[2];
-                territoire.progressIndicators = res[3];
-                territoire.expressionById = res[4];
-                territoire.annotationByResourceId = res[5];
-                            
-                return territoire;
-            });
-        }, 
         
         /*
             graph is an abstract graph
         */
-        getGraphAnnotations: function getGraphAnnotations(graph, territoireId){
+        getGraphAnnotations: function getGraphAnnotations(graph, territoireId){            
             var annotationByResourceId = Object.create(null);
 
             var resourceIds = new Set();
@@ -187,7 +131,7 @@ module.exports = {
             Edges are {source: Node, target: Node}
         */
         getGraphFromRootURIs: function(rootURIs){
-            
+            //console.time('getGraphFromRootURIs');
             //var PERIPHERIC_DEPTH = 10000;
             
             //console.log('getGraphFromRootURIs', rootURIs.toJSON());
@@ -197,12 +141,14 @@ module.exports = {
             
             // (alias => canonical ResourceId) map
             var aliasToCanonicalResourceId = new StringMap/*<ResourceIdStr, ResourceIdStr>*/();
-            
-            function buildGraph(resourceIds, depth){
-                //console.time('buildGraph');
 
+            function buildGraph(resourceIds, depth){
+                //console.time('buildGraph '+resourceIds.size);
+                
+                //var k = 'findValidByIds '+resourceIds.size;
+                //console.time(k);
                 return Resources.findValidByIds(resourceIds).then(function(resources){
-                    // console.log('building graph, found resources', resources.length);
+                    //console.timeEnd(k);
                     
                     // create nodes for non-alias
                     resources.forEach(function(res){
@@ -235,11 +181,12 @@ module.exports = {
                         buildGraph(aliasTargetIds, depth) : // same depth on purpose
                         Promise.resolve();
                     
-                    
+                    //console.time('Links.findBySources '+resourceIds.size);
                     var nextDepthGraphP = Links.findBySources(new Set(resourcesWithExpression.map(function(r){
                         return r.id;
                     })))
                         .then(function(links){
+                            //console.timeEnd('Links.findBySources '+resourceIds.size);
                             var nextResourceIds = new Set();
 
                             links.forEach(function(l){
@@ -258,7 +205,10 @@ module.exports = {
                                 return buildGraph(nextResourceIds, depth+1);
                         });
                     
-                    return Promise.all([aliasRetryBuildGraphP, nextDepthGraphP]);
+                    var resP = Promise.all([aliasRetryBuildGraphP, nextDepthGraphP])
+                    //resP.then(console.timeEnd.bind(console, 'buildGraph '+resourceIds.size));
+                    
+                    return resP;
                 });
             }
             
@@ -272,7 +222,7 @@ module.exports = {
                         e.source = Number(e.source);
                     });
 
-                    //console.timeEnd('buildGraph');
+                    //console.timeEnd('getGraphFromRootURIs');
                     return {
                         nodes: nodes,
                         edges: edges,

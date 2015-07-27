@@ -23,10 +23,12 @@ module.exports = function getTerritoireScreenData(territoireId){
         }));
     });
 
+    console.time('getTerritoireResourceGraph')
     var abstractPageGraphP = getTerritoireResourceGraph(territoireId)
         .then(function(res){
             return res.graph;
         });
+    abstractPageGraphP.then(console.timeEnd.bind(console, 'getTerritoireResourceGraph'))
 
     var expressionByIdP = abstractPageGraphP
         .then(getGraphExpressions)

@@ -210,19 +210,25 @@ app.get('/territoire/:id', function(req, res){
     }
     else{
         var userInitDataP = database.complexQueries.getUserInitData(user.id);
-        var territoireScreenDataP = getTerritoireScreenData(territoireId);
+        var territoireP = database.Territoires.findById(territoireId);
 
         // Create a fresh document every time
-        Promise.all([makeDocument(indexHTMLStr), userInitDataP, territoireScreenDataP])
+        Promise.all([makeDocument(indexHTMLStr), userInitDataP, territoireP])
             .then(function(result){
                 var doc = result[0].document;
                 var dispose = result[0].dispose;
 
                 var initData = result[1];
-                var territoireScreenData = result[2];
+                var territoire = result[2];
 
                 renderDocumentWithData(doc, Object.assign(initData, {
-                    territoire: territoireScreenData
+                    territoire: Object.assign({
+                        queries: [],
+                        graph: {
+                            nodes: [],
+                            edges: []
+                        }
+                    }, territoire)
                 }), TerritoireViewScreen);
 
                 res.send( serializeDocumentToHTML(doc) );

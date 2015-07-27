@@ -131,7 +131,7 @@ module.exports = {
             Edges are {source: Node, target: Node}
         */
         getGraphFromRootURIs: function(rootURIs){
-            console.time('getGraphFromRootURIs');
+            //console.time('getGraphFromRootURIs');
             //var PERIPHERIC_DEPTH = 10000;
             
             //console.log('getGraphFromRootURIs', rootURIs.toJSON());
@@ -143,12 +143,12 @@ module.exports = {
             var aliasToCanonicalResourceId = new StringMap/*<ResourceIdStr, ResourceIdStr>*/();
 
             function buildGraph(resourceIds, depth){
-                console.time('buildGraph '+resourceIds.size);
+                //console.time('buildGraph '+resourceIds.size);
                 
-                var k = 'findValidByIds '+resourceIds.size;
-                console.time(k);
+                //var k = 'findValidByIds '+resourceIds.size;
+                //console.time(k);
                 return Resources.findValidByIds(resourceIds).then(function(resources){
-                    console.timeEnd(k);
+                    //console.timeEnd(k);
                     
                     // create nodes for non-alias
                     resources.forEach(function(res){
@@ -181,12 +181,12 @@ module.exports = {
                         buildGraph(aliasTargetIds, depth) : // same depth on purpose
                         Promise.resolve();
                     
-                    console.time('Links.findBySources '+resourceIds.size);
+                    //console.time('Links.findBySources '+resourceIds.size);
                     var nextDepthGraphP = Links.findBySources(new Set(resourcesWithExpression.map(function(r){
                         return r.id;
                     })))
                         .then(function(links){
-                            console.timeEnd('Links.findBySources '+resourceIds.size);
+                            //console.timeEnd('Links.findBySources '+resourceIds.size);
                             var nextResourceIds = new Set();
 
                             links.forEach(function(l){
@@ -206,7 +206,7 @@ module.exports = {
                         });
                     
                     var resP = Promise.all([aliasRetryBuildGraphP, nextDepthGraphP])
-                    resP.then(console.timeEnd.bind(console, 'buildGraph '+resourceIds.size));
+                    //resP.then(console.timeEnd.bind(console, 'buildGraph '+resourceIds.size));
                     
                     return resP;
                 });
@@ -222,7 +222,7 @@ module.exports = {
                         e.source = Number(e.source);
                     });
 
-                    console.timeEnd('getGraphFromRootURIs');
+                    //console.timeEnd('getGraphFromRootURIs');
                     return {
                         nodes: nodes,
                         edges: edges,

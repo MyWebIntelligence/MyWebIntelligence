@@ -20,7 +20,7 @@ var cache = new Map();
 var scheduledRefreshes = new Set/*<territoireId>*/()
 
 function refreshCacheEntry(territoireId){
-    console.log('refreshCacheEntry', territoireId);
+    //console.log('refreshCacheEntry', territoireId);
     
     if(scheduledRefreshes.has(territoireId))
         return; // already scheduled
@@ -29,7 +29,7 @@ function refreshCacheEntry(territoireId){
     
     return database.complexQueries.getTerritoireGraph(territoireId)
         .then(function(graph){
-            console.log('refreshCacheEntry', territoireId, 'done');
+            //console.log('refreshCacheEntry', territoireId, 'done');
             cache.set(territoireId, {
                 graph: graph,
                 buildTime: Date.now()
@@ -42,7 +42,7 @@ function refreshCacheEntry(territoireId){
 module.exports = function(territoireId){
     var entry = cache.get(territoireId);
     
-    console.log('territoireGraphCache', entry);
+    console.log('territoireGraphCache entry', entry);
     
     if(entry){
         entry.lastAccessTime = Date.now();

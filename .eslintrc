@@ -8,15 +8,16 @@
         "dot-notation": 0,
         "no-shadow": 1,
         "curly": 0,
-        "no-use-before-define": "no-func",
+        "no-use-before-define": 0,
         "no-native-reassign": 1,
         "no-process-exit": 0,
         
         "eol-last": 1,
         "no-space-before-semi": 1,
-        "new-cap": {
-            "capIsNewExceptions": ["React"]
-        },
+        "new-cap": [2, {
+            "capIsNewExceptions": ["React"],
+            "newIsCapExceptions": ["sigma"]
+        }],
         "semi": 0,
         "quotes": 0,
         "no-trailing-spaces": 0,
@@ -30,6 +31,7 @@
         "consistent-return": 0
     },
     "globals": {
-        "Promise": true
+        "Promise": true,
+        "sigma": true
     }
 }

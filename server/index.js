@@ -142,6 +142,8 @@ app.get('/auth/google/callback',
     }
 );
 
+app.use('/sigma', express.static(resolve(__dirname, '..', 'node_modules', 'sigma', 'build')));
+
 
 /***
     HTML routes

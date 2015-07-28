@@ -487,7 +487,7 @@ function GraphModel(nodeAttributes, edgeAttributes, options){
             
             return csv
                 .write(
-                    Object.keys(nodeByName).map(function(n){return nodeByName[n];}),
+                    Object.keys(nodeByName).map(function(n){return nodeByName[n]}),
                     {headers: true}
                 )
         }

@@ -86,3 +86,7 @@ main.territoire ul.result-list > li .excerpt{
     color: rgba(0, 0, 0, 0.75);
     
 }
+
+main.territoire #sigma-container{
+    min-height: 50vh;
+}

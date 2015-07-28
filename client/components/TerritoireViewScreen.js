@@ -4,6 +4,7 @@ var React = require('react');
 
 var Tabs = require('./external/Tabs.js');
 var Header = require('./Header');
+var DomainGraph = require('./DomainGraph');
 
 var abstractGraphToPageGraph = require('../../common/graph/abstractGraphToPageGraph');
 var pageGraphToDomainGraph = require('../../common/graph/pageGraphToDomainGraph');
@@ -150,17 +151,7 @@ module.exports = React.createClass({
                             })
                         ) : undefined,
                         // Domains tab content
-                        territoire.resultListByDomain ? React.DOM.ul(
-                            {className: 'result-list'},
-                            territoire.resultListByDomain.map(function(r){
-                                return React.DOM.li({}, [
-                                    React.DOM.a({ href: r.url, target: '_blank' }, [
-                                        React.DOM.h3({}, r.domain)
-                                    ]),
-                                    React.DOM.div({ className: 'excerpt' }, r.count)
-                                ]);
-                            })
-                        ) : undefined
+                        new DomainGraph()
                     ]),
                     
                     React.DOM.div({className: 'exports'}, [

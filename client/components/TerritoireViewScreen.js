@@ -69,14 +69,17 @@ module.exports = React.createClass({
     refreshTimeout: undefined,
     scheduleRefreshIfNecessary: function(){        
         var props = this.props;
+        var self = this;
         var t = props.territoire;
         var crawlTodoCount = t && t.progressIndicators && t.progressIndicators.crawlTodoCount;
         
-        console.log("scheduleRefreshIfNecessary", crawlTodoCount);
+        console.log("scheduleRefreshIfNecessary", crawlTodoCount, t.graph && t.graph.edges.length);
         
-        if(crawlTodoCount && crawlTodoCount >= 1){
-            this.refreshTimeout = setTimeout(function(){
-                this.refreshTimeout = undefined;
+        // for perceived performance purposes, sometimes only a graph with the query results is sent initially.
+        // refresh the graph if no edge was found in the graph
+        if( self.refreshTimeout === undefined && (crawlTodoCount && crawlTodoCount >= 1) || (t.graph && t.graph.edges.length === 0)){
+            self.refreshTimeout = setTimeout(function(){
+                self.refreshTimeout = undefined;
                 props.refresh();
             }, 5*1000);
         }
@@ -95,14 +98,33 @@ module.exports = React.createClass({
     },
     
     getInitialState: function() {
-        return {}
+        return {
+            domainGraph: undefined
+        }
     },
     
     render: function() {
+        var self = this;
         var props = this.props;
+        var state = this.state;
         var territoire = props.territoire;
         
-        //console.log('territoire', territoire);
+        console.log('territoire', territoire, territoire.graph);
+        
+        if(!state.domainGraph && territoire.graph){
+            pageGraphToDomainGraph(
+                abstractGraphToPageGraph(
+                    territoire.graph, 
+                    territoire.expressionById, 
+                    territoire.annotationByResourceId
+                )
+            ).then(function(domainGraph){
+                self.setState({
+                    domainGraph: domainGraph
+                })
+            })
+            
+        }
         
         return React.DOM.div({className: "react-wrapper"}, [
             new Header({
@@ -151,7 +173,9 @@ module.exports = React.createClass({
                             })
                         ) : undefined,
                         // Domains tab content
-                        new DomainGraph()
+                        new DomainGraph({
+                            graph: state.domainGraph ? state.domainGraph : undefined
+                        })
                     ]),
                     
                     React.DOM.div({className: 'exports'}, [

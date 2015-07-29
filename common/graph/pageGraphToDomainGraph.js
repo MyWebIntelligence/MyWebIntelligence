@@ -2,6 +2,8 @@
 
 var stats = require('simple-statistics');
 
+var immutableMap = require('immutable').Map;
+
 var expressionDomain = require('../../expressionDomain');
 var DomainGraph = require('./DomainGraph');
 
@@ -34,6 +36,7 @@ var MAX_ALEXA_RANK = 1000001;
 */
 module.exports = function pageGraphToDomainGraph(pageGraph, alexaRanks){
     var domainGraph = new DomainGraph();
+    alexaRanks = alexaRanks || immutableMap(); // eventually, alexaRanks will just be annotation. See #160
     
     function makeDomainNodes(graph){
         

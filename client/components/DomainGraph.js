@@ -19,46 +19,70 @@ module.exports = React.createClass({
     },
     
     componentDidMount: function(){
+        console.log('DomainGraph compontentDidMount', this.props.graph);
+                
+        this._drawGraph(this.props.graph);
+    },
+    
+    componentWillReceiveProps: function(nextProps){
+        console.log('DomainGraph componentWillReceiveProps', nextProps.graph);
         
-        var graph = new sigma({
+        this._drawGraph(nextProps.graph);
+    },
+    
+    _drawGraph: function(domainGraph){
+        
+        if(this.graph){
+            try{
+                this.graph.kill();
+            }catch(e){}
+        }
+        
+        var sigmaNodes = [];
+        domainGraph.nodes.forEach(function(n){
+            //console.log('dom grpah node', n);
+
+            sigmaNodes.push({
+                id: n.title,
+                label: n.title,
+                x: Math.random(),
+                y: Math.random(),
+                size: 20*Math.random(),
+                color: '#666'
+             });
+        });
+        
+        var sigmaEdges = [];
+        console.log('domain edges', domainGraph.edges);
+        domainGraph.edges.forEach(function(e, i){
+            //console.log('domain graph edge', e);
+
+            sigmaEdges.push({
+                id: 'e'+i,
+                source: e.source,
+                target: e.target
+            });
+        });
+        
+        
+        var sigmaGraph = new sigma({
             graph: {
-                nodes: Array(10).fill().map(function(e, i){
-                    return {
-                        id: 'n' + i,
-                        label: 'Node ' + i,
-                        x: Math.random(),
-                        y: Math.random(),
-                        size: 20*Math.random(),
-                        color: '#666'
-                     }
-                }),
-                edges: Array(Math.round(Math.random()*30)).fill().map(function(e, i){
-                    return {
-                        id: 'e'+i,
-                        source: 'n'+ Math.floor(Math.random()*10),
-                        target: 'n'+ Math.floor(Math.random()*10)
-                    }
-                })
+                nodes: sigmaNodes,
+                edges: sigmaEdges
             },
             container: SIGMA_CONTAINER_ID
         });
         
-        graph.startForceAtlas2({worker: true, barnesHutOptimize: false});
+        sigmaGraph.startForceAtlas2({worker: true, barnesHutOptimize: false});
         
         setTimeout(function(){
-            graph.stopForceAtlas2();
+            sigmaGraph.stopForceAtlas2();
         }, 5000);
         
-        this.graph = graph;
+        this.graph = sigmaGraph;
     },
     
     render: function() {
-        //var props = this.props;
-        //var state = this.state;
-        
-        
-        
-        
         return React.DOM.div({id: SIGMA_CONTAINER_ID}, []);
     }
 });

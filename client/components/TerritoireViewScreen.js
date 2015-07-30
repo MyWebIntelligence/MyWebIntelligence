@@ -66,20 +66,20 @@ function triggerDownload(content, name, type){
 
 module.exports = React.createClass({
     
-    refreshTimeout: undefined,
-    scheduleRefreshIfNecessary: function(){        
+    _refreshTimeout: undefined,
+    _scheduleRefreshIfNecessary: function(){        
         var props = this.props;
         var self = this;
         var t = props.territoire;
         var crawlTodoCount = t && t.progressIndicators && t.progressIndicators.crawlTodoCount;
         
-        console.log("scheduleRefreshIfNecessary", crawlTodoCount, t.graph && t.graph.edges.length);
+        console.log("scheduleRefreshIfNecessary", crawlTodoCount, t.graph && t.graph.edges.length, self._refreshTimeout);
         
         // for perceived performance purposes, sometimes only a graph with the query results is sent initially.
         // refresh the graph if no edge was found in the graph
-        if( self.refreshTimeout === undefined && (crawlTodoCount && crawlTodoCount >= 1) || (t.graph && t.graph.edges.length === 0)){
-            self.refreshTimeout = setTimeout(function(){
-                self.refreshTimeout = undefined;
+        if( self._refreshTimeout === undefined && ((crawlTodoCount && crawlTodoCount >= 1) || (t.graph && t.graph.edges.length === 0))){
+            self._refreshTimeout = setTimeout(function(){
+                self._refreshTimeout = undefined;
                 props.refresh();
             }, 5*1000);
         }
@@ -87,18 +87,20 @@ module.exports = React.createClass({
     
     // maybe schedule a refresh on mount and when receiving props
     componentDidMount: function(){
-        this.scheduleRefreshIfNecessary();
+        this._scheduleRefreshIfNecessary();
     },
     componentDidUpdate: function(){
-        this.scheduleRefreshIfNecessary();
+        this._scheduleRefreshIfNecessary();
     },
     
     componentWillUnmount: function(){
-        clearTimeout(this.refreshTimeout);
+        clearTimeout(this._refreshTimeout);
+        this._refreshTimeout = undefined;
     },
     
     getInitialState: function() {
         return {
+            territoireGraph: undefined,
             domainGraph: undefined
         }
     },
@@ -109,9 +111,9 @@ module.exports = React.createClass({
         var state = this.state;
         var territoire = props.territoire;
         
-        console.log('territoire', territoire, territoire.graph);
+        console.log('territoire', territoire, territoire.graph && territoire.graph.edges.length);
         
-        if(!state.domainGraph && territoire.graph){
+        if(territoire.graph && state.territoireGraph !== territoire.graph){
             pageGraphToDomainGraph(
                 abstractGraphToPageGraph(
                     territoire.graph, 
@@ -120,7 +122,8 @@ module.exports = React.createClass({
                 )
             ).then(function(domainGraph){
                 self.setState({
-                    domainGraph: domainGraph
+                    domainGraph: domainGraph,
+                    territoireGraph: territoire.graph
                 })
             })
             

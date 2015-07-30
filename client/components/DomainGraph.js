@@ -12,20 +12,25 @@ interface DomainGraphProps{
 */
 
 var SIGMA_CONTAINER_ID = 'sigma-container';
+var MAX_FORCE_ATLAS_TIME = 20*1000;
 
 module.exports = React.createClass({
+    displayName: "DomainGraph",
+    
     getInitialState: function() {
         return {};
     },
     
     componentDidMount: function(){
         console.log('DomainGraph compontentDidMount', this.props.graph);
-                
+        console.log('this.props.graph.edges.size', this.props.graph.edges.size)
+        
         this._drawGraph(this.props.graph);
     },
     
     componentWillReceiveProps: function(nextProps){
         console.log('DomainGraph componentWillReceiveProps', nextProps.graph);
+        console.log('nextProps.graph.edges.size', nextProps.graph.edges.size)
         
         this._drawGraph(nextProps.graph);
     },
@@ -53,14 +58,15 @@ module.exports = React.createClass({
         });
         
         var sigmaEdges = [];
-        console.log('domain edges', domainGraph.edges);
-        domainGraph.edges.forEach(function(e, i){
+        //console.log('domain edges', domainGraph.edges);
+        
+        domainGraph.edges.forEach(function(e){
             //console.log('domain graph edge', e);
 
             sigmaEdges.push({
-                id: 'e'+i,
-                source: e.source,
-                target: e.target
+                id: 'e'+sigmaEdges.length,
+                source: e.node1.title,
+                target: e.node2.title
             });
         });
         
@@ -77,7 +83,7 @@ module.exports = React.createClass({
         
         setTimeout(function(){
             sigmaGraph.stopForceAtlas2();
-        }, 5000);
+        }, MAX_FORCE_ATLAS_TIME);
         
         this.graph = sigmaGraph;
     },

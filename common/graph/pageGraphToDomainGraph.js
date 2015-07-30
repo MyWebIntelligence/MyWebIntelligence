@@ -163,8 +163,12 @@ module.exports = function pageGraphToDomainGraph(pageGraph, alexaRanks){
                 var count = targetToCount.get(domainTarget) || 0;
                 targetToCount.set(domainTarget, count+1);
             });
-                
+            
+            //console.log("sourceToTargetToCount", sourceToTargetToCount.size);
+            
             sourceToTargetToCount.forEach(function(targetToCount, source){
+                //console.log("targetToCount", source, targetToCount.size);
+                
                 targetToCount.forEach(function(count, target){
                     domainGraph.addEdge(source, target, {
                         weight: count

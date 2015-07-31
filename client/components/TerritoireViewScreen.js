@@ -4,6 +4,7 @@ var React = require('react');
 
 var Tabs = require('./external/Tabs.js');
 var Header = require('./Header');
+var DomainGraph = require('./DomainGraph');
 
 var abstractGraphToPageGraph = require('../../common/graph/abstractGraphToPageGraph');
 var pageGraphToDomainGraph = require('../../common/graph/pageGraphToDomainGraph');
@@ -65,17 +66,20 @@ function triggerDownload(content, name, type){
 
 module.exports = React.createClass({
     
-    refreshTimeout: undefined,
-    scheduleRefreshIfNecessary: function(){        
+    _refreshTimeout: undefined,
+    _scheduleRefreshIfNecessary: function(){        
         var props = this.props;
+        var self = this;
         var t = props.territoire;
         var crawlTodoCount = t && t.progressIndicators && t.progressIndicators.crawlTodoCount;
         
-        console.log("scheduleRefreshIfNecessary", crawlTodoCount);
+        console.log("scheduleRefreshIfNecessary", crawlTodoCount, t.graph && t.graph.edges.length, self._refreshTimeout);
         
-        if(crawlTodoCount && crawlTodoCount >= 1){
-            this.refreshTimeout = setTimeout(function(){
-                this.refreshTimeout = undefined;
+        // for perceived performance purposes, sometimes only a graph with the query results is sent initially.
+        // refresh the graph if no edge was found in the graph
+        if( self._refreshTimeout === undefined && ((crawlTodoCount && crawlTodoCount >= 1) || (t.graph && t.graph.edges.length === 0))){
+            self._refreshTimeout = setTimeout(function(){
+                self._refreshTimeout = undefined;
                 props.refresh();
             }, 5*1000);
         }
@@ -83,25 +87,47 @@ module.exports = React.createClass({
     
     // maybe schedule a refresh on mount and when receiving props
     componentDidMount: function(){
-        this.scheduleRefreshIfNecessary();
+        this._scheduleRefreshIfNecessary();
     },
     componentDidUpdate: function(){
-        this.scheduleRefreshIfNecessary();
+        this._scheduleRefreshIfNecessary();
     },
     
     componentWillUnmount: function(){
-        clearTimeout(this.refreshTimeout);
+        clearTimeout(this._refreshTimeout);
+        this._refreshTimeout = undefined;
     },
     
     getInitialState: function() {
-        return {}
+        return {
+            territoireGraph: undefined,
+            domainGraph: undefined
+        }
     },
     
     render: function() {
+        var self = this;
         var props = this.props;
+        var state = this.state;
         var territoire = props.territoire;
         
-        //console.log('territoire', territoire);
+        console.log('territoire', territoire, territoire.graph && territoire.graph.edges.length);
+        
+        if(territoire.graph && state.territoireGraph !== territoire.graph){
+            pageGraphToDomainGraph(
+                abstractGraphToPageGraph(
+                    territoire.graph, 
+                    territoire.expressionById, 
+                    territoire.annotationByResourceId
+                )
+            ).then(function(domainGraph){
+                self.setState({
+                    domainGraph: domainGraph,
+                    territoireGraph: territoire.graph
+                })
+            })
+            
+        }
         
         return React.DOM.div({className: "react-wrapper"}, [
             new Header({
@@ -150,17 +176,9 @@ module.exports = React.createClass({
                             })
                         ) : undefined,
                         // Domains tab content
-                        territoire.resultListByDomain ? React.DOM.ul(
-                            {className: 'result-list'},
-                            territoire.resultListByDomain.map(function(r){
-                                return React.DOM.li({}, [
-                                    React.DOM.a({ href: r.url, target: '_blank' }, [
-                                        React.DOM.h3({}, r.domain)
-                                    ]),
-                                    React.DOM.div({ className: 'excerpt' }, r.count)
-                                ]);
-                            })
-                        ) : undefined
+                        new DomainGraph({
+                            graph: state.domainGraph ? state.domainGraph : undefined
+                        })
                     ]),
                     
                     React.DOM.div({className: 'exports'}, [

@@ -67,8 +67,6 @@ app.use(bodyParser.json({limit: "2mb"})); // for parsing application/json
 app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
 app.use(multer()); // for parsing multipart/form-data
 
-var serializedUsers = new Map();
-
 passport.use(new GoogleStrategy({
     clientID: googleCredentials["CLIENT_ID"],
     clientSecret: googleCredentials["CLIENT_SECRET"],
@@ -100,31 +98,84 @@ passport.use(new GoogleStrategy({
     }).catch(errFun)
 }));
 
+var serializedUsers = new Map/*<UserId, User>*/();
+
+var HARDCODED_DEVELOPER_ID = 68451720;
+
+if(process.env.NODE_ENV === 'development'){    
+    database.Users.findById(HARDCODED_DEVELOPER_ID)
+        .then(function(user){
+            if(user){
+                serializedUsers.set(HARDCODED_DEVELOPER_ID, user);
+                console.log('hardcoding user', user);
+            }
+            else{
+                throw new Error('No user with id '+HARDCODED_DEVELOPER_ID);
+            }
+        })
+        .catch(function(error){
+            console.error('Problem trying to hardcode user', HARDCODED_DEVELOPER_ID, process.env.NODE_ENV, error)
+        })
+}
+    
+
 passport.serializeUser(function(user, done) {
+    console.log('serializeUser', user);
+    
     serializedUsers.set(user.id, user);
     done(null, user.id);
 });
 
 passport.deserializeUser(function(id, done) {
+    console.log('deserializeUser', id);
+    
     done(null, serializedUsers.get(id));
+});
+
+app.use(express.static(resolve(__dirname, '..', 'client')));
+app.use('/sigma', express.static(resolve(__dirname, '..', 'node_modules', 'sigma', 'build')));
+
+app.use(passport.initialize());
+
+
+if(process.env.NODE_ENV !== 'development'){
+    app.use(session({ 
+        secret: 'olive wood amplifi jourbon',
+        key: "s",
+        resave: false,
+        saveUninitialized: true
+    }));
+
+    app.use(passport.session());
+}
+
+app.use(compression());
+
+app.use(function(req, res, next){
+    console.log('NODE_ENV dependent route', process.env.NODE_ENV)
+    
+    if(process.env.NODE_ENV === 'development'){
+        req.session = {
+            passport: {
+                user: serializedUsers.get(HARDCODED_DEVELOPER_ID)
+            }
+        };
+    }
+    
+    var user = req.session.passport.user;
+    
+    if((process.env.NODE_ENV === 'stable' || process.env.NODE_ENV === 'experimental') && (!user || !user.id)){
+        console.log('redirect')
+        res.redirect('/');
+    }
+    else{
+        next();
+    }
+        
 });
 
 
 
-// gzip/deflate outgoing responses
-app.use(session({ 
-    secret: 'olive wood amplifi jourbon',
-    key: "s",
-    resave: false,
-    saveUninitialized: true
-}));
-
-app.use(passport.initialize());
-app.use(passport.session());
-
-app.use(express.static(resolve(__dirname, '..', 'client')));
-
-app.use(compression());
 
 
 /*
@@ -143,6 +194,7 @@ app.get('/auth/google/callback',
 );
 
 
+
 /***
     HTML routes
 ***/
@@ -153,92 +205,79 @@ function renderDocumentWithData(doc, data, reactFactory){
 }
 
 app.get('/territoires', function(req, res){
-    var user = serializedUsers.get(req.session.passport.user);
-    if(!user || !user.id){
-        res.redirect('/');
-    }
-    else{
-        var userInitDataP = database.complexQueries.getUserInitData(user.id);
+    console.log('/territoires', typeof req.session.passport.user)
+    
+    var user = serializedUsers.get(req.session.passport.user.id);
+    var userInitDataP = database.complexQueries.getUserInitData(user.id);
 
-        // Create a fresh document every time
-        Promise.all([makeDocument(indexHTMLStr), userInitDataP]).then(function(result){
-            var doc = result[0].document;
-            var dispose = result[0].dispose;
-            
-            var initData = result[1];
+    // Create a fresh document every time
+    Promise.all([makeDocument(indexHTMLStr), userInitDataP]).then(function(result){
+        var doc = result[0].document;
+        var dispose = result[0].dispose;
 
-            renderDocumentWithData(doc, initData, TerritoireListScreen);
-            res.send( serializeDocumentToHTML(doc) );
-            dispose();
-        })
-        .catch(function(err){ console.error('/territoires', err, err.stack); });
-    }
+        var initData = result[1];
+
+        renderDocumentWithData(doc, initData, TerritoireListScreen);
+        res.send( serializeDocumentToHTML(doc) );
+        dispose();
+    })
+    .catch(function(err){ console.error('/territoires', err, err.stack); });   
 });
 
 
 app.get('/oracles', function(req, res){
-    var user = serializedUsers.get(req.session.passport.user);
-    if(!user || !user.id){
-        res.redirect('/');
-    }
-    else{
-        var userInitDataP = database.complexQueries.getUserInitData(user.id);
+    var user = serializedUsers.get(req.session.passport.user.id);
+    var userInitDataP = database.complexQueries.getUserInitData(user.id);
 
-        // Create a fresh document every time
-        Promise.all([makeDocument(indexHTMLStr), userInitDataP]).then(function(result){
-            var doc = result[0].document;
-            var dispose = result[0].dispose;
-            
-            var initData = result[1];
+    // Create a fresh document every time
+    Promise.all([makeDocument(indexHTMLStr), userInitDataP]).then(function(result){
+        var doc = result[0].document;
+        var dispose = result[0].dispose;
 
-            renderDocumentWithData(doc, initData, OraclesScreen);
+        var initData = result[1];
 
-            res.send( serializeDocumentToHTML(doc) );
-            dispose();
-        })
-        .catch(function(err){ console.error('/oracles', err); });
-    }
+        renderDocumentWithData(doc, initData, OraclesScreen);
+
+        res.send( serializeDocumentToHTML(doc) );
+        dispose();
+    })
+    .catch(function(err){ console.error('/oracles', err); });
 });
 
 
 app.get('/territoire/:id', function(req, res){
-    var user = serializedUsers.get(req.session.passport.user);
+    var user = serializedUsers.get(req.session.passport.user.id);
     var territoireId = Number(req.params.id);
     
-    if(!user || !user.id){
-        res.redirect('/');
-    }
-    else{
-        var userInitDataP = database.complexQueries.getUserInitData(user.id);
-        var territoireP = database.Territoires.findById(territoireId);
+    var userInitDataP = database.complexQueries.getUserInitData(user.id);
+    var territoireP = database.Territoires.findById(territoireId);
 
-        // Create a fresh document every time
-        Promise.all([makeDocument(indexHTMLStr), userInitDataP, territoireP])
-            .then(function(result){
-                var doc = result[0].document;
-                var dispose = result[0].dispose;
+    // Create a fresh document every time
+    Promise.all([makeDocument(indexHTMLStr), userInitDataP, territoireP])
+        .then(function(result){
+            var doc = result[0].document;
+            var dispose = result[0].dispose;
 
-                var initData = result[1];
-                var territoire = result[2];
+            var initData = result[1];
+            var territoire = result[2];
 
-                renderDocumentWithData(doc, Object.assign(initData, {
-                    territoire: Object.assign({
-                        queries: [],
-                        graph: {
-                            nodes: [],
-                            edges: []
-                        }
-                    }, territoire)
-                }), TerritoireViewScreen);
+            renderDocumentWithData(doc, Object.assign(initData, {
+                territoire: Object.assign({
+                    queries: [],
+                    graph: {
+                        nodes: [],
+                        edges: []
+                    }
+                }, territoire)
+            }), TerritoireViewScreen);
 
-                res.send( serializeDocumentToHTML(doc) );
-                dispose();
-            })
-            .catch(function(err){
-                console.error('/territoire/:id problem', territoireId, err, err.stack);
-                res.status(500).send(['/territoire/:id problem', territoireId, err].join(' '));
-            });
-    }
+            res.send( serializeDocumentToHTML(doc) );
+            dispose();
+        })
+        .catch(function(err){
+            console.error('/territoire/:id problem', territoireId, err, err.stack);
+            res.status(500).send(['/territoire/:id problem', territoireId, err].join(' '));
+        });
 
 });
 
@@ -545,11 +584,7 @@ app.get('/oracle-credentials', function(req, res){
 });
 
 app.get('/territoire-view-data/:id', function(req, res){
-    var user = serializedUsers.get(req.session.passport.user);
-    if(!user || !user.id){
-        res.redirect('/');
-        return;
-    }
+    // var user = serializedUsers.get(req.session.passport.user.id);
     
     var territoireId = Number(req.params.id);
     

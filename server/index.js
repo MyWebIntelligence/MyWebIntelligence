@@ -135,6 +135,9 @@ passport.deserializeUser(function(id, done) {
 app.use(express.static(resolve(__dirname, '..', 'client')));
 app.use('/sigma', express.static(resolve(__dirname, '..', 'node_modules', 'sigma', 'build')));
 
+app.use(passport.initialize());
+
+
 if(process.env.NODE_ENV !== 'development'){
     app.use(session({ 
         secret: 'olive wood amplifi jourbon',
@@ -143,7 +146,6 @@ if(process.env.NODE_ENV !== 'development'){
         saveUninitialized: true
     }));
 
-    app.use(passport.initialize());
     app.use(passport.session());
 }
 

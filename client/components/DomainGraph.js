@@ -12,7 +12,7 @@ interface DomainGraphProps{
 */
 
 var SIGMA_CONTAINER_ID = 'sigma-container';
-var MAX_FORCE_ATLAS_TIME = 20*1000;
+var MAX_FORCE_ATLAS_TIME = 30*1000;
 
 module.exports = React.createClass({
     displayName: "DomainGraph",
@@ -44,15 +44,22 @@ module.exports = React.createClass({
         }
         
         var sigmaNodes = [];
+        
+        var inDegrees = new WeakMap();
+        domainGraph.edges.forEach(function(e){
+            var deg = inDegrees.get(e.node2);
+            inDegrees.set(e.node2, deg ? deg+1 : 1);
+        });
+        
         domainGraph.nodes.forEach(function(n){
             //console.log('dom grpah node', n);
-
+            
             sigmaNodes.push({
                 id: n.title,
                 label: n.title,
                 x: Math.random(),
                 y: Math.random(),
-                size: 20*Math.random(),
+                size: Math.min(inDegrees.get(n)/2, 8),
                 color: '#666'
              });
         });

@@ -36,6 +36,8 @@ module.exports = React.createClass({
     },
     
     _drawGraph: function(domainGraph){
+        console.log('_drawGraph', domainGraph);
+        
         
         if(this.graph){
             try{

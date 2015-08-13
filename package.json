@@ -62,6 +62,7 @@
     "fast-csv": "^0.6.0",
     "google-pagerank": "0.0.3",
     "immutable": "^3.7.4",
+    "ioredis": "^1.7.4",
     "jsdom": "3.x",
     "moment": "^2.10.2",
     "multer": "^0.1.7",

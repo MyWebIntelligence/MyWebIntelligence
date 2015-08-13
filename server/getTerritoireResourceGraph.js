@@ -3,10 +3,22 @@
 var fork = require('child_process').fork;
 
 var StringMap = require('stringmap');
+//var Redis = require('ioredis');
+
+
 
 var w = fork(require.resolve('./territoireGraphCache-worker'))
 
 var terrIdToPromiseResolve = new Map();
+
+/*var redisClient = new Redis({
+    port: 6379,
+    host: 'redis'//,
+    //password: 'auth',
+    //db: 0
+})*/
+
+
 
 w.on('message', function(res){
     var id = res.territoireId;

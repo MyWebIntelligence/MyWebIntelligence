@@ -135,21 +135,21 @@ module.exports = React.createClass({
                  oracleHref: "/oracles"
             }),
             
-            React.DOM.main({className: 'territoire'}, [
-                React.DOM.header({}, [
-                    React.DOM.h1({}, [
+            React.DOM.main({className: 'territoire'},
+                React.DOM.header({},
+                    React.DOM.h1({}, 
                         "Territoire "+territoire.name
-                    ]),
-                    territoire.progressIndicators ? React.DOM.h2({}, [
+                    ),
+                    territoire.progressIndicators ? React.DOM.h2({}, 
                         React.DOM.span({title: "Query oracle results"}, territoire.progressIndicators.queriesResultsCount),
                         '-',
                         React.DOM.span({title: "Crawl todo"}, territoire.progressIndicators.crawlTodoCount),
                         '-',
                         React.DOM.span({title: "Expressions"}, Object.keys(territoire.expressionById || {}).length)
-                    ]) : undefined
-                ]),
+                    ) : undefined
+                ),
                 
-                React.DOM.div({className: 'tabs-and-exports'}, [
+                React.DOM.div({className: 'tabs-and-exports'},
                     new Tabs({
                         defaultTabNum: 0,
                         tabNames: ['Pages', 'Domains'],
@@ -181,7 +181,7 @@ module.exports = React.createClass({
                         })
                     ]),
                     
-                    React.DOM.div({className: 'exports'}, [
+                    React.DOM.div({className: 'exports'},
                         React.DOM.a({
                             href: "/territoire/"+territoire.id+"/expressions.csv",
                             download: true
@@ -220,11 +220,11 @@ module.exports = React.createClass({
                                     });
                             }
                         }, 'Download Domains GEXF')
-                    ])
+                    )
                 
-                ])
+                )
                 
-            ])
+            )
         
         ]);
     }

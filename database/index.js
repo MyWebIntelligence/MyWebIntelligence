@@ -2,6 +2,8 @@
 
 var StringMap = require('stringmap');
 
+var cleanupURLs = require('../common/cleanupURLs');
+
 // JSON database models
 var Users = require('./models/Users');
 var Territoires = require('./models/Territoires');
@@ -249,7 +251,11 @@ module.exports = {
                     var terrResults = [];
                 
                     queriesResults.forEach(function(qRes){
-                        terrResults = terrResults.concat(qRes ? qRes.results : []);
+                        terrResults = terrResults.concat(qRes ?
+                            // cleanup the results before returning them as they may contain relative links or non-http links
+                            cleanupURLs(qRes.results) : 
+                            []
+                        );
                     });
                 
                     return new Set(terrResults);

@@ -2,7 +2,11 @@
 
 var React = require('react');
 
+var cleanupURLs = require('../../common/cleanupURLs');
+
 var DeleteButton = React.createFactory(require('./DeleteButton'));
+
+
 
 /*
 
@@ -65,9 +69,7 @@ module.exports = React.createClass({
                         }).type;
                         
                         if(type === 'list'){
-                            value = input.value.split('\n').map(function(str){
-                                return str.trim();
-                            });
+                            value = cleanupURLs(input.value.split('\n'))
                         }
                         else{
                             if(type === 'boolean'){
@@ -156,7 +158,7 @@ module.exports = React.createClass({
                             if(opt.type === 'list'){
                                 input = React.DOM.textarea({
                                     name: id,
-                                    defaultValue: queryOracleOptions[id],
+                                    defaultValue: (queryOracleOptions[id] || []).join('\n'),
                                     rows: 5
                                 })
                             }

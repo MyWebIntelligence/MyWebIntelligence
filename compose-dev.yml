@@ -1,0 +1,21 @@
+app:
+   build: .
+   command: node server/index.js
+   links:
+      - db
+   ports:
+      - 3333:3333
+   environment:
+      - POSTGRES_PASSWORD=password
+      - NODE_ENV=development
+   volumes: 
+      - .:/usr/mywi
+db:
+   image: postgres:9.4
+   environment:
+      - POSTGRES_PASSWORD=password
+   volumes:
+      - ./_storage/etc:/etc/postgresql
+      - ./_storage/log:/var/log/postgresql
+      - ./_storage/data:/var/lib/postgresql
+      - ./_storage/data/data:/var/lib/postgresql/data

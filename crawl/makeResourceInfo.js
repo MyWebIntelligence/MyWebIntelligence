@@ -1,37 +1,10 @@
 "use strict";
 
 var makeDocument = require('../common/makeDocument');
-var stripURLHash = require('../common/stripURLHash');
+var cleanupURLs = require('../common/cleanupURLs');
 
 var getReadabilityAPIMainContent = require('./getReadabilityAPIMainContent');
 
-/*
-    These links usually end up being resources that are heavy to download and that we cannot process yet.
-    They will be ignored
-*/
-var EXCLUDED_FILE_EXTENSIONS = [
-    // documents
-    '.pdf',
-    '.doc',
-    '.docx',
-    '.ppt',
-    '.pptx',
-    '.xls',
-    '.xlsx',
-    
-    // archives
-    '.zip',
-    '.tar.gz',
-    '.tar',
-    '.gz',
-    '.rar',
-    
-    // images
-    '.png',
-    '.eps',
-    '.jpg',
-    '.jpeg'
-];
 
 function extractMainContent(o){
     // TODO eventually, use Mozilla's readability
@@ -64,22 +37,8 @@ module.exports = function(url, html){
     
         // links
         var links = Array.from(mainContent.querySelectorAll('a[href]'));
-
-        var urls = links
-            .map(function(a){ return a.href.trim() })
-            // remove non-http links, like javascript: and mailto: links
-            .filter(function(u){ return /^https?/.test(u); })
-            .map(stripURLHash)
-            // exclude URLs that are likely to end up being resources that we cannot process
-            .filter(function(u){
-                // the url doesn't end with any of the excluded file extensions
-                // equivalent to: every extension does not terminate the url
-                return EXCLUDED_FILE_EXTENSIONS.every(function(ext){
-                    return !u.endsWith(ext);
-                });
-            });
         
-        var uniqueLinks = new Set(urls);
+        var uniqueLinks = new Set(cleanupURLs(links.map(function(a){ return a.href; })));
 
         // remove self-references
         uniqueLinks.delete(url);

@@ -1,0 +1,14 @@
+app:
+   build: .
+   command: node server/index.js
+   links:
+      - db
+   ports:
+      - 4444:3333
+   environment:
+      - POSTGRES_PASSWORD=password
+      - NODE_ENV=experimental
+db:
+   image: postgres:9.4
+   environment:
+      - POSTGRES_PASSWORD=password

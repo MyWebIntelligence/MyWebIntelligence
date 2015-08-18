@@ -51,7 +51,7 @@ TODO figure out and document relationship with Trello
 
 ### Install
 
-* Install Node.js, Docker
+* Install Node.js, Docker, Docker-compose
 
 ```bash
 npm install

@@ -3,10 +3,13 @@
 var pg = require('pg');
 
 var conStringByNODE_ENV = {
-    "test":         "postgres://postgres:password@localhost:5600/postgres",
+    // with docker-compose
     "development":  "postgres://postgres:password@db:5432/postgres", // default NODE_ENV value
+    "experimental": "postgres://postgres:password@db:5432/postgres",
+
+    // without docker-compose (yet)
+    "test":         "postgres://postgres:password@localhost:5600/postgres",
     "dev-docker":   "postgres://postgres:password@mywi-dev-db:5432/postgres",
-    "experimental": "postgres://postgres:password@mywi-experimental-db:5432/postgres",
     "stable":       "postgres://postgres:password@mywi-stable-db:5432/postgres"
 }
 

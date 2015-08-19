@@ -4,7 +4,7 @@ var database = require('../database/index.js');
 
 var getGraphExpressions = require('../common/graph/getGraphExpressions');
 
-var getTerritoireResourceGraph = require('../server/getTerritoireResourceGraph');
+var getTerritoireResourceGraph = require('../server/territoireGraphCache/getTerritoireResourceGraph');
 var simplifyExpression = require('../server/simplifyExpression');
 
 

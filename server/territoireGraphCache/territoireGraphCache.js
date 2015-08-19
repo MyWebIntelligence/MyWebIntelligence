@@ -1,8 +1,14 @@
 "use strict";
 
+var child_process = require('child_process');
+var fork = child_process.fork;
+var exec = child_process.exec;
+
+var MAXIMUM_NICENESS = 19;
+
 var StringMap = require('stringmap');
 
-var database = require('../database');
+var database = require('../../database');
 
 // var ONE_HOUR = 60*60*1000;
 
@@ -15,9 +21,7 @@ var database = require('../database');
 */
 var cache = new Map();
 
-
-
-var scheduledRefreshes = new Set/*<territoireId>*/()
+var scheduledRefreshes = new Map/*<territoireId, Process>*/()
 
 function refreshCacheEntry(territoireId){
     //console.log('refreshCacheEntry', territoireId);
@@ -25,24 +29,32 @@ function refreshCacheEntry(territoireId){
     if(scheduledRefreshes.has(territoireId))
         return; // already scheduled
     
-    scheduledRefreshes.add(territoireId);
+    var w = fork(require.resolve('./territoireGraphBuilder-worker'), [territoireId]);
     
-    return database.complexQueries.getTerritoireGraph(territoireId)
-        .then(function(graph){
-            //console.log('refreshCacheEntry', territoireId, 'done');
-            cache.set(territoireId, {
-                graph: graph,
-                buildTime: Date.now()
-            });
-            scheduledRefreshes.delete(territoireId);
-        })
+    scheduledRefreshes.set(territoireId, w);
+    
+    w.on('message', function(graph){
+        // it's the graph, 
+        cache.set(territoireId, {
+            graph: graph,
+            buildTime: Date.now()
+        });
+        
+        w.kill();
+    });
+    
+    w.on('exit', function(){
+        scheduledRefreshes.delete(territoireId);
+    })
+    
+    exec( ['renice', '-n', MAXIMUM_NICENESS, w.pid].join(' ') );
 }
 
 
 module.exports = function(territoireId){
     var entry = cache.get(territoireId);
     
-    console.log('territoireGraphCache entry', entry);
+    console.log('territoireGraphCache entry', !!entry);
     
     if(entry){
         entry.lastAccessTime = Date.now();
@@ -94,10 +106,5 @@ module.exports = function(territoireId){
                 };
             })
     }
-    
-    
-    
-    
-    
     
 }

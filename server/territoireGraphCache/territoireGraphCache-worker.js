@@ -1,6 +1,9 @@
 "use strict";
 
-require('../ES-mess');
+process.title = "MyWI territoireGraphCache-worker";
+
+require('../../ES-mess');
+
 
 console.log('territoireGraphCache-worker', 'represent!')
 

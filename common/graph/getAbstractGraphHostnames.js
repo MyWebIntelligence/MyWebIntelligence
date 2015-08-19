@@ -15,7 +15,8 @@ module.exports = function getAbstractGraphHostnames(graph){
     var hostnames = new Set();
     
     nodes.forEach(function(res){
-        hostnames.add(getHostname(res.url));
+        if(typeof res.expression_id === 'number')
+            hostnames.add(getHostname(res.url));
     });
     
     return hostnames;

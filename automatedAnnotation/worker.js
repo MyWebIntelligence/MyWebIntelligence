@@ -102,7 +102,7 @@ function processTask(task){
                 
                     return annotationFunction(url)
                         .then(function(value){
-                            console.log('Annotation', url, annotation.type, value);
+                            //console.log('Annotation', url, annotation.type, value);
                         
                             return database.Annotations.update(annotation.id, {
                                 value: value

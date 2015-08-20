@@ -50,6 +50,7 @@ module.exports = function prepareGCSEOracle(credentials){
         var query = options.query;
         var start = options.start;
         var num = options.num;
+        var lr = options.lr;
         var dateRange = options.dateRange;
 
         var params = {
@@ -58,6 +59,7 @@ module.exports = function prepareGCSEOracle(credentials){
             q: query,
             start: start,
             num: num,
+            lr: lr,
             // https://developers.google.com/custom-search/docs/structured_data#page_dates
             sort: dateRange ? [ 
                 'date', 
@@ -124,7 +126,8 @@ module.exports = function prepareGCSEOracle(credentials){
 
     return function GCSEOracle(q, oracleOptions){
         var regularGCSEResults = getGCSEResultsForAllStarts({
-            query: q
+            query: q,
+            lr: oracleOptions && oracleOptions.lr
         });
         
         if(oracleOptions && oracleOptions.add24MonthHistory){
@@ -132,7 +135,8 @@ module.exports = function prepareGCSEOracle(credentials){
             var rangeResults = makeRangesFromNow(90, 8).map(function(range){
                 return getGCSEResultsForAllStarts({
                     query: q,
-                    dateRange: range
+                    dateRange: range,
+                    lr: oracleOptions && oracleOptions.lr
                 });
             });
             

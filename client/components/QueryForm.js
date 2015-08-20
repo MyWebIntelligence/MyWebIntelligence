@@ -76,6 +76,7 @@ module.exports = React.createClass({
                                 value = input.checked;
                             }
                             else{
+                                // works for Array.isArray(type)
                                 value = input.value;
                             }
                         }
@@ -150,8 +151,11 @@ module.exports = React.createClass({
                             input = React.DOM.select({
                                 name: id,
                                 defaultValue: queryOracleOptions[id]
-                            }, opt.type.map(function(v){
-                                return React.DOM.option({value: v}, v);
+                            }, opt.type.map(function(optOpt){
+                                return React.DOM.option({
+                                    value: optOpt.value,
+                                    key: optOpt.value
+                                }, optOpt.text)
                             }));
                         }
                         else{

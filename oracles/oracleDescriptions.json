@@ -7,6 +7,156 @@
                 "id": "add24MonthHistory", 
                 "name": "add 24-month history",
                 "type": "boolean"
+            },
+            {
+                "id": "lr", 
+                "name": "language",
+                "type": [
+                    {
+                        "value": "",
+                        "text": "- any -"
+                    },
+                    {
+                        "value": "lang_ar",
+                        "text": "Arabic"
+                    },
+                    {
+                        "value": "lang_bg",
+                        "text": "Bulgarian"
+                    },
+                    {
+                        "value": "lang_ca",
+                        "text": "Catalan"
+                    },
+                    {
+                        "value": "lang_cs",
+                        "text": "Czech"
+                    },
+                    {
+                        "value": "lang_da",
+                        "text": "Danish"
+                    },
+                    {
+                        "value": "lang_de",
+                        "text": "German"
+                    },
+                    {
+                        "value": "lang_el",
+                        "text": "Greek"
+                    },
+                    {
+                        "value": "lang_en",
+                        "text": "English"
+                    },
+                    {
+                        "value": "lang_es",
+                        "text": "Spanish"
+                    },
+                    {
+                        "value": "lang_et",
+                        "text": "Estonian"
+                    },
+                    {
+                        "value": "lang_fi",
+                        "text": "Finnish"
+                    },
+                    {
+                        "value": "lang_fr",
+                        "text": "French"
+                    },
+                    {
+                        "value": "lang_hr",
+                        "text": "Croatian"
+                    },
+                    {
+                        "value": "lang_hu",
+                        "text": "Hungarian"
+                    },
+                    {
+                        "value": "lang_id",
+                        "text": "Indonesian"
+                    },
+                    {
+                        "value": "lang_is",
+                        "text": "Icelandic"
+                    },
+                    {
+                        "value": "lang_it",
+                        "text": "Italian"
+                    },
+                    {
+                        "value": "lang_iw",
+                        "text": "Hebrew"
+                    },
+                    {
+                        "value": "lang_ja",
+                        "text": "Japanese"
+                    },
+                    {
+                        "value": "lang_ko",
+                        "text": "Korean"
+                    },
+                    {
+                        "value": "lang_lt",
+                        "text": "Lithuanian"
+                    },
+                    {
+                        "value": "lang_lv",
+                        "text": "Latvian"
+                    },
+                    {
+                        "value": "lang_nl",
+                        "text": "Dutch"
+                    },
+                    {
+                        "value": "lang_no",
+                        "text": "Norwegian"
+                    },
+                    {
+                        "value": "lang_pl",
+                        "text": "Polish"
+                    },
+                    {
+                        "value": "lang_pt",
+                        "text": "Portuguese"
+                    },
+                    {
+                        "value": "lang_ro",
+                        "text": "Romanian"
+                    },
+                    {
+                        "value": "lang_ru",
+                        "text": "Russian"
+                    },
+                    {
+                        "value": "lang_sk",
+                        "text": "Slovak"
+                    },
+                    {
+                        "value": "lang_sl",
+                        "text": "Slovenian"
+                    },
+                    {
+                        "value": "lang_sr",
+                        "text": "Serbian"
+                    },
+                    {
+                        "value": "lang_sv",
+                        "text": "Swedish"
+                    },
+                    {
+                        "value": "lang_tr",
+                        "text": "Turkish"
+                    },
+                    {
+                        "value": "lang_zh-CN",
+                        "text": "Chinese (Simplified)"
+                    },
+                    {
+                        "value": "lang_zh-TW",
+                        "text": "Chinese (Traditional)"
+                    }
+                ]
             }
         ],
         "needsCredentials": {

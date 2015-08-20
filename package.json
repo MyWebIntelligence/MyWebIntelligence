@@ -17,7 +17,7 @@
     "build-dev": "docker-compose -f compose-dev.yml build",
     "up-dev": "docker-compose -f compose-dev.yml up",
     "build-experimental": "docker-compose -f compose-experimental.yml build",
-    "up-experimental": "docker-compose -f compose-experimental.yml up",
+    "up-experimental": "docker-compose -f compose-experimental.yml up -d",
     "build-stable-container": "docker build --tag=\"mywi/stable\" .",
     "start-stable-db-container": "docker rm mywi-stable-db; docker run --name mywi-stable-db -p 5300:5432 -e POSTGRES_PASSWORD=password -d mywi/database",
     "start-stable": "docker run -d -p=3333:3333 -e \"NODE_ENV=stable\" --link mywi-stable-db:mywi-stable-db mywi/stable node server/index.js",

@@ -5,7 +5,7 @@ main.territoire{
 main.territoire h1{
     width: 100%;
     text-align: center;
-    border-bottom: 1px solid #CCC;
+    /*border-bottom: 1px solid #CCC;*/
     margin: 0;
     padding: 0.5em;
 }
@@ -47,10 +47,17 @@ main.territoire .tabs-and-exports nav.tabs-tab-container{
     width: 100%;
 }
 
+main.territoire ul.result-list{
+    max-width: 60vw;
+    
+    display: flex;
+    flex-direction: column;
+}
+
 main.territoire ul.result-list > li{
     text-align: left;
     margin-bottom: 0.5em;
-    min-height: 3.5em;
+    min-height: 3em;
     padding: 0.4em;
 }
 

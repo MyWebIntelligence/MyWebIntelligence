@@ -28,13 +28,14 @@ module.exports = {
     /*
         urls is a Set<url>
     */
-    createTasksTodo: function(annotationId){
-        
+    createTasksTodo: function(resourceId, territoireId, type){
         return databaseP.then(function(db){
             var query = annotationTasks
                 .insert({
                     status: 'todo',
-                    annotation_id: annotationId
+                    resource_id: resourceId, 
+                    territoire_id: territoireId,
+                    type: type
                 })
                 .toQuery();
                 

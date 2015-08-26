@@ -26,21 +26,70 @@ module.exports = {
         })
     },
     
-    update: function(aid, delta){
-        return databaseP.then(function(db){
-            var query = annotations
-                .update(delta)
-                .where(annotations.id.equals(aid))
-                .toQuery();
-
-            //console.log('Annotations update query', query);
+    update: function(resourceId, territoireId, userId, values, accepted){
+        
+        return databaseP
+            .then(function(db){
             
-            return new Promise(function(resolve, reject){
-                db.query(query, function(err, result){
-                    if(err) reject(err); else resolve(result.rows);
+                var query = annotations
+                    .select(annotations.accepted, annotations.values)
+                    .where(annotations.resource_id.equals(resourceId).and(
+                        annotations.territoire_id.equals(territoireId)
+                    ))
+                    .toQuery();
+
+
+                return new Promise(function(resolve, reject){
+                    db.query(query, function(err, result){
+                        if(err) reject(err); else resolve(result.rows[0]);
+                    });
                 });
-            });
-        })
+            })
+            .then(function(currentAnnotation){
+                // /!\ between this instant and when the UPDATE occurs, someone else may call .update
+                // This is a race condition. Of the two .update calls, only the last one will win.
+                // For now, it's considered acceptable as update per (resourceId, territoireId) pair should be rare enough
+            
+                return databaseP
+                    .then(function(db){
+                        var update = {};
+                    
+                        // save the last human user who made an update
+                        if(userId !== undefined)
+                            update.user_id = userId;
+                    
+                        var newAccepted = typeof accepted === 'boolean' && currentAnnotation.accepted !== accepted ?
+                            accepted : undefined;
+                    
+                        if(typeof newAccepted === 'boolean')
+                            update.accepted = newAccepted;
+                    
+                        var newValues = JSON.stringify(
+                            Object.assign(
+                                JSON.parse(currentAnnotation.values || '{}'),
+                                values || {}
+                            )
+                        )
+                        
+                        update.values = newValues;
+                    
+                        var query = annotations
+                            .update(update)
+                            .where(annotations.resource_id.equals(resourceId).and(
+                                annotations.territoire_id.equals(territoireId)
+                            ))
+                            .toQuery();
+
+                        //console.log('Annotations update query', query);
+
+                        return new Promise(function(resolve, reject){
+                            db.query(query, function(err, result){
+                                if(err) reject(err); else resolve(result.rows);
+                            });
+                        });
+                    });
+            })
+        
     },
     
     findById: function(id){

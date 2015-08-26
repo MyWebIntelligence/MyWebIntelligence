@@ -65,23 +65,26 @@ CREATE INDEX ON get_expression_tasks (related_territoire_id);
 
 
 CREATE TABLE IF NOT EXISTS annotations (
-    id           SERIAL PRIMARY KEY,
-    type         text NOT NULL,
-    "value"      integer,
-    resource_id  integer REFERENCES resources (id) NOT NULL,
-    territoire_id  integer NOT NULL -- eventually should be a foreign key for the territoires table
-    
-    -- eventually add user_id
+    accepted        boolean DEFAULT true,
+    values          text, -- JSON blob. This prevents annotation-based queries at the SQL level. Stats will have to be made in JS or maybe in a synthesized document served by ElasticSearch
+    resource_id     integer REFERENCES resources (id) NOT NULL,
+    territoire_id   integer NOT NULL, -- eventually should be a foreign key for the territoires table
+    user_id         integer, -- eventually should be a foreign key for the users table. NULL means an algorithm made the annotation
+    PRIMARY KEY(territoire_id, resource_id) -- for now
 ) INHERITS(lifecycle);
 CREATE TRIGGER updated_at_annotations BEFORE UPDATE ON annotations FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
-CREATE INDEX ON annotations (territoire_id, resource_id);
+
+CREATE INDEX ON annotations (territoire_id);
+CREATE INDEX ON annotations (resource_id);
 
 
 CREATE TYPE annotation_tasks_status AS ENUM ('todo', 'in progress');
 CREATE TABLE IF NOT EXISTS annotation_tasks (
-    id          SERIAL PRIMARY KEY,
-    annotation_id integer UNIQUE REFERENCES annotations (id) NOT NULL,
-    status      annotation_tasks_status
+    id              SERIAL PRIMARY KEY,
+    type            text NOT NULL,
+    resource_id     integer REFERENCES resources (id) NOT NULL,
+    territoire_id   integer NOT NULL,
+    status          annotation_tasks_status
 ) INHERITS(lifecycle);
 CREATE TRIGGER updated_at_annotation_tasks BEFORE UPDATE ON annotation_tasks FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
 

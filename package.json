@@ -26,7 +26,7 @@
     "lint": "eslint ./",
     "build-test-crawl-docker-image": "docker build --tag=\"mywi/test-crawl\" --file=test/automated/crawl/Dockerfile .",
     "test-crawl": "docker run --add-host a.web:127.0.0.1 mywi/test-crawl /usr/bin/supervisord -c /usr/mywi/test/automated/crawl/supervisord.conf",
-    "sql-generate": "node-sql-generate --dsn postgres://postgres:password@localhost:5500/postgres > ./postgresDB/declarations.js",
+    "sql-generate": "node-sql-generate --dsn postgres://postgres:password@db:5432/postgres > ./postgresDB/declarations.js",
     "create-sql-tables": "node tools/createSQLTables.js"
   },
   "repository": {

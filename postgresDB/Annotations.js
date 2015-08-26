@@ -13,7 +13,6 @@ module.exports = {
         return databaseP.then(function(db){
             var query = annotations
                 .insert(annotationData)
-                .returning('id')
                 .toQuery();
 
             //console.log('Annotations create query', query);
@@ -112,49 +111,24 @@ module.exports = {
     /*
         resourceIds: Set<ResourceId>
         
-        For each (resourceId, territoireId, type) tuple, this function returns the latest annotation (max creation_date)
-        regardless of what that date is and of the annotation author.
+        For each (resourceId, territoireId) pair, this function returns the annotations
         This function is meant for exports.
-        In the future other functions will enable introspecting annotation history
     */
     findLatestByResourceIdsAndTerritoireId: function(resourceIds, territoireId){
-        
-        /*
-            For each (resourceId, territoireId, type) tuple, find the latest annotation (max creation_date)
-        */
-        var latestAnnotation = annotations
-            .subQuery('latest_annotation')
-            .select(
-                annotations.resource_id, 
-                annotations.type.as('ann_type'), // to prevent collision with latestAnnotation.type (=== "SUBQUERY")
-                annotations.created_at.max().as('latest_date')
-            )
-            .where(annotations.territoire_id.equals(territoireId).and(
-                annotations.resource_id.in(resourceIds.toJSON())
-            ))
-            .group(
-                annotations.resource_id,
-                annotations.type
-            );
-        
-        //console.log('latestAnnotation', latestAnnotation.table, latestAnnotation);
-        
         
         return databaseP.then(function(db){
             var query = annotations
                 .select(
                     annotations.resource_id, 
-                    annotations.type,
-                    annotations.value
+                    annotations.values
                 )
-                .from( annotations
-                       .join(latestAnnotation)
-                       .on( annotations.resource_id.equals(latestAnnotation.resource_id).and(
-                            annotations.type.equals(latestAnnotation.ann_type).and(
-                            annotations.created_at.equals(latestAnnotation.latest_date)
-                        ) ) )
+                .where(
+                    annotations.territoire_id.equals(territoireId).and(
+                        annotations.values.isNotNull().and(
+                            annotations.accepted.equals(true)
+                        )
+                    )
                 )
-                .where( annotations.value.isNotNull() )
                 .toQuery();
 
             //console.log('Annotations findLatestByResourceIdsAndTerritoireId query', query);

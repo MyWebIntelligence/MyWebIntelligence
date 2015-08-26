@@ -113,13 +113,7 @@ module.exports = {
             return resourceIds.size > 0 ? Annotations.findLatestByResourceIdsAndTerritoireId(resourceIds, territoireId)
                 .then(function(annotations){
                     annotations.forEach(function(ann){                        
-                        var resourceAnnotations = annotationByResourceId[ann.resource_id];
-                        if(!resourceAnnotations){
-                            resourceAnnotations = Object.create(null);
-                            annotationByResourceId[ann.resource_id] = resourceAnnotations;
-                        }
-                        
-                        resourceAnnotations[ann.type] = ann.value;
+                        annotationByResourceId[ann.resource_id] = JSON.parse(ann.values);
                     });
                 
                     return annotationByResourceId;

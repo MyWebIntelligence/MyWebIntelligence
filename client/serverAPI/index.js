@@ -60,5 +60,11 @@ module.exports = {
     },
     getAlexaRanks: function(hostnames){
         return sendReq('GET', '/alexa-ranks?hostnames='+encodeURIComponent( JSON.stringify(hostnames.toJSON()) ));
+    },
+    annotate: function(resourceId, territoireId, annotations, approved){
+        return sendReq('POST', '/'+['annotation', territoireId, resourceId].join('/'), {
+            approved: approved,
+            values: annotations
+        });
     }
 };

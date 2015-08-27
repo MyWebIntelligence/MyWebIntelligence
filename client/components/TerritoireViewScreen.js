@@ -5,6 +5,7 @@ var React = require('react');
 var Tabs = require('./external/Tabs.js');
 var Header = require('./Header');
 var DomainGraph = require('./DomainGraph');
+var PageListItem = require('./PageListItem');
 
 var abstractGraphToPageGraph = require('../../common/graph/abstractGraphToPageGraph');
 var pageGraphToDomainGraph = require('../../common/graph/pageGraphToDomainGraph');
@@ -164,15 +165,15 @@ module.exports = React.createClass({
                                     return;
                                 
                                 var expression = territoire.expressionById[expressionId];
-                                                                
-                                // node backed by actual expression
-                                return React.DOM.li({"data-expression-id": expressionId}, [
-                                    React.DOM.a({ href: node.url, target: '_blank' }, [
-                                        React.DOM.h3({}, expression.title),
-                                        React.DOM.h4({}, node.url)
-                                    ]),
-                                    React.DOM.div({ className: 'excerpt' }, expression.excerpt)
-                                ]);
+                                                      
+                                return new PageListItem({
+                                    resourceId: node.id,
+                                    territoireId: territoire.id,
+
+                                    url: node.url,
+                                    title: expression.title,
+                                    excerpt: expression.excerpt
+                                });
                             })
                         ) : undefined,
                         // Domains tab content

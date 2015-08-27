@@ -54,45 +54,7 @@ main.territoire ul.result-list{
     flex-direction: column;
 }
 
-main.territoire ul.result-list > li{
-    text-align: left;
-    margin-bottom: 0.5em;
-    min-height: 3em;
-    padding: 0.4em;
-}
 
-main.territoire ul.result-list > li:hover{
-    background-color: #EAEAEA;
-    outline: solid 1px #CCC;
-}
-
-main.territoire ul.result-list > li a{
-    margin: 0;
-    padding: 0;
-    text-decoration: none;
-}
-
-main.territoire ul.result-list > li a h3,
-main.territoire ul.result-list > li a h4
-{
-    margin: 0;
-    padding: 0;
-}
-
-main.territoire ul.result-list > li a h3{
-    font-size: 1em;
-}
-main.territoire ul.result-list > li a h4{
-    font-size: 0.7em;
-    color: #479b47;
-}
-
-main.territoire ul.result-list > li .excerpt{
-    margin-top: 0.2em;
-    font-size: 0.7em;
-    color: rgba(0, 0, 0, 0.75);
-    
-}
 
 main.territoire #sigma-container{
     min-height: 80vh;

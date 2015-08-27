@@ -24,7 +24,7 @@ exports.annotations = sql.define({
 	columns: [
 		{ name: 'created_at' },
 		{ name: 'updated_at' },
-		{ name: 'accepted' },
+		{ name: 'approved' },
 		{ name: 'values' },
 		{ name: 'resource_id' },
 		{ name: 'territoire_id' },

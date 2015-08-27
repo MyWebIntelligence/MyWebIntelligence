@@ -106,7 +106,7 @@ function processTask(task){
                         task.territoire_id, 
                         undefined, // annotationFunction did the annotation job, so that's not a human user, so undefined
                         values, 
-                        undefined // no accepted value
+                        undefined // no approved value
                     );
                 })
                 .catch(function(err){

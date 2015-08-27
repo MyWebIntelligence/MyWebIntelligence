@@ -25,13 +25,13 @@ module.exports = {
         })
     },
     
-    update: function(resourceId, territoireId, userId, values, accepted){
+    update: function(resourceId, territoireId, userId, values, approved){
         
         return databaseP
             .then(function(db){
             
                 var query = annotations
-                    .select(annotations.accepted, annotations.values)
+                    .select(annotations.approved, annotations.values)
                     .where(annotations.resource_id.equals(resourceId).and(
                         annotations.territoire_id.equals(territoireId)
                     ))
@@ -57,11 +57,11 @@ module.exports = {
                         if(userId !== undefined)
                             update.user_id = userId;
                     
-                        var newAccepted = typeof accepted === 'boolean' && currentAnnotation.accepted !== accepted ?
-                            accepted : undefined;
+                        var newApproved = typeof approved === 'boolean' && currentAnnotation.approved !== approved ?
+                            approved : undefined;
                     
-                        if(typeof newAccepted === 'boolean')
-                            update.accepted = newAccepted;
+                        if(typeof newApproved === 'boolean')
+                            update.approved = newApproved;
                     
                         var newValues = JSON.stringify(
                             Object.assign(
@@ -125,7 +125,7 @@ module.exports = {
                 .where(
                     annotations.territoire_id.equals(territoireId).and(
                         annotations.values.isNotNull().and(
-                            annotations.accepted.equals(true)
+                            annotations.approved.equals(true)
                         )
                     )
                 )

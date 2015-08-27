@@ -65,7 +65,7 @@ CREATE INDEX ON get_expression_tasks (related_territoire_id);
 
 
 CREATE TABLE IF NOT EXISTS annotations (
-    accepted        boolean DEFAULT true,
+    approved        boolean DEFAULT NULL, -- NULL means "don't know yet"
     values          text, -- JSON blob. This prevents annotation-based queries at the SQL level. Stats will have to be made in JS or maybe in a synthesized document served by ElasticSearch
     resource_id     integer REFERENCES resources (id) NOT NULL,
     territoire_id   integer NOT NULL, -- eventually should be a foreign key for the territoires table

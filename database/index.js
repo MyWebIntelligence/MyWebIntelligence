@@ -121,16 +121,17 @@ module.exports = {
         },
         
         /*
-            uris: Set<string>
+            rootURIs: Set<url>
+            notApprovedResourceIds: Set<ResourceId>
             @returns an abstract graph
             Nodes are url => (partial) expression 
             Edges are {source: Node, target: Node}
         */
-        getGraphFromRootURIs: function(rootURIs){
+        getGraphFromRootURIs: function(rootURIs, resourceIdBlackList){
             //console.time('getGraphFromRootURIs');
             //var PERIPHERIC_DEPTH = 10000;
             
-            //console.log('getGraphFromRootURIs', rootURIs.toJSON());
+            console.log('getGraphFromRootURIs', rootURIs.size, resourceIdBlackList.size);
             
             var nodes = new StringMap/*<ResourceIdStr, resource>*/(); // these are only canonical urls
             var edges = new Set();
@@ -169,10 +170,15 @@ module.exports = {
                     var aliasResources = resources.filter(function(r){
                         return r.alias_of !== null;
                     });
-                    var aliasTargetIds = new Set(aliasResources.map(function(r){
-                        aliasToCanonicalResourceId.set(String(r.id), String(r.alias_of));
-                        return r.alias_of;
-                    }));
+                    var aliasTargetIds = new Set(aliasResources
+                        .map(function(r){
+                            aliasToCanonicalResourceId.set(String(r.id), String(r.alias_of));
+                            return r.alias_of;
+                        })
+                        .filter(function(rid){
+                            return !resourceIdBlackList.has(rid);
+                        })
+                    );
                     var aliasRetryBuildGraphP = aliasTargetIds.size >= 1 ?
                         buildGraph(aliasTargetIds, depth) : // same depth on purpose
                         Promise.resolve();
@@ -188,8 +194,12 @@ module.exports = {
                             links.forEach(function(l){
                                 var targetIdStr = String(l.target);
 
-                                if(!nodes.has(targetIdStr) && !aliasToCanonicalResourceId.has(targetIdStr))
-                                    nextResourceIds.add(targetIdStr);
+                                if(!nodes.has(targetIdStr) && 
+                                   !aliasToCanonicalResourceId.has(targetIdStr) && 
+                                   !resourceIdBlackList.has(l.target))
+                                {
+                                    nextResourceIds.add(l.target);
+                                }
 
                                 edges.add({
                                     source: String(l.source),
@@ -209,7 +219,12 @@ module.exports = {
             }
             
             return Resources.findValidByURLs(rootURIs).then(function(resources){
-                var ids = new Set( resources.map(function(r){ return r.id; }) );
+                var ids = new Set( resources
+                    .map(function(r){ return r.id; }) 
+                    .filter(function(id, i, arr){ if(i===0){console.log('resourceIds', arr)}  return !resourceIdBlackList.has(id) })
+                );
+                
+                console.log('getGraphFromRootURIs ids', ids.size);
                 
                 return buildGraph(ids, 0).then(function(){
                     // edges may contain non-canonical URLs in the target because of how it's built. Converting before returning
@@ -231,6 +246,42 @@ module.exports = {
                     };
                 })
             });  
+        },
+        
+        /*
+            urls is a Set<url>
+        */
+        getValidTerritoireQueryResultResources: function(territoireId){
+            
+            return this.getTerritoireQueryResults(territoireId)
+                .then(database.Resources.findValidByURLs)
+                .then( throw 'TODO remove those with an annotation === false' )
+            
+                /*
+                databaseP.then(function(db){
+                    var query = resources
+                        .select('*')
+                        .from(
+                            resources
+                                .join(annotations)
+                                .on(resources.id.equals(annotations.resource_id))
+                        )
+                        .where(
+                            resources.url.in(urls.toJSON()).and(
+                                isValidResourceExpression
+                            )
+                        )
+                        .toQuery();
+
+                    //console.log('Resources findValidByURLs query', query);
+
+                    return new Promise(function(resolve, reject){
+                        db.query(query, function(err, result){
+                            if(err) reject(err); else resolve(result.rows);
+                        });
+                    });
+                })*/
+            
         },
         
         getTerritoireQueryResults: function(territoireId){
@@ -261,8 +312,17 @@ module.exports = {
             
             var self = this;
             
-            return this.getTerritoireQueryResults(territoireId).then(function(roots){
-                return self.getGraphFromRootURIs( roots );
+            return Promise.all([
+                this.getTerritoireQueryResults(territoireId),
+                Annotations.findNotApproved(territoireId)
+            ]).then(function(res){
+                var roots = res[0];
+                var notApprovedAnnotations = res[1];
+                
+                return self.getGraphFromRootURIs(
+                    roots, 
+                    new Set(notApprovedAnnotations.map(function(ann){ return ann.resource_id; }))
+                );
             });
         },
         

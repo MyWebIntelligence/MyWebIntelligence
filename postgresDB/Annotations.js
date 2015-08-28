@@ -108,6 +108,29 @@ module.exports = {
         })
     },
     
+    findNotApproved: function(territoireId){
+        return databaseP.then(function(db){
+            var query = annotations
+                .select(
+                    annotations.resource_id
+                )
+                .where(
+                    annotations.territoire_id.equals(territoireId).and(
+                        annotations.approved.equals(false)
+                    )
+                )
+                .toQuery();
+
+            //console.log('Annotations findLatestByResourceIdsAndTerritoireId query', query);
+            
+            return new Promise(function(resolve, reject){
+                db.query(query, function(err, result){
+                    if(err) reject(err); else resolve(result.rows);
+                });
+            });
+        })
+    },
+    
     /*
         resourceIds: Set<ResourceId>
         

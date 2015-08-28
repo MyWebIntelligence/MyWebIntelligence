@@ -74,7 +74,7 @@ CREATE TABLE IF NOT EXISTS annotations (
 ) INHERITS(lifecycle);
 CREATE TRIGGER updated_at_annotations BEFORE UPDATE ON annotations FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
 
-CREATE INDEX ON annotations (territoire_id);
+CREATE INDEX ON annotations (territoire_id, approved);
 CREATE INDEX ON annotations (resource_id);
 
 

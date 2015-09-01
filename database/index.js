@@ -18,6 +18,8 @@ var declarations = require('../postgresDB/declarations.js');
 // PostGREs models
 var Expressions = require('../postgresDB/Expressions');
 var Resources = require('../postgresDB/Resources');
+var isValidResourceExpression = Resources.isValidResourceExpression;
+
 var Links = require('../postgresDB/Links');
 var GetExpressionTasks = require('../postgresDB/GetExpressionTasks');
 var AlexaRankCache = require('../postgresDB/AlexaRankCache');
@@ -221,7 +223,7 @@ module.exports = {
             return Resources.findValidByURLs(rootURIs).then(function(resources){
                 var ids = new Set( resources
                     .map(function(r){ return r.id; }) 
-                    .filter(function(id, i, arr){ if(i===0){console.log('resourceIds', arr)}  return !resourceIdBlackList.has(id) })
+                    .filter(function(id){ return !resourceIdBlackList.has(id) })
                 );
                 
                 console.log('getGraphFromRootURIs ids', ids.size);
@@ -252,35 +254,41 @@ module.exports = {
             urls is a Set<url>
         */
         getValidTerritoireQueryResultResources: function(territoireId){
+            var resources = declarations.resources;
+            var annotations = declarations.annotations;
             
             return this.getTerritoireQueryResults(territoireId)
-                .then(database.Resources.findValidByURLs)
-                .then( throw 'TODO remove those with an annotation === false' )
+                .then(function(urls){// throw 'TODO remove those with an annotation === false' )
             
-                /*
-                databaseP.then(function(db){
-                    var query = resources
-                        .select('*')
-                        .from(
-                            resources
-                                .join(annotations)
-                                .on(resources.id.equals(annotations.resource_id))
-                        )
-                        .where(
-                            resources.url.in(urls.toJSON()).and(
-                                isValidResourceExpression
+                //.then(database.Resources.findValidByURLs)
+                    return databaseP.then(function(db){
+                        var query = resources
+                            .select(resources.star())
+                            .from(
+                                resources
+                                    .join(annotations)
+                                    .on(resources.id.equals(annotations.resource_id))
                             )
-                        )
-                        .toQuery();
+                            .where(
+                                annotations.territoire_id.equals(territoireId).and(
+                                    annotations.approved.equals(true).and(
+                                        resources.url.in(urls.toJSON()).and(
+                                            isValidResourceExpression
+                                        )
+                                    )
+                                )
+                            )
+                            .toQuery();
 
-                    //console.log('Resources findValidByURLs query', query);
+                        //console.log('Resources findValidByURLs query', query);
 
-                    return new Promise(function(resolve, reject){
-                        db.query(query, function(err, result){
-                            if(err) reject(err); else resolve(result.rows);
+                        return new Promise(function(resolve, reject){
+                            db.query(query, function(err, result){
+                                if(err) reject(err); else resolve(result.rows);
+                            });
                         });
-                    });
-                })*/
+                    })
+                })
             
         },
         
@@ -335,7 +343,7 @@ module.exports = {
                 var queryByTerritoireId = getExpressionTasks
                     .select( getExpressionTasks.resource_id )
                     .from(getExpressionTasks)
-                    .where(getExpressionTasks.related_territoire_id.equal(territoireId))
+                    .where(getExpressionTasks.territoire_id.equal(territoireId))
                     .toQuery();
                 
                 

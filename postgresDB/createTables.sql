@@ -57,11 +57,11 @@ CREATE TABLE IF NOT EXISTS get_expression_tasks (
     id          SERIAL PRIMARY KEY,
     resource_id integer UNIQUE REFERENCES resources (id) NOT NULL,
     status      get_expression_tasks_status,
-    related_territoire_id  integer NOT NULL, -- eventually should be a foreign key for the territoires table
+    territoire_id  integer NOT NULL, -- eventually should be a foreign key for the territoires table
     depth       integer NOT NULL
 ) INHERITS(lifecycle);
 CREATE TRIGGER updated_at_get_expression_tasks BEFORE UPDATE ON get_expression_tasks FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
-CREATE INDEX ON get_expression_tasks (related_territoire_id);
+CREATE INDEX ON get_expression_tasks (territoire_id);
 
 
 CREATE TABLE IF NOT EXISTS annotations (

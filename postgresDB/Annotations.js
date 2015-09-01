@@ -8,8 +8,11 @@ var databaseP = require('./databaseClientP');
 var annotations = require('./declarations.js').annotations;
 
 module.exports = {
-    // expressionData is an array
+
     create: function(annotationData){
+        if(!Array.isArray(annotationData))
+            annotationData = [annotationData];
+        
         return databaseP.then(function(db){
             var query = annotations
                 .insert(annotationData)

@@ -11,6 +11,8 @@ var isValidResourceExpression = resources.other_error.isNull()
     .and(resources.http_status.lt(400).or(resources.http_status.isNull()))
 
 module.exports = {
+    isValidResourceExpression: isValidResourceExpression,
+    
     /*
         urls is a Set<url>
     */

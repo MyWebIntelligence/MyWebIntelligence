@@ -78,7 +78,7 @@ exports.get_expression_tasks = sql.define({
 		{ name: 'id' },
 		{ name: 'resource_id' },
 		{ name: 'status' },
-		{ name: 'related_territoire_id' },
+		{ name: 'territoire_id' },
 		{ name: 'depth' }
 	]
 });

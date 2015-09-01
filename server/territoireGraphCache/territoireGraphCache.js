@@ -72,8 +72,7 @@ module.exports = function(territoireId){
         refreshCacheEntry(territoireId)
 
         // Get the territoire query results and make a graph out of that to be returned ASAP
-        return database.complexQueries.getTerritoireQueryResults(territoireId)
-            .then(database.Resources.findValidByURLs)
+        return database.complexQueries.getValidTerritoireQueryResultResources(territoireId)
             .then(function(resources){            
                 var nodes = new StringMap();
             

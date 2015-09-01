@@ -8,12 +8,14 @@ var databaseP = require('./databaseClientP');
 var annotations = require('./declarations.js').annotations;
 
 module.exports = {
-    // expressionData is an array
+
     create: function(annotationData){
+        if(!Array.isArray(annotationData))
+            annotationData = [annotationData];
+        
         return databaseP.then(function(db){
             var query = annotations
                 .insert(annotationData)
-                .returning('id')
                 .toQuery();
 
             //console.log('Annotations create query', query);
@@ -26,21 +28,70 @@ module.exports = {
         })
     },
     
-    update: function(aid, delta){
-        return databaseP.then(function(db){
-            var query = annotations
-                .update(delta)
-                .where(annotations.id.equals(aid))
-                .toQuery();
-
-            //console.log('Annotations update query', query);
+    update: function(resourceId, territoireId, userId, values, approved){
+        
+        return databaseP
+            .then(function(db){
             
-            return new Promise(function(resolve, reject){
-                db.query(query, function(err, result){
-                    if(err) reject(err); else resolve(result.rows);
+                var query = annotations
+                    .select(annotations.approved, annotations.values)
+                    .where(annotations.resource_id.equals(resourceId).and(
+                        annotations.territoire_id.equals(territoireId)
+                    ))
+                    .toQuery();
+
+
+                return new Promise(function(resolve, reject){
+                    db.query(query, function(err, result){
+                        if(err) reject(err); else resolve(result.rows[0]);
+                    });
                 });
-            });
-        })
+            })
+            .then(function(currentAnnotation){
+                // /!\ between this instant and when the UPDATE occurs, someone else may call .update
+                // This is a race condition. Of the two .update calls, only the last one will win.
+                // For now, it's considered acceptable as update per (resourceId, territoireId) pair should be rare enough
+            
+                return databaseP
+                    .then(function(db){
+                        var update = {};
+                    
+                        // save the last human user who made an update
+                        if(userId !== undefined)
+                            update.user_id = userId;
+                    
+                        var newApproved = typeof approved === 'boolean' && currentAnnotation.approved !== approved ?
+                            approved : undefined;
+                    
+                        if(typeof newApproved === 'boolean')
+                            update.approved = newApproved;
+                    
+                        var newValues = JSON.stringify(
+                            Object.assign(
+                                JSON.parse(currentAnnotation.values || '{}'),
+                                values || {}
+                            )
+                        )
+                        
+                        update.values = newValues;
+                    
+                        var query = annotations
+                            .update(update)
+                            .where(annotations.resource_id.equals(resourceId).and(
+                                annotations.territoire_id.equals(territoireId)
+                            ))
+                            .toQuery();
+
+                        //console.log('Annotations update query', query);
+
+                        return new Promise(function(resolve, reject){
+                            db.query(query, function(err, result){
+                                if(err) reject(err); else resolve(result.rows);
+                            });
+                        });
+                    });
+            })
+        
     },
     
     findById: function(id){
@@ -60,52 +111,50 @@ module.exports = {
         })
     },
     
+    findNotApproved: function(territoireId){
+        return databaseP.then(function(db){
+            var query = annotations
+                .select(
+                    annotations.resource_id
+                )
+                .where(
+                    annotations.territoire_id.equals(territoireId).and(
+                        annotations.approved.equals(false)
+                    )
+                )
+                .toQuery();
+
+            //console.log('Annotations findLatestByResourceIdsAndTerritoireId query', query);
+            
+            return new Promise(function(resolve, reject){
+                db.query(query, function(err, result){
+                    if(err) reject(err); else resolve(result.rows);
+                });
+            });
+        })
+    },
+    
     /*
         resourceIds: Set<ResourceId>
         
-        For each (resourceId, territoireId, type) tuple, this function returns the latest annotation (max creation_date)
-        regardless of what that date is and of the annotation author.
+        For each (resourceId, territoireId) pair, this function returns the annotations
         This function is meant for exports.
-        In the future other functions will enable introspecting annotation history
     */
     findLatestByResourceIdsAndTerritoireId: function(resourceIds, territoireId){
-        
-        /*
-            For each (resourceId, territoireId, type) tuple, find the latest annotation (max creation_date)
-        */
-        var latestAnnotation = annotations
-            .subQuery('latest_annotation')
-            .select(
-                annotations.resource_id, 
-                annotations.type.as('ann_type'), // to prevent collision with latestAnnotation.type (=== "SUBQUERY")
-                annotations.created_at.max().as('latest_date')
-            )
-            .where(annotations.territoire_id.equals(territoireId).and(
-                annotations.resource_id.in(resourceIds.toJSON())
-            ))
-            .group(
-                annotations.resource_id,
-                annotations.type
-            );
-        
-        //console.log('latestAnnotation', latestAnnotation.table, latestAnnotation);
-        
         
         return databaseP.then(function(db){
             var query = annotations
                 .select(
                     annotations.resource_id, 
-                    annotations.type,
-                    annotations.value
+                    annotations.values
                 )
-                .from( annotations
-                       .join(latestAnnotation)
-                       .on( annotations.resource_id.equals(latestAnnotation.resource_id).and(
-                            annotations.type.equals(latestAnnotation.ann_type).and(
-                            annotations.created_at.equals(latestAnnotation.latest_date)
-                        ) ) )
+                .where(
+                    annotations.territoire_id.equals(territoireId).and(
+                        annotations.values.isNotNull().and(
+                            annotations.approved.equals(true)
+                        )
+                    )
                 )
-                .where( annotations.value.isNotNull() )
                 .toQuery();
 
             //console.log('Annotations findLatestByResourceIdsAndTerritoireId query', query);

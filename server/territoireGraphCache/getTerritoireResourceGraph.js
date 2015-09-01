@@ -5,7 +5,7 @@ var fork = require('child_process').fork;
 var StringMap = require('stringmap');
 //var Redis = require('ioredis');
 
-
+var database = require('../../database');
 
 var w = fork(require.resolve('./territoireGraphCache-worker'))
 
@@ -21,25 +21,48 @@ var terrIdToPromiseResolve = new Map();
 
 
 w.on('message', function(res){
-    var id = res.territoireId;
+    var territoireId = res.territoireId;
     
-    var receivedNodes = res.graph.nodes;
-    var nodes = new StringMap();
+    // Need to remove resources annotated for rejection as the territoire cache may not be up-to-date on them
+    database.Annotations.findNotApproved(territoireId)
+        .then(function(rejectedAnns){
+            
+            var rejectedResourceIds = new Set(rejectedAnns.map(function(r){
+                return r.resource_id;
+            }));
+        
+            //console.log("rejectedResourceIds", rejectedResourceIds.toJSON());
+        
+            var receivedNodes = res.graph.nodes;
+            var nodes = new StringMap();
+
+            // remove rejected nodes
+            receivedNodes.forEach(function(n){
+                //console.log('n.id', n.id, typeof n.id);
+                
+                if(!rejectedResourceIds.has(n.id))
+                    nodes.set(String(n.id), n);
+            });
+            
+            
+            res.graph.nodes = nodes;
+            res.graph.toJSON = function(){
+                return {
+                    nodes: res.graph.nodes.values(),
+                    
+                    // remove edges referencing on either end a rejected node
+                    edges: res.graph.edges.filter(function(e){
+                        return !rejectedResourceIds.has(e.source) && !rejectedResourceIds.has(e.target);
+                    })
+                }
+            }
+
+            terrIdToPromiseResolve.get(territoireId).resolve(res);
+            terrIdToPromiseResolve.delete(territoireId);
+            
+        })
     
-    receivedNodes.forEach(function(n){
-        nodes.set(String(n.id), n);
-    })
     
-    res.graph.nodes = nodes;
-    res.graph.toJSON = function(){
-        return {
-            nodes: res.graph.nodes.values(),
-            edges: res.graph.edges
-        }
-    }
-    
-    terrIdToPromiseResolve.get(id).resolve(res);
-    terrIdToPromiseResolve.delete(id);
 })
 
 

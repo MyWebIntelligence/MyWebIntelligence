@@ -8,7 +8,7 @@ var approve = require('./approve');
 
 var database = require('../database');
 var isValidResource = require('./isValidResource');
-//var createResourceTasks = require('../server/createResourceTasks');
+var createOrFindResourceForTerritoire = require('../server/createOrFindResourceForTerritoire');
 
 
 
@@ -123,8 +123,11 @@ function processTask(task){
                                     return database.Resources.associateWithExpression(resourceId, expression.id);
                                 }).catch(errlog("Expressions.create + associateWithExpression"));
                             
+                            
+                            console.log('task.territoire_id', task.territoire_id)
+                            
                             linksUpdatedP = resExprLink.links.size >= 1 ? 
-                                database.Resources.findByURLsOrCreate(resExprLink.links)
+                                createOrFindResourceForTerritoire(resExprLink.links, task.territoire_id)
                                     .then(function(linkResources){
                                         var linksData = linkResources.map(function(r){
                                             return {
@@ -138,14 +141,16 @@ function processTask(task){
                                 : undefined;
 
                             if(approve({depth: task.depth, expression: resExprLink.expression})){
-
+                                
+                                database.Annotations.update(resourceId, task.territoire_id, undefined, undefined, true)
+                                
                                 //throw 'TODO filter out references that already have a corresponding expression either as uri or alias';
 
                                 // Don't recreate tasks for now. Will re-enable when a better approval algorithm is implemented.
                                 tasksCreatedP = Promise.resolve()/*createResourceTasks(
                                     new Set(expression.references),
                                     {
-                                        territoireId: task.related_territoire_id,
+                                        territoireId: task.territoire_id,
                                         depth: task.depth+1
                                     }
                                 );*/

@@ -79,38 +79,38 @@ function processTask(task){
         return deleteTask(task);
     });
     
-    
-    return database.Annotations.findById(task.annotation_id)
-        .then(function(annotation){
-            // pick the correct function for the task type
-            var annotationFunction = socialSignals.get(annotation.type);
-            
-            //console.log('annotationFunction', annotation, annotation.type, typeof annotationFunction);
-        
-            // get the resource id + url
-            return database.Resources.findValidByIds(new Set([annotation.resource_id]))
-                .then(function(resources){
-                    //console.log('findValidByIds', annotation.resource_id)
-                
-                    var resource = resources[0];
-                    if(!resource)
-                        return undefined; // Don't bother annotating invalid resources
-                
-                    var url = resource.url;
-                    
-                    // save the result in the annotation
-                
-                    return annotationFunction(url)
-                        .then(function(value){
-                            //console.log('Annotation', url, annotation.type, value);
-                        
-                            return database.Annotations.update(annotation.id, {
-                                value: value
-                            });
-                        })
-                        .catch(function(err){
-                            console.error('Annotation error', err, err.stack);
-                        });
+    var annotationFunction = socialSignals.get(task.type);
+    //console.log('annotationFunction', annotation, annotation.type, typeof annotationFunction);
+
+    // get the resource id + url
+    return database.Resources.findValidByIds(new Set([task.resource_id]))
+        .then(function(resources){
+            //console.log('findValidByIds', annotation.resource_id)
+
+            var resource = resources[0];
+            if(!resource)
+                return undefined; // Don't bother annotating invalid resources
+
+            var url = resource.url;
+
+            // save the result in the annotation
+
+            return annotationFunction(url)
+                .then(function(value){
+                    //console.log('Annotation', url, task.type, value);
+                    var values = {};
+                    values[task.type] = value;
+
+                    return database.Annotations.update(
+                        task.resource_id, 
+                        task.territoire_id, 
+                        undefined, // annotationFunction did the annotation job, so that's not a human user, so undefined
+                        values, 
+                        undefined // no approved value
+                    );
+                })
+                .catch(function(err){
+                    console.error('Annotation error', err, err.stack);
                 });
         })
         .catch(function(err){
@@ -121,7 +121,7 @@ function processTask(task){
             clearTimeout(taskTimeout);
             return deleteTask(task);
         });
-    
+
 }
 
 

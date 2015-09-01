@@ -44,7 +44,7 @@ module.exports = {
                     .insert({
                         resource_id: resourceId,
                         status: 'todo',
-                        related_territoire_id: territoireId,
+                        territoire_id: territoireId,
                         depth: depth
                     })
                     .toQuery();

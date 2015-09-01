@@ -562,6 +562,27 @@ app.get('/territoire-view-data/:id', function(req, res){
     });
 });
 
+app.post('/annotation/:territoireId/:resourceId', function(req, res){
+    var user = serializedUsers.get(req.session.passport.user);
+    if(!user || !user.id){
+        res.redirect('/');
+        return;
+    }
+    
+    var territoireId = Number(req.params.territoireId);
+    var resourceId = Number(req.params.resourceId);
+    var data = req.body;
+    
+    database.Annotations.update(resourceId, territoireId, user.id, data.values, data.approved)
+        .then(function(){
+            res.status(200).send('');
+        })
+        .catch(function(err){
+            console.error('database problem', err, err.stack);
+            res.status(500).send('database problem '+err);
+        });
+});
+
 
 
 var server = app.listen(PORT, function(){

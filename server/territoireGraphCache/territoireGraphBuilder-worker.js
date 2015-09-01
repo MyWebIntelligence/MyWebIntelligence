@@ -6,12 +6,6 @@ require('../../ES-mess');
 
 var database = require('../../database');
 
-
-console.log('MyWI territoireGraphBuilder-worker args');
-process.argv.forEach(function(val, i) {
-    console.log(i, val);
-});
-
 var territoireId = Number(process.argv[2]);
 
 database.complexQueries.getTerritoireGraph(territoireId)

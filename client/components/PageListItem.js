@@ -47,10 +47,10 @@ module.exports = React.createClass({
                 className: classes.join(' '),
                 "data-resource-id": resourceId
             }, 
-            React.DOM.a({ href: props.url, target: '_blank' }, [
+            React.DOM.a({ href: props.url, target: '_blank' },
                 React.DOM.h3({}, props.title),
                 React.DOM.h4({}, props.url)
-            ]),
+            ),
             React.DOM.div({ className: 'excerpt' }, props.excerpt),
             React.DOM.button({
                 className : 'reject',
@@ -67,7 +67,31 @@ module.exports = React.createClass({
                         approved: newApproved
                     });
                 }
-            }, 'X')
+            }, '🗑'),
+            React.DOM.div({ className: 'annotations' },
+                // keywords
+                React.DOM.div({}, 
+                    [
+                        'Rhum', 'Vin Australien', 'Vin de Bordeaux'
+                    ].map(function(tag){
+                        return React.DOM.span({className: 'tag'}, tag)
+                    }),
+                    React.DOM.input({text: 'input'})
+                ),
+                          
+                // negative
+                React.DOM.button({}, '☹'),
+            
+                // type
+                React.DOM.select({}, ["", "Institutional", "Thematique", "Web dictionary", "Editorial", "Blog", "Forum", "Social Network", "Search Engine"].map(function(type){
+                    return React.DOM.option({
+                        value: type
+                    }, type)
+                })),
+                
+                // fav
+                React.DOM.button({}, '☆') // ★
+            )
                            
         );
     }

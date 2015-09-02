@@ -161,18 +161,21 @@ module.exports = React.createClass({
                             {className: 'result-list'}, 
                             territoire.graph.nodes.map(function(node){
                                 var expressionId = node.expression_id;
+                                var resourceId = node.id;
                                 if(expressionId === null || expressionId === undefined)
                                     return;
                                 
                                 var expression = territoire.expressionById[expressionId];
                                                       
                                 return new PageListItem({
-                                    resourceId: node.id,
+                                    resourceId: resourceId,
                                     territoireId: territoire.id,
 
                                     url: node.url,
                                     title: expression.title,
-                                    excerpt: expression.excerpt
+                                    excerpt: expression.excerpt,
+                                    
+                                    annotations: territoire.annotationByResourceId[resourceId]
                                 });
                             })
                         ) : undefined,

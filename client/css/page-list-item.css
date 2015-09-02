@@ -93,6 +93,10 @@ li.page-list-item .annotations{
     justify-content: space-between;
 }
 
+li.page-list-item:hover .annotations{
+    display: flex;
+}
+
 li.page-list-item .annotations .tag{
     font-size: 0.7em;
     padding: 0.3em;
@@ -103,20 +107,31 @@ li.page-list-item .annotations .tag{
 
 li.page-list-item .annotations button, li.page-list-item .annotations select{
     margin: 0;
-    border: 0;
     background: white;
-    
+    border: 0;
 }
 
 li.page-list-item .annotations button{
     font-size: 1.5em;
-
 }
 
-li.page-list-item:hover .annotations{
-    display: flex;
+li.page-list-item .annotations select{
+    outline: 1px solid lightgrey;
 }
 
+li.page-list-item .annotations .sentiment{
+}
+li.page-list-item .annotations .sentiment .negative{
+    
+}
+li.page-list-item .annotations .sentiment .active{
+    background-color: beige;
+    color: red;
+}
+
+li.page-list-item .annotations .favorite{
+    color: gold;
+}
 
 
 

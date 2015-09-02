@@ -22,8 +22,11 @@ interface PageListItemProps{
 
 module.exports = React.createClass({
     getInitialState: function() {
+        console.log('this.props.annotations', this.props.annotations);
+        
         return {
-            approved: true
+            approved: true,
+            annotations: this.props.annotations || {}
         };
     },
     
@@ -34,6 +37,10 @@ module.exports = React.createClass({
         
         var resourceId = props.resourceId;
         var territoireId = props.territoireId;
+        
+        var annotations = state.annotations;
+        if(resourceId === 2)
+            console.log('annotations', annotations)
         
         var classes = ['page-list-item'];
         if(!state.approved){
@@ -52,6 +59,8 @@ module.exports = React.createClass({
                 React.DOM.h4({}, props.url)
             ),
             React.DOM.div({ className: 'excerpt' }, props.excerpt),
+            
+            // rejection/approval button
             React.DOM.button({
                 className : 'reject',
                 onClick: function(){
@@ -68,29 +77,100 @@ module.exports = React.createClass({
                     });
                 }
             }, '🗑'),
+            
+            // annotations
             React.DOM.div({ className: 'annotations' },
-                // keywords
-                React.DOM.div({}, 
-                    [
-                        'Rhum', 'Vin Australien', 'Vin de Bordeaux'
-                    ].map(function(tag){
-                        return React.DOM.span({className: 'tag'}, tag)
+                // tags
+                React.DOM.div({ className: 'tags' }, 
+                    (annotations.tags || []).map(function(tag){
+                        return React.DOM.span({className: 'tag', key: tag}, tag)
                     }),
                     React.DOM.input({text: 'input'})
                 ),
                           
-                // negative
-                React.DOM.button({}, '☹'),
+                // sentiment
+                React.DOM.div({
+                    className: 'sentiment'
+                }, 
+                    // negative
+                    React.DOM.button({
+                        className: ['negative', (annotations.sentiment === 'negative' ? 'active' : '')].join(' '),
+                        onClick: function(){
+                            var newSentiment = annotations.sentiment === 'negative' ? undefined : 'negative';
+                            
+                            var newAnnotations = Object.assign(
+                                annotations,
+                                { sentiment: newSentiment }
+                            );
+                            
+                            annotate(resourceId, territoireId, newAnnotations, undefined) // TODO add a pending state or something
+                                .catch(function(err){
+                                    console.error('sentiment annotation error', resourceId, territoireId, newAnnotations, err);
+                                }); 
+                            
+                            self.setState(Object.assign(
+                                state, 
+                                { annotations: newAnnotations }
+                            ));
+                        }
+                    }, '☹')        
+                    // only negative sentiment for now          
+                ),
             
-                // type
-                React.DOM.select({}, ["", "Institutional", "Thematique", "Web dictionary", "Editorial", "Blog", "Forum", "Social Network", "Search Engine"].map(function(type){
-                    return React.DOM.option({
-                        value: type
-                    }, type)
-                })),
+                // media-type
+                React.DOM.select({
+                    value: annotations['media_type'],
+                    onChange: function(e){
+                        var newMediaType = e.target.value;
+                        
+                        var newAnnotations = Object.assign(
+                            annotations,
+                            { 'media_type': newMediaType }
+                        );
+
+                        annotate(resourceId, territoireId, newAnnotations, undefined) // TODO add a pending state or something
+                            .catch(function(err){
+                                console.error('media-type annotation error', resourceId, territoireId, newAnnotations, err);
+                            }); 
+
+                        self.setState(Object.assign(
+                            state, 
+                            { annotations: newAnnotations }
+                        ));
+                    }
+                }, 
+                    ["", "Institutional", "Thematique", 
+                     "Web dictionary", "Editorial", "Blog", 
+                     "Forum", "Social Network", "Search Engine"]
+                        .map(function(type){
+                            return React.DOM.option({
+                                value: type
+                            }, type)
+                        })
+                ),
                 
-                // fav
-                React.DOM.button({}, '☆') // ★
+                // favorite
+                React.DOM.button({
+                    className: ['favorite', (annotations.favorite ? 'active' : '')].join(' '),
+                    onClick: function(){
+                        var newFavorite = !annotations.favorite;
+
+                        var newAnnotations = Object.assign(
+                            annotations,
+                            { favorite: newFavorite }
+                        );
+
+                        annotate(resourceId, territoireId, newAnnotations, undefined) // TODO add a pending state or something
+                            .catch(function(err){
+                                console.error('favorite annotation error', resourceId, territoireId, newAnnotations, err);
+                            }); 
+
+                        self.setState(Object.assign(
+                            state, 
+                            { annotations: newAnnotations }
+                        ));
+                    }
+                }, annotations.favorite ? '★' : '☆')
             )
                            
         );

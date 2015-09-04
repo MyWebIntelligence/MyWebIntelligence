@@ -1,7 +1,7 @@
 li.page-list-item{
     text-align: left;
     margin-bottom: 0.5em;
-    min-height: 3em;
+    min-height: 8em;
     padding: 0.4em;
     
     position: relative;
@@ -50,8 +50,8 @@ li.page-list-item .excerpt{
     Annotations
 */
 li.page-list-item button.reject{
-    width: 3em;
-    height: 3em;
+    width: 1.5em;
+    height: 1.5em;
     position: absolute;
 
     cursor: pointer;
@@ -64,7 +64,9 @@ li.page-list-item button.reject{
     
     background-color: antiquewhite; 
   
-    display: none;    
+    display: none;   
+    
+    font-size: 2em;
 }
 
 
@@ -74,6 +76,74 @@ li.page-list-item:hover button.reject{
 
 
 
+li.page-list-item .annotations{
+    width: 100%;
+    height: 2em;
+    position: absolute;
+    
+    bottom: 0;
+    left: 0;
+    
+    border-top: 1px solid lightgrey;
+    background: white;
+
+    display: none;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
+li.page-list-item:hover .annotations{
+    display: flex;
+}
+
+li.page-list-item .annotations .tag{
+    font-size: 0.7em;
+    padding: 0.3em;
+    margin: 0 0.2em;
+    background-color: lightblue;
+    border-radius: 20%;
+}
+
+li.page-list-item .annotations .tag .delete{
+    background-color: lightblue;
+    font-size: 1em;
+    padding: 0.2em;
+
+
+}
+li.page-list-item .annotations .tag .delete::before{
+    content: "x";
+    color: red;
+}
+
+li.page-list-item .annotations button, li.page-list-item .annotations select{
+    margin: 0;
+    background: white;
+    border: 0;
+}
+
+li.page-list-item .annotations button{
+    font-size: 1.5em;
+}
+
+li.page-list-item .annotations select{
+    outline: 1px solid lightgrey;
+}
+
+li.page-list-item .annotations .sentiment{
+}
+li.page-list-item .annotations .sentiment .negative{
+    
+}
+li.page-list-item .annotations .sentiment .active{
+    background-color: beige;
+    color: red;
+}
+
+li.page-list-item .annotations .favorite{
+    color: gold;
+}
 
 
 

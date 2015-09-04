@@ -106,6 +106,8 @@ module.exports = React.createClass({
         }
     },
     
+    displayName: 'TerritoireViewScreen',
+    
     render: function() {
         var self = this;
         var props = this.props;
@@ -127,16 +129,34 @@ module.exports = React.createClass({
                     territoireGraph: territoire.graph
                 })
             })
-            
         }
         
-        return React.DOM.div({className: "react-wrapper"}, [
+        // find all territoire tags to create a <datalist>
+        var territoireTags = new Set();
+        
+        if(territoire.annotationByResourceId){
+            Object.keys(territoire.annotationByResourceId).forEach(function(rid){
+                var annotations = territoire.annotationByResourceId[rid];
+                var tags = annotations.tags || new Set();
+
+                tags.forEach(function(t){
+                    territoireTags.add(t);
+                });
+            });
+        }
+        
+        console.log('typeof React.DOM.datalist', typeof React.DOM.datalist);
+        
+        return React.DOM.div({className: "react-wrapper"}, 
             new Header({
                  user: props.user,
                  oracleHref: "/oracles"
             }),
             
             React.DOM.main({className: 'territoire'},
+                React.DOM.datalist({id: "tags"}, territoireTags.toJSON().map(function(t){
+                    return React.DOM.option({ key: t, value: t });
+                })),
                 React.DOM.header({},
                     React.DOM.h1({}, 
                         "Territoire "+territoire.name
@@ -161,18 +181,21 @@ module.exports = React.createClass({
                             {className: 'result-list'}, 
                             territoire.graph.nodes.map(function(node){
                                 var expressionId = node.expression_id;
+                                var resourceId = node.id;
                                 if(expressionId === null || expressionId === undefined)
                                     return;
                                 
                                 var expression = territoire.expressionById[expressionId];
                                                       
                                 return new PageListItem({
-                                    resourceId: node.id,
+                                    resourceId: resourceId,
                                     territoireId: territoire.id,
 
                                     url: node.url,
                                     title: expression.title,
-                                    excerpt: expression.excerpt
+                                    excerpt: expression.excerpt,
+                                    
+                                    annotations: territoire.annotationByResourceId[resourceId]
                                 });
                             })
                         ) : undefined,
@@ -227,6 +250,6 @@ module.exports = React.createClass({
                 
             )
         
-        ]);
+        );
     }
 });

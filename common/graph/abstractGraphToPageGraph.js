@@ -39,7 +39,7 @@ module.exports = function abstractGraphToPageGraph(abGraph, expressionById, anno
         var annotations = annotationsById[resourceId];
         
         var name = nextNodeName();
-
+        
         pageGraph.addNode(name, Object.assign(
             {
                 url: res.url,
@@ -47,7 +47,10 @@ module.exports = function abstractGraphToPageGraph(abGraph, expressionById, anno
                 title: expression.title || '',
                 expressionId: typeof expression.id === "number" ? expression.id : -1
             }, 
-            annotations
+            annotations,
+            annotations ? {
+                tags: annotations.tags.toJSON().join(', ')
+            } : undefined
         ));
 
         var urlToNodeNameKey = String(res.id);

@@ -105,6 +105,18 @@ li.page-list-item .annotations .tag{
     border-radius: 20%;
 }
 
+li.page-list-item .annotations .tag .delete{
+    background-color: lightblue;
+    font-size: 1em;
+    padding: 0.2em;
+
+
+}
+li.page-list-item .annotations .tag .delete::before{
+    content: "x";
+    color: red;
+}
+
 li.page-list-item .annotations button, li.page-list-item .annotations select{
     margin: 0;
     background: white;

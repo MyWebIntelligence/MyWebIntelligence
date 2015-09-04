@@ -75,6 +75,18 @@ page("/territoires", function(){
 });
 
 
+// Makes sure tags are a Set<string>
+function massageTerritoireData(terrData){
+    var annotations = terrData.annotationByResourceId;
+    
+    Object.keys(annotations).forEach(function(id){
+        var ann = annotations[id];
+        ann.tags = new Set( ann.tags || [] );
+    })
+    
+    return terrData;
+}
+
 page("/territoire/:id", function displayTerritoireViewScreen(context){
     var territoireId = Number(context.params.id);
     var t = data.user.territoires.find(function(terr){
@@ -86,10 +98,12 @@ page("/territoire/:id", function displayTerritoireViewScreen(context){
     
     function refresh(){
         console.log('refresh');
-        return serverAPI.getTerritoireViewData(t).then(function(terrViewData){
-            console.log('getTerritoireViewData', t, terrViewData);
-            render(terrViewData)
-        });
+        return serverAPI.getTerritoireViewData(t)
+            .then(massageTerritoireData)
+            .then(function(terrViewData){
+                console.log('getTerritoireViewData', t, terrViewData);
+                render(terrViewData)
+            });
     }
     
     function render(terrViewData){

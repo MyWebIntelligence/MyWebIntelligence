@@ -2,7 +2,11 @@
 
 var React = require('react');
 
+var findTags = require('../findTags');
+
 var annotate = require('../serverAPI').annotate;
+
+
 
 /*
 
@@ -20,13 +24,18 @@ interface PageListItemProps{
 */
 
 
+
+
+
+
 module.exports = React.createClass({
     getInitialState: function() {
         console.log('this.props.annotations', this.props.annotations);
         
         return {
             approved: true,
-            annotations: this.props.annotations || {}
+            annotations: this.props.annotations || {tags: new Set()},
+            tagInputValue: ''
         };
     },
     
@@ -39,8 +48,6 @@ module.exports = React.createClass({
         var territoireId = props.territoireId;
         
         var annotations = state.annotations;
-        if(resourceId === 2)
-            console.log('annotations', annotations)
         
         var classes = ['page-list-item'];
         if(!state.approved){
@@ -82,10 +89,74 @@ module.exports = React.createClass({
             React.DOM.div({ className: 'annotations' },
                 // tags
                 React.DOM.div({ className: 'tags' }, 
-                    (annotations.tags || []).map(function(tag){
-                        return React.DOM.span({className: 'tag', key: tag}, tag)
+                    annotations.tags.toJSON().map(function(tag){
+                        return React.DOM.span({className: 'tag', key: tag},
+                            tag,
+                            React.DOM.button({
+                                className: 'delete',
+                                onClick: function(){
+                                    var newTags = new Set(annotations.tags)
+                            
+                                    newTags.delete(tag);
+
+                                    var newAnnotations = Object.assign(
+                                        annotations,
+                                        { tags: newTags }
+                                    );
+
+                                    // TODO add a pending state or something
+                                    annotate(resourceId, territoireId, newAnnotations, undefined) 
+                                        .catch(function(err){
+                                            console.error('sentiment annotation error', resourceId, territoireId, newAnnotations, err);
+                                        });
+
+                                    self.setState(
+                                        Object.assign(state, {
+                                            annotations: newAnnotations
+                                        })
+                                    );
+                                }
+                            }, ''),
+                            // invisible comma as tag separator for sweet tag copy/paste
+                            React.DOM.span({style: {opacity: '0'}}, ',') 
+                        )
                     }),
-                    React.DOM.input({text: 'input'})
+                    React.DOM.input({
+                        type: 'text',
+                        list: "tags",
+                        value: state.tagInputValue,
+                        onChange: function(e){
+                            var value = e.target.value;
+                            
+                            var res = findTags(value);
+                            var inputTags = res.tags;
+                            
+                            var newTags = new Set(annotations.tags)
+                            
+                            // merge tags
+                            inputTags.forEach(function(t){
+                                newTags.add(t); // mutate annotations.tags directly
+                            });
+                            
+                            var newAnnotations = Object.assign(
+                                annotations,
+                                { tags: newTags }
+                            );
+                            
+                            annotate(resourceId, territoireId, newAnnotations, undefined) // TODO add a pending state or something
+                                .catch(function(err){
+                                    console.error('sentiment annotation error', resourceId, territoireId, newAnnotations, err);
+                                });
+                            
+                            self.setState(
+                                Object.assign(state, {
+                                    annotations: newAnnotations,
+                                    tagInputValue: res.leftover
+                                })
+                            );
+                            
+                        }
+                    })
                 ),
                           
                 // sentiment

@@ -112,14 +112,16 @@ module.exports = {
                 resourceIds.add(node.id);
             });
             
-            return resourceIds.size > 0 ? Annotations.findLatestByResourceIdsAndTerritoireId(resourceIds, territoireId)
-                .then(function(annotations){
-                    annotations.forEach(function(ann){                        
-                        annotationByResourceId[ann.resource_id] = JSON.parse(ann.values);
-                    });
-                
-                    return annotationByResourceId;
-                }) : annotationByResourceId;
+            return resourceIds.size > 0 ? 
+                Annotations.findLatestByResourceIdsAndTerritoireId(resourceIds, territoireId)
+                    .then(function(annotations){
+                        annotations.forEach(function(ann){                        
+                            annotationByResourceId[ann.resource_id] = JSON.parse(ann.values);
+                        });
+
+                        return annotationByResourceId;
+                    }) : 
+                Promise.resolve(annotationByResourceId);
         },
         
         /*

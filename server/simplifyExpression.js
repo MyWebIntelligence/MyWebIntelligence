@@ -1,6 +1,6 @@
 "use strict";
 
-var MAX_EXCERPT_LENGTH = 300;
+var MAX_EXCERPT_LENGTH = 640; // "because 640 is a known number" - Amar Lakel, one day, when he was inspired.
 
 module.exports = function simplifyExpression(expression){
     return {

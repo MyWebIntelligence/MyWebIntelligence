@@ -441,23 +441,23 @@ app.get('/territoire/:id/expressions.csv', function(req, res){
         
         var exportableResources = graph.nodes.map(function(node){
             var exprId = node.expression_id;
-            console.log('node.expression_id', node.expression_id, node);
-            
             var expression = expressionById[exprId];
-            var annotations = annotationsByResourceId[node.id];
-                
-            return Object.assign(
-                {
-                    id: node.id,
-                    url: expression.url,
-                    title: expression.title
-                    // remove content as it's currently not necessary and pollutes CSV exports
-                    // core_content: expression.main_text, 
-                },
-                simplifyExpression(expression),
-                annotations
-            );
-        });
+            if(expression){
+                var annotations = annotationsByResourceId[node.id];
+
+                return Object.assign(
+                    {
+                        id: node.id,
+                        url: node.url,
+                        title: expression.title
+                        // remove content as it's currently not necessary and pollutes CSV exports
+                        // core_content: expression.main_text, 
+                    },
+                    simplifyExpression(expression),
+                    annotations
+                );
+            }
+        }).filter(function(r){ return !!r; });
         
         var csvStream = csv.write(
             exportableResources,

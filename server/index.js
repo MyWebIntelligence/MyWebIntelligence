@@ -27,7 +27,7 @@ var database = require('../database');
 var onQueryCreated = require('./onQueryCreated');
 var getGraphExpressions = require('../common/graph/getGraphExpressions');
 var getTerritoireScreenData = require('../database/getTerritoireScreenData');
-
+var simplifyExpression = require('./simplifyExpression');
 
 var TerritoireListScreen = React.createFactory(require('../client/components/TerritoireListScreen'));
 var OraclesScreen = React.createFactory(require('../client/components/OraclesScreen'));
@@ -412,18 +412,23 @@ app.get('/territoire/:id/domains.gexf', function(req, res){
 
 app.get('/territoire/:id/expressions.csv', function(req, res){
     var user = serializedUsers.get(req.session.passport.user);
-    var id = Number(req.params.id);
-    console.log('expressions.csv', user.id, 'territoire id', id);
+    var territoireId = Number(req.params.id);
+    console.log('expressions.csv', user.id, 'territoire id', territoireId);
     
-    var territoireP = database.Territoires.findById(id);
+    var territoireP = database.Territoires.findById(territoireId);
     console.time('graph from db');
-    var graphP = database.complexQueries.getTerritoireGraph(id);
+    var graphP = database.complexQueries.getTerritoireGraph(territoireId);
     var expressionByIdP = graphP.then(getGraphExpressions);
+    var annotationsP = graphP.then(function(graph){
+        return database.complexQueries.getGraphAnnotations(graph, territoireId);
+    })
     
-    Promise.all([territoireP, expressionByIdP]).then(function(result){
+    Promise.all([territoireP, expressionByIdP, annotationsP, graphP]).then(function(result){
         console.timeEnd('graph from db')
         var territoire = result[0];
         var expressionById = result[1];
+        var annotationsByResourceId = result[2];
+        var graph = result[3];
         
         // convert the file to GEXF
         // send with proper content-type
@@ -432,19 +437,30 @@ app.get('/territoire/:id/expressions.csv', function(req, res){
         
         res.status(200);
         
-        var expressions = Object.keys(expressionById).map(function(exprId){
+        console.log('Array.isArray(graph.nodes)', Array.isArray(graph.nodes));
+        
+        var exportableResources = graph.nodes.map(function(node){
+            var exprId = node.expression_id;
             var expression = expressionById[exprId];
-            return {
-                id: expression.id,
-                url: expression.url,
-                title: expression.title,
-                core_content: expression.main_text,
-                meta_description: expression.meta_description
-            };
-        });
+            if(expression){
+                var annotations = annotationsByResourceId[node.id];
+
+                return Object.assign(
+                    {
+                        id: node.id,
+                        url: node.url,
+                        title: expression.title
+                        // remove content as it's currently not necessary and pollutes CSV exports
+                        // core_content: expression.main_text, 
+                    },
+                    simplifyExpression(expression),
+                    annotations
+                );
+            }
+        }).filter(function(r){ return !!r; });
         
         var csvStream = csv.write(
-            expressions,
+            exportableResources,
             {headers: true}
         );
         

@@ -59,10 +59,7 @@ module.exports = function pageGraphToDomainGraph(pageGraph, alexaRanks){
             .then(function(){
                 var pageNodeToDomainNode = new WeakMap();
                 
-                expressionDomainToPageNode.forEach(function(pageNodes, ed){
-                    // adding '_' at the beginning because sometimes domain names begin with numbers
-                    var idyfiedExpressionDomain = '_' + ed.replace(/(\.|\-)/g, '_');
-                    
+                expressionDomainToPageNode.forEach(function(pageNodes, ed){                    
                     var protocol = pageNodes.reduce(function(acc, node){
                         var p = getProtocol(node.url);
                         return p === 'http' ? acc : p;
@@ -97,7 +94,7 @@ module.exports = function pageGraphToDomainGraph(pageGraph, alexaRanks){
                         return d < acc && d !== -1 ? d : acc;
                     }, +Infinity);
                     
-                    var domainNode = domainGraph.addNode(idyfiedExpressionDomain, {
+                    var domainNode = domainGraph.addNode(ed, {
                         title: ed,
                         nb_expressions: pageNodes.length,
                         base_url: protocol+'://'+getHostname(pageNodes[0].url),

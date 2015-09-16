@@ -50,22 +50,6 @@ function GraphNode(name, attributes){
         throw new TypeError("name is not of type string ("+typeof name+")");
     }
 
-    /**
-     * According to http://guess.wikispot.org/The_GUESS_.gdf_format:
-     * "Nodes are required to have unique names (identifiers). You will want
-     * to avoid using anything that is not a valid Python variable name here
-     * if you want to access the nodes by this name (so setting names to just
-     * a number is probably a bad idea... try v44 or n44 instead of just "44")"
-     *
-     * So an error is thrown when:
-     * - name starts with a number
-     * - name contains a space
-     * - contains a ponctuation char
-     */
-    if(/(^[0-9]|\s|\W)/.test(name)){
-        throw new Error("name ("+name+") is invalid (should be usable as a Python variable)");
-    }
-
     ret.name = name;
 
     for(opt in attributes)

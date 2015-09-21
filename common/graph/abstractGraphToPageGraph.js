@@ -36,7 +36,7 @@ module.exports = function abstractGraphToPageGraph(abGraph, expressionById, anno
             expressionById[expressionId]
         );
         
-        var annotations = annotationsById[resourceId];
+        var annotations = annotationsById ? annotationsById[resourceId] : undefined;
         
         var name = nextNodeName();
         

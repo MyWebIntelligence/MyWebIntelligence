@@ -10,6 +10,7 @@ app:
       - NODE_ENV=development
    volumes: 
       - .:/usr/mywi
+   tty: true
 db:
    image: postgres:9.4
    environment:

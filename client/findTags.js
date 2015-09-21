@@ -1,6 +1,7 @@
 "use strict";
 
 module.exports = function findTags(str){
+    // semi-colon, colon and anti-slash are separators
     var tags = str.split(/[\;\,\/]/);
     var leftover = tags.pop(); // mutates tags
     

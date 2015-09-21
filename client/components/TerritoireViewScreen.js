@@ -2,16 +2,19 @@
 
 var React = require('react');
 
-var Tabs = require('./external/Tabs.js');
-var Header = require('./Header');
-var DomainGraph = require('./DomainGraph');
-var PageListItem = require('./PageListItem');
+var ImmutableSet = require('immutable').Set;
+
+var Tabs = React.createFactory(require('./external/Tabs.js'));
+var Header = React.createFactory(require('./Header'));
+var DomainGraph = React.createFactory(require('./DomainGraph'));
+var PageListItem = React.createFactory(require('./PageListItem'));
 
 var abstractGraphToPageGraph = require('../../common/graph/abstractGraphToPageGraph');
 var pageGraphToDomainGraph = require('../../common/graph/pageGraphToDomainGraph');
 var getAbstractGraphHostnames = require('../../common/graph/getAbstractGraphHostnames');
 
 var getAlexaRanks = require('../serverAPI/getAlexaRanks')
+var annotate = require('../serverAPI').annotate;
 
 /*
 
@@ -65,6 +68,27 @@ function triggerDownload(content, name, type){
 }
 
 
+function computeTerritoireTags(annotationByResourceId){
+    var territoireTags = new ImmutableSet();
+        
+    if(annotationByResourceId){
+        console.log("computeTerritoireTags", annotationByResourceId);
+        Object.keys(annotationByResourceId).forEach(function(rid){
+            var annotations = annotationByResourceId[rid];
+            var tags = annotations.tags || new Set();
+            console.log("computeTerritoireTags", rid, annotations, tags);
+            
+            tags.forEach(function(t){
+                territoireTags = territoireTags.add(t);
+            });
+        });
+    }
+    
+    console.log("computeTerritoireTags", territoireTags.size)
+    return territoireTags;
+}
+
+
 module.exports = React.createClass({
     
     _refreshTimeout: undefined,
@@ -99,8 +123,25 @@ module.exports = React.createClass({
         this._refreshTimeout = undefined;
     },
     
+    
+    componentWillReceiveProps: function(nextProps) {
+        var territoire = nextProps.territoire;
+        
+        console.log('componentWillReceiveProps territoire.annotationByResourceId', territoire.annotationByResourceId, territoire)
+        this.setState(Object.assign({}, this.state, {
+            annotationByResourceId: territoire.annotationByResourceId,
+            territoireTags: computeTerritoireTags(territoire.annotationByResourceId)
+        }));
+    },
+    
     getInitialState: function() {
+        var territoire = this.props.territoire;
+                
+        console.log('getInitialState annotationByResourceId', territoire.annotationByResourceId, territoire);
+        
         return {
+            territoireTags: computeTerritoireTags(territoire.annotationByResourceId),
+            annotationByResourceId: territoire.annotationByResourceId,
             territoireGraph: undefined,
             domainGraph: undefined
         }
@@ -121,32 +162,20 @@ module.exports = React.createClass({
                 abstractGraphToPageGraph(
                     territoire.graph, 
                     territoire.expressionById, 
-                    territoire.annotationByResourceId
+                    state.annotationByResourceId
                 )
             ).then(function(domainGraph){
-                self.setState({
-                    domainGraph: domainGraph,
-                    territoireGraph: territoire.graph
-                })
+                // this is ugly
+                setTimeout(function(){
+                    self.setState(Object.assign({}, state, {
+                        domainGraph: domainGraph,
+                        territoireGraph: territoire.graph
+                    }));
+                }, 20)
             })
         }
         
-        // find all territoire tags to create a <datalist>
-        var territoireTags = new Set();
-        
-        if(territoire.annotationByResourceId){
-            Object.keys(territoire.annotationByResourceId).forEach(function(rid){
-                var annotations = territoire.annotationByResourceId[rid];
-                var tags = annotations.tags || new Set();
-
-                tags.forEach(function(t){
-                    territoireTags.add(t);
-                });
-            });
-        }
-        
-        console.log('typeof React.DOM.datalist', typeof React.DOM.datalist);
-        
+                
         return React.DOM.div({className: "react-wrapper"}, 
             new Header({
                  user: props.user,
@@ -154,7 +183,7 @@ module.exports = React.createClass({
             }),
             
             React.DOM.main({className: 'territoire'},
-                React.DOM.datalist({id: "tags"}, territoireTags.toJSON().map(function(t){
+                React.DOM.datalist({id: "tags"}, state.territoireTags.toArray().map(function(t){
                     return React.DOM.option({ key: t, value: t });
                 })),
                 React.DOM.header({},
@@ -189,13 +218,33 @@ module.exports = React.createClass({
                                                       
                                 return new PageListItem({
                                     resourceId: resourceId,
-                                    territoireId: territoire.id,
 
                                     url: node.url,
                                     title: expression.title,
                                     excerpt: expression.excerpt,
                                     
-                                    annotations: territoire.annotationByResourceId[resourceId]
+                                    annotations: state.annotationByResourceId ? state.annotationByResourceId[resourceId] : {tags: new Set()},
+                                    annotate: function(newAnnotations, approved){
+                                        // TODO add a pending state or something
+                                        annotate(resourceId, territoire.id, newAnnotations, approved)
+                                            .catch(function(err){
+                                                console.error('annotation update error', resourceId, territoire.id, newAnnotations, err);
+                                            });
+                                        
+                                        var territoireTags = state.territoireTags;
+                                        
+                                        // add tags for autocomplete
+                                        newAnnotations.tags.forEach(function(t){
+                                            territoireTags = territoireTags.add(t);
+                                        });
+                                                                            
+                                        state.annotationByResourceId[resourceId] = newAnnotations;
+                                        
+                                        self.setState(Object.assign({}, state, {
+                                            annotationByResourceId: state.annotationByResourceId, // mutated
+                                            territoireTags: territoireTags
+                                        }));
+                                    }
                                 });
                             })
                         ) : undefined,
@@ -231,7 +280,7 @@ module.exports = React.createClass({
                             onClick: function(e){
                                 e.preventDefault();
                                 
-                                generateDomainGEXF(territoire.graph, territoire.expressionById, territoire.annotationByResourceId)
+                                generateDomainGEXF(territoire.graph, territoire.expressionById, state.annotationByResourceId)
                                     .then(function(domainsGEXF){
                                         triggerDownload(
                                             domainsGEXF,

@@ -40,6 +40,17 @@ CREATE TRIGGER updated_at_resources BEFORE UPDATE ON resources FOR EACH ROW EXEC
 
 -- Per http://www.postgresql.org/docs/9.4/static/indexes-unique.html Postgresql already create all the necessary indices via the UNIQUE constraints
 
+
+CREATE TABLE IF NOT EXISTS expression_domains (
+    id           SERIAL PRIMARY KEY,
+    main_url     text NOT NULL,
+    title        text,
+    description  text,
+    keywords     text
+) INHERITS(lifecycle);
+CREATE TRIGGER updated_at_expression_domains BEFORE UPDATE ON expression_domains FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
+
+
 -- "links" is chosen because it's not a SQL reserved keyword like "references"
 CREATE TABLE IF NOT EXISTS links (
     "source"      integer REFERENCES resources (id) NOT NULL,
@@ -65,11 +76,12 @@ CREATE INDEX ON get_expression_tasks (territoire_id);
 
 
 CREATE TABLE IF NOT EXISTS annotations (
-    approved        boolean DEFAULT NULL, -- NULL means "don't know yet"
-    values          text, -- JSON blob. This prevents annotation-based queries at the SQL level. Stats will have to be made in JS or maybe in a synthesized document served by ElasticSearch
-    resource_id     integer REFERENCES resources (id) NOT NULL,
-    territoire_id   integer NOT NULL, -- eventually should be a foreign key for the territoires table
-    user_id         integer, -- eventually should be a foreign key for the users table. NULL means an algorithm made the annotation
+    approved                boolean DEFAULT NULL, -- NULL means "don't know yet"
+    values                  text, -- JSON blob. This prevents annotation-based queries at the SQL level. Stats will have to be made in JS or maybe in a synthesized document served by ElasticSearch
+    expression_domain_id    integer REFERENCES expression_domains (id) NOT NULL,
+    resource_id             integer REFERENCES resources (id) NOT NULL,
+    territoire_id           integer NOT NULL, -- eventually should be a foreign key for the territoires table
+    user_id                 integer, -- eventually should be a foreign key for the users table. NULL means an algorithm made the annotation
     PRIMARY KEY(territoire_id, resource_id) -- for now
 ) INHERITS(lifecycle);
 CREATE TRIGGER updated_at_annotations BEFORE UPDATE ON annotations FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();

@@ -142,7 +142,7 @@ function processTask(task){
 
                             if(approve({depth: task.depth, expression: resExprLink.expression})){
                                 
-                                database.Annotations.update(resourceId, task.territoire_id, undefined, undefined, true)
+                                database.ResourceAnnotations.update(resourceId, task.territoire_id, undefined, undefined, true)
                                 
                                 //throw 'TODO filter out references that already have a corresponding expression either as uri or alias';
 

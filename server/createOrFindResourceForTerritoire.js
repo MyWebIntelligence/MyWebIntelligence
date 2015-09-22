@@ -16,7 +16,7 @@ module.exports = function createOrFindResourceForTerritoire(urls, territoireId){
             //console.log('resources', resources.slice(0, 5));
         
             return Promise._allResolved(resources.map(function(resource){
-                return database.Annotations.create({
+                return database.ResourceAnnotations.create({
                     resource_id: resource.id,
                     territoire_id: territoireId
                 });

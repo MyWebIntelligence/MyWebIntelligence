@@ -5,7 +5,7 @@ sql.setDialect('postgres');
 
 var databaseP = require('./databaseClientP');
 
-var annotations = require('./declarations.js').annotations;
+var resource_annotations = require('./declarations.js').resource_annotations;
 
 module.exports = {
 
@@ -14,11 +14,11 @@ module.exports = {
             annotationData = [annotationData];
         
         return databaseP.then(function(db){
-            var query = annotations
+            var query = resource_annotations
                 .insert(annotationData)
                 .toQuery();
 
-            //console.log('Annotations create query', query);
+            //console.log('ResourceAnnotations create query', query);
             
             return new Promise(function(resolve, reject){
                 db.query(query, function(err, result){
@@ -33,10 +33,10 @@ module.exports = {
         return databaseP
             .then(function(db){
             
-                var query = annotations
-                    .select(annotations.approved, annotations.values)
-                    .where(annotations.resource_id.equals(resourceId).and(
-                        annotations.territoire_id.equals(territoireId)
+                var query = resource_annotations
+                    .select(resource_annotations.approved, resource_annotations.values)
+                    .where(resource_annotations.resource_id.equals(resourceId).and(
+                        resource_annotations.territoire_id.equals(territoireId)
                     ))
                     .toQuery();
 
@@ -75,14 +75,14 @@ module.exports = {
                         
                         update.values = newValues;
                     
-                        var query = annotations
+                        var query = resource_annotations
                             .update(update)
-                            .where(annotations.resource_id.equals(resourceId).and(
-                                annotations.territoire_id.equals(territoireId)
+                            .where(resource_annotations.resource_id.equals(resourceId).and(
+                                resource_annotations.territoire_id.equals(territoireId)
                             ))
                             .toQuery();
 
-                        //console.log('Annotations update query', query);
+                        //console.log('ResourceAnnotations update query', query);
 
                         return new Promise(function(resolve, reject){
                             db.query(query, function(err, result){
@@ -96,12 +96,12 @@ module.exports = {
     
     findById: function(id){
         return databaseP.then(function(db){
-            var query = annotations
+            var query = resource_annotations
                 .select('*')
-                .where( annotations.id.equals(id) )
+                .where( resource_annotations.id.equals(id) )
                 .toQuery();
 
-            //console.log('Annotations findById query', query);
+            //console.log('ResourceAnnotations findById query', query);
             
             return new Promise(function(resolve, reject){
                 db.query(query, function(err, result){
@@ -113,18 +113,18 @@ module.exports = {
     
     findNotApproved: function(territoireId){
         return databaseP.then(function(db){
-            var query = annotations
+            var query = resource_annotations
                 .select(
-                    annotations.resource_id
+                    resource_annotations.resource_id
                 )
                 .where(
-                    annotations.territoire_id.equals(territoireId).and(
-                        annotations.approved.equals(false)
+                    resource_annotations.territoire_id.equals(territoireId).and(
+                        resource_annotations.approved.equals(false)
                     )
                 )
                 .toQuery();
 
-            //console.log('Annotations findLatestByResourceIdsAndTerritoireId query', query);
+            //console.log('ResourceAnnotations findLatestByResourceIdsAndTerritoireId query', query);
             
             return new Promise(function(resolve, reject){
                 db.query(query, function(err, result){
@@ -143,21 +143,21 @@ module.exports = {
     findLatestByResourceIdsAndTerritoireId: function(resourceIds, territoireId){
         
         return databaseP.then(function(db){
-            var query = annotations
+            var query = resource_annotations
                 .select(
-                    annotations.resource_id, 
-                    annotations.values
+                    resource_annotations.resource_id, 
+                    resource_annotations.values
                 )
                 .where(
-                    annotations.territoire_id.equals(territoireId).and(
-                        annotations.values.isNotNull().and(
-                            annotations.approved.equals(true)
+                    resource_annotations.territoire_id.equals(territoireId).and(
+                        resource_annotations.values.isNotNull().and(
+                            resource_annotations.approved.equals(true)
                         )
                     )
                 )
                 .toQuery();
 
-            //console.log('Annotations findLatestByResourceIdsAndTerritoireId query', query);
+            //console.log('ResourceAnnotations findLatestByResourceIdsAndTerritoireId query', query);
             
             return new Promise(function(resolve, reject){
                 db.query(query, function(err, result){

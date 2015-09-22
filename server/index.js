@@ -589,7 +589,7 @@ app.post('/annotation/:territoireId/:resourceId', function(req, res){
     var resourceId = Number(req.params.resourceId);
     var data = req.body;
     
-    database.Annotations.update(resourceId, territoireId, user.id, data.values, data.approved)
+    database.ResourceAnnotations.update(resourceId, territoireId, user.id, data.values, data.approved)
         .then(function(){
             res.status(200).send('');
         })

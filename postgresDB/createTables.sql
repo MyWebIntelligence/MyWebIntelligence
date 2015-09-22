@@ -75,7 +75,7 @@ CREATE TRIGGER updated_at_get_expression_tasks BEFORE UPDATE ON get_expression_t
 CREATE INDEX ON get_expression_tasks (territoire_id);
 
 
-CREATE TABLE IF NOT EXISTS annotations (
+CREATE TABLE IF NOT EXISTS resource_annotations (
     approved                boolean DEFAULT NULL, -- NULL means "don't know yet"
     values                  text, -- JSON blob. This prevents annotation-based queries at the SQL level. Stats will have to be made in JS or maybe in a synthesized document served by ElasticSearch
     expression_domain_id    integer REFERENCES expression_domains (id) NOT NULL,
@@ -84,10 +84,10 @@ CREATE TABLE IF NOT EXISTS annotations (
     user_id                 integer, -- eventually should be a foreign key for the users table. NULL means an algorithm made the annotation
     PRIMARY KEY(territoire_id, resource_id) -- for now
 ) INHERITS(lifecycle);
-CREATE TRIGGER updated_at_annotations BEFORE UPDATE ON annotations FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
+CREATE TRIGGER updated_at_resource_annotations BEFORE UPDATE ON resource_annotations FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
 
-CREATE INDEX ON annotations (territoire_id, approved);
-CREATE INDEX ON annotations (resource_id);
+CREATE INDEX ON resource_annotations (territoire_id, approved);
+CREATE INDEX ON resource_annotations (resource_id);
 
 
 CREATE TYPE annotation_tasks_status AS ENUM ('todo', 'in progress');

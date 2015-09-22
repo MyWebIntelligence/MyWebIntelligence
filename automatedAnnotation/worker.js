@@ -101,7 +101,7 @@ function processTask(task){
                     var values = {};
                     values[task.type] = value;
 
-                    return database.Annotations.update(
+                    return database.ResourceAnnotations.update(
                         task.resource_id, 
                         task.territoire_id, 
                         undefined, // annotationFunction did the annotation job, so that's not a human user, so undefined

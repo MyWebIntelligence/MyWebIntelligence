@@ -19,8 +19,7 @@ module.exports = function findOrCreateExpressionDomain(url){
                         .then(function(created){
                             return created[0];
                         })
-                        .catch(function(err){
-                            console.log('findOrCreateExpressionDomain catch', err); 
+                        .catch(function(){
                             // race condition may have led an expression domain being created
                             // between the first findByString and the create resulting in a violation
                             // of the unique string constraint (leading to this catch)

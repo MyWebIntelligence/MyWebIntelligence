@@ -28,6 +28,7 @@ var onQueryCreated = require('./onQueryCreated');
 var getGraphExpressions = require('../common/graph/getGraphExpressions');
 var getTerritoireScreenData = require('../database/getTerritoireScreenData');
 var simplifyExpression = require('./simplifyExpression');
+var computeSocialImpact = require('../automatedAnnotation/computeSocialImpact');
 
 var TerritoireListScreen = React.createFactory(require('../client/components/TerritoireListScreen'));
 var OraclesScreen = React.createFactory(require('../client/components/OraclesScreen'));
@@ -436,26 +437,33 @@ app.get('/territoire/:id/expressions.csv', function(req, res){
         res.set('Content-disposition', 'attachment; filename="' + territoire.name+'-pages.csv"');
         
         res.status(200);
-        
-        console.log('Array.isArray(graph.nodes)', Array.isArray(graph.nodes));
-        
+                
         var exportableResources = graph.nodes.map(function(node){
             var exprId = node.expression_id;
             var expression = expressionById[exprId];
             if(expression){
                 var annotations = annotationsByResourceId[node.id];
+                var simplifiedExpression = simplifyExpression(expression);
+                
+                // Reference : https://docs.google.com/spreadsheets/d/1y2-zKeWAD9POD_hjth-v4KlMlm5HqD7tzKvbPilLb4o/edit?usp=sharing
+                return {
+                    url: node.url,
+                    title: expression.title,
+                    // remove content as it's currently not necessary and pollutes CSV exports
+                    // core_content: expression.main_text, 
 
-                return Object.assign(
-                    {
-                        id: node.id,
-                        url: node.url,
-                        title: expression.title
-                        // remove content as it's currently not necessary and pollutes CSV exports
-                        // core_content: expression.main_text, 
-                    },
-                    simplifyExpression(expression),
-                    annotations
-                );
+                    excerpt: simplifiedExpression.excerpt,
+                    tags: (annotations.tags || []).join(' / '),
+                    favorite: annotations.favorite,
+                    negative: annotations.negative,
+                    content_length: (expression.main_text || '').length,
+                    google_pagerank: annotations.google_pagerank,
+                    twitter_share: annotations.twitter_share,
+                    facebook_share: annotations.facebook_share,
+                    facebook_like: annotations.facebook_like,
+                    linkedin_share: annotations.linkedin_share,
+                    social_impact: computeSocialImpact(annotations)
+                }
             }
         }).filter(function(r){ return !!r; });
         

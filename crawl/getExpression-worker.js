@@ -124,7 +124,7 @@ function processTask(task){
                                 }).catch(errlog("Expressions.create + associateWithExpression"));
                             
                             
-                            console.log('task.territoire_id', task.territoire_id)
+                            //console.log('task.territoire_id', task.territoire_id)
                             
                             linksUpdatedP = resExprLink.links.size >= 1 ? 
                                 createOrFindResourceForTerritoire(resExprLink.links, task.territoire_id)

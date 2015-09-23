@@ -7,9 +7,13 @@ var databaseP = require('./databaseClientP');
 
 var alexaRankCache = require('./declarations.js').alexa_rank_cache;
 
+var databaseJustCreatedSymbol = require('./databaseJustCreatedSymbol');
+var justCreatedMarker = {};
+justCreatedMarker[databaseJustCreatedSymbol] = true;
+
 module.exports = {
     /*
-        urls is a Set<url>
+        data fits the model
     */
     create: function(data){        
         return databaseP.then(function(db){
@@ -22,7 +26,10 @@ module.exports = {
             
             return new Promise(function(resolve, reject){
                 db.query(query, function(err, result){
-                    if(err) reject(Object.assign(err, {query: query})); else resolve(result.rows[0]);
+                    if(err) reject(Object.assign(err, {query: query}));
+                    else resolve( result.rows.map(function(r){
+                        return Object.assign( r, justCreatedMarker );
+                    }) )
                 });
             });
         })

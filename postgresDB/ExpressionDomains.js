@@ -5,23 +5,25 @@ sql.setDialect('postgres');
 
 var databaseP = require('./databaseClientP');
 
-var links = require('./declarations.js').links;
-
 var databaseJustCreatedSymbol = require('./databaseJustCreatedSymbol');
 var justCreatedMarker = {};
 justCreatedMarker[databaseJustCreatedSymbol] = true;
 
+var expression_domains = require('./declarations.js').expression_domains;
+
 module.exports = {
-    /*
-        linksData is a {source: ResourceId, target: ResourceId}[]
-    */
-    create: function(linksData){
+
+    create: function(edData){
+        if(!Array.isArray(edData))
+            edData = [edData];
+        
         return databaseP.then(function(db){
-            var query = links
-                .insert(linksData)
+            var query = expression_domains
+                .insert(edData)
+                .returning('*')
                 .toQuery();
 
-            //console.log('Links create query', query);
+            //console.log('ResourceAnnotations create query', query);
             
             return new Promise(function(resolve, reject){
                 db.query(query, function(err, result){
@@ -34,35 +36,18 @@ module.exports = {
         })
     },
     
-    /* sourceIds is a Set<SourceId> */
-    findBySources: function(sourceIds){
+    findByString: function(string){
         return databaseP.then(function(db){
-            var query = links
+            var query = expression_domains
                 .select('*')
-                .where(links.source.in(sourceIds.toJSON()))
+                .where( expression_domains.string.equals(string) )
                 .toQuery();
 
-            //console.log('Links create query', query);
+            //console.log('ResourceAnnotations findById query', query);
             
             return new Promise(function(resolve, reject){
                 db.query(query, function(err, result){
-                    if(err) reject(err); else resolve(result.rows);
-                });
-            });
-        })
-    },
-    
-    deleteAll: function(){
-        return databaseP.then(function(db){
-            var query = links
-                .delete()
-                .toQuery();
-
-            //console.log('Resources deleteAll query', query);
-            
-            return new Promise(function(resolve, reject){
-                db.query(query, function(err, result){
-                    if(err) reject(err); else resolve(result);
+                    if(err) reject(err); else resolve(result.rows[0]);
                 });
             });
         })

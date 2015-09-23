@@ -43,6 +43,7 @@ CREATE TRIGGER updated_at_resources BEFORE UPDATE ON resources FOR EACH ROW EXEC
 
 CREATE TABLE IF NOT EXISTS expression_domains (
     id           SERIAL PRIMARY KEY,
+    string       text UNIQUE NOT NULL,
     main_url     text NOT NULL,
     title        text,
     description  text,
@@ -78,7 +79,7 @@ CREATE INDEX ON get_expression_tasks (territoire_id);
 CREATE TABLE IF NOT EXISTS resource_annotations (
     approved                boolean DEFAULT NULL, -- NULL means "don't know yet"
     values                  text, -- JSON blob. This prevents annotation-based queries at the SQL level. Stats will have to be made in JS or maybe in a synthesized document served by ElasticSearch
-    expression_domain_id    integer REFERENCES expression_domains (id) NOT NULL,
+    expression_domain_id    integer REFERENCES expression_domains (id),
     resource_id             integer REFERENCES resources (id) NOT NULL,
     territoire_id           integer NOT NULL, -- eventually should be a foreign key for the territoires table
     user_id                 integer, -- eventually should be a foreign key for the users table. NULL means an algorithm made the annotation

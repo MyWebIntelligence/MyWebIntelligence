@@ -7,6 +7,10 @@ var databaseP = require('./databaseClientP');
 
 var resources = require('./declarations.js').resources;
 
+var databaseJustCreatedSymbol = require('./databaseJustCreatedSymbol');
+var justCreatedMarker = {};
+justCreatedMarker[databaseJustCreatedSymbol] = true;
+
 var isValidResourceExpression = resources.other_error.isNull()
     .and(resources.http_status.lt(400).or(resources.http_status.isNull()))
 
@@ -31,7 +35,10 @@ module.exports = {
             
             return new Promise(function(resolve, reject){
                 db.query(query, function(err, result){
-                    if(err) reject(Object.assign(err, {query: query})); else resolve(result.rows);
+                    if(err) reject(Object.assign(err, {query: query}));
+                    else resolve( result.rows.map(function(r){
+                        return Object.assign( r, justCreatedMarker );
+                    }) );
                 });
             });
         })
@@ -73,12 +80,10 @@ module.exports = {
             
             return (new Promise(function(resolve, reject){
                 db.query(query, function(err, result){
-                    if(err) reject(err); else resolve(result.rows);
+                    if(err) reject(err); else resolve(result.rows[0]);
                 });
             }))
-                .then(function(resourcesObjs){
-                    var r = resourcesObjs[0];
-                
+                .then(function(r){
                     return r ?
                         r : 
                         self.create(new Set([url])).then(function(ress){ return ress[0] });

@@ -25,6 +25,7 @@ var GetExpressionTasks = require('../postgresDB/GetExpressionTasks');
 var AlexaRankCache = require('../postgresDB/AlexaRankCache');
 var ResourceAnnotations = require('../postgresDB/ResourceAnnotations');
 var AnnotationTasks = require('../postgresDB/AnnotationTasks');
+var ExpressionDomains = require('../postgresDB/ExpressionDomains');
 
 
 var getExpressionTasks = declarations.get_expression_tasks;
@@ -44,6 +45,7 @@ module.exports = {
     GetExpressionTasks: GetExpressionTasks,
     ResourceAnnotations: ResourceAnnotations,
     AnnotationTasks: AnnotationTasks,
+    ExpressionDomains: ExpressionDomains,
     
     clearAll: function(){
         var self = this;

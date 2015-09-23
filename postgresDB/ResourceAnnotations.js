@@ -5,6 +5,10 @@ sql.setDialect('postgres');
 
 var databaseP = require('./databaseClientP');
 
+var databaseJustCreatedSymbol = require('./databaseJustCreatedSymbol');
+var justCreatedMarker = {};
+justCreatedMarker[databaseJustCreatedSymbol] = true;
+
 var resource_annotations = require('./declarations.js').resource_annotations;
 
 module.exports = {
@@ -22,13 +26,16 @@ module.exports = {
             
             return new Promise(function(resolve, reject){
                 db.query(query, function(err, result){
-                    if(err) reject(err); else resolve(result.rows);
+                    if(err) reject(Object.assign(err, {query: query}));
+                    else resolve( result.rows.map(function(r){
+                        return Object.assign( r, justCreatedMarker );
+                    }) );
                 });
             });
         })
     },
     
-    update: function(resourceId, territoireId, userId, values, approved){
+    update: function(resourceId, territoireId, userId, values, approved, expressionDomainId){
         
         return databaseP
             .then(function(db){
@@ -59,6 +66,8 @@ module.exports = {
                         // save the last human user who made an update
                         if(userId !== undefined)
                             update.user_id = userId;
+                        if(expressionDomainId !== undefined)
+                            update.expression_domain_id = expressionDomainId;
                     
                         var newApproved = typeof approved === 'boolean' && currentAnnotation.approved !== approved ?
                             approved : undefined;

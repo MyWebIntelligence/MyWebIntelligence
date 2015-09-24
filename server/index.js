@@ -422,14 +422,22 @@ app.get('/territoire/:id/expressions.csv', function(req, res){
     var expressionByIdP = graphP.then(getGraphExpressions);
     var annotationsP = graphP.then(function(graph){
         return database.complexQueries.getGraphAnnotations(graph, territoireId);
-    })
+    });
     
-    Promise.all([territoireP, expressionByIdP, annotationsP, graphP]).then(function(result){
+    var expressionDomainsByIdP = database.complexQueries.getTerritoireExpressionDomains(territoireId)
+        .then(function(expressionDomains){
+            var o = Object.create(null);
+            expressionDomains.forEach(function(ed){ o[ed.id] = ed; });
+            return o;
+        });
+    
+    Promise.all([territoireP, expressionByIdP, annotationsP, expressionDomainsByIdP, graphP]).then(function(result){
         console.timeEnd('graph from db')
         var territoire = result[0];
         var expressionById = result[1];
         var annotationsByResourceId = result[2];
-        var graph = result[3];
+        var expressionDomainsById = result[3];
+        var graph = result[4];
         
         // convert the file to GEXF
         // send with proper content-type
@@ -441,9 +449,12 @@ app.get('/territoire/:id/expressions.csv', function(req, res){
         var exportableResources = graph.nodes.map(function(node){
             var exprId = node.expression_id;
             var expression = expressionById[exprId];
-            if(expression){
-                var annotations = annotationsByResourceId[node.id];
+            var annotations = annotationsByResourceId[node.id];
+
+            if(expression && annotations){
                 var simplifiedExpression = simplifyExpression(expression);
+           
+                console.log('domain_title', annotations);
                 
                 // Reference : https://docs.google.com/spreadsheets/d/1y2-zKeWAD9POD_hjth-v4KlMlm5HqD7tzKvbPilLb4o/edit?usp=sharing
                 return {
@@ -462,7 +473,11 @@ app.get('/territoire/:id/expressions.csv', function(req, res){
                     facebook_share: annotations.facebook_share,
                     facebook_like: annotations.facebook_like,
                     linkedin_share: annotations.linkedin_share,
-                    social_impact: computeSocialImpact(annotations)
+                    social_impact: computeSocialImpact(annotations),
+                    
+                    // related to the domain
+                    media_type: annotations.media_type, // soon enough, this one will have to move up to the domain
+                    domain_title: (expressionDomainsById[annotations.expressionDomainId] || {title: ''}).title
                 }
             }
         }).filter(function(r){ return !!r; });
@@ -474,7 +489,7 @@ app.get('/territoire/:id/expressions.csv', function(req, res){
         
         csvStream.pipe(res);
     }).catch(function(err){
-        console.error('expressions.gexf error', err, err.stack)
+        console.error('expressions.csv error', err, err.stack)
         
         res.status(500).send('database problem '+ err);
     }); 

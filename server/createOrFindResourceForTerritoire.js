@@ -18,7 +18,11 @@ module.exports = function createOrFindResourceForTerritoire(urls, territoireId){
             //console.log('resources', resources.slice(0, 5));
         
             return Promise._allResolved(resources.map(function(resource){
-                var expressionDomainP = findOrCreateExpressionDomain(resource.url);
+                var expressionDomainP = findOrCreateExpressionDomain(resource.url)
+                    .catch(function(err){
+                        console.error('findOrCreateExpressionDomain error', err)
+                    });
+                
                 var resourceAnnotationCreatedP = database.ResourceAnnotations.create({
                     resource_id: resource.id,
                     territoire_id: territoireId
@@ -33,7 +37,7 @@ module.exports = function createOrFindResourceForTerritoire(urls, territoireId){
                     }
                     else{
                         // forward any other error
-                        throw err;
+                        console.error('ResourceAnnotations.create error', err);
                     }
                 })
                 
@@ -48,7 +52,7 @@ module.exports = function createOrFindResourceForTerritoire(urls, territoireId){
                         );
                     })
                     .catch(function(err){
-                        console.error('Error while findOrCreateExpressionDomain, database.ResourceAnnotations.create or database.ResourceAnnotations.update', err);
+                        console.error('Error while database.ResourceAnnotations.update', err);
                     });
             }))
                 .then(function(){

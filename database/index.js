@@ -119,11 +119,43 @@ module.exports = {
                     .then(function(annotations){
                         annotations.forEach(function(ann){                        
                             annotationByResourceId[ann.resource_id] = JSON.parse(ann.values);
+                            annotationByResourceId[ann.resource_id].expressionDomainId = ann.expression_domain_id;
                         });
 
                         return annotationByResourceId;
                     }) : 
                 Promise.resolve(annotationByResourceId);
+        },
+        
+        
+        /*
+            graph is an abstract graph
+        */
+        getTerritoireExpressionDomains: function getGraphExpressionDomains(territoireId){            
+            
+            var expression_domains = declarations.expression_domains;
+            var resource_annotations = declarations.resource_annotations;
+            
+            return databaseP.then(function(db){
+                var query = expression_domains
+                    .select('*')
+                    .where( expression_domains.id.in(
+                        resource_annotations.subQuery()
+                            .select(resource_annotations.expression_domain_id.distinct())
+                            .where(resource_annotations.territoire_id.equals(territoireId))
+                        )
+                    )
+                    .toQuery();
+
+                console.log('getTerritoireExpressionDomains query', query);
+
+                return new Promise(function(resolve, reject){
+                    db.query(query, function(err, result){
+                        if(err) reject(err); else resolve(result.rows);
+                    });
+                });
+            });
+            
         },
         
         /*

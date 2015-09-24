@@ -155,7 +155,8 @@ module.exports = {
             var query = resource_annotations
                 .select(
                     resource_annotations.resource_id, 
-                    resource_annotations.values
+                    resource_annotations.values, 
+                    resource_annotations.expression_domain_id
                 )
                 .where(
                     resource_annotations.territoire_id.equals(territoireId).and(

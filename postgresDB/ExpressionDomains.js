@@ -36,11 +36,11 @@ module.exports = {
         })
     },
     
-    findByString: function(string){
+    findByName: function(name){
         return databaseP.then(function(db){
             var query = expression_domains
                 .select('*')
-                .where( expression_domains.string.equals(string) )
+                .where( expression_domains.name.equals(name) )
                 .toQuery();
 
             //console.log('ResourceAnnotations findById query', query);
@@ -48,6 +48,23 @@ module.exports = {
             return new Promise(function(resolve, reject){
                 db.query(query, function(err, result){
                     if(err) reject(err); else resolve(result.rows[0]);
+                });
+            });
+        })
+    },
+    
+    update: function(id, expressionDomainsDelta){
+        return databaseP.then(function(db){
+            var query = expression_domains
+                .update(expressionDomainsDelta)
+                .where(expression_domains.id.equal(id))
+                .toQuery();
+
+            //console.log('ResourceAnnotations findById query', query);
+            
+            return new Promise(function(resolve, reject){
+                db.query(query, function(err, result){
+                    if(err) reject(err); else resolve(result);
                 });
             });
         })

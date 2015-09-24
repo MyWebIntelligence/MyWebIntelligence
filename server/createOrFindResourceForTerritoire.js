@@ -22,7 +22,22 @@ module.exports = function createOrFindResourceForTerritoire(urls, territoireId){
                 var resourceAnnotationCreatedP = database.ResourceAnnotations.create({
                     resource_id: resource.id,
                     territoire_id: territoireId
-                });
+                }).catch(function(err){
+                    if(err && err.constraint === "resource_annotations_pkey"){
+                        // This (attempt to recreate annotations for the same resource/territoire pair)
+                        // may happen and we can't know beforehand unless a cache of the database 
+                        // resource_annotations table is kept (which is impractical for memory reasons)
+                        // or if we check beforehands (but results in 2 queries each time instead of one)
+                        // Ignore silently, it's an expected error
+                        return; 
+                    }
+                    else{
+                        // forward any other error
+                        throw err;
+                    }
+                })
+                
+                ;
                 
                 return Promise.all([expressionDomainP, resourceAnnotationCreatedP])
                     .then(function(res){

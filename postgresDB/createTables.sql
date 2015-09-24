@@ -43,8 +43,8 @@ CREATE TRIGGER updated_at_resources BEFORE UPDATE ON resources FOR EACH ROW EXEC
 
 CREATE TABLE IF NOT EXISTS expression_domains (
     id           SERIAL PRIMARY KEY,
-    string       text UNIQUE NOT NULL,
-    main_url     text NOT NULL,
+    name         text UNIQUE NOT NULL,
+    main_url     text,
     title        text,
     description  text,
     keywords     text

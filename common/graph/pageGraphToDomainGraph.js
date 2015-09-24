@@ -4,7 +4,7 @@ var stats = require('simple-statistics');
 
 var immutableMap = require('immutable').Map;
 
-var expressionDomain = require('../../expressionDomain');
+var expressionDomain = require('../../expressionDomain/heuristics/default').getExpressionDomainName;
 var DomainGraph = require('./DomainGraph');
 
 

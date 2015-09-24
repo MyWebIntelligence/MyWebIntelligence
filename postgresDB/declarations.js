@@ -42,7 +42,7 @@ exports.expression_domains = sql.define({
 		{ name: 'created_at' },
 		{ name: 'updated_at' },
 		{ name: 'id' },
-		{ name: 'string' },
+		{ name: 'name' },
 		{ name: 'main_url' },
 		{ name: 'title' },
 		{ name: 'description' },

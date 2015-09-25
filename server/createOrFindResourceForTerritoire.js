@@ -13,6 +13,8 @@ module.exports = function createOrFindResourceForTerritoire(urls, territoireId){
     if(typeof urls === 'string')
         urls = new Set([urls]);
     
+    console.log('createOrFindResourceForTerritoire', urls.toJSON());
+    
     return database.Resources.findByURLsOrCreate(urls)
         .then(function(resources){
             //console.log('resources', resources.slice(0, 5));
@@ -20,7 +22,8 @@ module.exports = function createOrFindResourceForTerritoire(urls, territoireId){
             return Promise._allResolved(resources.map(function(resource){
                 var expressionDomainP = findOrCreateExpressionDomain(resource.url)
                     .catch(function(err){
-                        console.error('findOrCreateExpressionDomain error', err)
+                        console.error('findOrCreateExpressionDomain error', err);
+                        throw err;
                     });
                 
                 var resourceAnnotationCreatedP = database.ResourceAnnotations.create({
@@ -39,9 +42,7 @@ module.exports = function createOrFindResourceForTerritoire(urls, territoireId){
                         // forward any other error
                         console.error('ResourceAnnotations.create error', err);
                     }
-                })
-                
-                ;
+                });
                 
                 return Promise.all([expressionDomainP, resourceAnnotationCreatedP])
                     .then(function(res){

@@ -133,7 +133,7 @@ module.exports = {
                 )
                 .toQuery();
 
-            //console.log('ResourceAnnotations findLatestByResourceIdsAndTerritoireId query', query);
+            //console.log('ResourceAnnotations findNotApproved query', query);
             
             return new Promise(function(resolve, reject){
                 db.query(query, function(err, result){
@@ -146,11 +146,9 @@ module.exports = {
     /*
         resourceIds: Set<ResourceId>
         
-        For each (resourceId, territoireId) pair, this function returns the annotations
         This function is meant for exports.
     */
-    findLatestByResourceIdsAndTerritoireId: function(resourceIds, territoireId){
-        
+    findByTerritoireId: function(territoireId){        
         return databaseP.then(function(db){
             var query = resource_annotations
                 .select(
@@ -160,14 +158,19 @@ module.exports = {
                 )
                 .where(
                     resource_annotations.territoire_id.equals(territoireId).and(
+                        // should be:
+                        //resource_annotations.values.isNotNull().and(
+                        //    resource_annotations.approved.equals(true)
+                        //)
+                        // but for now that we don't crawl, do:
                         resource_annotations.values.isNotNull().and(
-                            resource_annotations.approved.equals(true)
+                            resource_annotations.approved.equals(true).or(resource_annotations.approved.isNull())
                         )
                     )
                 )
                 .toQuery();
 
-            //console.log('ResourceAnnotations findLatestByResourceIdsAndTerritoireId query', query);
+            //console.log('ResourceAnnotations findByTerritoireId query', query);
             
             return new Promise(function(resolve, reject){
                 db.query(query, function(err, result){

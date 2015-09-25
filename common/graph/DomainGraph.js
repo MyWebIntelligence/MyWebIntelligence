@@ -4,6 +4,9 @@ var GraphModel = require('./GraphModel');
 
 var domainNodeDesc = {
     // Node attributes description
+    "name": {
+        type: "string"
+    },
     "title": {
         type: "string"
     },

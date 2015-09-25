@@ -115,7 +115,7 @@ module.exports = {
             });
             
             return resourceIds.size > 0 ? 
-                ResourceAnnotations.findLatestByResourceIdsAndTerritoireId(resourceIds, territoireId)
+                ResourceAnnotations.findByTerritoireId(territoireId)
                     .then(function(annotations){
                         annotations.forEach(function(ann){                        
                             annotationByResourceId[ann.resource_id] = JSON.parse(ann.values);
@@ -147,7 +147,7 @@ module.exports = {
                     )
                     .toQuery();
 
-                console.log('getTerritoireExpressionDomains query', query);
+                //console.log('getTerritoireExpressionDomains query', query);
 
                 return new Promise(function(resolve, reject){
                     db.query(query, function(err, result){

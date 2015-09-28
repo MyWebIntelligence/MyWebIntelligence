@@ -42,6 +42,9 @@ module.exports = function pageGraphToDomainGraph(pageGraph, alexaRanks, expressi
         graph.nodes.toJSON().forEach(function(pn){
             var expressionDomainId = pn.expressionDomainId;
             
+            if(expressionDomainId === undefined)
+                return; // Pending https://github.com/MyWebIntelligence/MyWebIntelligence/issues/199 Ignore for now
+            
             var expressionDomainPageNodes = expressionDomainIdToPageNode.get(expressionDomainId);
             
             if(!expressionDomainPageNodes){

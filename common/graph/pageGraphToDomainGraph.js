@@ -56,8 +56,6 @@ module.exports = function pageGraphToDomainGraph(pageGraph, alexaRanks, expressi
 
         expressionDomainIdToPageNode.forEach(function(pageNodes, expressionDomainId){
             var alexaRank = alexaRanks.get(getHostname(pageNodes[0].url)) || MAX_ALEXA_RANK;
-
-            console.log('pageNodes', pageNodes);
             
             var domainFbLikes = pageNodes
                 .map(function(node){ return node.facebook_like; })

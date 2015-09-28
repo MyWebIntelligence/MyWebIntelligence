@@ -41,6 +41,7 @@ module.exports = function createOrFindResourceForTerritoire(urls, territoireId){
                     else{
                         // forward any other error
                         console.error('ResourceAnnotations.create error', err);
+                        throw err;
                     }
                 });
                 

@@ -183,7 +183,13 @@ module.exports = React.createClass({
             
             React.DOM.main({className: 'territoire'},
                 React.DOM.datalist({id: "tags"}, state.territoireTags.toArray().map(function(t){
-                    return React.DOM.option({ key: t, value: t });
+                    return React.DOM.option({ 
+                        key: t, 
+                        // so that clicking on an auto-complete value does autocomplete without the user
+                        // doesn't have to hit ';' itself
+                        value: t+';', 
+                        label: t
+                    });
                 })),
                 React.DOM.header({},
                     React.DOM.h1({}, 

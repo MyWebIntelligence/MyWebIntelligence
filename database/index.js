@@ -27,6 +27,8 @@ var ResourceAnnotations = require('../postgresDB/ResourceAnnotations');
 var AnnotationTasks = require('../postgresDB/AnnotationTasks');
 var ExpressionDomains = require('../postgresDB/ExpressionDomains');
 
+var massageExpressionDomain = require('../postgresDB/massageExpressionDomain');
+
 
 var getExpressionTasks = declarations.get_expression_tasks;
 
@@ -151,7 +153,7 @@ module.exports = {
 
                 return new Promise(function(resolve, reject){
                     db.query(query, function(err, result){
-                        if(err) reject(err); else resolve(result.rows);
+                        if(err) reject(err); else resolve(result.rows.map(massageExpressionDomain));
                     });
                 });
             });

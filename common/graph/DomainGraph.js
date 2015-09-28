@@ -4,10 +4,16 @@ var GraphModel = require('./GraphModel');
 
 var domainNodeDesc = {
     // Node attributes description
-    "name": {
+    "title": {
         type: "string"
     },
-    "title": {
+    "domain_title": {
+        type: "string"
+    },
+    "description": {
+        type: "string"
+    },
+    "keywords": {
         type: "string"
     },
     /*"type": {
@@ -82,6 +88,15 @@ var domainNodeDesc = {
     },
     "median_google_pagerank": {
         // if array has an even length, average of the two middle value is performed. Can end up with a x.5
+        type: "float"
+    },
+    "sum_likes": {
+        type: "float"
+    },
+    "sum_shares": {
+        type: "float"
+    },
+    "social_impact": {
         type: "float"
     }
 };

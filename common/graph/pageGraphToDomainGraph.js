@@ -5,6 +5,7 @@ var stats = require('simple-statistics');
 var immutableMap = require('immutable').Map;
 
 var DomainGraph = require('./DomainGraph');
+var computeSocialImpact = require('../../automatedAnnotation/computeSocialImpact');
 
 
 var parse = require('url').parse;
@@ -56,6 +57,8 @@ module.exports = function pageGraphToDomainGraph(pageGraph, alexaRanks, expressi
         expressionDomainIdToPageNode.forEach(function(pageNodes, expressionDomainId){
             var alexaRank = alexaRanks.get(getHostname(pageNodes[0].url)) || MAX_ALEXA_RANK;
 
+            console.log('pageNodes', pageNodes);
+            
             var domainFbLikes = pageNodes
                 .map(function(node){ return node.facebook_like; })
                 .filter(function(likes){ return likes !== undefined && likes !== null && likes !== -1; });
@@ -76,6 +79,10 @@ module.exports = function pageGraphToDomainGraph(pageGraph, alexaRanks, expressi
                 .map(function(node){ return node.google_pagerank; })
                 .filter(function(gRank){ return gRank !== undefined && gRank !== null && gRank !== 12; });
 
+            var socialImpacts = pageNodes
+                .map(function(node){ return computeSocialImpact(node); })
+                .filter(function(si){ return si !== undefined && si !== null && si !== 0; });
+
 
             // depth is min(depth)
             var depth = pageNodes.reduce(function(acc, node){
@@ -86,11 +93,14 @@ module.exports = function pageGraphToDomainGraph(pageGraph, alexaRanks, expressi
             var expressionDomain = expressionDomainsById[expressionDomainId];
 
             var domainNode = domainGraph.addNode(expressionDomain.name, {
-                name: expressionDomain.name,
-                title: expressionDomain.title || expressionDomain.name,
-                nb_expressions: pageNodes.length,
-                base_url: expressionDomain.main_url  || expressionDomain.name,
+                base_url: expressionDomain.main_url || expressionDomain.name,
                 depth: depth,
+                
+                domain_title: expressionDomain.title || expressionDomain.name,
+                title: expressionDomain.name,
+                description: expressionDomain.description || '',
+                keywords: (expressionDomain.keywords || []).join(' / '),
+                nb_expressions: pageNodes.length,
 
                 global_alexarank: alexaRank,
                 inverse_global_alexarank: 1/alexaRank,
@@ -113,7 +123,17 @@ module.exports = function pageGraphToDomainGraph(pageGraph, alexaRanks, expressi
 
                 min_google_pagerank: cleanValue(stats.min(domainGooglePagerank), [undefined, null], 12),
                 max_google_pagerank: cleanValue(stats.max(domainGooglePagerank), [undefined, null], 12),
-                median_google_pagerank: cleanValue(stats.median(domainGooglePagerank), [undefined, null], 12)
+                median_google_pagerank: cleanValue(stats.median(domainGooglePagerank), [undefined, null], 12),
+                
+                sum_likes: cleanValue(stats.sum(domainFbLikes), [undefined, null], 0),
+                sum_shares: (
+                    cleanValue(stats.sum(domainFbShares), [undefined, null], 0) +
+                    cleanValue(stats.sum(domainTwitterShares), [undefined, null], 0) +
+                    cleanValue(stats.sum(domainLinkedinShares), [undefined, null], 0)
+                ),
+                
+                social_impact: cleanValue(stats.sum(socialImpacts), [undefined, null], 0)
+
             });
 
             pageNodes.forEach(function(pn){

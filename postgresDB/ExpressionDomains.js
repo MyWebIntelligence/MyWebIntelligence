@@ -5,11 +5,15 @@ sql.setDialect('postgres');
 
 var databaseP = require('./databaseClientP');
 
+var massageExpressionDomain = require('./massageExpressionDomain');
+
 var databaseJustCreatedSymbol = require('./databaseJustCreatedSymbol');
 var justCreatedMarker = {};
 justCreatedMarker[databaseJustCreatedSymbol] = true;
 
 var expression_domains = require('./declarations.js').expression_domains;
+
+
 
 module.exports = {
 
@@ -29,7 +33,7 @@ module.exports = {
                 db.query(query, function(err, result){
                     if(err) reject(Object.assign(err, {query: query}));
                     else resolve( result.rows.map(function(r){
-                        return Object.assign( r, justCreatedMarker );
+                        return Object.assign( massageExpressionDomain(r), justCreatedMarker );
                     }) );
                 });
             });
@@ -47,7 +51,7 @@ module.exports = {
             
             return new Promise(function(resolve, reject){
                 db.query(query, function(err, result){
-                    if(err) reject(err); else resolve(result.rows[0]);
+                    if(err) reject(err); else resolve(massageExpressionDomain(result.rows[0]));
                 });
             });
         })

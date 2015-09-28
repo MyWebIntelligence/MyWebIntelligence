@@ -91,7 +91,8 @@ module.exports = function pageGraphToDomainGraph(pageGraph, alexaRanks, expressi
                 return d < acc && d !== -1 ? d : acc;
             }, +Infinity);
             
-            var expressionDomain = expressionDomainsById[expressionDomainId];
+            var expressionDomain = expressionDomainsById[expressionDomainId] 
+                || {name: 'undefined'}; // pending https://github.com/MyWebIntelligence/MyWebIntelligence/issues/199
 
             var domainNode = domainGraph.addNode(expressionDomain.name, {
                 base_url: expressionDomain.main_url || expressionDomain.name,

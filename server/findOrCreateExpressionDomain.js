@@ -16,7 +16,7 @@ function findOrCreateExpressionDomainByName(expressionDomainName, url, expressio
                             return database.ExpressionDomains.update(created[0].id, expressionDomainInfos)
                         })
                         .catch(function(err){
-                            console.error('expressionDomainInfos error', err);
+                            console.error('expressionDomainInfos error', err, expressionDomainName, url);
                         })
                 
                     // don't wait for the expression domain infos to be in the database to return
@@ -25,7 +25,7 @@ function findOrCreateExpressionDomainByName(expressionDomainName, url, expressio
                 })
                 .catch(function(){
                     // race condition may have led an expression domain to being created
-                    // between the first findByString and the create resulting in a violation
+                    // between the first findByName and the create resulting in a violation
                     // of the unique string constraint (leading to this catch)
                     return database.ExpressionDomains.findByName(expressionDomainName)
                 })

@@ -24,7 +24,7 @@ w.on('message', function(res){
     var territoireId = res.territoireId;
     
     // Need to remove resources annotated for rejection as the territoire cache may not be up-to-date on them
-    database.Annotations.findNotApproved(territoireId)
+    database.ResourceAnnotations.findNotApproved(territoireId)
         .then(function(rejectedAnns){
             
             var rejectedResourceIds = new Set(rejectedAnns.map(function(r){

@@ -1,4 +1,4 @@
-# Annotations
+# Resource Annotations
 
 ## Automated
 

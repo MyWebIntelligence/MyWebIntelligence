@@ -33,7 +33,7 @@ function generateExpressionGEXF(abstractGraph, expressionById, annotationsById){
 }
 
 
-function generateDomainGEXF(abstractGraph, expressionById, annotationsById){
+function generateDomainGEXF(abstractGraph, expressionById, annotationsById, expressionDomainById){
     var pageGraph = abstractGraphToPageGraph(abstractGraph, expressionById, annotationsById);
     var graphHostname = getAbstractGraphHostnames(abstractGraph);
     
@@ -41,7 +41,7 @@ function generateDomainGEXF(abstractGraph, expressionById, annotationsById){
         .then(function(alexaRanks){
             console.log("alexaRanks", alexaRanks.size, alexaRanks);
             
-            return pageGraphToDomainGraph(pageGraph, alexaRanks);
+            return pageGraphToDomainGraph(pageGraph, alexaRanks, expressionDomainById);
         });
     
     return domainGraphP.then(function(domainGraph){
@@ -72,11 +72,9 @@ function computeTerritoireTags(annotationByResourceId){
     var territoireTags = new ImmutableSet();
         
     if(annotationByResourceId){
-        console.log("computeTerritoireTags", annotationByResourceId);
         Object.keys(annotationByResourceId).forEach(function(rid){
             var annotations = annotationByResourceId[rid];
             var tags = annotations.tags || new Set();
-            console.log("computeTerritoireTags", rid, annotations, tags);
             
             tags.forEach(function(t){
                 territoireTags = territoireTags.add(t);
@@ -84,7 +82,6 @@ function computeTerritoireTags(annotationByResourceId){
         });
     }
     
-    console.log("computeTerritoireTags", territoireTags.size)
     return territoireTags;
 }
 
@@ -157,22 +154,24 @@ module.exports = React.createClass({
         
         console.log('territoire', territoire, territoire.graph && territoire.graph.edges.length);
         
-        if(territoire.graph && state.territoireGraph !== territoire.graph){
-            pageGraphToDomainGraph(
+        if(territoire.graph && territoire.expressionDomainsById && state.territoireGraph !== territoire.graph){
+            var domainGraph = pageGraphToDomainGraph(
                 abstractGraphToPageGraph(
                     territoire.graph, 
                     territoire.expressionById, 
                     state.annotationByResourceId
-                )
-            ).then(function(domainGraph){
-                // this is ugly
-                setTimeout(function(){
-                    self.setState(Object.assign({}, state, {
-                        domainGraph: domainGraph,
-                        territoireGraph: territoire.graph
-                    }));
-                }, 20)
-            })
+                ),
+                undefined,
+                territoire.expressionDomainsById
+            )
+            
+            // this is ugly
+            setTimeout(function(){
+                self.setState(Object.assign({}, state, {
+                    domainGraph: domainGraph,
+                    territoireGraph: territoire.graph
+                }));
+            }, 20)
         }
         
                 
@@ -184,7 +183,13 @@ module.exports = React.createClass({
             
             React.DOM.main({className: 'territoire'},
                 React.DOM.datalist({id: "tags"}, state.territoireTags.toArray().map(function(t){
-                    return React.DOM.option({ key: t, value: t });
+                    return React.DOM.option({ 
+                        key: t, 
+                        // so that clicking on an auto-complete value does autocomplete without the user
+                        // doesn't have to hit ';' itself
+                        value: t+';', 
+                        label: t
+                    });
                 })),
                 React.DOM.header({},
                     React.DOM.h1({}, 
@@ -280,7 +285,7 @@ module.exports = React.createClass({
                             onClick: function(e){
                                 e.preventDefault();
                                 
-                                generateDomainGEXF(territoire.graph, territoire.expressionById, state.annotationByResourceId)
+                                generateDomainGEXF(territoire.graph, territoire.expressionById, state.annotationByResourceId, territoire.expressionDomainsById)
                                     .then(function(domainsGEXF){
                                         triggerDownload(
                                             domainsGEXF,

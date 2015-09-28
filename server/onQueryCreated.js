@@ -43,7 +43,7 @@ module.exports = function onQueryCreated(query, user){
                             }),
                             // approve query results by default
                             Promise.all(resources.map(function(r){
-                                return db.Annotations.update(r.id, query.belongs_to, undefined, undefined, true)
+                                return db.ResourceAnnotations.update(r.id, query.belongs_to, undefined, undefined, true)
                             }))
                         ])
                     })

@@ -124,7 +124,7 @@ function processTask(task){
                                 }).catch(errlog("Expressions.create + associateWithExpression"));
                             
                             
-                            console.log('task.territoire_id', task.territoire_id)
+                            //console.log('task.territoire_id', task.territoire_id)
                             
                             linksUpdatedP = resExprLink.links.size >= 1 ? 
                                 createOrFindResourceForTerritoire(resExprLink.links, task.territoire_id)
@@ -142,7 +142,7 @@ function processTask(task){
 
                             if(approve({depth: task.depth, expression: resExprLink.expression})){
                                 
-                                database.Annotations.update(resourceId, task.territoire_id, undefined, undefined, true)
+                                database.ResourceAnnotations.update(resourceId, task.territoire_id, undefined, undefined, true)
                                 
                                 //throw 'TODO filter out references that already have a corresponding expression either as uri or alias';
 

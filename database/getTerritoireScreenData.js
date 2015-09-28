@@ -48,6 +48,14 @@ module.exports = function getTerritoireScreenData(territoireId){
         });
     annotationByResourceIdP.then(console.timeEnd.bind(console, 'fetching annotations'))
 
+    var expressionDomainsByIdP = database.complexQueries.getTerritoireExpressionDomains(territoireId)
+        .then(function(expressionDomains){            
+            var o = Object.create(null);
+            expressionDomains.forEach(function(ed){ o[ed.id] = ed; });
+            return o;
+        });
+
+    
     // timing of this query will make the values certainly out-of-sync with when 
     var progressIndicatorsP = database.complexQueries.getProgressIndicators(territoireId);
 
@@ -56,7 +64,7 @@ module.exports = function getTerritoireScreenData(territoireId){
 
     console.time('all data');
     return Promise.all([
-        territoireP, relevantQueriesP, abstractPageGraphP, progressIndicatorsP, expressionByIdP, annotationByResourceIdP, queryReadyP
+        territoireP, relevantQueriesP, abstractPageGraphP, progressIndicatorsP, expressionByIdP, annotationByResourceIdP, expressionDomainsByIdP, queryReadyP
     ]).then(function(res){
         console.timeEnd('all data');
         var territoire = res[0];
@@ -66,6 +74,7 @@ module.exports = function getTerritoireScreenData(territoireId){
         territoire.progressIndicators = res[3];
         territoire.expressionById = res[4];
         territoire.annotationByResourceId = res[5];
+        territoire.expressionDomainsById = res[6];
 
         return territoire;
     });

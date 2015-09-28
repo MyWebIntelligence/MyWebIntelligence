@@ -51,6 +51,10 @@ var pageNodeDesc = {
     'media_type': {
         type: "string",
         default: ''
+    },
+    expressionDomainId: {
+        type: "integer",
+        default: -1
     }
 };
 

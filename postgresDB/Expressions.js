@@ -6,6 +6,10 @@ var databaseP = require('./databaseClientP');
 
 var serializeValueForDB = require('./serializeValueForDB');
 
+var databaseJustCreatedSymbol = require('./databaseJustCreatedSymbol');
+var justCreatedMarker = {};
+justCreatedMarker[databaseJustCreatedSymbol] = true;
+
 /*
     Expressions contain large bodies of content. This API is designed so that most "get/find" methods only return "structure" fields.
     To get the content, use getExpressionsWithContent(ids)
@@ -33,7 +37,10 @@ module.exports = {
             
             return new Promise(function(resolve, reject){
                 db.query(query, function(err, result){
-                    if(err) reject(err); else resolve(result.rows);
+                    if(err) reject(Object.assign(err, {query: query}));
+                    else resolve( result.rows.map(function(r){
+                        return Object.assign( r, justCreatedMarker );
+                    }) ) 
                 });
             });
         })

@@ -7,6 +7,10 @@ var databaseP = require('./databaseClientP');
 
 var annotationTasks = require('./declarations.js').annotation_tasks;
 
+var databaseJustCreatedSymbol = require('./databaseJustCreatedSymbol');
+var justCreatedMarker = {};
+justCreatedMarker[databaseJustCreatedSymbol] = true;
+
 module.exports = {
     create: function(data){
         return databaseP.then(function(db){
@@ -19,7 +23,10 @@ module.exports = {
             
             return new Promise(function(resolve, reject){
                 db.query(query, function(err, result){
-                    if(err) reject(err); else resolve(result);
+                    if(err) reject(Object.assign(err, {query: query}));
+                    else resolve( result.rows.map(function(r){
+                        return Object.assign( r, justCreatedMarker );
+                    }) )
                 });
             });
         })

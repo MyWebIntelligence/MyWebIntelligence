@@ -28,6 +28,7 @@ var onQueryCreated = require('./onQueryCreated');
 var getGraphExpressions = require('../common/graph/getGraphExpressions');
 var getTerritoireScreenData = require('../database/getTerritoireScreenData');
 var simplifyExpression = require('./simplifyExpression');
+var computeSocialImpact = require('../automatedAnnotation/computeSocialImpact');
 
 var TerritoireListScreen = React.createFactory(require('../client/components/TerritoireListScreen'));
 var OraclesScreen = React.createFactory(require('../client/components/OraclesScreen'));
@@ -421,14 +422,22 @@ app.get('/territoire/:id/expressions.csv', function(req, res){
     var expressionByIdP = graphP.then(getGraphExpressions);
     var annotationsP = graphP.then(function(graph){
         return database.complexQueries.getGraphAnnotations(graph, territoireId);
-    })
+    });
     
-    Promise.all([territoireP, expressionByIdP, annotationsP, graphP]).then(function(result){
+    var expressionDomainsByIdP = database.complexQueries.getTerritoireExpressionDomains(territoireId)
+        .then(function(expressionDomains){
+            var o = Object.create(null);
+            expressionDomains.forEach(function(ed){ o[ed.id] = ed; });
+            return o;
+        });
+    
+    Promise.all([territoireP, expressionByIdP, annotationsP, expressionDomainsByIdP, graphP]).then(function(result){
         console.timeEnd('graph from db')
         var territoire = result[0];
         var expressionById = result[1];
         var annotationsByResourceId = result[2];
-        var graph = result[3];
+        var expressionDomainsById = result[3];
+        var graph = result[4];
         
         // convert the file to GEXF
         // send with proper content-type
@@ -436,26 +445,40 @@ app.get('/territoire/:id/expressions.csv', function(req, res){
         res.set('Content-disposition', 'attachment; filename="' + territoire.name+'-pages.csv"');
         
         res.status(200);
-        
-        console.log('Array.isArray(graph.nodes)', Array.isArray(graph.nodes));
-        
+                
         var exportableResources = graph.nodes.map(function(node){
             var exprId = node.expression_id;
             var expression = expressionById[exprId];
-            if(expression){
-                var annotations = annotationsByResourceId[node.id];
+            var annotations = annotationsByResourceId[node.id];
 
-                return Object.assign(
-                    {
-                        id: node.id,
-                        url: node.url,
-                        title: expression.title
-                        // remove content as it's currently not necessary and pollutes CSV exports
-                        // core_content: expression.main_text, 
-                    },
-                    simplifyExpression(expression),
-                    annotations
-                );
+            if(expression && annotations){
+                var simplifiedExpression = simplifyExpression(expression);
+           
+                console.log('domain_title', annotations);
+                
+                // Reference : https://docs.google.com/spreadsheets/d/1y2-zKeWAD9POD_hjth-v4KlMlm5HqD7tzKvbPilLb4o/edit?usp=sharing
+                return {
+                    url: node.url,
+                    title: expression.title,
+                    // remove content as it's currently not necessary and pollutes CSV exports
+                    // core_content: expression.main_text, 
+
+                    excerpt: simplifiedExpression.excerpt,
+                    tags: (annotations.tags || []).join(' / '),
+                    favorite: annotations.favorite,
+                    negative: annotations.negative,
+                    content_length: (expression.main_text || '').length,
+                    google_pagerank: annotations.google_pagerank,
+                    twitter_share: annotations.twitter_share,
+                    facebook_share: annotations.facebook_share,
+                    facebook_like: annotations.facebook_like,
+                    linkedin_share: annotations.linkedin_share,
+                    social_impact: computeSocialImpact(annotations),
+                    
+                    // related to the domain
+                    media_type: annotations.media_type, // soon enough, this one will have to move up to the domain
+                    domain_title: (expressionDomainsById[annotations.expressionDomainId] || {title: ''}).title
+                }
             }
         }).filter(function(r){ return !!r; });
         
@@ -466,7 +489,7 @@ app.get('/territoire/:id/expressions.csv', function(req, res){
         
         csvStream.pipe(res);
     }).catch(function(err){
-        console.error('expressions.gexf error', err, err.stack)
+        console.error('expressions.csv error', err, err.stack)
         
         res.status(500).send('database problem '+ err);
     }); 
@@ -589,7 +612,7 @@ app.post('/annotation/:territoireId/:resourceId', function(req, res){
     var resourceId = Number(req.params.resourceId);
     var data = req.body;
     
-    database.Annotations.update(resourceId, territoireId, user.id, data.values, data.approved)
+    database.ResourceAnnotations.update(resourceId, territoireId, user.id, data.values, data.approved)
         .then(function(){
             res.status(200).send('');
         })

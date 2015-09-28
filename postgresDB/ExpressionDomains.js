@@ -5,60 +5,66 @@ sql.setDialect('postgres');
 
 var databaseP = require('./databaseClientP');
 
-var links = require('./declarations.js').links;
+var massageExpressionDomain = require('./massageExpressionDomain');
 
 var databaseJustCreatedSymbol = require('./databaseJustCreatedSymbol');
 var justCreatedMarker = {};
 justCreatedMarker[databaseJustCreatedSymbol] = true;
 
+var expression_domains = require('./declarations.js').expression_domains;
+
+
+
 module.exports = {
-    /*
-        linksData is a {source: ResourceId, target: ResourceId}[]
-    */
-    create: function(linksData){
+
+    create: function(edData){
+        if(!Array.isArray(edData))
+            edData = [edData];
+        
         return databaseP.then(function(db){
-            var query = links
-                .insert(linksData)
+            var query = expression_domains
+                .insert(edData)
+                .returning('*')
                 .toQuery();
 
-            //console.log('Links create query', query);
+            //console.log('ResourceAnnotations create query', query);
             
             return new Promise(function(resolve, reject){
                 db.query(query, function(err, result){
                     if(err) reject(Object.assign(err, {query: query}));
                     else resolve( result.rows.map(function(r){
-                        return Object.assign( r, justCreatedMarker );
+                        return Object.assign( massageExpressionDomain(r), justCreatedMarker );
                     }) );
                 });
             });
         })
     },
     
-    /* sourceIds is a Set<SourceId> */
-    findBySources: function(sourceIds){
+    findByName: function(name){
         return databaseP.then(function(db){
-            var query = links
+            var query = expression_domains
                 .select('*')
-                .where(links.source.in(sourceIds.toJSON()))
+                .where( expression_domains.name.equals(name) )
                 .toQuery();
 
-            //console.log('Links create query', query);
+            //console.log('ResourceAnnotations findById query', query);
             
             return new Promise(function(resolve, reject){
                 db.query(query, function(err, result){
-                    if(err) reject(err); else resolve(result.rows);
+                    if(err) reject(err); else resolve(massageExpressionDomain(result.rows[0]));
                 });
             });
         })
     },
     
-    deleteAll: function(){
+    update: function(id, expressionDomainsDelta){
         return databaseP.then(function(db){
-            var query = links
-                .delete()
+            var query = expression_domains
+                .update(expressionDomainsDelta)
+                .where(expression_domains.id.equal(id))
                 .toQuery();
 
-            //console.log('Resources deleteAll query', query);
+            //console.log('ResourceAnnotations findById query', query);
             
             return new Promise(function(resolve, reject){
                 db.query(query, function(err, result){

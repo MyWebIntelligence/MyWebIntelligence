@@ -7,6 +7,15 @@ var domainNodeDesc = {
     "title": {
         type: "string"
     },
+    "domain_title": {
+        type: "string"
+    },
+    "description": {
+        type: "string"
+    },
+    "keywords": {
+        type: "string"
+    },
     /*"type": {
         type: "string" // enum. See https://github.com/MyWebIntelligence/MyWebIntelligence/issues/74#issuecomment-84032672
     },*/
@@ -79,6 +88,15 @@ var domainNodeDesc = {
     },
     "median_google_pagerank": {
         // if array has an even length, average of the two middle value is performed. Can end up with a x.5
+        type: "float"
+    },
+    "sum_likes": {
+        type: "float"
+    },
+    "sum_shares": {
+        type: "float"
+    },
+    "social_impact": {
         type: "float"
     }
 };

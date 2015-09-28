@@ -23,8 +23,11 @@ var isValidResourceExpression = Resources.isValidResourceExpression;
 var Links = require('../postgresDB/Links');
 var GetExpressionTasks = require('../postgresDB/GetExpressionTasks');
 var AlexaRankCache = require('../postgresDB/AlexaRankCache');
-var Annotations = require('../postgresDB/Annotations');
+var ResourceAnnotations = require('../postgresDB/ResourceAnnotations');
 var AnnotationTasks = require('../postgresDB/AnnotationTasks');
+var ExpressionDomains = require('../postgresDB/ExpressionDomains');
+
+var massageExpressionDomain = require('../postgresDB/massageExpressionDomain');
 
 
 var getExpressionTasks = declarations.get_expression_tasks;
@@ -42,8 +45,9 @@ module.exports = {
     Resources: Resources,
     AlexaRankCache: AlexaRankCache,
     GetExpressionTasks: GetExpressionTasks,
-    Annotations: Annotations,
+    ResourceAnnotations: ResourceAnnotations,
     AnnotationTasks: AnnotationTasks,
+    ExpressionDomains: ExpressionDomains,
     
     clearAll: function(){
         var self = this;
@@ -113,15 +117,47 @@ module.exports = {
             });
             
             return resourceIds.size > 0 ? 
-                Annotations.findLatestByResourceIdsAndTerritoireId(resourceIds, territoireId)
+                ResourceAnnotations.findByTerritoireId(territoireId)
                     .then(function(annotations){
                         annotations.forEach(function(ann){                        
                             annotationByResourceId[ann.resource_id] = JSON.parse(ann.values);
+                            annotationByResourceId[ann.resource_id].expressionDomainId = ann.expression_domain_id;
                         });
 
                         return annotationByResourceId;
                     }) : 
                 Promise.resolve(annotationByResourceId);
+        },
+        
+        
+        /*
+            graph is an abstract graph
+        */
+        getTerritoireExpressionDomains: function getGraphExpressionDomains(territoireId){            
+            
+            var expression_domains = declarations.expression_domains;
+            var resource_annotations = declarations.resource_annotations;
+            
+            return databaseP.then(function(db){
+                var query = expression_domains
+                    .select('*')
+                    .where( expression_domains.id.in(
+                        resource_annotations.subQuery()
+                            .select(resource_annotations.expression_domain_id.distinct())
+                            .where(resource_annotations.territoire_id.equals(territoireId))
+                        )
+                    )
+                    .toQuery();
+
+                //console.log('getTerritoireExpressionDomains query', query);
+
+                return new Promise(function(resolve, reject){
+                    db.query(query, function(err, result){
+                        if(err) reject(err); else resolve(result.rows.map(massageExpressionDomain));
+                    });
+                });
+            });
+            
         },
         
         /*
@@ -257,7 +293,7 @@ module.exports = {
         */
         getValidTerritoireQueryResultResources: function(territoireId){
             var resources = declarations.resources;
-            var annotations = declarations.annotations;
+            var resource_annotations = declarations.resource_annotations;
             
             return this.getTerritoireQueryResults(territoireId)
                 .then(function(urls){// throw 'TODO remove those with an annotation === false' )
@@ -268,12 +304,12 @@ module.exports = {
                             .select(resources.star())
                             .from(
                                 resources
-                                    .join(annotations)
-                                    .on(resources.id.equals(annotations.resource_id))
+                                    .join(resource_annotations)
+                                    .on(resources.id.equals(resource_annotations.resource_id))
                             )
                             .where(
-                                annotations.territoire_id.equals(territoireId).and(
-                                    annotations.approved.equals(true).and(
+                                resource_annotations.territoire_id.equals(territoireId).and(
+                                    resource_annotations.approved.equals(true).and(
                                         resources.url.in(urls.toJSON()).and(
                                             isValidResourceExpression
                                         )
@@ -324,7 +360,7 @@ module.exports = {
             
             return Promise.all([
                 this.getTerritoireQueryResults(territoireId),
-                Annotations.findNotApproved(territoireId)
+                ResourceAnnotations.findNotApproved(territoireId)
             ]).then(function(res){
                 var roots = res[0];
                 var notApprovedAnnotations = res[1];

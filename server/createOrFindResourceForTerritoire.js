@@ -13,7 +13,7 @@ module.exports = function createOrFindResourceForTerritoire(urls, territoireId){
     if(typeof urls === 'string')
         urls = new Set([urls]);
     
-    console.log('createOrFindResourceForTerritoire', urls.toJSON());
+    //console.log('createOrFindResourceForTerritoire', urls.toJSON());
     
     return database.Resources.findByURLsOrCreate(urls)
         .then(function(resources){

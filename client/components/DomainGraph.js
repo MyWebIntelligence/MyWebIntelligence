@@ -21,17 +21,11 @@ module.exports = React.createClass({
         return {};
     },
     
-    componentDidMount: function(){
-        console.log('DomainGraph compontentDidMount', this.props.graph);
-        console.log('this.props.graph.edges.size', this.props.graph.edges.size)
-        
+    componentDidMount: function(){        
         this._drawGraph(this.props.graph);
     },
     
-    componentWillReceiveProps: function(nextProps){
-        console.log('DomainGraph componentWillReceiveProps', nextProps.graph);
-        console.log('nextProps.graph.edges.size', nextProps.graph.edges.size)
-        
+    componentWillReceiveProps: function(nextProps){        
         this._drawGraph(nextProps.graph);
     },
     

@@ -8,9 +8,9 @@ var approve = require('./approve');
 
 var database = require('../database');
 var isValidResource = require('./isValidResource');
+
 var createOrFindResourceForTerritoire = require('../server/createOrFindResourceForTerritoire');
-
-
+var addAlias = require('../server/addAlias');
 
 var errlog = function(context){
     return function(err){
@@ -99,7 +99,7 @@ function processTask(task){
                     //console.log('resExprLink', resExprLink);
 
                     var resourceIdP = resExprLink.resource.url !== url ?
-                        database.Resources.addAlias(task.resource_id, resExprLink.resource.url).catch(errlog("addAlias")) :
+                        addAlias(task.resource_id, resExprLink.resource.url, task.territoire_id).catch(errlog("addAlias")) :
                         Promise.resolve(task.resource_id);
 
                     return resourceIdP.then(function(resourceId){                        

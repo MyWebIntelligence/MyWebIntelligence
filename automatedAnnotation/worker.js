@@ -5,6 +5,9 @@ process.title = "MyWI Automated Annotation worker";
 
 var database = require('../database');
 var socialSignals = require('./socialSignals');
+var resourceCoreAnnotations = require('./resourceCoreAnnotations');
+
+var taskFunctions = socialSignals.merge(resourceCoreAnnotations)
 
 
 /*var errlog = function(context){
@@ -79,7 +82,7 @@ function processTask(task){
         return deleteTask(task);
     });
     
-    var annotationFunction = socialSignals.get(task.type);
+    var annotationFunction = taskFunctions.get(task.type);
     //console.log('annotationFunction', annotation, annotation.type, typeof annotationFunction);
 
     // get the resource id + url
@@ -91,24 +94,9 @@ function processTask(task){
             if(!resource)
                 return undefined; // Don't bother annotating invalid resources
 
-            var url = resource.url;
-
             // save the result in the annotation
 
-            return annotationFunction(url)
-                .then(function(value){
-                    //console.log('Annotation', url, task.type, value);
-                    var values = {};
-                    values[task.type] = value;
-
-                    return database.ResourceAnnotations.update(
-                        task.resource_id, 
-                        task.territoire_id, 
-                        undefined, // annotationFunction did the annotation job, so that's not a human user, so undefined
-                        values, 
-                        undefined // no approved value
-                    );
-                })
+            return annotationFunction(resource, task.territoire_id)
                 .catch(function(err){
                     console.error('Annotation error', err, err.stack);
                 });

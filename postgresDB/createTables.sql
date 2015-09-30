@@ -97,6 +97,7 @@ CREATE TABLE IF NOT EXISTS annotation_tasks (
     type            text NOT NULL,
     resource_id     integer REFERENCES resources (id) NOT NULL,
     territoire_id   integer NOT NULL,
+    depth           integer NOT NULL,
     status          annotation_tasks_status
 ) INHERITS(lifecycle);
 CREATE TRIGGER updated_at_annotation_tasks BEFORE UPDATE ON annotation_tasks FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();

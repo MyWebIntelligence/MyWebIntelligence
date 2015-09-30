@@ -35,13 +35,16 @@ module.exports = {
     /*
         urls is a Set<url>
     */
-    createTasksTodo: function(resourceId, territoireId, type){
+    createTasksTodo: function(resourceId, territoireId, type, depth){
+        console.log('AnnotationTasks.createTasksTodo', resourceId, territoireId, type, depth)
+        
         return databaseP.then(function(db){
             var query = annotationTasks
                 .insert({
                     status: 'todo',
                     resource_id: resourceId, 
                     territoire_id: territoireId,
+                    depth: depth,
                     type: type
                 })
                 .toQuery();

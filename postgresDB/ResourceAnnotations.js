@@ -143,9 +143,7 @@ module.exports = {
         })
     },
     
-    /*
-        resourceIds: Set<ResourceId>
-        
+    /*        
         This function is meant for exports.
     */
     findByTerritoireId: function(territoireId){        
@@ -178,5 +176,34 @@ module.exports = {
                 });
             });
         })
+    },
+    
+    /*        
+        This function is mainly meant for CSV exports.
+    */
+    findApprovedByTerritoireId: function(territoireId){    
+        //console.log('findApprovedByTerritoireId', territoireId);
+        
+        return databaseP.then(function(db){
+            var query = resource_annotations
+                .select( resource_annotations.star() )
+                .where(
+                    resource_annotations.territoire_id.equals(territoireId).and(
+                        resource_annotations.approved.equals(true).and(
+                            resource_annotations.values.isNotNull()
+                        )
+                    )
+                )
+                .toQuery();
+
+            //console.log('ResourceAnnotations findByTerritoireId query', query);
+            
+            return new Promise(function(resolve, reject){
+                db.query(query, function(err, result){
+                    if(err) reject(err); else resolve(result.rows);
+                });
+            });
+        })
     }
+    
 };

@@ -161,6 +161,44 @@ module.exports = {
         },
         
         /*
+            resourceIds : Set<ResourceId>
+        */
+        getExpressionsByResourceIds: function(resourceIds){
+            console.log('getExpressionsByResourceIds', resourceIds.size);
+            
+            var resources = declarations.resources;
+            var expressions = declarations.expressions;
+            
+            console.log()
+            
+            return databaseP.then(function(db){
+                var query = expressions
+                    .select(
+                        expressions.main_text,
+                        expressions.title,
+                        expressions.meta_description,
+                        resources.id.as('resource_id'),
+                        resources.url
+                    )
+                    .from( resources
+                          .join(expressions)
+                          .on(resources.expression_id.equals(expressions.id))
+                    )
+                    .where( resources.id.in(resourceIds.toJSON()) )
+                    .toQuery();
+
+                console.log('getTerritoireExpressionDomains query', query);
+
+                return new Promise(function(resolve, reject){
+                    db.query(query, function(err, result){
+                        if(err) reject(err); else resolve(result.rows.map(massageExpressionDomain));
+                    });
+                });
+            });
+            
+        },
+        
+        /*
             rootURIs: Set<url>
             notApprovedResourceIds: Set<ResourceId>
             @returns an abstract graph

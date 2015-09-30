@@ -25,7 +25,6 @@ var database = require('../database');
 //var dropAllTables = require('../postgresDB/dropAllTables');
 //var createTables = require('../postgresDB/createTables');
 var onQueryCreated = require('./onQueryCreated');
-var getGraphExpressions = require('../common/graph/getGraphExpressions');
 var getTerritoireScreenData = require('../database/getTerritoireScreenData');
 var simplifyExpression = require('./simplifyExpression');
 var computeSocialImpact = require('../automatedAnnotation/computeSocialImpact');
@@ -418,10 +417,25 @@ app.get('/territoire/:id/expressions.csv', function(req, res){
     
     var territoireP = database.Territoires.findById(territoireId);
     console.time('graph from db');
-    var graphP = database.complexQueries.getTerritoireGraph(territoireId);
-    var expressionByIdP = graphP.then(getGraphExpressions);
-    var annotationsP = graphP.then(function(graph){
-        return database.complexQueries.getGraphAnnotations(graph, territoireId);
+
+    var annotationByResourceIdP = database.ResourceAnnotations.findApprovedByTerritoireId(territoireId)
+        .then(function(annotations){
+            var annotationByResourceId = Object.create(null);
+
+            annotations.forEach(function(ann){                        
+                annotationByResourceId[ann.resource_id] = JSON.parse(ann.values);
+                annotationByResourceId[ann.resource_id].expressionDomainId = ann.expression_domain_id;
+            });
+
+            return annotationByResourceId;
+        });
+    
+    var territoireResourceIdsP = annotationByResourceIdP.then(function(annotationByResourceId){
+        return new Set(Object.keys(annotationByResourceId))
+    })
+    
+    var expressionsWithResourceIdP = territoireResourceIdsP.then(function(ids){
+        return database.complexQueries.getExpressionsByResourceIds(ids);
     });
     
     var expressionDomainsByIdP = database.complexQueries.getTerritoireExpressionDomains(territoireId)
@@ -431,34 +445,28 @@ app.get('/territoire/:id/expressions.csv', function(req, res){
             return o;
         });
     
-    Promise.all([territoireP, expressionByIdP, annotationsP, expressionDomainsByIdP, graphP]).then(function(result){
+    Promise.all([
+        territoireP, expressionsWithResourceIdP, annotationByResourceIdP, expressionDomainsByIdP
+    ]).then(function(result){
         console.timeEnd('graph from db')
         var territoire = result[0];
-        var expressionById = result[1];
+        var expressionsWithResourceId = result[1];
         var annotationsByResourceId = result[2];
         var expressionDomainsById = result[3];
-        var graph = result[4];
         
-        // convert the file to GEXF
-        // send with proper content-type
-        res.set('Content-Type', "text/csv");
-        res.set('Content-disposition', 'attachment; filename="' + territoire.name+'-pages.csv"');
-        
-        res.status(200);
                 
-        var exportableResources = graph.nodes.map(function(node){
-            var exprId = node.expression_id;
-            var expression = expressionById[exprId];
-            var annotations = annotationsByResourceId[node.id];
+        var exportableResources = expressionsWithResourceId.map(function(expressionWithResourceId){
+            var resourceId = expressionWithResourceId.resource_id;
+            
+            var expression = Object.freeze(expressionWithResourceId);
+            var annotations = annotationsByResourceId[resourceId];
 
             if(expression && annotations){
                 var simplifiedExpression = simplifyExpression(expression);
-           
-                console.log('domain_title', annotations);
                 
                 // Reference : https://docs.google.com/spreadsheets/d/1y2-zKeWAD9POD_hjth-v4KlMlm5HqD7tzKvbPilLb4o/edit?usp=sharing
                 return {
-                    url: node.url,
+                    url: expressionWithResourceId.url,
                     title: expression.title,
                     // remove content as it's currently not necessary and pollutes CSV exports
                     // core_content: expression.main_text, 
@@ -486,6 +494,11 @@ app.get('/territoire/:id/expressions.csv', function(req, res){
             exportableResources,
             {headers: true}
         );
+        
+        // ready to send
+        res.status(200);
+        res.set('Content-Type', "text/csv");
+        res.set('Content-disposition', 'attachment; filename="' + territoire.name + '-pages.csv"');
         
         csvStream.pipe(res);
     }).catch(function(err){

@@ -5,11 +5,11 @@ var socialSignals = require('../automatedAnnotation/socialSignals');
 
 var socialSignalTypes = socialSignals.keySeq().toArray();
 
-module.exports = function(resource, territoireId, depth){
-    // console.log('approve resource', resource.url, territoireId, depth, resource);
+module.exports = function(resourceId, territoireId, depth){
+    // console.log('approve resource', resourceId, territoireId, depth);
     
     return database.ResourceAnnotations.update(
-        resource.id, territoireId, undefined, undefined, true
+        resourceId, territoireId, undefined, undefined, true
     )
         .then(function(){
             return Promise.all(socialSignalTypes.map(function(type){
@@ -23,7 +23,7 @@ module.exports = function(resource, territoireId, depth){
                     // Race conditions can also happen in collision with human annotations which is a BIG deal 
                     // but unlikely enough to be considered acceptable for now.
                     setTimeout(function(){
-                        database.AnnotationTasks.createTasksTodo(resource.id, territoireId, type, depth)
+                        database.AnnotationTasks.createTasksTodo(resourceId, territoireId, type, depth)
                             .then(resolve)
                             .catch(function(err){
                                 console.error('annotation create error', err, err.stack);

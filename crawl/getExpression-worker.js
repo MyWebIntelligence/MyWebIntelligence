@@ -156,7 +156,7 @@ function processTask(task){
                                 : undefined;
 
                             if(approve({depth: task.depth, expression: resExprLink.expression})){
-                                approveResource(resource, task.territoire_id, task.depth);
+                                approveResource(resourceId, task.territoire_id, task.depth);
                             }
                         }
 

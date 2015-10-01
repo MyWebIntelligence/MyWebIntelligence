@@ -9,8 +9,10 @@ var approve = require('./approve');
 var database = require('../database');
 var isValidResource = require('./isValidResource');
 
-var createOrFindResourceForTerritoire = require('../server/createOrFindResourceForTerritoire');
 var addAlias = require('../server/addAlias');
+
+var approveResource = require('../server/approveResource');
+
 
 var errlog = function(context){
     return function(err){
@@ -70,6 +72,8 @@ function deleteTask(task){
 function processTask(task){
     var taskTimeout;
     
+    var territoireId = task.territoire_id;
+    
     inFlightTasks.add(task);
     
     // getExpression fights against a timer
@@ -99,10 +103,10 @@ function processTask(task){
                     //console.log('resExprLink', resExprLink);
 
                     var resourceIdP = resExprLink.resource.url !== url ?
-                        addAlias(task.resource_id, resExprLink.resource.url, task.territoire_id).catch(errlog("addAlias")) :
+                        addAlias(task.resource_id, resExprLink.resource.url, territoireId).catch(errlog("addAlias")) :
                         Promise.resolve(task.resource_id);
 
-                    return resourceIdP.then(function(resourceId){                        
+                    return resourceIdP.then(function(resourceId){
                         var resourceUpdatedP = database.Resources.update(
                             resourceId,
                             Object.assign(
@@ -115,7 +119,7 @@ function processTask(task){
                         var expressionUpdatedP;
                         var linksUpdatedP;
                         var tasksCreatedP;
-
+                        
                         if(isValidResource(resExprLink.resource)){                            
                             expressionUpdatedP = database.Expressions.create(resExprLink.expression)
                                 .then(function(expressions){
@@ -126,8 +130,19 @@ function processTask(task){
                             
                             //console.log('task.territoire_id', task.territoire_id)
                             
+                            /*
+                                Promise._allResolved(resources.map(function(r){
+                                    return database.AnnotationTasks.createTasksTodo(r.id, query.belongs_to, 'prepare_resource', depth);
+                                }))
+                            */
+                            
                             linksUpdatedP = resExprLink.links.size >= 1 ? 
-                                createOrFindResourceForTerritoire(resExprLink.links, task.territoire_id)
+                                database.Resources.findByURLsOrCreate(resExprLink.links)
+                                    .then(function(linkResources){
+                                        return Promise._allResolved(linkResources.map(function(r){
+                                            return database.AnnotationTasks.createTasksTodo(r.id, territoireId, 'prepare_resource', task.depth+1);
+                                        })).then(function(){ return linkResources; })
+                                    })
                                     .then(function(linkResources){
                                         var linksData = linkResources.map(function(r){
                                             return {
@@ -141,19 +156,7 @@ function processTask(task){
                                 : undefined;
 
                             if(approve({depth: task.depth, expression: resExprLink.expression})){
-                                
-                                database.ResourceAnnotations.update(resourceId, task.territoire_id, undefined, undefined, true)
-                                
-                                //throw 'TODO filter out references that already have a corresponding expression either as uri or alias';
-
-                                // Don't recreate tasks for now. Will re-enable when a better approval algorithm is implemented.
-                                tasksCreatedP = Promise.resolve()/*createResourceTasks(
-                                    new Set(expression.references),
-                                    {
-                                        territoireId: task.territoire_id,
-                                        depth: task.depth+1
-                                    }
-                                );*/
+                                approveResource(resourceId, task.territoire_id, task.depth);
                             }
                         }
 

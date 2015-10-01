@@ -77,12 +77,15 @@ describe('onQueryCreated', function(){
                     db.Resources.findByURLs(new Set(URLs))
                         .then(function(resources){
                             assert.isArray(resources);
-                            assert.strictEqual(resources.length, URLs.length);
+                            assert.strictEqual(resources.length, URLs.length, 'should create resources');
                         }),
-                    db.GetExpressionTasks.getAll()
+                    db.AnnotationTasks.getAll()
                         .then(function(tasks){
                             assert.isArray(tasks);
-                            assert.strictEqual(tasks.length, URLs.length);
+                            assert.strictEqual(tasks.length, URLs.length, 'should create AnnotationTasks');
+                            tasks.forEach(function(t){
+                                assert(t.type, 'prepare_resource');
+                            });
                             tasks.forEach(function(t){
                                 assert(t.status, 'todo');
                             });

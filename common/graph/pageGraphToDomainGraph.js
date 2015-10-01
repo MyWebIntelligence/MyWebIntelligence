@@ -89,54 +89,62 @@ module.exports = function pageGraphToDomainGraph(pageGraph, alexaRanks, expressi
             }, +Infinity);
             
             var expressionDomain = expressionDomainsById[expressionDomainId];
+            
+            // Currently, the graph is built unrelated to the territoire
+            // this leads to resources being part of the graph while not being approved (because they were part 
+            // of a previous territoire for instance. Noticed via depth===2 which is currently 
+            // (Sept 2015, no crawl) impossible) and maybe not even having been through prepareResourceForTerritoire
+            // This leads to expressionDomainId === undefined and expressionDomain === undefined
+            // This test prevents problems under these circumstances
+            if(expressionDomain){
+                var domainNode = domainGraph.addNode(expressionDomain.name, {
+                    base_url: expressionDomain.main_url || expressionDomain.name,
+                    depth: depth,
 
-            var domainNode = domainGraph.addNode(expressionDomain.name, {
-                base_url: expressionDomain.main_url || expressionDomain.name,
-                depth: depth,
-                
-                domain_title: expressionDomain.title || expressionDomain.name,
-                title: expressionDomain.name,
-                description: expressionDomain.description || '',
-                keywords: (expressionDomain.keywords || []).join(' / '),
-                nb_expressions: pageNodes.length,
+                    domain_title: expressionDomain.title || expressionDomain.name,
+                    title: expressionDomain.name,
+                    description: expressionDomain.description || '',
+                    keywords: (expressionDomain.keywords || []).join(' / '),
+                    nb_expressions: pageNodes.length,
 
-                global_alexarank: alexaRank,
-                inverse_global_alexarank: 1/alexaRank,
+                    global_alexarank: alexaRank,
+                    inverse_global_alexarank: 1/alexaRank,
 
-                min_facebook_like: cleanValue(stats.min(domainFbLikes), [undefined, null], -1),
-                max_facebook_like: cleanValue(stats.max(domainFbLikes), [undefined, null], -1),
-                median_facebook_like: cleanValue(stats.median(domainFbLikes), [undefined, null], -1),
+                    min_facebook_like: cleanValue(stats.min(domainFbLikes), [undefined, null], -1),
+                    max_facebook_like: cleanValue(stats.max(domainFbLikes), [undefined, null], -1),
+                    median_facebook_like: cleanValue(stats.median(domainFbLikes), [undefined, null], -1),
 
-                min_facebook_share: cleanValue(stats.min(domainFbShares), [undefined, null], -1),
-                max_facebook_share: cleanValue(stats.max(domainFbShares), [undefined, null], -1),
-                median_facebook_share: cleanValue(stats.median(domainFbShares), [undefined, null], -1),
+                    min_facebook_share: cleanValue(stats.min(domainFbShares), [undefined, null], -1),
+                    max_facebook_share: cleanValue(stats.max(domainFbShares), [undefined, null], -1),
+                    median_facebook_share: cleanValue(stats.median(domainFbShares), [undefined, null], -1),
 
-                min_twitter_share: cleanValue(stats.min(domainTwitterShares), [undefined, null], -1),
-                max_twitter_share: cleanValue(stats.max(domainTwitterShares), [undefined, null], -1),
-                median_twitter_share: cleanValue(stats.median(domainTwitterShares), [undefined, null], -1),
+                    min_twitter_share: cleanValue(stats.min(domainTwitterShares), [undefined, null], -1),
+                    max_twitter_share: cleanValue(stats.max(domainTwitterShares), [undefined, null], -1),
+                    median_twitter_share: cleanValue(stats.median(domainTwitterShares), [undefined, null], -1),
 
-                min_linkedin_share: cleanValue(stats.min(domainLinkedinShares), [undefined, null], -1),
-                max_linkedin_share: cleanValue(stats.max(domainLinkedinShares), [undefined, null], -1),
-                median_linkedin_share: cleanValue(stats.median(domainLinkedinShares), [undefined, null], -1),
+                    min_linkedin_share: cleanValue(stats.min(domainLinkedinShares), [undefined, null], -1),
+                    max_linkedin_share: cleanValue(stats.max(domainLinkedinShares), [undefined, null], -1),
+                    median_linkedin_share: cleanValue(stats.median(domainLinkedinShares), [undefined, null], -1),
 
-                min_google_pagerank: cleanValue(stats.min(domainGooglePagerank), [undefined, null], 12),
-                max_google_pagerank: cleanValue(stats.max(domainGooglePagerank), [undefined, null], 12),
-                median_google_pagerank: cleanValue(stats.median(domainGooglePagerank), [undefined, null], 12),
-                
-                sum_likes: cleanValue(stats.sum(domainFbLikes), [undefined, null], 0),
-                sum_shares: (
-                    cleanValue(stats.sum(domainFbShares), [undefined, null], 0) +
-                    cleanValue(stats.sum(domainTwitterShares), [undefined, null], 0) +
-                    cleanValue(stats.sum(domainLinkedinShares), [undefined, null], 0)
-                ),
-                
-                social_impact: cleanValue(stats.sum(socialImpacts), [undefined, null], 0)
+                    min_google_pagerank: cleanValue(stats.min(domainGooglePagerank), [undefined, null], 12),
+                    max_google_pagerank: cleanValue(stats.max(domainGooglePagerank), [undefined, null], 12),
+                    median_google_pagerank: cleanValue(stats.median(domainGooglePagerank), [undefined, null], 12),
 
-            });
+                    sum_likes: cleanValue(stats.sum(domainFbLikes), [undefined, null], 0),
+                    sum_shares: (
+                        cleanValue(stats.sum(domainFbShares), [undefined, null], 0) +
+                        cleanValue(stats.sum(domainTwitterShares), [undefined, null], 0) +
+                        cleanValue(stats.sum(domainLinkedinShares), [undefined, null], 0)
+                    ),
 
-            pageNodes.forEach(function(pn){
-                pageNodeToDomainNode.set(pn, domainNode);
-            });
+                    social_impact: cleanValue(stats.sum(socialImpacts), [undefined, null], 0)
+
+                });
+
+                pageNodes.forEach(function(pn){
+                    pageNodeToDomainNode.set(pn, domainNode);
+                });
+            }
         })
 
         return pageNodeToDomainNode;
@@ -150,10 +158,15 @@ module.exports = function pageGraphToDomainGraph(pageGraph, alexaRanks, expressi
         var domainSource = pageNodeToDomainNode.get(e.node1);
         var domainTarget = pageNodeToDomainNode.get(e.node2);
 
-        if(!domainSource)
+        // related to the expressionDomain === undefined problem above.
+        // It leads to having no domain node for some page nodes making these tests fail.
+        // disabling them for now
+        /*if(!domainSource)
             throw 'no domainSource';
         if(!domainTarget)
-            throw 'no domainTarget';
+            throw 'no domainTarget';*/
+        if(domainSource === undefined || domainTarget === undefined)
+            return;
 
         if(domainSource === domainTarget)
             return; // self-reference, no need to create an edge

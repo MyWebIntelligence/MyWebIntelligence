@@ -20,7 +20,7 @@ var exports = immutableMap();
 Object.keys(annotationFunctions).forEach(function(type){
     
     exports = exports.set(type, function(resource, territoireId){
-        annotationFunctions[type](resource.url).then(function(value){
+        return annotationFunctions[type](resource.url).then(function(value){
             var values = {};
             values[type] = value;
 

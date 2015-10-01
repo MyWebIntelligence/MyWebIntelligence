@@ -36,7 +36,7 @@ module.exports = {
         urls is a Set<url>
     */
     createTasksTodo: function(resourceId, territoireId, type, depth){
-        console.log('AnnotationTasks.createTasksTodo', resourceId, territoireId, type, depth)
+        //console.log('AnnotationTasks.createTasksTodo', resourceId, territoireId, type, depth)
         
         return databaseP.then(function(db){
             var query = annotationTasks

@@ -6,9 +6,10 @@ var socialSignals = require('../automatedAnnotation/socialSignals');
 var socialSignalTypes = socialSignals.keySeq().toArray();
 
 module.exports = function(resource, territoireId, depth){
+    // console.log('approve resource', resource.url, territoireId, depth, resource);
     
     return database.ResourceAnnotations.update(
-        resource.id, territoireId, undefined, undefined, undefined, undefined, true
+        resource.id, territoireId, undefined, undefined, true
     )
         .then(function(){
             return Promise.all(socialSignalTypes.map(function(type){

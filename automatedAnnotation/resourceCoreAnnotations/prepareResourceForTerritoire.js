@@ -12,7 +12,7 @@ var findOrCreateExpressionDomain = require('../../server/findOrCreateExpressionD
 */
 
 module.exports = function(resource, territoireId, depth){
-    console.log('prepareResourceForTerritoire', resource, territoireId, depth)
+    //console.log('prepareResourceForTerritoire', territoireId, depth, resource.url)
     
     var expressionDomainP = findOrCreateExpressionDomain(resource.url)
         .catch(function(err){

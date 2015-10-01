@@ -15,6 +15,8 @@ var getExpressionTasks = require('./declarations.js').get_expression_tasks;
 
 module.exports = {
     create: function(data){
+        console.log('GetExpressionTasks', data);
+        
         return databaseP.then(function(db){
             
             var query = getExpressionTasks

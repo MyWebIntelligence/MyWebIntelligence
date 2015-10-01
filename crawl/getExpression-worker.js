@@ -106,7 +106,7 @@ function processTask(task){
                         addAlias(task.resource_id, resExprLink.resource.url, territoireId).catch(errlog("addAlias")) :
                         Promise.resolve(task.resource_id);
 
-                    return resourceIdP.then(function(resourceId){                        
+                    return resourceIdP.then(function(resourceId){
                         var resourceUpdatedP = database.Resources.update(
                             resourceId,
                             Object.assign(
@@ -119,7 +119,7 @@ function processTask(task){
                         var expressionUpdatedP;
                         var linksUpdatedP;
                         var tasksCreatedP;
-
+                        
                         if(isValidResource(resExprLink.resource)){                            
                             expressionUpdatedP = database.Expressions.create(resExprLink.expression)
                                 .then(function(expressions){
@@ -156,7 +156,7 @@ function processTask(task){
                                 : undefined;
 
                             if(approve({depth: task.depth, expression: resExprLink.expression})){
-                                approveResource(resourceId, task.territoire_id, task.depth);
+                                approveResource(resource, task.territoire_id, task.depth);
                             }
                         }
 

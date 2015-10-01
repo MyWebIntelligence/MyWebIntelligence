@@ -9,12 +9,12 @@ var EXPRESSION_DOMAIN_NAME_PREFIX = 'facebook/';
 */
 
 module.exports = {
-    hostnames: [
+    hostnames: new Set([
         'facebook.com',
         'www.facebook.com',
         'fr-fr.facebook.com',
         'fr-ca.facebook.com'
-    ],
+    ]),
     
     // NEVER use the g flag in regexps here. See https://twitter.com/erikcorry/status/231050692553502720
     invalidPatterns: [

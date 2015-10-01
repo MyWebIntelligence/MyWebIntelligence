@@ -11,7 +11,7 @@ var makeDocument = require('../../common/makeDocument');
 */
 
 module.exports = {
-    hostnames: ['*'], // irrelevant
+    hostnames: new Set(['*']), // irrelevant
     
     getExpressionDomainName: function(u){  
         var hostname = url.parse(u).hostname;

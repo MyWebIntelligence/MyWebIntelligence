@@ -1,35 +1,10 @@
 "use strict";
 
-var stripURLHash = require('./stripURLHash');
 var url = require('url');
 
+var stripURLHash = require('./stripURLHash');
 
-// These links usually end up being resources that are heavy to download and that we cannot process yet.
-// They will be ignored
-
-var EXCLUDED_FILE_EXTENSIONS = [
-    // documents
-    '.pdf',
-    '.doc',
-    '.docx',
-    '.ppt',
-    '.pptx',
-    '.xls',
-    '.xlsx',
-    
-    // archives
-    '.zip',
-    '.tar.gz',
-    '.tar',
-    '.gz',
-    '.rar',
-    
-    // images
-    '.png',
-    '.eps',
-    '.jpg',
-    '.jpeg'
-];
+var isURLAnExpression = require('../expressionDomain/isURLAnExpression');
 
 
 
@@ -49,16 +24,14 @@ module.exports = function(urls){
                 return false;
                     
             // remove non-http links, like javascript: and mailto: links
-            return /^https?/.test(parsed.protocol);
+            return parsed.protocol === 'http:' || parsed.protocol === 'https:';
         })
         .map(stripURLHash)
         // exclude URLs that are likely to end up being resources that we cannot process
         .filter(function(u){
             // the url doesn't end with any of the excluded file extensions
             // equivalent to: none of the extension terminates the url
-            return EXCLUDED_FILE_EXTENSIONS.every(function(ext){
-                return !u.endsWith(ext);
-            });
+            return isURLAnExpression(u);
         });
     
 };

@@ -4,10 +4,12 @@ var url = require('url');
 var defaultHeuristic = require('./heuristics/default');
 
 var facebookHeuristic = require('./heuristics/facebook');
+var twitterHeuristic = require('./heuristics/twitter');
 
 var heuristics = [
-    facebookHeuristic
-]
+    facebookHeuristic,
+    twitterHeuristic
+];
 
 /*
     The expression domain is the domain of the party making the expression.

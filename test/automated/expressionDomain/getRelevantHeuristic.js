@@ -10,6 +10,7 @@ chai.use(require('chai-as-promised'));
 
 var facebookHeuristic = require('../../../expressionDomain/heuristics/facebook');
 var twitterHeuristic = require('../../../expressionDomain/heuristics/twitter');
+var linkedinHeuristic = require('../../../expressionDomain/heuristics/linkedin');
 var defaultHeuristic = require('../../../expressionDomain/heuristics/default');
 
 var getRelevantHeuristic = require('../../../expressionDomain/getRelevantHeuristic');
@@ -46,11 +47,24 @@ describe('getRelevantHeuristic', function(){
         return assert.strictEqual(h, twitterHeuristic);
     });
     
-    it('https://mobile.twitter.com/yo', function(){
+    it('https://mobile.twitter.com/yo => Twitter', function(){
         var h = getRelevantHeuristic('https://twitter.com/MozDevNet/status/649599676308590592');
         
         return assert.strictEqual(h, twitterHeuristic);
     });
+    
+    it('https://www.linkedin.com/company/1004390 => Linkedin', function(){
+        var h = getRelevantHeuristic('https://www.linkedin.com/company/1004390');
+        
+        return assert.strictEqual(h, linkedinHeuristic);
+    });
+    
+    it('http://fr.linkedin.com/pub/dir/+/Lakel => Linkedin', function(){
+        var h = getRelevantHeuristic('http://fr.linkedin.com/pub/dir/+/Lakel');
+        
+        return assert.strictEqual(h, linkedinHeuristic);
+    });
+    
     
     it('https://www.youtube.com/watch?v=JGhoLcsr8GA => Default (soon Youtube)', function(){
         var h = getRelevantHeuristic('https://www.youtube.com/watch?v=JGhoLcsr8GA');

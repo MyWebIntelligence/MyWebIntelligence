@@ -5,10 +5,12 @@ var defaultHeuristic = require('./heuristics/default');
 
 var facebookHeuristic = require('./heuristics/facebook');
 var twitterHeuristic = require('./heuristics/twitter');
+var linkedinHeuristic = require('./heuristics/linkedin');
 
 var heuristics = [
     facebookHeuristic,
-    twitterHeuristic
+    twitterHeuristic,
+    linkedinHeuristic
 ];
 
 /*

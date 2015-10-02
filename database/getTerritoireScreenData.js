@@ -33,11 +33,9 @@ module.exports = function getTerritoireScreenData(territoireId){
     var expressionByIdP = abstractPageGraphP
         .then(getGraphExpressions)
         .then(function(expressionById){
-            console.time('simplifyExpression');
             Object.keys(expressionById).forEach(function(id){
                 expressionById[id] = simplifyExpression(expressionById[id]);
             });
-            console.timeEnd('simplifyExpression');
             return expressionById;
         });
 

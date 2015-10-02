@@ -1,6 +1,13 @@
 "use strict";
 
+var url = require('url');
 var defaultHeuristic = require('./heuristics/default');
+
+var facebookHeuristic = require('./heuristics/facebook');
+
+var heuristics = [
+    facebookHeuristic
+]
 
 /*
     The expression domain is the domain of the party making the expression.
@@ -11,6 +18,13 @@ var defaultHeuristic = require('./heuristics/default');
     This is unrelated to the notion of domain in the sense of URL domain (scheme + hostname + port)
     
 */
-module.exports = function(/*url*/){
-    return defaultHeuristic;
+module.exports = function(u){
+    var parsedURL = url.parse(u);
+    var hostname = parsedURL.hostname;
+
+    var correctHeuristic = heuristics.find(function(h){
+        return h.hostnames.has(hostname);
+    })
+    
+    return correctHeuristic ? correctHeuristic : defaultHeuristic;
 };

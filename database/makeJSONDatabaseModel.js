@@ -8,8 +8,6 @@ var path = require('path');
 var readFile = promisify(fs.readFile);
 var writeFile = promisify(fs.writeFile);
 
-console.log("process.env.NODE_ENV", process.env.NODE_ENV);
-
 var BASE_STORAGE_PATH_P = new Promise(function(resolve){
     if(process.env.NODE_ENV === 'test')
         // doesn't work inside a docker container
@@ -20,11 +18,6 @@ var BASE_STORAGE_PATH_P = new Promise(function(resolve){
     else
         resolve(path.resolve(__dirname, '_storage'))
 })
-
-
-BASE_STORAGE_PATH_P.then(function(p){
-    console.log('BASE_STORAGE_PATH', p);
-});
 
 module.exports = function makeJSONDatabaseModel(name, methods){
     // to queue all I/O operations

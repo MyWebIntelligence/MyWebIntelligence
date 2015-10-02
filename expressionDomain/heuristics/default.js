@@ -11,7 +11,33 @@ var makeDocument = require('../../common/makeDocument');
 */
 
 module.exports = {
-    hostnames: ['*'], // irrelevant
+    hostnames: new Set(['*']), // irrelevant
+    
+    invalidPatterns: [
+        // These links usually end up being resources that are heavy to download and that we cannot process yet.
+        
+        // documents
+        /\.pdf$/,
+        /\.doc$/,
+        /\.docx$/,
+        /\.ppt$/,
+        /\.pptx$/,
+        /\.xls$/,
+        /\.xlsx$/,
+    
+        // archives
+        /\.zip$/,
+        /\.tar.gz$/,
+        /\.tar$/,
+        /\.gz$/,
+        /\.rar$/,
+    
+        // images
+        /\.png$/,
+        /\.eps$/,
+        /\.jpg$/,
+        /\.jpeg$/
+    ],
     
     getExpressionDomainName: function(u){  
         var hostname = url.parse(u).hostname;

@@ -50,7 +50,9 @@ module.exports = {
     },
     
     getExpressionDomainInfos: function(u){
-        console.log(u);
+        return Promise.resolve({
+            main_url: u
+        })
     }
 
 }

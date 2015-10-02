@@ -103,7 +103,7 @@ function processTask(task){
                     //console.log('resExprLink', resExprLink);
 
                     var resourceIdP = resExprLink.resource.url !== url ?
-                        addAlias(task.resource_id, resExprLink.resource.url, territoireId).catch(errlog("addAlias")) :
+                        addAlias(task.resource_id, resExprLink.resource.url, territoireId, task.depth).catch(errlog("addAlias")) :
                         Promise.resolve(task.resource_id);
 
                     return resourceIdP.then(function(resourceId){

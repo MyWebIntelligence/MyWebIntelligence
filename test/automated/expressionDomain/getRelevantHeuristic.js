@@ -16,6 +16,7 @@ var youtubeHeuristic = require('../../../expressionDomain/heuristics/youtube');
 var vimeoHeuristic = require('../../../expressionDomain/heuristics/vimeo');
 var dailymotionHeuristic = require('../../../expressionDomain/heuristics/dailymotion');
 var instagramHeuristic = require('../../../expressionDomain/heuristics/instagram');
+var viadeoHeuristic = require('../../../expressionDomain/heuristics/viadeo');
 
 var defaultHeuristic = require('../../../expressionDomain/heuristics/default');
 
@@ -129,6 +130,18 @@ describe('getRelevantHeuristic', function(){
         var h = getRelevantHeuristic('https://instagr.am/p/52yI4XPM3i/');
         
         return assert.strictEqual(h, instagramHeuristic);
+    });
+    
+    it('https://viadeo.com/ => Viadeo', function(){
+        var h = getRelevantHeuristic('https://viadeo.com/');
+        
+        return assert.strictEqual(h, viadeoHeuristic);
+    });
+    
+    it('http://fr.viadeo.com/fr/profile/amar.lakel => Viadeo', function(){
+        var h = getRelevantHeuristic('http://fr.viadeo.com/fr/profile/amar.lakel');
+        
+        return assert.strictEqual(h, viadeoHeuristic);
     });
     
 });

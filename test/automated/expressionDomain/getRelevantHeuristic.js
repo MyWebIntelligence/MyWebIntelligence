@@ -11,6 +11,7 @@ chai.use(require('chai-as-promised'));
 var facebookHeuristic = require('../../../expressionDomain/heuristics/facebook');
 var twitterHeuristic = require('../../../expressionDomain/heuristics/twitter');
 var linkedinHeuristic = require('../../../expressionDomain/heuristics/linkedin');
+var slideshareHeuristic = require('../../../expressionDomain/heuristics/slideshare');
 var defaultHeuristic = require('../../../expressionDomain/heuristics/default');
 
 var getRelevantHeuristic = require('../../../expressionDomain/getRelevantHeuristic');
@@ -48,7 +49,7 @@ describe('getRelevantHeuristic', function(){
     });
     
     it('https://mobile.twitter.com/yo => Twitter', function(){
-        var h = getRelevantHeuristic('https://twitter.com/MozDevNet/status/649599676308590592');
+        var h = getRelevantHeuristic('https://mobile.twitter.com/yo');
         
         return assert.strictEqual(h, twitterHeuristic);
     });
@@ -65,6 +66,17 @@ describe('getRelevantHeuristic', function(){
         return assert.strictEqual(h, linkedinHeuristic);
     });
     
+    it('http://www.slideshare.net/doaj/ => Slideshare', function(){
+        var h = getRelevantHeuristic('http://www.slideshare.net/doaj/');
+        
+        return assert.strictEqual(h, slideshareHeuristic);
+    });
+    
+    it('http://pt.slideshare.net/about => Slideshare', function(){
+        var h = getRelevantHeuristic('http://pt.slideshare.net/about');
+        
+        return assert.strictEqual(h, slideshareHeuristic);
+    });
     
     it('https://www.youtube.com/watch?v=JGhoLcsr8GA => Default (soon Youtube)', function(){
         var h = getRelevantHeuristic('https://www.youtube.com/watch?v=JGhoLcsr8GA');

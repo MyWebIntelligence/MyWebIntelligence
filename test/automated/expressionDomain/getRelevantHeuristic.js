@@ -13,6 +13,7 @@ var twitterHeuristic = require('../../../expressionDomain/heuristics/twitter');
 var linkedinHeuristic = require('../../../expressionDomain/heuristics/linkedin');
 var slideshareHeuristic = require('../../../expressionDomain/heuristics/slideshare');
 var youtubeHeuristic = require('../../../expressionDomain/heuristics/youtube');
+var vimeoHeuristic = require('../../../expressionDomain/heuristics/vimeo');
 
 var defaultHeuristic = require('../../../expressionDomain/heuristics/default');
 
@@ -90,6 +91,18 @@ describe('getRelevantHeuristic', function(){
         var h = getRelevantHeuristic('http://www.youtube.com/user/ASAveterinaria');
         
         return assert.strictEqual(h, youtubeHeuristic);
+    });
+    
+    it('https://vimeo.com/worrydream => Vimeo', function(){
+        var h = getRelevantHeuristic('https://vimeo.com/worrydream');
+        
+        return assert.strictEqual(h, vimeoHeuristic);
+    });
+    
+    it('http://vimeo.com/115154289 => Vimeo', function(){
+        var h = getRelevantHeuristic('http://vimeo.com/115154289');
+        
+        return assert.strictEqual(h, vimeoHeuristic);
     });
     
 });

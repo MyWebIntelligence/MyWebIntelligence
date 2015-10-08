@@ -12,13 +12,15 @@ module.exports = function(oembedEndpointUrl){
     
     return function(url){
         return new Promise(function(resolve, reject){
+            var oembedEndpoint = oembedEndpointUrl.includes('.{format}') ?
+                oembedEndpointUrl.replace('.{format}', '.json') :
+                oembedEndpointUrl;
+            
             var oembedUrl = [
-                oembedEndpointUrl,
-                '?',
-                'url=',
+                oembedEndpoint,
+                '?url=',
                 encodeURIComponent(url),
-                '&',
-                'format=json'
+                oembedEndpointUrl.includes('.{format}') ? '' : '&format=json'
             ].join('');
             
             

@@ -8,13 +8,15 @@ var twitterHeuristic = require('./heuristics/twitter');
 var linkedinHeuristic = require('./heuristics/linkedin');
 var slideshareHeuristic = require('./heuristics/slideshare');
 var youtubeHeuristic = require('./heuristics/youtube');
+var vimeoHeuristic = require('./heuristics/vimeo');
 
 var heuristics = [
     facebookHeuristic,
     twitterHeuristic,
     linkedinHeuristic,
     slideshareHeuristic,
-    youtubeHeuristic
+    youtubeHeuristic,
+    vimeoHeuristic
 ];
 
 /*

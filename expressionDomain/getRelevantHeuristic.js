@@ -6,11 +6,25 @@ var defaultHeuristic = require('./heuristics/default');
 var facebookHeuristic = require('./heuristics/facebook');
 var twitterHeuristic = require('./heuristics/twitter');
 var linkedinHeuristic = require('./heuristics/linkedin');
+var slideshareHeuristic = require('./heuristics/slideshare');
+var youtubeHeuristic = require('./heuristics/youtube');
+var vimeoHeuristic = require('./heuristics/vimeo');
+var dailymotionHeuristic = require('./heuristics/dailymotion');
+var instagramHeuristic = require('./heuristics/instagram');
+var viadeoHeuristic = require('./heuristics/viadeo');
+var pinterestHeuristic = require('./heuristics/pinterest');
 
 var heuristics = [
     facebookHeuristic,
     twitterHeuristic,
-    linkedinHeuristic
+    linkedinHeuristic,
+    slideshareHeuristic,
+    youtubeHeuristic,
+    vimeoHeuristic,
+    dailymotionHeuristic,
+    instagramHeuristic,
+    viadeoHeuristic,
+    pinterestHeuristic
 ];
 
 /*

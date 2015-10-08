@@ -4,9 +4,6 @@ var url = require('url');
 
 var EXPRESSION_DOMAIN_NAME_PREFIX = 'linkedin/';
 
-/*
-    This file implements the default expression domain heuristics, that is the last one after they all failed
-*/
 
 module.exports = {
     hostnames: new Set([

@@ -63,7 +63,7 @@ describe('Linkedin expression domain heuristics', function(){
         ].map(function(url){
             var edNameP = linkedinHeuristics.getExpressionDomainName(url);
             
-            return assert.isRejected(edNameP, url+' should be an invalid URL for the Facebook heuristics');
+            return assert.isRejected(edNameP, url+' should be an invalid URL for the Linkedin heuristics');
         }));
         
     });

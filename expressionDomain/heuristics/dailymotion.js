@@ -7,13 +7,13 @@ var wildcard = require('wildcard');
 var providers = require('../oembed/providers.json');
 var makeOembedHeuristicsHelper = require('../oembed/makeOembedHeuristicsHelper');
 
-var EXPRESSION_DOMAIN_NAME_PREFIX = 'vimeo/';
+var EXPRESSION_DOMAIN_NAME_PREFIX = 'dailymotion/';
 
-var vimeoProvider = providers.find(function(p){
-    return p.provider_name === "Vimeo";
+var dailymotionProvider = providers.find(function(p){
+    return p.provider_name === "Dailymotion";
 });
 
-var oembedHelper = makeOembedHeuristicsHelper(vimeoProvider.endpoints[0].url);
+var oembedHelper = makeOembedHeuristicsHelper(dailymotionProvider.endpoints[0].url);
 
 /*
     This file implements the default expression domain heuristics, that is the last one after they all failed
@@ -21,8 +21,8 @@ var oembedHelper = makeOembedHeuristicsHelper(vimeoProvider.endpoints[0].url);
 
 module.exports = {
     hostnames: new Set([
-        'vimeo.com',
-        'www.vimeo.com'
+        'dailymotion.com',
+        'www.dailymotion.com'
     ]),
     
     // NEVER use the g flag in regexps here. See https://twitter.com/erikcorry/status/231050692553502720
@@ -41,28 +41,16 @@ module.exports = {
         }
         
         if(pathname === "/"){
-            return Promise.resolve('vimeo.com');
+            return Promise.resolve('dailymotion.com');
         }
         
         var matches = pathname.match(/^\/([A-Za-z]\w+)\/?$/);
         if(matches && matches[1])
             return Promise.resolve(EXPRESSION_DOMAIN_NAME_PREFIX + matches[1]);
         
-        var schemes = vimeoProvider.endpoints[0].schemes;
+        var schemes = dailymotionProvider.endpoints[0].schemes;
         
-        var httpu = url.format(
-            Object.assign(
-                {},
-                parsedURL,
-                // currently, the vimeo provider scheme only takes http into account
-                // pending https://github.com/iamcal/oembed/pull/104
-                {
-                    protocol: 'http'
-                }
-            )
-        );
-        
-        if(schemes.some(function(s){ return wildcard(s, httpu); })){
+        if(schemes.some(function(s){ return wildcard(s, u); })){
             return oembedHelper(u).then(function(oembedInfos){
                 return EXPRESSION_DOMAIN_NAME_PREFIX + oembedInfos.author_name;
             });

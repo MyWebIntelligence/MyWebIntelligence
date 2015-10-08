@@ -14,6 +14,7 @@ var linkedinHeuristic = require('../../../expressionDomain/heuristics/linkedin')
 var slideshareHeuristic = require('../../../expressionDomain/heuristics/slideshare');
 var youtubeHeuristic = require('../../../expressionDomain/heuristics/youtube');
 var vimeoHeuristic = require('../../../expressionDomain/heuristics/vimeo');
+var dailymotionHeuristic = require('../../../expressionDomain/heuristics/dailymotion');
 
 var defaultHeuristic = require('../../../expressionDomain/heuristics/default');
 
@@ -103,6 +104,18 @@ describe('getRelevantHeuristic', function(){
         var h = getRelevantHeuristic('http://vimeo.com/115154289');
         
         return assert.strictEqual(h, vimeoHeuristic);
+    });
+    
+    it('http://www.dailymotion.com/video/x1eyk1_guru-mc-solaar-le-bien-le-mal_music => Dailymotion', function(){
+        var h = getRelevantHeuristic('http://www.dailymotion.com/video/x1eyk1_guru-mc-solaar-le-bien-le-mal_music');
+        
+        return assert.strictEqual(h, dailymotionHeuristic);
+    });
+    
+    it('http://www.dailymotion.com/PeteRock => Dailymotion', function(){
+        var h = getRelevantHeuristic('http://www.dailymotion.com/PeteRock');
+        
+        return assert.strictEqual(h, dailymotionHeuristic);
     });
     
 });

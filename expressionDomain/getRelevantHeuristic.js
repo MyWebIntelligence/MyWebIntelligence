@@ -10,6 +10,7 @@ var slideshareHeuristic = require('./heuristics/slideshare');
 var youtubeHeuristic = require('./heuristics/youtube');
 var vimeoHeuristic = require('./heuristics/vimeo');
 var dailymotionHeuristic = require('./heuristics/dailymotion');
+var instagramHeuristic = require('./heuristics/instagram');
 
 var heuristics = [
     facebookHeuristic,
@@ -18,7 +19,8 @@ var heuristics = [
     slideshareHeuristic,
     youtubeHeuristic,
     vimeoHeuristic,
-    dailymotionHeuristic
+    dailymotionHeuristic,
+    instagramHeuristic
 ];
 
 /*

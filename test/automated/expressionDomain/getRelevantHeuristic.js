@@ -15,6 +15,7 @@ var slideshareHeuristic = require('../../../expressionDomain/heuristics/slidesha
 var youtubeHeuristic = require('../../../expressionDomain/heuristics/youtube');
 var vimeoHeuristic = require('../../../expressionDomain/heuristics/vimeo');
 var dailymotionHeuristic = require('../../../expressionDomain/heuristics/dailymotion');
+var instagramHeuristic = require('../../../expressionDomain/heuristics/instagram');
 
 var defaultHeuristic = require('../../../expressionDomain/heuristics/default');
 
@@ -116,6 +117,18 @@ describe('getRelevantHeuristic', function(){
         var h = getRelevantHeuristic('http://www.dailymotion.com/PeteRock');
         
         return assert.strictEqual(h, dailymotionHeuristic);
+    });
+    
+    it('https://instagram.com/alice_kieffer/ => Instagram', function(){
+        var h = getRelevantHeuristic('https://instagram.com/alice_kieffer/');
+        
+        return assert.strictEqual(h, instagramHeuristic);
+    });
+    
+    it('https://instagr.am/p/52yI4XPM3i/ => Instagram', function(){
+        var h = getRelevantHeuristic('https://instagr.am/p/52yI4XPM3i/');
+        
+        return assert.strictEqual(h, instagramHeuristic);
     });
     
 });

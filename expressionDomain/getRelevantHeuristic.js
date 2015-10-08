@@ -7,12 +7,14 @@ var facebookHeuristic = require('./heuristics/facebook');
 var twitterHeuristic = require('./heuristics/twitter');
 var linkedinHeuristic = require('./heuristics/linkedin');
 var slideshareHeuristic = require('./heuristics/slideshare');
+var youtubeHeuristic = require('./heuristics/youtube');
 
 var heuristics = [
     facebookHeuristic,
     twitterHeuristic,
     linkedinHeuristic,
-    slideshareHeuristic
+    slideshareHeuristic,
+    youtubeHeuristic
 ];
 
 /*

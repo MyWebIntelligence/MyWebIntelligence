@@ -12,23 +12,13 @@ var facebookHeuristic = require('../../../expressionDomain/heuristics/facebook')
 var twitterHeuristic = require('../../../expressionDomain/heuristics/twitter');
 var linkedinHeuristic = require('../../../expressionDomain/heuristics/linkedin');
 var slideshareHeuristic = require('../../../expressionDomain/heuristics/slideshare');
+var youtubeHeuristic = require('../../../expressionDomain/heuristics/youtube');
+
 var defaultHeuristic = require('../../../expressionDomain/heuristics/default');
 
 var getRelevantHeuristic = require('../../../expressionDomain/getRelevantHeuristic');
 
 describe('getRelevantHeuristic', function(){
-    
-    it('http://facebook.com/pages/Sciences-et-Avenir/194705390569710 => Facebook', function(){
-        var h = getRelevantHeuristic('http://facebook.com/pages/Sciences-et-Avenir/194705390569710');
-        
-        return assert.strictEqual(h, facebookHeuristic);
-    });
-    
-    it('http://fr-fr.facebook.com/mymsa => Facebook', function(){
-        var h = getRelevantHeuristic('http://fr-fr.facebook.com/mymsa');
-        
-        return assert.strictEqual(h, facebookHeuristic);
-    });
     
     it('https://developers.facebook.com/?ref=pf => Default', function(){
         var h = getRelevantHeuristic('https://developers.facebook.com/?ref=pf');
@@ -40,6 +30,18 @@ describe('getRelevantHeuristic', function(){
         var h = getRelevantHeuristic('https://github.com/MyWebIntelligence/MyWebIntelligence');
         
         return assert.strictEqual(h, defaultHeuristic);
+    });
+    
+    it('http://facebook.com/pages/Sciences-et-Avenir/194705390569710 => Facebook', function(){
+        var h = getRelevantHeuristic('http://facebook.com/pages/Sciences-et-Avenir/194705390569710');
+        
+        return assert.strictEqual(h, facebookHeuristic);
+    });
+    
+    it('http://fr-fr.facebook.com/mymsa => Facebook', function(){
+        var h = getRelevantHeuristic('http://fr-fr.facebook.com/mymsa');
+        
+        return assert.strictEqual(h, facebookHeuristic);
     });
     
     it('https://twitter.com/MozDevNet/status/649599676308590592 => Twitter', function(){
@@ -78,10 +80,16 @@ describe('getRelevantHeuristic', function(){
         return assert.strictEqual(h, slideshareHeuristic);
     });
     
-    it('https://www.youtube.com/watch?v=JGhoLcsr8GA => Default (soon Youtube)', function(){
+    it('https://www.youtube.com/watch?v=JGhoLcsr8GA => Youtube', function(){
         var h = getRelevantHeuristic('https://www.youtube.com/watch?v=JGhoLcsr8GA');
         
-        return assert.strictEqual(h, defaultHeuristic);
+        return assert.strictEqual(h, youtubeHeuristic);
+    });
+    
+    it('http://www.youtube.com/user/ASAveterinaria => Youtube', function(){
+        var h = getRelevantHeuristic('http://www.youtube.com/user/ASAveterinaria');
+        
+        return assert.strictEqual(h, youtubeHeuristic);
     });
     
 });

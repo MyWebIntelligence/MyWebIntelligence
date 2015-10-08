@@ -12,6 +12,7 @@ var vimeoHeuristic = require('./heuristics/vimeo');
 var dailymotionHeuristic = require('./heuristics/dailymotion');
 var instagramHeuristic = require('./heuristics/instagram');
 var viadeoHeuristic = require('./heuristics/viadeo');
+var pinterestHeuristic = require('./heuristics/pinterest');
 
 var heuristics = [
     facebookHeuristic,
@@ -22,7 +23,8 @@ var heuristics = [
     vimeoHeuristic,
     dailymotionHeuristic,
     instagramHeuristic,
-    viadeoHeuristic
+    viadeoHeuristic,
+    pinterestHeuristic
 ];
 
 /*

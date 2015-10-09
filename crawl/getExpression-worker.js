@@ -3,6 +3,11 @@
 require('../ES-mess');
 process.title = "MyWI getExpression worker";
 
+var SECOND = 1000; // ms
+var ONE_HOUR = 60*60*SECOND;
+
+
+/*
 var getExpression = require('./getExpression');
 var approve = require('./approve');
 
@@ -22,8 +27,6 @@ var errlog = function(context){
 
 console.log('# getExpression process', process.pid);
 
-var SECOND = 1000; // ms
-var ONE_HOUR = 60*60*SECOND;
 
 var TASK_PICK_INTERVAL_DELAY = 10*SECOND;
 var MAX_CONCURRENT_TASKS = 30;
@@ -47,7 +50,7 @@ setInterval(function(){
         
         var taskToPickCount = MAX_CONCURRENT_TASKS - inFlightTasks.size;
         
-        databaseTasksP = database.GetExpressionTasks.pickTasks(taskToPickCount)
+        databaseTasksP = database.Tasks.pickTasks(taskToPickCount)
             .then(function(tasks){
                 tasks.forEach(processTask);
                 databaseTasksP = undefined;
@@ -64,7 +67,7 @@ setInterval(function(){
 function deleteTask(task){
     // the two actions are purposefully not synchronized
     inFlightTasks.delete(task);
-    return database.GetExpressionTasks.delete(task.id);
+    return database.Tasks.delete(task.id);
 }
 
 
@@ -98,76 +101,7 @@ function processTask(task){
             if(resource.expression_id !== null || resource.other_error !== null)
                 return;
 
-            return getExpression(url)
-                .then(function(resExprLink){
-                    //console.log('resExprLink', resExprLink);
-
-                    var resourceIdP = resExprLink.resource.url !== url ?
-                        addAlias(task.resource_id, resExprLink.resource.url, territoireId, task.depth).catch(errlog("addAlias")) :
-                        Promise.resolve(task.resource_id);
-
-                    return resourceIdP.then(function(resourceId){
-                        var resourceUpdatedP = database.Resources.update(
-                            resourceId,
-                            Object.assign(
-                                {},
-                                {other_error: null}, // remove any previous other_error if there was one
-                                resExprLink.resource // take the other_error from here if there is one
-                            )
-                        )
-                            .catch(errlog("Resources.update"));
-                        var expressionUpdatedP;
-                        var linksUpdatedP;
-                        var tasksCreatedP;
-                        
-                        if(isValidResource(resExprLink.resource)){                            
-                            expressionUpdatedP = database.Expressions.create(resExprLink.expression)
-                                .then(function(expressions){
-                                    var expression = expressions[0];
-                                    return database.Resources.associateWithExpression(resourceId, expression.id);
-                                }).catch(errlog("Expressions.create + associateWithExpression"));
-                            
-                            
-                            //console.log('task.territoire_id', task.territoire_id)
-                            
-                            /*
-                                Promise._allResolved(resources.map(function(r){
-                                    return database.AnnotationTasks.createTasksTodo(r.id, query.belongs_to, 'prepare_resource', depth);
-                                }))
-                            */
-                            
-                            linksUpdatedP = resExprLink.links.size >= 1 ? 
-                                database.Resources.findByURLsOrCreate(resExprLink.links)
-                                    .then(function(linkResources){
-                                        return Promise._allResolved(linkResources.map(function(r){
-                                            return database.AnnotationTasks.createTasksTodo(r.id, territoireId, 'prepare_resource', task.depth+1);
-                                        })).then(function(){ return linkResources; })
-                                    })
-                                    .then(function(linkResources){
-                                        var linksData = linkResources.map(function(r){
-                                            return {
-                                                source: resourceId,
-                                                target: r.id
-                                            };
-                                        });
-
-                                        return database.Links.create(linksData).catch(errlog("Links.create"));
-                                    }).catch(errlog("Resources.findByURLsOrCreate link"))
-                                : undefined;
-
-                            if(approve({depth: task.depth, expression: resExprLink.expression})){
-                                approveResource(resourceId, task.territoire_id, task.depth);
-                            }
-                        }
-
-                        return Promise.all([resourceUpdatedP, expressionUpdatedP, linksUpdatedP, tasksCreatedP]);
-                    });
-                })
-                .catch(function(err){
-                    console.log('getExpression error', url, err, err.stack);
-
-                    return; // symbolic. Just to make explicit the next .then is a "finally"
-                })
+            
         })
         .catch(function(){})
         // in any case ("finally")
@@ -177,7 +111,7 @@ function processTask(task){
         });
     
 }
-
+*/
 
 
 process.on('uncaughtException', function(e){

@@ -35,11 +35,11 @@ module.exports = function(oembedEndpointUrl){
                     return;
                 }
 
-                if(response.status >= 400){
+                if(response.statusCode >= 400){
                     reject(Object.assign(
                         new Error('Oembed HTTP status error'),
                         {
-                            httpStatus: response.status,
+                            httpStatus: response.statusCode,
                             body: body
                         }
                     ));

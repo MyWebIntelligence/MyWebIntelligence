@@ -13,5 +13,8 @@ crawl/config.json
 
 database/_storage/*
 
+# temporary gedit files
+*~
+
 notes.md
 *.txt

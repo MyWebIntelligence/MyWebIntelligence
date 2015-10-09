@@ -23,7 +23,7 @@ module.exports = function(resourceId, territoireId, depth){
                     // Race conditions can also happen in collision with human annotations which is a BIG deal 
                     // but unlikely enough to be considered acceptable for now.
                     setTimeout(function(){
-                        database.AnnotationTasks.createTasksTodo(resourceId, territoireId, type, depth)
+                        database.Tasks.createTasksTodo(resourceId, territoireId, type, depth)
                             .then(resolve)
                             .catch(function(err){
                                 console.error('annotation create error', err, err.stack);

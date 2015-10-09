@@ -35,7 +35,7 @@ module.exports = function onQueryCreated(query, user){
                 database.Resources.findByURLsOrCreate(cleanQueryResults)
                     .then(function(resources){
                         return Promise._allResolved(resources.map(function(r){
-                            return database.AnnotationTasks.createTasksTodo(r.id, query.belongs_to, 'prepare_resource', 0);
+                            return database.Tasks.createTasksTodo(r.id, query.belongs_to, 'prepare_resource', 0);
                         }))
                     })
             ]);

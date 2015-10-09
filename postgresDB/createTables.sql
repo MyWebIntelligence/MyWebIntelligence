@@ -63,19 +63,6 @@ CREATE TRIGGER updated_at_links BEFORE UPDATE ON links FOR EACH ROW EXECUTE PROC
 CREATE INDEX ON links ("source");
 
 
-
-CREATE TYPE get_expression_tasks_status AS ENUM ('todo', 'getting expression');
-CREATE TABLE IF NOT EXISTS get_expression_tasks (
-    id          SERIAL PRIMARY KEY,
-    resource_id integer UNIQUE REFERENCES resources (id) NOT NULL,
-    status      get_expression_tasks_status,
-    territoire_id  integer NOT NULL, -- eventually should be a foreign key for the territoires table
-    depth       integer NOT NULL
-) INHERITS(lifecycle);
-CREATE TRIGGER updated_at_get_expression_tasks BEFORE UPDATE ON get_expression_tasks FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
-CREATE INDEX ON get_expression_tasks (territoire_id);
-
-
 CREATE TABLE IF NOT EXISTS resource_annotations (
     approved                boolean DEFAULT NULL, -- NULL means "don't know yet"
     values                  text, -- JSON blob. This prevents annotation-based queries at the SQL level. Stats will have to be made in JS or maybe in a synthesized document served by ElasticSearch
@@ -91,16 +78,16 @@ CREATE INDEX ON resource_annotations (territoire_id, approved);
 CREATE INDEX ON resource_annotations (resource_id);
 
 
-CREATE TYPE annotation_tasks_status AS ENUM ('todo', 'in progress');
-CREATE TABLE IF NOT EXISTS annotation_tasks (
+CREATE TYPE tasks_status AS ENUM ('todo', 'in progress');
+CREATE TABLE IF NOT EXISTS tasks (
     id              SERIAL PRIMARY KEY,
     type            text NOT NULL,
     resource_id     integer REFERENCES resources (id) NOT NULL,
     territoire_id   integer NOT NULL,
     depth           integer NOT NULL,
-    status          annotation_tasks_status
+    status          tasks_status
 ) INHERITS(lifecycle);
-CREATE TRIGGER updated_at_annotation_tasks BEFORE UPDATE ON annotation_tasks FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
+CREATE TRIGGER updated_at_tasks BEFORE UPDATE ON tasks FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
 
 
 CREATE TABLE IF NOT EXISTS alexa_rank_cache (

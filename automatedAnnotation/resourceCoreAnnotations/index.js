@@ -7,5 +7,6 @@ var immutableMap = require('immutable').Map;
 */
 // TODO Eventually, add expressions here https://github.com/MyWebIntelligence/MyWebIntelligence/issues/159
 module.exports = immutableMap({
-    'prepare_resource': require('./prepareResourceForTerritoire')
+    'prepare_resource': require('./prepareResourceForTerritoire'),
+    'expression': require('./crawlExpressionForTerritoire')
 })

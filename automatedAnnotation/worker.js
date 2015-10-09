@@ -16,25 +16,38 @@ var taskFunctions = socialSignals.merge(resourceCoreAnnotations)
     }
 }*/
 
-console.log('# Automated annotation process', process.pid);
+console.log('# Task worker process', process.pid);
 
 var SECOND = 1000; // ms
 var ONE_HOUR = 60*60*SECOND;
 
 var TASK_PICK_INTERVAL_DELAY = 10*SECOND;
-var MAX_CONCURRENT_TASKS = 30;
+var MAX_CONCURRENT_TASKS = 40;
 var AUTOMATED_ANNOTATION_MAX_DELAY = 3*60*SECOND;
 
 
 var inFlightTasks = new Set();
 var databaseTasksP;
 
+function pickTasks(count){
+    return database.Tasks.pickTasks(count)
+        .then(function(tasks){
+            //console.log('picked', tasks.length, tasks, 'tasks');
+            tasks.forEach(processTask);
+            databaseTasksP = undefined;
+        })
+        .catch(function(err){
+            console.error('pickTasks error', err);
+            databaseTasksP = undefined;
+        });
+}
+
 // main interval
 // pick tasks independently of tasks successes, failures and hang
 setInterval(function(){
     console.log('Automated annotation interval', inFlightTasks.size);
     
-    database.AnnotationTasks.getAll()
+    database.Tasks.getAll()
         .then(function(tasks){
             console.log('There are', tasks.length, 'tasks');
         })
@@ -42,25 +55,24 @@ setInterval(function(){
     if(inFlightTasks.size < MAX_CONCURRENT_TASKS && !databaseTasksP){
         var taskToPickCount = MAX_CONCURRENT_TASKS - inFlightTasks.size;
         
-        databaseTasksP = database.AnnotationTasks.pickTasks(taskToPickCount)
-            .then(function(tasks){
-                //console.log('picked', tasks.length, tasks, 'tasks');
-                tasks.forEach(processTask);
-                databaseTasksP = undefined;
-            })
-            .catch(function(err){
-                console.error('pickTasks error', err);
-                databaseTasksP = undefined;
-            });
+        databaseTasksP = pickTasks(taskToPickCount);
     }
     
 }, TASK_PICK_INTERVAL_DELAY);
 
 
 function deleteTask(task){
-    // the two actions are purposefully not synchronized
+    // the two .delete are purposefully not synchronized
     inFlightTasks.delete(task);
-    return database.AnnotationTasks.delete(task.id);
+    return database.Tasks.delete(task.id)
+        .then(function(){
+            // if tasks were done "too quickly", let's just 
+            if(inFlightTasks.size < MAX_CONCURRENT_TASKS/2 && !databaseTasksP){
+                var taskToPickCount = MAX_CONCURRENT_TASKS - inFlightTasks.size;
+
+                databaseTasksP = pickTasks(taskToPickCount);
+            }
+        });
 }
 
 
@@ -82,8 +94,8 @@ function processTask(task){
         return deleteTask(task);
     });
     
-    var annotationFunction = taskFunctions.get(task.type);
-    //console.log('annotationFunction', task.type, typeof annotationFunction, task);
+    var taskFunction = taskFunctions.get(task.type);
+    //console.log('taskFunction', task.type, typeof taskFunction, task);
 
     // get the resource id + url
     return database.Resources.findValidByIds(new Set([task.resource_id]))
@@ -96,7 +108,7 @@ function processTask(task){
 
             // save the result in the annotation
 
-            return annotationFunction(resource, task.territoire_id, task.depth)
+            return taskFunction(resource, task.territoire_id, task.depth)
                 .catch(function(err){
                     console.error('Annotation error', err, err.stack);
                 });

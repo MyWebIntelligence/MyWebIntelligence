@@ -5,7 +5,7 @@ sql.setDialect('postgres');
 
 var databaseP = require('./databaseClientP');
 
-var annotationTasks = require('./declarations.js').annotation_tasks;
+var tasks = require('./declarations.js').tasks;
 
 var databaseJustCreatedSymbol = require('./databaseJustCreatedSymbol');
 var justCreatedMarker = {};
@@ -15,7 +15,7 @@ module.exports = {
     create: function(data){
         return databaseP.then(function(db){
             
-            var query = annotationTasks
+            var query = tasks
                 .insert(data)
                 .toQuery();
 
@@ -36,10 +36,10 @@ module.exports = {
         urls is a Set<url>
     */
     createTasksTodo: function(resourceId, territoireId, type, depth){
-        //console.log('AnnotationTasks.createTasksTodo', resourceId, territoireId, type, depth)
+        //console.log('Tasks.createTasksTodo', resourceId, territoireId, type, depth)
         
         return databaseP.then(function(db){
-            var query = annotationTasks
+            var query = tasks
                 .insert({
                     status: 'todo',
                     resource_id: resourceId, 
@@ -67,18 +67,18 @@ module.exports = {
         return databaseP.then(function(db){
             // http://stackoverflow.com/a/11568880            
             
-            var subSelect = annotationTasks
+            var subSelect = tasks
                 .subQuery()
-                .select(annotationTasks.id)
-                .where(annotationTasks.status.equals('todo'))
+                .select(tasks.id)
+                .where(tasks.status.equals('todo'))
                 .limit(count)
                 .forUpdate();
             
-            var query = annotationTasks
+            var query = tasks
                 .update({
                     status: 'in progress'
                 })
-                .where(annotationTasks.id.in( subSelect ))
+                .where(tasks.id.in( subSelect ))
                 .returning('*')
                 .toQuery();
             
@@ -94,9 +94,9 @@ module.exports = {
     
     delete: function(id){
         return databaseP.then(function(db){
-            var query = annotationTasks
+            var query = tasks
                 .delete()
-                .where(annotationTasks.id.equals(id))
+                .where(tasks.id.equals(id))
                 .returning('*')
                 .toQuery();
             
@@ -113,7 +113,7 @@ module.exports = {
     getAll: function(){
         return databaseP.then(function(db){
             
-            var query = annotationTasks
+            var query = tasks
                 .select('*')
                 .toQuery();
             

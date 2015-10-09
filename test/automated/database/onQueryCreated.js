@@ -79,10 +79,10 @@ describe('onQueryCreated', function(){
                             assert.isArray(resources);
                             assert.strictEqual(resources.length, URLs.length, 'should create resources');
                         }),
-                    db.AnnotationTasks.getAll()
+                    db.Tasks.getAll()
                         .then(function(tasks){
                             assert.isArray(tasks);
-                            assert.strictEqual(tasks.length, URLs.length, 'should create AnnotationTasks');
+                            assert.strictEqual(tasks.length, URLs.length, 'should create Tasks');
                             tasks.forEach(function(t){
                                 assert(t.type, 'prepare_resource');
                             });

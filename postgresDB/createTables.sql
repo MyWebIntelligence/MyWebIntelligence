@@ -91,16 +91,16 @@ CREATE INDEX ON resource_annotations (territoire_id, approved);
 CREATE INDEX ON resource_annotations (resource_id);
 
 
-CREATE TYPE annotation_tasks_status AS ENUM ('todo', 'in progress');
-CREATE TABLE IF NOT EXISTS annotation_tasks (
+CREATE TYPE tasks_status AS ENUM ('todo', 'in progress');
+CREATE TABLE IF NOT EXISTS tasks (
     id              SERIAL PRIMARY KEY,
     type            text NOT NULL,
     resource_id     integer REFERENCES resources (id) NOT NULL,
     territoire_id   integer NOT NULL,
     depth           integer NOT NULL,
-    status          annotation_tasks_status
+    status          tasks_status
 ) INHERITS(lifecycle);
-CREATE TRIGGER updated_at_annotation_tasks BEFORE UPDATE ON annotation_tasks FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
+CREATE TRIGGER updated_at_tasks BEFORE UPDATE ON tasks FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
 
 
 CREATE TABLE IF NOT EXISTS alexa_rank_cache (

@@ -132,7 +132,7 @@ function processTask(task){
                             
                             /*
                                 Promise._allResolved(resources.map(function(r){
-                                    return database.AnnotationTasks.createTasksTodo(r.id, query.belongs_to, 'prepare_resource', depth);
+                                    return database.Tasks.createTasksTodo(r.id, query.belongs_to, 'prepare_resource', depth);
                                 }))
                             */
                             
@@ -140,7 +140,7 @@ function processTask(task){
                                 database.Resources.findByURLsOrCreate(resExprLink.links)
                                     .then(function(linkResources){
                                         return Promise._allResolved(linkResources.map(function(r){
-                                            return database.AnnotationTasks.createTasksTodo(r.id, territoireId, 'prepare_resource', task.depth+1);
+                                            return database.Tasks.createTasksTodo(r.id, territoireId, 'prepare_resource', task.depth+1);
                                         })).then(function(){ return linkResources; })
                                     })
                                     .then(function(linkResources){

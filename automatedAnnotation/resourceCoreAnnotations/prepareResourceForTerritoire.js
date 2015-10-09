@@ -50,7 +50,7 @@ module.exports = function(resource, territoireId, depth){
         .then(function(){
             // for now, only get expression of query results
             if(depth === 0)
-                return database.GetExpressionTasks.createTasksTodo(new Set([resource.id]), territoireId, depth);
+                return database.Tasks.createTasksTodo(resource.id, territoireId, 'expression', depth);
         })
         .catch(function(err){
             console.error('Error while database.ResourceAnnotations.update', err);

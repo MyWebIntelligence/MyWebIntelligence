@@ -94,8 +94,8 @@ function processTask(task){
         return deleteTask(task);
     });
     
-    var annotationFunction = taskFunctions.get(task.type);
-    //console.log('annotationFunction', task.type, typeof annotationFunction, task);
+    var taskFunction = taskFunctions.get(task.type);
+    //console.log('taskFunction', task.type, typeof taskFunction, task);
 
     // get the resource id + url
     return database.Resources.findValidByIds(new Set([task.resource_id]))
@@ -108,7 +108,7 @@ function processTask(task){
 
             // save the result in the annotation
 
-            return annotationFunction(resource, task.territoire_id, task.depth)
+            return taskFunction(resource, task.territoire_id, task.depth)
                 .catch(function(err){
                     console.error('Annotation error', err, err.stack);
                 });

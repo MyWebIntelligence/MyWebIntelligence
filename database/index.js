@@ -21,16 +21,12 @@ var Resources = require('../postgresDB/Resources');
 var isValidResourceExpression = Resources.isValidResourceExpression;
 
 var Links = require('../postgresDB/Links');
-var GetExpressionTasks = require('../postgresDB/GetExpressionTasks');
 var AlexaRankCache = require('../postgresDB/AlexaRankCache');
 var ResourceAnnotations = require('../postgresDB/ResourceAnnotations');
 var Tasks = require('../postgresDB/Tasks');
 var ExpressionDomains = require('../postgresDB/ExpressionDomains');
 
 var massageExpressionDomain = require('../postgresDB/massageExpressionDomain');
-
-
-var getExpressionTasks = declarations.get_expression_tasks;
 
 
 module.exports = {
@@ -44,7 +40,6 @@ module.exports = {
     Links : Links,
     Resources: Resources,
     AlexaRankCache: AlexaRankCache,
-    GetExpressionTasks: GetExpressionTasks,
     ResourceAnnotations: ResourceAnnotations,
     Tasks: Tasks,
     ExpressionDomains: ExpressionDomains,
@@ -93,12 +88,12 @@ module.exports = {
         
         getProgressIndicators: function(territoireId){
             var queryResultsP = this.getTerritoireQueryResults(territoireId);
-            var crawlTodoCountP = this.getCrawlTodoCount(territoireId);
+            var territoireTaskCountP = this.getTerritoireTaskCount(territoireId);
             
-            return Promise.all([ queryResultsP, crawlTodoCountP ]).then(function(res){
+            return Promise.all([ queryResultsP, territoireTaskCountP ]).then(function(res){
                 return {
                     queriesResultsCount: res[0].size,
-                    crawlTodoCount: res[1]
+                    territoireTaskCount: res[1]
                 }
             });
         },
@@ -410,56 +405,27 @@ module.exports = {
             });
         },
         
-        getCrawlTodoCount: function(territoireId){
-            
-            var self = this;
+        getTerritoireTaskCount: function(territoireId){
+            var tasks = declarations.tasks;
+            var TASK_COUNT_KEY = 'task_count';
             
             return databaseP.then(function(db){
                 
-                var queryByTerritoireId = getExpressionTasks
-                    .select( getExpressionTasks.resource_id )
-                    .from(getExpressionTasks)
-                    .where(getExpressionTasks.territoire_id.equal(territoireId))
+                var queryByTerritoireId = tasks
+                    .select( tasks.star().count().as(TASK_COUNT_KEY) )
+                    .where(
+                        tasks.territoire_id.equal(territoireId).and(
+                            tasks.type.notEqual('prepare_resource')
+                        )
+                    )
                     .toQuery();
                 
                 
-                var tasksForTerritoireIdP = new Promise(function(resolve, reject){
+                return new Promise(function(resolve, reject){
                     db.query(queryByTerritoireId, function(err, result){
-                        if(err) reject(err); else resolve( result.rows );
+                        if(err) reject(err); else resolve( result.rows[0][TASK_COUNT_KEY] );
                     });
                 });
-                
-                var tasksForQueryResultsP = self.getTerritoireQueryResults(territoireId)
-                    .then(function(urls){
-                        return Resources.findByURLs(urls)
-                            .then(function(resources){
-                                return resources.map(function(r){ return r.id });
-                            });
-                    })
-                    .then(function(resourceIds){
-                        var queryByQueryResults = getExpressionTasks
-                            .select( getExpressionTasks.resource_id )
-                            .from(getExpressionTasks)
-                            .where(getExpressionTasks.resource_id.in(resourceIds))
-                            .toQuery();
-                        
-                        return new Promise(function(resolve, reject){
-                            db.query(queryByQueryResults, function(err, result){
-                                if(err) reject(err); else resolve( result.rows );
-                            });
-                        });
-                    });
-                
-                
-                return Promise.all([ tasksForTerritoireIdP, tasksForQueryResultsP ])
-                    .then(function(res){
-                        var rids0 = res[0].map(function(t){ return t.resource_id});
-                        var rids1 = res[1].map(function(t){ return t.resource_id});
-                    
-                        var uniqueTaskIds = new Set(rids0.concat(rids1));
-                    
-                        return uniqueTaskIds.size;
-                    })
                 
             });
             

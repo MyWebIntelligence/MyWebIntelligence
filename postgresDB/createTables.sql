@@ -63,19 +63,6 @@ CREATE TRIGGER updated_at_links BEFORE UPDATE ON links FOR EACH ROW EXECUTE PROC
 CREATE INDEX ON links ("source");
 
 
-
-CREATE TYPE get_expression_tasks_status AS ENUM ('todo', 'getting expression');
-CREATE TABLE IF NOT EXISTS get_expression_tasks (
-    id          SERIAL PRIMARY KEY,
-    resource_id integer UNIQUE REFERENCES resources (id) NOT NULL,
-    status      get_expression_tasks_status,
-    territoire_id  integer NOT NULL, -- eventually should be a foreign key for the territoires table
-    depth       integer NOT NULL
-) INHERITS(lifecycle);
-CREATE TRIGGER updated_at_get_expression_tasks BEFORE UPDATE ON get_expression_tasks FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
-CREATE INDEX ON get_expression_tasks (territoire_id);
-
-
 CREATE TABLE IF NOT EXISTS resource_annotations (
     approved                boolean DEFAULT NULL, -- NULL means "don't know yet"
     values                  text, -- JSON blob. This prevents annotation-based queries at the SQL level. Stats will have to be made in JS or maybe in a synthesized document served by ElasticSearch

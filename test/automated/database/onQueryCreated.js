@@ -129,7 +129,7 @@ describe('onQueryCreated', function(){
                             assert.isArray(resources);
                             assert.strictEqual(resources.length, 3);
                         }),
-                    db.GetExpressionTasks.getAll()
+                    db.Tasks.getAll()
                         .then(function(tasks){
                             assert.isArray(tasks);
                             // may create an superfluous task 

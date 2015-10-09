@@ -93,13 +93,13 @@ module.exports = React.createClass({
         var props = this.props;
         var self = this;
         var t = props.territoire;
-        var crawlTodoCount = t && t.progressIndicators && t.progressIndicators.crawlTodoCount;
+        var territoireTaskCount = t && t.progressIndicators && t.progressIndicators.territoireTaskCount;
         
-        console.log("scheduleRefreshIfNecessary", crawlTodoCount, t.graph && t.graph.edges.length, self._refreshTimeout);
+        console.log("scheduleRefreshIfNecessary", territoireTaskCount, t.graph && t.graph.edges.length, self._refreshTimeout);
         
         // for perceived performance purposes, sometimes only a graph with the query results is sent initially.
         // refresh the graph if no edge was found in the graph
-        if( self._refreshTimeout === undefined && ((crawlTodoCount && crawlTodoCount >= 1) || (t.graph && t.graph.edges.length === 0))){
+        if( self._refreshTimeout === undefined && ((territoireTaskCount && territoireTaskCount >= 1) || (t.graph && t.graph.edges.length === 0))){
             self._refreshTimeout = setTimeout(function(){
                 self._refreshTimeout = undefined;
                 props.refresh();
@@ -198,7 +198,7 @@ module.exports = React.createClass({
                     territoire.progressIndicators ? React.DOM.h2({}, 
                         React.DOM.span({title: "Query oracle results"}, territoire.progressIndicators.queriesResultsCount),
                         '-',
-                        React.DOM.span({title: "Crawl todo"}, territoire.progressIndicators.crawlTodoCount),
+                        React.DOM.span({title: "Crawl todo"}, territoire.progressIndicators.territoireTaskCount),
                         '-',
                         React.DOM.span({title: "Expressions"}, Object.keys(territoire.expressionById || {}).length)
                     ) : undefined

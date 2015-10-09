@@ -50,7 +50,7 @@ setInterval(function(){
         
         var taskToPickCount = MAX_CONCURRENT_TASKS - inFlightTasks.size;
         
-        databaseTasksP = database.GetExpressionTasks.pickTasks(taskToPickCount)
+        databaseTasksP = database.Tasks.pickTasks(taskToPickCount)
             .then(function(tasks){
                 tasks.forEach(processTask);
                 databaseTasksP = undefined;
@@ -67,7 +67,7 @@ setInterval(function(){
 function deleteTask(task){
     // the two actions are purposefully not synchronized
     inFlightTasks.delete(task);
-    return database.GetExpressionTasks.delete(task.id);
+    return database.Tasks.delete(task.id);
 }
 
 

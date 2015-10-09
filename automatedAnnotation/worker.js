@@ -16,7 +16,7 @@ var taskFunctions = socialSignals.merge(resourceCoreAnnotations)
     }
 }*/
 
-console.log('# Automated annotation process', process.pid);
+console.log('# Task worker process', process.pid);
 
 var SECOND = 1000; // ms
 var ONE_HOUR = 60*60*SECOND;

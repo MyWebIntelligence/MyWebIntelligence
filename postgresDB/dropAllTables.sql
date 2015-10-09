@@ -2,6 +2,8 @@
 
 DROP TABLE IF EXISTS get_expression_tasks;
 DROP TYPE IF EXISTS get_expression_tasks_status;
+DROP TABLE IF EXISTS annotation_tasks;
+DROP TYPE IF EXISTS annotation_tasks_status;
 
 
 DROP TABLE IF EXISTS links;

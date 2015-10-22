@@ -92,6 +92,31 @@ module.exports = {
         });
     },
     
+    /*
+        tasksData: Set<Task>
+    */
+    setTodoState: function(tasksData){
+        return databaseP.then(function(db){
+            var taskIds = tasksData.toJSON().map(function(t){ return t.id; });
+            
+            var query = tasks
+                .update({
+                    status: 'todo'
+                })
+                .where(tasks.id.in( taskIds ))
+                .toQuery();
+            
+            // console.log('Annotation tasks pickTasks query', query);
+            
+            return new Promise(function(resolve, reject){
+                db.query(query, function(err, result){
+                    if(err) reject(err); else resolve(result.rows);
+                });
+            });
+        });
+        
+    },
+    
     delete: function(id){
         return databaseP.then(function(db){
             var query = tasks

@@ -70,7 +70,11 @@ module.exports = {
             var subSelect = tasks
                 .subQuery()
                 .select(tasks.id)
-                .where(tasks.status.equals('todo'))
+                .where(
+                    tasks.status.equals('todo').or(
+                        tasks.status.equals('in progress').and(tasks.literal("now() > updated_at + interval '1 hour'"))
+                    )
+                )
                 .limit(count)
                 .forUpdate();
             
@@ -90,6 +94,31 @@ module.exports = {
                 });
             });
         });
+    },
+    
+    /*
+        tasksData: Set<Task>
+    */
+    setTodoState: function(tasksData){
+        return databaseP.then(function(db){
+            var taskIds = tasksData.toJSON().map(function(t){ return t.id; });
+            
+            var query = tasks
+                .update({
+                    status: 'todo'
+                })
+                .where(tasks.id.in( taskIds ))
+                .toQuery();
+            
+            // console.log('Annotation tasks pickTasks query', query);
+            
+            return new Promise(function(resolve, reject){
+                db.query(query, function(err, result){
+                    if(err) reject(err); else resolve(result.rows);
+                });
+            });
+        });
+        
     },
     
     delete: function(id){

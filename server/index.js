@@ -80,7 +80,7 @@ passport.use(new GoogleStrategy({
 
     return database.Users.findByGoogleId(googleUser.id).then(function(user){
         if(user){
-            console.log('existing user', user);
+            console.log('User logging in', user.id, user.name);
             done(null, user);
         }
         else{

@@ -15,7 +15,7 @@ var SECOND = 1000; // ms
 var ONE_HOUR = 60*60*SECOND;
 
 var TASK_PICK_INTERVAL_DELAY = 15*SECOND;
-var MAX_CONCURRENT_TASKS = 40;
+var MAX_CONCURRENT_TASKS = 30;
 var AUTOMATED_ANNOTATION_MAX_DELAY = 3*60*SECOND;
 
 var processName = '# TW'+process.pid;
@@ -48,11 +48,6 @@ var taskPickTimeout = setTimeout(function taskPickTimeoutFunction(){
     taskPickTimeout = setTimeout(taskPickTimeoutFunction, TASK_PICK_INTERVAL_DELAY)
     
     console.log(processName, 'Task timeout', inFlightTasks.size);
-    
-    database.Tasks.getAll()
-        .then(function(tasks){
-            console.log('There are', tasks.length, 'tasks');
-        })
     
     if(inFlightTasks.size < MAX_CONCURRENT_TASKS && !databaseTasksP){
         var taskToPickCount = MAX_CONCURRENT_TASKS - inFlightTasks.size;
@@ -136,7 +131,7 @@ function processTask(task){
     When this process is about to die for any reason, it will attempt its best to:
     * abort all remaining tasks
 */
-function lastBreathe(){
+function lastBreath(){
     console.log(
         processName, 'dying with honor.\n',
         'Processed', processedTasks, 'tasks ('+ String(inFlightTasks.size), 'pending)'
@@ -152,7 +147,7 @@ function lastBreathe(){
     // Best effort to put the database back in a reasonable state. No biggie if failing to do so.
     return Promise.race([
         database.Tasks.setTodoState(pendingTasks),
-        new Promise(function(resolve) { setTimeout(resolve, 20*SECOND) })
+        new Promise(function(resolve) { setTimeout(resolve, 30*SECOND); })
     ]);
     
 }
@@ -164,14 +159,14 @@ process.on('uncaughtException', function(e){
 
 process.once('SIGINT', function(){
     console.log('SIGINT', process.pid);
-    lastBreathe()
+    lastBreath()
     .then(function(){ process.exit(); })
     .catch(function(){ process.exit(); });
 });
 
 process.once('SIGTERM', function(){
     console.log('SIGTERM', process.pid);
-    lastBreathe()
+    lastBreath()
     .then(function(){ process.exit(); })
     .catch(function(){ process.exit(); });
 });

@@ -5,14 +5,25 @@ var child_process = require('child_process');
 var fork = child_process.fork;
 var exec = child_process.exec;
 
+var database = require('../database');
+
 var MAXIMUM_NICENESS = 19;
 
 var SECOND = 1000; // ms
 var MINUTE = 60*SECOND;
 
-var WORKER_LIFE_DURATION = 3*MINUTE;
+var WORKER_LIFE_DURATION = 15*MINUTE;
 
 var workers = new Set();
+
+
+setInterval(function(){
+    database.Tasks.getAll()
+        .then(function(tasks){
+            console.log('There are', tasks.length, 'tasks');
+        })
+}, 1*MINUTE);
+
 
 function createWorker(){
     console.log('Creating Task Worker...');

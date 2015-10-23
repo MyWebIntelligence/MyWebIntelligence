@@ -70,7 +70,11 @@ module.exports = {
             var subSelect = tasks
                 .subQuery()
                 .select(tasks.id)
-                .where(tasks.status.equals('todo'))
+                .where(
+                    tasks.status.equals('todo').or(
+                        tasks.status.equals('in progress').and(tasks.literal("now() > updated_at + interval '1 hour'"))
+                    )
+                )
                 .limit(count)
                 .forUpdate();
             

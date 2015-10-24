@@ -140,7 +140,8 @@ module.exports = React.createClass({
             territoireTags: computeTerritoireTags(territoire.annotationByResourceId),
             annotationByResourceId: territoire.annotationByResourceId,
             territoireGraph: undefined,
-            domainGraph: undefined
+            domainGraph: undefined,
+            rejectedResourceIds : new ImmutableSet()
         }
     },
     
@@ -222,19 +223,24 @@ module.exports = React.createClass({
                                 var expression = territoire.expressionById[expressionId];
                                                       
                                 return new PageListItem({
+                                    key: resourceId,
+
                                     resourceId: resourceId,
 
                                     url: node.url,
                                     title: expression.title,
                                     excerpt: expression.excerpt,
+                                    rejected: state.rejectedResourceIds.has(resourceId),
                                     
                                     annotations: state.annotationByResourceId ? state.annotationByResourceId[resourceId] : {tags: new Set()},
                                     annotate: function(newAnnotations, approved){
+                                        
                                         // TODO add a pending state or something
                                         annotate(resourceId, territoire.id, newAnnotations, approved)
                                             .catch(function(err){
                                                 console.error('annotation update error', resourceId, territoire.id, newAnnotations, err);
                                             });
+                                        
                                         
                                         var territoireTags = state.territoireTags;
                                         
@@ -245,9 +251,17 @@ module.exports = React.createClass({
                                                                             
                                         state.annotationByResourceId[resourceId] = newAnnotations;
                                         
+                                        var rejectedResourceIds = state.rejectedResourceIds;
+                                        if(approved !== undefined){
+                                            rejectedResourceIds = approved ?
+                                                rejectedResourceIds.delete(resourceId) :
+                                                rejectedResourceIds = rejectedResourceIds.add(resourceId);
+                                        }
+                                        
                                         self.setState(Object.assign({}, state, {
                                             annotationByResourceId: state.annotationByResourceId, // mutated
-                                            territoireTags: territoireTags
+                                            territoireTags: territoireTags,
+                                            rejectedResourceIds: rejectedResourceIds
                                         }));
                                     }
                                 });

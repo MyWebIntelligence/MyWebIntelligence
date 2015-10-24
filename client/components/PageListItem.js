@@ -4,7 +4,7 @@ var React = require('react');
 
 var findTags = require('../findTags');
 
-
+var mixin = Object.assign;
 
 /*
 
@@ -17,28 +17,30 @@ interface PageListItemProps{
     
     annotations: object map,
     
+    rejected?: boolean, // can only be true. undefined otherwise
+    annotate: (annotations, approved): void
 }
+
+This component has no state (besides for tags input leftover) and is only handled by its parent (TerritoireViewScreen)
 
 */
 
 
 module.exports = React.createClass({
+    
     getInitialState: function () {
-
         return {
-            approved: true,
-            annotations: this.props.annotations || {tags: new Set()},
             tagInputValue: ''
         };
     },
-
-    componentWillReceiveProps: function(nextProps) {
-        //console.log('nextProps.annotations', nextProps.annotations)
-        this.setState(Object.assign({}, this.state, {
-            annotations: nextProps.annotations || {tags: new Set()}
-        }));
+    
+    shouldComponentUpdate: function(nextProps){
+        var props = this.props;
+        
+        return props.rejected !== nextProps.rejected ||
+            props.annotations !== nextProps.annotations;
     },
-
+    
     render: function () {
         var props = this.props;
         var state = this.state;
@@ -47,16 +49,14 @@ module.exports = React.createClass({
         var resourceId = props.resourceId;
         var annotate = props.annotate;
 
-        var annotations = state.annotations;
+        var annotations = props.annotations;
 
         var classes = ['page-list-item'];
-        if (!state.approved) {
+        if (props.rejected) {
             classes.push('rejected');
         }
 
         return React.DOM.li({
-                key: resourceId,
-
                 className: classes.join(' '),
                 "data-resource-id": resourceId
             },
@@ -74,15 +74,11 @@ module.exports = React.createClass({
             // rejection/approval button
             React.DOM.button({
                 className: 'reject',
-                onClick: function () {
-                    var newApproved = !state.approved;
+                onClick: function (){
+                    // if props.rejected was false (approved === true), we want newApproved to be false (approved === false)
+                    var newApproved = props.rejected;
 
-                    annotate(undefined, newApproved)
-
-                    // send HTTP request to change deleted of this resource
-                    self.setState({
-                        approved: newApproved
-                    });
+                    annotate(annotations, newApproved);
                 }
             }, '🗑'),
 
@@ -103,23 +99,14 @@ module.exports = React.createClass({
                             React.DOM.button({
                                 className: 'delete',
                                 onClick: function () {
-                                    var newTags = new Set(annotations.tags)
-
+                                    var newTags = new Set(annotations.tags);
                                     newTags.delete(tag);
 
-                                    var newAnnotations = Object.assign(
-                                        annotations, {
-                                            tags: newTags
-                                        }
-                                    );
-
-                                    annotate(newAnnotations, undefined);
-
-                                    self.setState(
-                                        Object.assign(state, {
-                                            annotations: newAnnotations
-                                        })
-                                    );
+                                    annotate(mixin(
+                                        {},
+                                        annotations,
+                                        { tags: newTags }
+                                    ), undefined);
                                 }
                             }, ''),
                             // invisible semi-colon as tag separator for sweet tag copy/paste
@@ -142,30 +129,23 @@ module.exports = React.createClass({
 
                             var newTags = new Set(annotations.tags)
 
-                            var newAnnotations = annotations;
-
                             if (inputTags.size >= 1) {
                                 // merge tags
                                 inputTags.forEach(function (t) {
-                                    newTags.add(t); // mutate annotations.tags directly
+                                    newTags.add(t);
                                 });
 
-                                newAnnotations = Object.assign(
-                                    annotations, {
-                                        tags: newTags
-                                    }
-                                );
-
-                                annotate(newAnnotations, undefined);
+                                annotate(mixin(
+                                    {},
+                                    annotations,
+                                    { tags: newTags }
+                                ), undefined);
                             }
 
-                            self.setState(
-                                Object.assign(state, {
-                                    annotations: newAnnotations,
-                                    tagInputValue: res.leftover
-                                })
-                            );
-
+                            self.setState({
+                                tagInputValue: res.leftover
+                            });
+                            
                         }
                     })
                 ),
@@ -178,21 +158,14 @@ module.exports = React.createClass({
                     React.DOM.button({
                         className: ['negative', (annotations.sentiment === 'negative' ? 'active' : '')].join(' '),
                         onClick: function () {
-                            var newSentiment = annotations.sentiment === 'negative' ? undefined : 'negative';
+                            // empty string means "no sentiment annotation"
+                            var newSentiment = annotations.sentiment === 'negative' ? '' : 'negative';
 
-                            var newAnnotations = Object.assign(
-                                annotations, {
-                                    sentiment: newSentiment
-                                }
-                            );
-
-                            annotate(newAnnotations, undefined);
-
-                            self.setState(Object.assign(
-                                state, {
-                                    annotations: newAnnotations
-                                }
-                            ));
+                            annotate(mixin(
+                                {},
+                                annotations,
+                                { sentiment: newSentiment }
+                            ), undefined);
                         }
                     }, '☹')
                     // only negative sentiment for now          
@@ -203,20 +176,12 @@ module.exports = React.createClass({
                         value: annotations['media_type'],
                         onChange: function (e) {
                             var newMediaType = e.target.value;
-
-                            var newAnnotations = Object.assign(
-                                annotations, {
-                                    'media_type': newMediaType
-                                }
-                            );
-
-                            annotate(newAnnotations, undefined)
-
-                            self.setState(Object.assign(
-                                state, {
-                                    annotations: newAnnotations
-                                }
-                            ));
+                            
+                            annotate(mixin(
+                                {},
+                                annotations,
+                                { 'media_type': newMediaType }
+                            ), undefined);
                         }
                     }, ["", "Institutional", "Thematique",
                      "Web dictionary", "Editorial", "Blog",
@@ -234,19 +199,11 @@ module.exports = React.createClass({
                     onClick: function () {
                         var newFavorite = !annotations.favorite;
 
-                        var newAnnotations = Object.assign(
-                            annotations, {
-                                favorite: newFavorite
-                            }
-                        );
-
-                        annotate(newAnnotations, undefined);
-
-                        self.setState(Object.assign(
-                            state, {
-                                annotations: newAnnotations
-                            }
-                        ));
+                        annotate(mixin(
+                            {},
+                            annotations,
+                            { favorite: newFavorite }
+                        ), undefined);
                     }
                 }, annotations.favorite ? '★' : '☆')
             )

@@ -1,7 +1,5 @@
 "use strict";
 
-var StringMap = require('stringmap');
-
 var cleanupURLs = require('../common/cleanupURLs');
 
 // JSON database models
@@ -195,24 +193,76 @@ module.exports = {
         
         /*
             rootURIs: Set<url>
-            notApprovedResourceIds: Set<ResourceId>
+            resourceIdBlackList: Set<ResourceId>
             @returns an abstract graph
             Nodes are url => (partial) expression 
             Edges are {source: Node, target: Node}
         */
         getGraphFromRootURIs: function(rootURIs, resourceIdBlackList){
-            //console.time('getGraphFromRootURIs');
+            console.time('getGraphFromRootURIs');
             //var PERIPHERIC_DEPTH = 10000;
             
-            console.log('getGraphFromRootURIs', rootURIs.size, resourceIdBlackList.size);
+            //console.log('getGraphFromRootURIs', rootURIs.size, resourceIdBlackList.size);
             
-            var nodes = new StringMap/*<ResourceIdStr, resource>*/(); // these are only canonical urls
+            // Make a resourceIdBlackList copy to safely add elements
+            // Added elements here currently only are resources which are part of an alias cycle
+            resourceIdBlackList = new Set(resourceIdBlackList); 
+            
+            var nodes = Object.create(null); // Dictionary<ResourceIdStr, resource> // these are only canonical urls
             var edges = new Set();
             
             // (alias => canonical ResourceId) map
-            var aliasToCanonicalResourceId = new StringMap/*<ResourceIdStr, ResourceIdStr>*/();
+            var aliasToCanonicalResourceId = Object.create(null); // Dictionary<ResourceIdStr, ResourceId>
 
+            // The web is so terrible that it can happens two URLs may redirect to one another
+            // thus creating an alias cycle. If these cycles aren't detected and addressed, the buildGraph
+            // function recurses indefinitely.
+            // The current choice to address this problem is to remove all resources in a cycle from the graph 
+            // if such a cycle is detected
+            function addAliasOrBreakAliasCycle(fromRid, toRid){
+                var candidateCycle = [fromRid, toRid];
+                var last = candidateCycle[candidateCycle.length -1];
+                
+                // This while loop + indexOf on growing array has O(n²) behavior
+                // but cycles should never be more than 2-3 elements, so whatev's
+                while(
+                    last !== undefined &&
+                    candidateCycle.slice(0, candidateCycle.length -1).indexOf(last) === -1
+                ){
+                    last = aliasToCanonicalResourceId[last]
+                    candidateCycle.push(last);
+                }
+                
+                if(last === undefined){
+                    // no cycle detected
+                    aliasToCanonicalResourceId[fromRid] = toRid;
+                }
+                else{
+                    // alias cycle detected
+                    var duplicateIndex = candidateCycle.slice(0, candidateCycle.length -1).indexOf(last);
+                    
+                    var cycle = candidateCycle.slice(duplicateIndex+1);
+                    console.log('Alias cycle detected!', cycle);
+                    
+                    cycle.forEach(function removeFromGraph(rId){
+                        resourceIdBlackList.add(rId);
+                        
+                        delete nodes[rId];
+                        
+                        edges.forEach(function(e){
+                            if(e.source === rId || e.target === rId)
+                                edges.delete(e);
+                        });
+                        
+                        delete aliasToCanonicalResourceId[rId];
+                    });                    
+                }
+
+            }
+            
+            
             function buildGraph(resourceIds, depth){
+                //console.log('buildGraph', resourceIds.size, resourceIds.size <= 5 ? resourceIds.toJSON() : '' )
                 //console.time('buildGraph '+resourceIds.size);
                 
                 //var k = 'findValidByIds '+resourceIds.size;
@@ -225,13 +275,11 @@ module.exports = {
                         if(res.alias_of !== null)
                             return;
                         
-                        var idKey = String(res.id);
-                        
-                        nodes.set(idKey, Object.assign({
-                            depth: depth
-                        }, res));
+                        nodes[res.id] = Object.assign(
+                            { depth: depth }, 
+                            res
+                        );
                     });
-                    
                     
                     // find which resource have an expression 
                     var resourcesWithExpression = resources.filter(function(r){
@@ -243,9 +291,12 @@ module.exports = {
                     var aliasResources = resources.filter(function(r){
                         return r.alias_of !== null;
                     });
+                    
+                    resources = undefined; // freeing only reference to this variable
+                    
                     var aliasTargetIds = new Set(aliasResources
                         .map(function(r){
-                            aliasToCanonicalResourceId.set(String(r.id), String(r.alias_of));
+                            addAliasOrBreakAliasCycle(r.id, r.alias_of);
                             return r.alias_of;
                         })
                         .filter(function(rid){
@@ -262,26 +313,27 @@ module.exports = {
                     })))
                         .then(function(links){
                             //console.timeEnd('Links.findBySources '+resourceIds.size);
-                            var nextResourceIds = new Set();
+                            var nextResourceIds = [];
 
                             links.forEach(function(l){
-                                var targetIdStr = String(l.target);
+                                var targetId = l.target;
 
-                                if(!nodes.has(targetIdStr) && 
-                                   !aliasToCanonicalResourceId.has(targetIdStr) && 
+                                if(!(targetId in nodes) && 
+                                   !(targetId in aliasToCanonicalResourceId) && 
                                    !resourceIdBlackList.has(l.target))
                                 {
-                                    nextResourceIds.add(l.target);
+                                    nextResourceIds.push(l.target);
                                 }
 
                                 edges.add({
-                                    source: String(l.source),
-                                    target: targetIdStr
+                                    source: l.source,
+                                    target: targetId
                                 });
                             });
 
-                            if(nextResourceIds.size >= 1)
-                                return buildGraph(nextResourceIds, depth+1);
+                            if(nextResourceIds.length >= 1){
+                                return buildGraph(new Set(nextResourceIds), depth+1);
+                            }
                         });
                     
                     var resP = Promise.all([aliasRetryBuildGraphP, nextDepthGraphP])
@@ -296,26 +348,20 @@ module.exports = {
                     .map(function(r){ return r.id; }) 
                     .filter(function(id){ return !resourceIdBlackList.has(id) })
                 );
+                resources = undefined; // clearing only reference to this variable
                 
                 console.log('getGraphFromRootURIs ids', ids.size);
                 
                 return buildGraph(ids, 0).then(function(){
                     // edges may contain non-canonical URLs in the target because of how it's built. Converting before returning
                     edges.forEach(function(e){
-                        e.target = Number(aliasToCanonicalResourceId.get(e.target) || e.target);
-                        e.source = Number(e.source);
+                        e.target = aliasToCanonicalResourceId[e.target] || e.target;
                     });
 
-                    //console.timeEnd('getGraphFromRootURIs');
+                    console.timeEnd('getGraphFromRootURIs');
                     return {
-                        nodes: nodes,
-                        edges: edges,
-                        toJSON: function(){
-                            return {
-                                nodes: nodes.values(),
-                                edges: edges
-                            }
-                        }
+                        nodes: Object.keys(nodes).map(function(k){ return nodes[k]; }), // only values
+                        edges: edges.toJSON()
                     };
                 })
             });  

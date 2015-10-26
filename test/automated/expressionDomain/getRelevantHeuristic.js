@@ -18,6 +18,7 @@ var dailymotionHeuristic = require('../../../expressionDomain/heuristics/dailymo
 var instagramHeuristic = require('../../../expressionDomain/heuristics/instagram');
 var viadeoHeuristic = require('../../../expressionDomain/heuristics/viadeo');
 var pinterestHeuristic = require('../../../expressionDomain/heuristics/pinterest');
+var googlePlusHeuristic = require('../../../expressionDomain/heuristics/googleplus');
 
 var defaultHeuristic = require('../../../expressionDomain/heuristics/default');
 
@@ -155,6 +156,18 @@ describe('getRelevantHeuristic', function(){
         var h = getRelevantHeuristic('http://es.pinterest.com/');
         
         return assert.strictEqual(h, pinterestHeuristic);
+    });
+    
+    it('https://plus.google.com/ => Google+', function(){
+        var h = getRelevantHeuristic('https://plus.google.com/');
+        
+        return assert.strictEqual(h, googlePlusHeuristic);
+    });
+    
+    it('https://plus.google.com/+1226digital/posts/iqV9xmRr35z => Google+', function(){
+        var h = getRelevantHeuristic('https://plus.google.com/+1226digital/posts/iqV9xmRr35z');
+        
+        return assert.strictEqual(h, googlePlusHeuristic);
     });
     
 });

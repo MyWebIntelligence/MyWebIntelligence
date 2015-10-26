@@ -35,7 +35,7 @@ describe('Vimeo expression domain heuristics', function(){
         return Promise.all([
             // no known invalid URLs at this point
         ].map(function(url){
-            var edNameP = twitterHeuristics.getExpressionDomainName(url);
+            var edNameP = vimeoHeuristic.getExpressionDomainName(url);
             
             return assert.isRejected(edNameP, url+' should be an invalid URL for the Slideshare heuristics');
         }));

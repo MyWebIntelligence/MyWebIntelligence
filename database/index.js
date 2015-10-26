@@ -161,9 +161,7 @@ module.exports = {
             
             var resources = declarations.resources;
             var expressions = declarations.expressions;
-            
-            console.log()
-            
+                        
             return databaseP.then(function(db){
                 var query = expressions
                     .select(

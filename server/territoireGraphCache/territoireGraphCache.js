@@ -88,14 +88,8 @@ module.exports = function(territoireId){
                 });
             
                 return {
-                    nodes: nodes,
-                    edges: new Set(),
-                    toJSON: function(){
-                        return {
-                            nodes: nodes.values(),
-                            edges: []
-                        }
-                    }
+                    nodes: nodes.values(),
+                    edges: []
                 };
             })
             .then(function(graph){

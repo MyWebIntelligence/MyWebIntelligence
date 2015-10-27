@@ -2,8 +2,6 @@
 
 var fork = require('child_process').fork;
 
-var StringMap = require('stringmap');
-
 var database = require('../../database');
 
 
@@ -26,34 +24,21 @@ var worker;
                     return r.resource_id;
                 }));
 
-                //console.log("rejectedResourceIds", rejectedResourceIds.toJSON());
-
-                var receivedNodes = res.graph.nodes;
-                var nodes = new StringMap();
-
-                // remove rejected nodes
-                receivedNodes.forEach(function(n){
-                    //console.log('n.id', n.id, typeof n.id);
-
-                    if(!rejectedResourceIds.has(n.id))
-                        nodes.set(String(n.id), n);
+                // remove rejected resources from the graph
+                res.graph.nodes = res.graph.nodes.filter(function(n){
+                    return !rejectedResourceIds.has(n.id) 
                 });
-
-
-                res.graph.nodes = nodes;
-                res.graph.toJSON = function(){
-                    return {
-                        nodes: res.graph.nodes.values(),
-
-                        // remove edges referencing on either end a rejected node
-                        edges: res.graph.edges.filter(function(e){
-                            return !rejectedResourceIds.has(e.source) && !rejectedResourceIds.has(e.target);
-                        })
-                    }
-                }
+                res.graph.edges = res.graph.edges.filter(function(e){
+                    return !rejectedResourceIds.has(e.source) && !rejectedResourceIds.has(e.target);
+                });
 
                 terrIdToPromise.get(territoireId).resolve(res);
                 terrIdToPromise.delete(territoireId);         
+            })
+            .catch(function(e){
+                console.error('Error trying to resolve territoire cache promise', e, e.stack);
+                terrIdToPromise.get(territoireId).reject(new Error('Error trying to resolve territoire cache promise '+ String(e)+' '+String(e.stack)));
+                terrIdToPromise.delete(territoireId); 
             });
     });
     

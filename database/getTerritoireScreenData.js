@@ -17,6 +17,7 @@ module.exports = function getTerritoireScreenData(territoireId){
     //console.time('getTerritoireResourceGraph')
     var abstractPageGraphP = getTerritoireResourceGraph(territoireId)
         .then(function(res){
+            res.graph.buildTime = res.buildTime;
             return res.graph;
         });
     //abstractPageGraphP.then(console.timeEnd.bind(console, 'getTerritoireResourceGraph'))

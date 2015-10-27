@@ -4,8 +4,6 @@ var child_process = require('child_process');
 var fork = child_process.fork;
 var exec = child_process.exec;
 
-var StringMap = require('stringmap');
-
 var database = require('../../database');
 
 var MAXIMUM_NICENESS = 19;
@@ -80,6 +78,7 @@ module.exports = function(territoireId){
         
         return Promise.resolve({
             graph: entry.graph,
+            complete: true,
             buildTime: entry.buildTime 
         });
     }
@@ -90,21 +89,20 @@ module.exports = function(territoireId){
         // Get the territoire query results and make a graph out of that to be returned ASAP
         return database.complexQueries.getValidTerritoireQueryResultResources(territoireId)
             .then(function(resources){            
-                var nodes = new StringMap();
+                var nodes = [];
             
                 resources.forEach(function(res){
                     if(res.alias_of !== null)
                         return;
 
-                    var idKey = String(res.id);
-
-                    nodes.set(idKey, Object.assign({
-                        depth: 0
-                    }, res));
+                    nodes.push(Object.assign(
+                        { depth: 0 },
+                        res
+                    ));
                 });
             
                 return {
-                    nodes: nodes.values(),
+                    nodes: nodes,
                     edges: []
                 };
             })

@@ -3,6 +3,7 @@
 var React = require('react');
 
 var ImmutableSet = require('immutable').Set;
+var moment = require('moment');
 
 var Tabs = React.createFactory(require('./external/Tabs.js'));
 var Header = React.createFactory(require('./Header'));
@@ -186,8 +187,8 @@ module.exports = React.createClass({
                 React.DOM.datalist({id: "tags"}, state.territoireTags.toArray().map(function(t){
                     return React.DOM.option({ 
                         key: t, 
-                        // so that clicking on an auto-complete value does autocomplete without the user
-                        // doesn't have to hit ';' itself
+                        // adding ; so that clicking on an auto-complete value does autocomplete 
+                        // without the user having to hit ';' themself
                         value: t+';', 
                         label: t
                     });
@@ -200,8 +201,22 @@ module.exports = React.createClass({
                         React.DOM.span({title: "Query oracle results"}, territoire.progressIndicators.queriesResultsCount),
                         '-',
                         React.DOM.span({title: "Crawl todo"}, territoire.progressIndicators.territoireTaskCount),
-                        '-',
-                        React.DOM.span({title: "Expressions"}, Object.keys(territoire.expressionById || {}).length)
+                        '- ',
+                        React.DOM.span({title: "Expressions"}, Object.keys(territoire.expressionById || {}).length),
+                        '+',
+                        React.DOM.span(
+                            {
+                                title: "Edges",
+                                style: {verticalAlign: 'middle', fontSize: '0.5em'}
+                            }, 
+                            territoire.graph.edges.length === 0 ? '(no edge)' : territoire.graph.edges.length
+                        ),
+                        ' ',                                   
+                        React.DOM.span(
+                            {
+                                title: "Graph build time",
+                                style: {verticalAlign: 'middle', fontSize: '0.5em'}
+                            }, moment(territoire.graph.buildTime).fromNow())
                     ) : undefined
                 ),
                 

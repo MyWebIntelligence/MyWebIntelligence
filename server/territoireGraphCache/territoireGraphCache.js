@@ -4,13 +4,13 @@ var child_process = require('child_process');
 var fork = child_process.fork;
 var exec = child_process.exec;
 
-var MAXIMUM_NICENESS = 19;
-
-var StringMap = require('stringmap');
-
 var database = require('../../database');
 
-// var ONE_HOUR = 60*60*1000;
+var MAXIMUM_NICENESS = 19;
+
+var ONE_HOUR = 60*60*1000;
+
+var CACHE_ENTRY_NO_ACCESS_MAX_TIME = ONE_HOUR;
 
 /*
     territoireId => mutable{
@@ -20,6 +20,19 @@ var database = require('../../database');
     }
 */
 var cache = new Map();
+
+setTimeout(function cleanupCache(){
+    setTimeout(cleanupCache, CACHE_ENTRY_NO_ACCESS_MAX_TIME/4);
+    
+    cache.forEach(function(entry, key){
+        if(Date.now() - entry.lastAccessTime < CACHE_ENTRY_NO_ACCESS_MAX_TIME){
+            // entry hasn't been accessed in a long time    
+            cache.delete(key);
+        }
+    });
+    
+}, CACHE_ENTRY_NO_ACCESS_MAX_TIME/4);
+
 
 var scheduledRefreshes = new Map/*<territoireId, Process>*/()
 
@@ -37,7 +50,8 @@ function refreshCacheEntry(territoireId){
         // it's the graph, 
         cache.set(territoireId, {
             graph: graph,
-            buildTime: Date.now()
+            buildTime: Date.now(),
+            lastAccessTime: Date.now()
         });
         
         w.kill();
@@ -64,7 +78,8 @@ module.exports = function(territoireId){
         
         return Promise.resolve({
             graph: entry.graph,
-            complete: true 
+            complete: true,
+            buildTime: entry.buildTime 
         });
     }
     else{
@@ -74,28 +89,21 @@ module.exports = function(territoireId){
         // Get the territoire query results and make a graph out of that to be returned ASAP
         return database.complexQueries.getValidTerritoireQueryResultResources(territoireId)
             .then(function(resources){            
-                var nodes = new StringMap();
+                var nodes = [];
             
                 resources.forEach(function(res){
                     if(res.alias_of !== null)
                         return;
 
-                    var idKey = String(res.id);
-
-                    nodes.set(idKey, Object.assign({
-                        depth: 0
-                    }, res));
+                    nodes.push(Object.assign(
+                        { depth: 0 },
+                        res
+                    ));
                 });
             
                 return {
                     nodes: nodes,
-                    edges: new Set(),
-                    toJSON: function(){
-                        return {
-                            nodes: nodes.values(),
-                            edges: []
-                        }
-                    }
+                    edges: []
                 };
             })
             .then(function(graph){

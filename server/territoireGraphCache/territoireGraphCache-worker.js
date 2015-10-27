@@ -24,3 +24,8 @@ process.on('message', function(msg){
             console.error('territoireGraphCache-worker error', e, e.stack);
         })
 });
+
+// An uncaught error in this process once caused an entire application crash...
+process.on('uncaughtException', function(err){
+    console.error('Uncaught error in territoire cache worker', err, err.stack);
+});

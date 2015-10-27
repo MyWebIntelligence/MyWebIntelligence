@@ -13,19 +13,11 @@ module.exports = function getTerritoireScreenData(territoireId){
     console.log('getTerritoireScreenData', territoireId);
 
     var territoireP = database.Territoires.findById(territoireId);
-    var relevantQueriesP = database.Queries.findByBelongsTo(territoireId);
-
-    var queryReadyP = relevantQueriesP.then(function(queries){
-        return Promise.all(queries.map(function(q){
-            return database.QueryResults.findLatestByQueryId(q.id).then(function(queryResults){
-                q.oracleResults = queryResults && queryResults.results;
-            });
-        }));
-    });
 
     //console.time('getTerritoireResourceGraph')
     var abstractPageGraphP = getTerritoireResourceGraph(territoireId)
         .then(function(res){
+            res.graph.buildTime = res.buildTime;
             return res.graph;
         });
     //abstractPageGraphP.then(console.timeEnd.bind(console, 'getTerritoireResourceGraph'))
@@ -62,17 +54,16 @@ module.exports = function getTerritoireScreenData(territoireId){
 
     console.time('all data');
     return Promise.all([
-        territoireP, relevantQueriesP, abstractPageGraphP, progressIndicatorsP, expressionByIdP, annotationByResourceIdP, expressionDomainsByIdP, queryReadyP
+        territoireP, abstractPageGraphP, progressIndicatorsP, expressionByIdP, annotationByResourceIdP, expressionDomainsByIdP
     ]).then(function(res){
         console.timeEnd('all data');
         var territoire = res[0];
 
-        territoire.queries = res[1];
-        territoire.graph = res[2];
-        territoire.progressIndicators = res[3];
-        territoire.expressionById = res[4];
-        territoire.annotationByResourceId = res[5];
-        territoire.expressionDomainsById = res[6];
+        territoire.graph = res[1];
+        territoire.progressIndicators = res[2];
+        territoire.expressionById = res[3];
+        territoire.annotationByResourceId = res[4];
+        territoire.expressionDomainsById = res[5];
 
         return territoire;
     });

@@ -34,11 +34,13 @@ module.exports = React.createClass({
         };
     },
     
-    shouldComponentUpdate: function(nextProps){
+    shouldComponentUpdate: function(nextProps, nextState){
         var props = this.props;
+        var state = this.state;
         
         return props.rejected !== nextProps.rejected ||
-            props.annotations !== nextProps.annotations;
+            props.annotations !== nextProps.annotations ||
+            state.tagInputValue !== nextState.tagInputValue;
     },
     
     render: function () {
@@ -50,7 +52,7 @@ module.exports = React.createClass({
         var annotate = props.annotate;
 
         var annotations = props.annotations;
-
+        
         var classes = ['page-list-item'];
         if (props.rejected) {
             classes.push('rejected');

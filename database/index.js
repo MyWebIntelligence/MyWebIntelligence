@@ -105,16 +105,10 @@ module.exports = {
         /*
             graph is an abstract graph
         */
-        getGraphAnnotations: function getGraphAnnotations(graph, territoireId){            
+        getGraphResourceAnnotations: function getGraphAnnotations(graph, territoireId){            
             var annotationByResourceId = Object.create(null);
-
-            var resourceIds = new Set();
-            
-            graph.nodes.forEach(function(node){
-                resourceIds.add(node.id);
-            });
-            
-            return resourceIds.size > 0 ? 
+                        
+            return graph.nodes.length > 0 ? 
                 ResourceAnnotations.findByTerritoireId(territoireId)
                     .then(function(annotations){
                         annotations.forEach(function(ann){                        
@@ -125,6 +119,28 @@ module.exports = {
                         return annotationByResourceId;
                     }) : 
                 Promise.resolve(annotationByResourceId);
+        },
+        
+        
+        /*
+            graph is an abstract graph
+        */
+        getGraphExpressionDomainAnnotations: function getGraphAnnotations(graph, territoireId){            
+            var annotationByEDId = Object.create(null);
+            
+            return graph.nodes.length > 0 ? 
+                ExpressionDomainAnnotations.findByTerritoireId(territoireId)
+                    .then(function(annotations){
+                        annotations.forEach(function(ann){                        
+                            annotationByEDId[ann.expression_domain_id] = {
+                                estimated_potential_audience: ann.estimated_potential_audience,
+                                media_type: ann.media_type
+                            };
+                        });
+
+                        return annotationByEDId;
+                    }) : 
+                Promise.resolve(annotationByEDId);
         },
         
         

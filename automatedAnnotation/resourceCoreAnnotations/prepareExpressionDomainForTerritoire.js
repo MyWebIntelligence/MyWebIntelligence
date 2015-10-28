@@ -13,8 +13,6 @@ var estimatePotentialAudience = require('../estimatePotentialAudience');
     This function returns a Promise that should always resolve
 */
 module.exports = function(url, territoireId){ 
-    console.log('prepareExpressionDomainForTerritoire', url, territoireId)
-
     var expressionDomainP = findOrCreateExpressionDomain(url);
     
     var expressionDomainAnnotationCreatedP = expressionDomainP
@@ -24,8 +22,8 @@ module.exports = function(url, territoireId){
             territoire_id: territoireId
         })
         .catch(function(err){
-            if(err && err.constraint === "resource_annotations_pkey"){
-                // This (attempt to recreate annotations for the same resource/territoire pair)
+            if(err && err.constraint === "expression_domain_annotations_pkey"){
+                // This (attempt to recreate annotations for the same (expression domain, territoire) pair)
                 // may happen and we can't know beforehand unless a cache of the database 
                 // resource_annotations table is kept (which is impractical for memory reasons)
                 // or if we check beforehands (but results in 2 queries each time instead of one)
@@ -48,7 +46,6 @@ module.exports = function(url, territoireId){
             return estimatePotentialAudience(expressionDomain)
             .then(function(potentialAudience){
                 if(typeof potentialAudience === 'number'){
-                    console.log('potentialAudience', expressionDomain.name, potentialAudience)
                     return database.ExpressionDomainAnnotations.update(
                         expressionDomain.id, territoireId, undefined, {
                             estimated_potential_audience: potentialAudience

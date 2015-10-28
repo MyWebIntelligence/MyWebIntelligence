@@ -2,17 +2,9 @@
 
 var stats = require('simple-statistics');
 
-var immutableMap = require('immutable').Map;
-
 var DomainGraph = require('./DomainGraph');
 var computeSocialImpact = require('../../automatedAnnotation/computeSocialImpact');
 
-
-var parse = require('url').parse;
-
-function getHostname(url){
-    return parse(url).hostname;
-}
 
 function cleanValue(v, forbidden, replacement){
     if(!Array.isArray(forbidden))
@@ -25,15 +17,15 @@ function cleanValue(v, forbidden, replacement){
 /*
     Right now, only the top1M is saved in the database
 */
-var MAX_ALEXA_RANK = 1000001;
+var DEFAULT_POTENTIAL_AUDIENCE = 100;
 
 /*
     pageGraph : PageGraph
-    alexaRanks: Immutable.Map<hostname, rank>
+    expressionDomainsById
+    expressionDomainAnnotationsByEDId
 */
-module.exports = function pageGraphToDomainGraph(pageGraph, alexaRanks, expressionDomainsById){
+module.exports = function pageGraphToDomainGraph(pageGraph, expressionDomainsById, expressionDomainAnnotationsByEDId){
     var domainGraph = new DomainGraph();
-    alexaRanks = alexaRanks || immutableMap(); // eventually, alexaRanks will just be annotation. See #160
     
     function makeDomainNodes(graph){
         
@@ -41,6 +33,8 @@ module.exports = function pageGraphToDomainGraph(pageGraph, alexaRanks, expressi
         
         graph.nodes.toJSON().forEach(function(pn){
             var expressionDomainId = pn.expressionDomainId;
+            
+            console.log('expressionDomainIdToPageNode, expressionDomainId', expressionDomainId, pn)
             
             var expressionDomainPageNodes = expressionDomainIdToPageNode.get(expressionDomainId);
             
@@ -55,7 +49,9 @@ module.exports = function pageGraphToDomainGraph(pageGraph, alexaRanks, expressi
         var pageNodeToDomainNode = new WeakMap();
 
         expressionDomainIdToPageNode.forEach(function(pageNodes, expressionDomainId){
-            var alexaRank = alexaRanks.get(getHostname(pageNodes[0].url)) || MAX_ALEXA_RANK;
+            var edAnnotations = expressionDomainAnnotationsByEDId[expressionDomainId];
+            
+            var potentialAudience = edAnnotations.estimated_potential_audience || DEFAULT_POTENTIAL_AUDIENCE;
             
             var domainFbLikes = pageNodes
                 .map(function(node){ return node.facebook_like; })
@@ -107,8 +103,7 @@ module.exports = function pageGraphToDomainGraph(pageGraph, alexaRanks, expressi
                     keywords: (expressionDomain.keywords || []).join(' / '),
                     nb_expressions: pageNodes.length,
 
-                    global_alexarank: alexaRank,
-                    inverse_global_alexarank: 1/alexaRank,
+                    estimated_potential_audience: potentialAudience,
 
                     min_facebook_like: cleanValue(stats.min(domainFbLikes), [undefined, null], -1),
                     max_facebook_like: cleanValue(stats.max(domainFbLikes), [undefined, null], -1),

@@ -12,9 +12,7 @@ var PageListItem = React.createFactory(require('./PageListItem'));
 
 var abstractGraphToPageGraph = require('../../common/graph/abstractGraphToPageGraph');
 var pageGraphToDomainGraph = require('../../common/graph/pageGraphToDomainGraph');
-var getAbstractGraphHostnames = require('../../common/graph/getAbstractGraphHostnames');
 
-var getAlexaRanks = require('../serverAPI/getAlexaRanks')
 var annotate = require('../serverAPI').annotate;
 
 /*
@@ -27,27 +25,18 @@ interface TerritoireViewScreenProps{
 
 */
 
-function generateExpressionGEXF(abstractGraph, expressionById, annotationsById){
-    var pageGraph = abstractGraphToPageGraph(abstractGraph, expressionById, annotationsById);
+function generateExpressionGEXF(abstractGraph, expressionById, resourceAnnotationByResourceId){
+    var pageGraph = abstractGraphToPageGraph(abstractGraph, expressionById, resourceAnnotationByResourceId);
     
     return pageGraph.exportAsGEXF();
 }
 
 
-function generateDomainGEXF(abstractGraph, expressionById, annotationsById, expressionDomainById){
-    var pageGraph = abstractGraphToPageGraph(abstractGraph, expressionById, annotationsById);
-    var graphHostname = getAbstractGraphHostnames(abstractGraph);
+function generateDomainGEXF(abstractGraph, expressionById, resourceAnnotationByResourceId, expressionDomainAnnotationsByEDId, expressionDomainById){
+    var pageGraph = abstractGraphToPageGraph(abstractGraph, expressionById, resourceAnnotationByResourceId);
+    var domainGraph = pageGraphToDomainGraph(pageGraph, expressionDomainById, expressionDomainAnnotationsByEDId);
     
-    var domainGraphP = getAlexaRanks(graphHostname)
-        .then(function(alexaRanks){
-            console.log("alexaRanks", alexaRanks.size, alexaRanks);
-            
-            return pageGraphToDomainGraph(pageGraph, alexaRanks, expressionDomainById);
-        });
-    
-    return domainGraphP.then(function(domainGraph){
-        return domainGraph.exportAsGEXF();
-    })
+    return domainGraph.exportAsGEXF();
 }
 
 
@@ -125,21 +114,19 @@ module.exports = React.createClass({
     componentWillReceiveProps: function(nextProps) {
         var territoire = nextProps.territoire;
         
-        console.log('componentWillReceiveProps territoire.annotationByResourceId', territoire.annotationByResourceId, territoire)
         this.setState(Object.assign({}, this.state, {
-            annotationByResourceId: territoire.annotationByResourceId,
-            territoireTags: computeTerritoireTags(territoire.annotationByResourceId)
+            resourceAnnotationByResourceId: territoire.resourceAnnotationByResourceId,
+            territoireTags: computeTerritoireTags(territoire.resourceAnnotationByResourceId)
         }));
     },
     
     getInitialState: function() {
         var territoire = this.props.territoire;
-                
-        console.log('getInitialState annotationByResourceId', territoire.annotationByResourceId, territoire);
-        
+                        
         return {
-            territoireTags: computeTerritoireTags(territoire.annotationByResourceId),
-            annotationByResourceId: territoire.annotationByResourceId,
+            territoireTags: computeTerritoireTags(territoire.resourceAnnotationByResourceId),
+            resourceAnnotationByResourceId: territoire.resourceAnnotationByResourceId,
+            expressionDomainAnnotationsByEDId: territoire.expressionDomainAnnotationsByEDId,
             territoireGraph: undefined,
             domainGraph: undefined,
             rejectedResourceIds : new ImmutableSet()
@@ -161,10 +148,10 @@ module.exports = React.createClass({
                 abstractGraphToPageGraph(
                     territoire.graph, 
                     territoire.expressionById, 
-                    state.annotationByResourceId
+                    state.resourceAnnotationByResourceId
                 ),
-                undefined,
-                territoire.expressionDomainsById
+                territoire.expressionDomainsById,
+                territoire.expressionDomainAnnotationsByEDId
             )
             
             // this is ugly
@@ -247,7 +234,7 @@ module.exports = React.createClass({
                                     excerpt: expression.excerpt,
                                     rejected: state.rejectedResourceIds.has(resourceId),
                                     
-                                    annotations: state.annotationByResourceId ? state.annotationByResourceId[resourceId] : {tags: new Set()},
+                                    annotations: state.resourceAnnotationByResourceId ? state.resourceAnnotationByResourceId[resourceId] : {tags: new Set()},
                                     annotate: function(newAnnotations, approved){
                                         
                                         // TODO add a pending state or something
@@ -264,7 +251,7 @@ module.exports = React.createClass({
                                             territoireTags = territoireTags.add(t);
                                         });
                                                                             
-                                        state.annotationByResourceId[resourceId] = newAnnotations;
+                                        state.resourceAnnotationByResourceId[resourceId] = newAnnotations;
                                         
                                         var rejectedResourceIds = state.rejectedResourceIds;
                                         if(approved !== undefined){
@@ -274,7 +261,7 @@ module.exports = React.createClass({
                                         }
                                         
                                         self.setState(Object.assign({}, state, {
-                                            annotationByResourceId: state.annotationByResourceId, // mutated
+                                            resourceAnnotationByResourceId: state.resourceAnnotationByResourceId, // mutated
                                             territoireTags: territoireTags,
                                             rejectedResourceIds: rejectedResourceIds
                                         }));
@@ -299,10 +286,10 @@ module.exports = React.createClass({
                             onClick: function(e){
                                 e.preventDefault();
                                 
-                                //console.log('before dl', territoire.annotationByResourceId, territoire);
+                                //console.log('before dl', territoire.resourceAnnotationByResourceId, territoire);
                                 
                                 triggerDownload(
-                                    generateExpressionGEXF(territoire.graph, territoire.expressionById, territoire.annotationByResourceId),
+                                    generateExpressionGEXF(territoire.graph, territoire.expressionById, territoire.resourceAnnotationByResourceId),
                                     territoire.name+'-pages.gexf',
                                     "application/gexf+xml"
                                 );
@@ -314,17 +301,19 @@ module.exports = React.createClass({
                             onClick: function(e){
                                 e.preventDefault();
                                 
-                                generateDomainGEXF(territoire.graph, territoire.expressionById, state.annotationByResourceId, territoire.expressionDomainsById)
-                                    .then(function(domainsGEXF){
-                                        triggerDownload(
-                                            domainsGEXF,
-                                            territoire.name+'-domains.gexf',
-                                            "application/gexf+xml"
-                                        );
-                                    })
-                                    .catch(function(err){
-                                        console.error('generateDomainGEXF error', err, err.stack);
-                                    });
+                                var domainsGEXF = generateDomainGEXF(
+                                    territoire.graph, 
+                                    territoire.expressionById, 
+                                    state.resourceAnnotationByResourceId, 
+                                    state.expressionDomainAnnotationsByEDId,
+                                    territoire.expressionDomainsById
+                                )
+                                    
+                                triggerDownload(
+                                    domainsGEXF,
+                                    territoire.name+'-domains.gexf',
+                                    "application/gexf+xml"
+                                );
                             }
                         }, 'Download Domains GEXF')
                     )

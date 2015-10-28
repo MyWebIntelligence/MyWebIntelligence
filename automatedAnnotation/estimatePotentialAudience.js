@@ -24,19 +24,15 @@ function alexaRankToPotentialAudience(alexaRank){
 }
 
 module.exports = function(ed){
-    console.log('estimatePotentialAudience', ed);
     
     if(ed.name.includes('.') && !ed.name.includes('/')){
         // 'expression domain === hostname' case
         var hostname = ed.name;
         var domain = tld.getDomain(hostname);
-
-        console.log('estimatePotentialAudience domain', domain);
         
         return database.AlexaRankCache.findByDomains(new Set([domain]))
         .then(function(arEntries){
             var areEntry = arEntries[0];
-            console.log('estimatePotentialAudience areEntry', domain, areEntry);
             if(!areEntry){
                 return undefined;
             }
@@ -45,7 +41,7 @@ module.exports = function(ed){
         });
     }
     else{
-        return undefined; 
+        return Promise.resolve(undefined); 
         // for now. Eventually, find the expression domain and call the corresponding audience estimation function
     }
 }

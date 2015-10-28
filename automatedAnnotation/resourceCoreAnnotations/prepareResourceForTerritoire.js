@@ -11,9 +11,7 @@ var prepareExpressionDomainForTerritoire = require('./prepareExpressionDomainFor
     This function returns a Promise that should always resolve
 */
 
-module.exports = function(resource, territoireId, depth){
-    console.log('prepareResourceForTerritoire', territoireId, depth, resource.url)
-    
+module.exports = function(resource, territoireId, depth){    
     var expressionDomainP = prepareExpressionDomainForTerritoire(resource.url, territoireId)
         .catch(function(err){
             console.error('prepareExpressionDomainForTerritoire error', err);
@@ -41,7 +39,6 @@ module.exports = function(resource, territoireId, depth){
 
     return Promise.all([expressionDomainP, resourceAnnotationCreatedP])
         .then(function(res){
-            console.log('Promise.all([expressionDomainP, resourceAnnotationCreatedP]).then');
             var expressionDomain = res[0];
 
             return database.ResourceAnnotations.update(

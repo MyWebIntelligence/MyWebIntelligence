@@ -116,6 +116,7 @@ module.exports = React.createClass({
         
         this.setState(Object.assign({}, this.state, {
             resourceAnnotationByResourceId: territoire.resourceAnnotationByResourceId,
+            expressionDomainAnnotationsByEDId: territoire.expressionDomainAnnotationsByEDId,
             territoireTags: computeTerritoireTags(territoire.resourceAnnotationByResourceId)
         }));
     },

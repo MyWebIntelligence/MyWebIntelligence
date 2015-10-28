@@ -33,9 +33,7 @@ module.exports = function pageGraphToDomainGraph(pageGraph, expressionDomainsByI
         
         graph.nodes.toJSON().forEach(function(pn){
             var expressionDomainId = pn.expressionDomainId;
-            
-            console.log('expressionDomainIdToPageNode, expressionDomainId', expressionDomainId, pn)
-            
+                        
             var expressionDomainPageNodes = expressionDomainIdToPageNode.get(expressionDomainId);
             
             if(!expressionDomainPageNodes){

@@ -21,8 +21,12 @@ var isValidResourceExpression = Resources.isValidResourceExpression;
 var Links = require('../postgresDB/Links');
 var AlexaRankCache = require('../postgresDB/AlexaRankCache');
 var ResourceAnnotations = require('../postgresDB/ResourceAnnotations');
+var ExpressionDomainAnnotations = require('../postgresDB/ExpressionDomainAnnotations');
+
 var Tasks = require('../postgresDB/Tasks');
 var ExpressionDomains = require('../postgresDB/ExpressionDomains');
+
+
 
 var massageExpressionDomain = require('../postgresDB/massageExpressionDomain');
 
@@ -39,6 +43,7 @@ module.exports = {
     Resources: Resources,
     AlexaRankCache: AlexaRankCache,
     ResourceAnnotations: ResourceAnnotations,
+    ExpressionDomainAnnotations: ExpressionDomainAnnotations,
     Tasks: Tasks,
     ExpressionDomains: ExpressionDomains,
     

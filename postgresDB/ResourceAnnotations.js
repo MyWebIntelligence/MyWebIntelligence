@@ -103,23 +103,6 @@ module.exports = {
         
     },
     
-    findById: function(id){
-        return databaseP.then(function(db){
-            var query = resource_annotations
-                .select('*')
-                .where( resource_annotations.id.equals(id) )
-                .toQuery();
-
-            //console.log('ResourceAnnotations findById query', query);
-            
-            return new Promise(function(resolve, reject){
-                db.query(query, function(err, result){
-                    if(err) reject(err); else resolve(result.rows[0]);
-                });
-            });
-        })
-    },
-    
     findNotApproved: function(territoireId){
         return databaseP.then(function(db){
             var query = resource_annotations

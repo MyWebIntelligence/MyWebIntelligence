@@ -96,6 +96,8 @@ module.exports = function pageGraphToDomainGraph(pageGraph, expressionDomainsByI
                     depth: depth,
 
                     domain_title: expressionDomain.title || expressionDomain.name,
+                    domain_type: edAnnotations.media_type || '',
+                    
                     title: expressionDomain.name,
                     description: expressionDomain.description || '',
                     keywords: (expressionDomain.keywords || []).join(' / '),

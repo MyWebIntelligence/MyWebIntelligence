@@ -10,6 +10,9 @@ var domainNodeDesc = {
     "domain_title": {
         type: "string"
     },
+    "domain_type": {
+        type: "string"
+    },
     "description": {
         type: "string"
     },

@@ -310,10 +310,10 @@ app.get('/territoire/:id/expressions.csv', function(req, res){
             return annotationByResourceId;
         });
 
-    var expressionDomainAnnotationByEDIdP = database.ExpressionDomainAnnotations.findApprovedByTerritoireId(territoireId)
+    var expressionDomainAnnotationByEDIdP = database.ExpressionDomainAnnotations.findByTerritoireId(territoireId)
         .then(function(annotations){
             var annotationByEDId = Object.create(null);
-
+            
             annotations.forEach(function(ann){                        
                 annotationByEDId[ann.expression_domain_id] = {
                     estimated_potential_audience: ann.estimated_potential_audience,
@@ -355,7 +355,7 @@ app.get('/territoire/:id/expressions.csv', function(req, res){
             var resourceAnnotations = resourceAnnotationByResourceId[resourceId];
             
             var expressionDomainId = resourceAnnotations.expressionDomainId;
-            var expressionDomainAnnotations = expressionDomainAnnotationByEDId[resourceId];
+            var expressionDomainAnnotations = expressionDomainAnnotationByEDId[expressionDomainId];
             
             if(expression){
                 var simplifiedExpression = simplifyExpression(expression);

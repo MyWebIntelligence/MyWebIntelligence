@@ -177,9 +177,7 @@ module.exports = {
         /*
             resourceIds : Set<ResourceId>
         */
-        getExpressionsByResourceIds: function(resourceIds){
-            console.log('getExpressionsByResourceIds', resourceIds.size);
-            
+        getExpressionsByResourceIds: function(resourceIds){            
             var resources = declarations.resources;
             var expressions = declarations.expressions;
                         
@@ -198,8 +196,6 @@ module.exports = {
                     )
                     .where( resources.id.in(resourceIds.toJSON()) )
                     .toQuery();
-
-                console.log('getTerritoireExpressionDomains query', query);
 
                 return new Promise(function(resolve, reject){
                     db.query(query, function(err, result){

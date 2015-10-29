@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS resources (
     alias_of       integer UNIQUE REFERENCES resources (id), -- nullable if it doesn't alias anything
     expression_id  integer UNIQUE REFERENCES expressions (id), -- NULL initially and when url is an alias
     http_status    smallint,
-    content_type   varchar(50),
+    content_type   text,
     other_error    text
 ) INHERITS(lifecycle);
 CREATE TRIGGER updated_at_resources BEFORE UPDATE ON resources FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();

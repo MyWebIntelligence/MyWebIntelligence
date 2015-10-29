@@ -13,7 +13,10 @@ var PageListItem = React.createFactory(require('./PageListItem'));
 var abstractGraphToPageGraph = require('../../common/graph/abstractGraphToPageGraph');
 var pageGraphToDomainGraph = require('../../common/graph/pageGraphToDomainGraph');
 
-var annotate = require('../serverAPI').annotate;
+var serverAPI = require('../serverAPI');
+
+var annotateResource = serverAPI.annotateResource;
+var annotateExpressionDomain = serverAPI.annotateExpressionDomain;
 
 /*
 
@@ -25,15 +28,15 @@ interface TerritoireViewScreenProps{
 
 */
 
-function generateExpressionGEXF(abstractGraph, expressionById, resourceAnnotationByResourceId){
-    var pageGraph = abstractGraphToPageGraph(abstractGraph, expressionById, resourceAnnotationByResourceId);
+function generateExpressionGEXF(abstractGraph, expressionById, resourceAnnotationByResourceId, expressionDomainAnnotationsByEDId){
+    var pageGraph = abstractGraphToPageGraph(abstractGraph, expressionById, resourceAnnotationByResourceId, expressionDomainAnnotationsByEDId);
     
     return pageGraph.exportAsGEXF();
 }
 
 
 function generateDomainGEXF(abstractGraph, expressionById, resourceAnnotationByResourceId, expressionDomainAnnotationsByEDId, expressionDomainById){
-    var pageGraph = abstractGraphToPageGraph(abstractGraph, expressionById, resourceAnnotationByResourceId);
+    var pageGraph = abstractGraphToPageGraph(abstractGraph, expressionById, resourceAnnotationByResourceId, expressionDomainAnnotationsByEDId);
     var domainGraph = pageGraphToDomainGraph(pageGraph, expressionDomainById, expressionDomainAnnotationsByEDId);
     
     return domainGraph.exportAsGEXF();
@@ -77,6 +80,7 @@ function computeTerritoireTags(annotationByResourceId){
 
 
 module.exports = React.createClass({
+    displayName: 'TerritoireViewScreen',
     
     _refreshTimeout: undefined,
     _scheduleRefreshIfNecessary: function(){        
@@ -134,7 +138,6 @@ module.exports = React.createClass({
         }
     },
     
-    displayName: 'TerritoireViewScreen',
     
     render: function() {
         var self = this;
@@ -149,10 +152,11 @@ module.exports = React.createClass({
                 abstractGraphToPageGraph(
                     territoire.graph, 
                     territoire.expressionById, 
-                    state.resourceAnnotationByResourceId
+                    state.resourceAnnotationByResourceId,
+                    state.expressionDomainAnnotationsByEDId
                 ),
                 territoire.expressionDomainsById,
-                territoire.expressionDomainAnnotationsByEDId
+                state.expressionDomainAnnotationsByEDId
             )
             
             // this is ugly
@@ -224,7 +228,18 @@ module.exports = React.createClass({
                                     return;
                                 
                                 var expression = territoire.expressionById[expressionId];
-                                                      
+                                var expressionDomainId = state.resourceAnnotationByResourceId ?
+                                    state.resourceAnnotationByResourceId[resourceId].expressionDomainId :
+                                    undefined;
+                                
+                                var resourceAnnotations = state.resourceAnnotationByResourceId ?
+                                    state.resourceAnnotationByResourceId[resourceId] : 
+                                    {tags: new Set()};
+                                var expressionDomainAnnotations = state.expressionDomainAnnotationsByEDId ?
+                                    state.expressionDomainAnnotationsByEDId[expressionDomainId] : 
+                                    undefined;
+                                
+                                
                                 return new PageListItem({
                                     key: resourceId,
 
@@ -235,34 +250,90 @@ module.exports = React.createClass({
                                     excerpt: expression.excerpt,
                                     rejected: state.rejectedResourceIds.has(resourceId),
                                     
-                                    annotations: state.resourceAnnotationByResourceId ? state.resourceAnnotationByResourceId[resourceId] : {tags: new Set()},
+                                    resourceAnnotations: resourceAnnotations,
+                                    expressionDomainAnnotations : expressionDomainAnnotations,
+                                    
                                     annotate: function(newAnnotations, approved){
+                                        newAnnotations = newAnnotations || {}
                                         
-                                        // TODO add a pending state or something
-                                        annotate(resourceId, territoire.id, newAnnotations, approved)
+                                        // separate out resource annotations from expression domain annotations
+                                        var deltaExpressionDomainAnnotations;
+                                        var deltaResourceAnnotations;
+                                        
+                                        if(newAnnotations.media_type !== undefined){
+                                            deltaExpressionDomainAnnotations = {
+                                                media_type: newAnnotations.media_type
+                                            };
+                                        }
+                                        
+                                        deltaResourceAnnotations = Object.assign(
+                                            {}, 
+                                            newAnnotations, 
+                                            {media_type: undefined}
+                                        );
+                                        
+                                        // remove merged object
+                                        newAnnotations = undefined;
+                                        
+                                        // is it worth calling annotateResource?
+                                        if(Object.keys(deltaResourceAnnotations)
+                                           .some(function(k){ return deltaResourceAnnotations[k] !== undefined }) ||
+                                           approved !== undefined
+                                          ){
+                                            // TODO add a pending state or something
+                                            annotateResource(resourceId, territoire.id, deltaResourceAnnotations, approved)
                                             .catch(function(err){
-                                                console.error('annotation update error', resourceId, territoire.id, newAnnotations, err);
+                                                console.error(
+                                                    'resource annotation update error', 
+                                                    resourceId, territoire.id, deltaResourceAnnotations, approved, err
+                                                );
                                             });
+                                        }
+                                        
+                                        // is it worth calling annotateExpressionDomain?
+                                        if(deltaExpressionDomainAnnotations){
+                                            annotateExpressionDomain(expressionDomainId, territoire.id, deltaExpressionDomainAnnotations)
+                                            .catch(function(err){
+                                                console.error(
+                                                    'expression domain annotation update error', 
+                                                    expressionDomainId, territoire.id, deltaExpressionDomainAnnotations, err
+                                                );
+                                            });   
+                                        }
                                         
                                         
+                                        // updating annotations locally (optimistically hoping being in sync with the server)
                                         var territoireTags = state.territoireTags;
                                         
                                         // add tags for autocomplete
-                                        newAnnotations.tags.forEach(function(t){
-                                            territoireTags = territoireTags.add(t);
-                                        });
-                                                                            
-                                        state.resourceAnnotationByResourceId[resourceId] = newAnnotations;
+                                        // tags are only added, never removed for autocomplete purposes
+                                        if(deltaResourceAnnotations.tags){
+                                            deltaResourceAnnotations.tags.forEach(function(t){
+                                                territoireTags = territoireTags.add(t);
+                                            });
+                                        }
                                         
+                                        state.resourceAnnotationByResourceId[resourceId] = Object.assign(
+                                            {},
+                                            resourceAnnotations,
+                                            deltaResourceAnnotations
+                                        );
+                                        state.expressionDomainAnnotationsByEDId[expressionDomainId] = Object.assign(
+                                            {},
+                                            expressionDomainAnnotations,
+                                            deltaExpressionDomainAnnotations
+                                        );
+
                                         var rejectedResourceIds = state.rejectedResourceIds;
                                         if(approved !== undefined){
                                             rejectedResourceIds = approved ?
                                                 rejectedResourceIds.delete(resourceId) :
-                                                rejectedResourceIds = rejectedResourceIds.add(resourceId);
+                                                rejectedResourceIds.add(resourceId);
                                         }
                                         
                                         self.setState(Object.assign({}, state, {
                                             resourceAnnotationByResourceId: state.resourceAnnotationByResourceId, // mutated
+                                            expressionDomainAnnotationsByEDId: state.expressionDomainAnnotationsByEDId, // mutated
                                             territoireTags: territoireTags,
                                             rejectedResourceIds: rejectedResourceIds
                                         }));

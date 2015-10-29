@@ -15,7 +15,8 @@ interface PageListItemProps{
     title: string,
     excerpt: string,
     
-    annotations: object map,
+    resourceAnnotations: object map,
+    expressionDomainAnnotations: object map,
     
     rejected?: boolean, // can only be true. undefined otherwise
     annotate: (annotations, approved): void
@@ -39,7 +40,8 @@ module.exports = React.createClass({
         var state = this.state;
         
         return props.rejected !== nextProps.rejected ||
-            props.annotations !== nextProps.annotations ||
+            props.resourceAnnotations !== nextProps.resourceAnnotations ||
+            props.expressionDomainAnnotations !== nextProps.expressionDomainAnnotations ||
             state.tagInputValue !== nextState.tagInputValue;
     },
     
@@ -51,7 +53,8 @@ module.exports = React.createClass({
         var resourceId = props.resourceId;
         var annotate = props.annotate;
 
-        var annotations = props.annotations;
+        var resourceAnnotations = props.resourceAnnotations;
+        var expressionDomainAnnotations = props.expressionDomainAnnotations;
         
         var classes = ['page-list-item'];
         if (props.rejected) {
@@ -80,7 +83,7 @@ module.exports = React.createClass({
                     // if props.rejected was false (approved === true), we want newApproved to be false (approved === false)
                     var newApproved = props.rejected;
 
-                    annotate(annotations, newApproved);
+                    annotate(undefined, newApproved);
                 }
             }, '🗑'),
 
@@ -92,7 +95,7 @@ module.exports = React.createClass({
                 React.DOM.div({
                         className: 'tags'
                     },
-                    annotations.tags.toJSON().map(function (tag) {
+                    resourceAnnotations.tags.toJSON().map(function (tag) {
                         return React.DOM.span({
                                 className: 'tag',
                                 key: tag
@@ -101,12 +104,12 @@ module.exports = React.createClass({
                             React.DOM.button({
                                 className: 'delete',
                                 onClick: function () {
-                                    var newTags = new Set(annotations.tags);
+                                    var newTags = new Set(resourceAnnotations.tags);
                                     newTags.delete(tag);
 
                                     annotate(mixin(
                                         {},
-                                        annotations,
+                                        resourceAnnotations,
                                         { tags: newTags }
                                     ), undefined);
                                 }
@@ -129,7 +132,7 @@ module.exports = React.createClass({
                             var res = findTags(value);
                             var inputTags = res.tags;
 
-                            var newTags = new Set(annotations.tags)
+                            var newTags = new Set(resourceAnnotations.tags)
 
                             if (inputTags.size >= 1) {
                                 // merge tags
@@ -139,7 +142,7 @@ module.exports = React.createClass({
 
                                 annotate(mixin(
                                     {},
-                                    annotations,
+                                    resourceAnnotations,
                                     { tags: newTags }
                                 ), undefined);
                             }
@@ -158,14 +161,14 @@ module.exports = React.createClass({
                     },
                     // negative
                     React.DOM.button({
-                        className: ['negative', (annotations.sentiment === 'negative' ? 'active' : '')].join(' '),
+                        className: ['negative', (resourceAnnotations.sentiment === 'negative' ? 'active' : '')].join(' '),
                         onClick: function () {
                             // empty string means "no sentiment annotation"
-                            var newSentiment = annotations.sentiment === 'negative' ? '' : 'negative';
+                            var newSentiment = resourceAnnotations.sentiment === 'negative' ? '' : 'negative';
 
                             annotate(mixin(
                                 {},
-                                annotations,
+                                resourceAnnotations,
                                 { sentiment: newSentiment }
                             ), undefined);
                         }
@@ -175,39 +178,34 @@ module.exports = React.createClass({
 
                 // media-type
                 React.DOM.select({
-                        value: annotations['media_type'],
-                        onChange: function (e) {
-                            var newMediaType = e.target.value;
-                            
-                            annotate(mixin(
-                                {},
-                                annotations,
-                                { 'media_type': newMediaType }
-                            ), undefined);
-                        }
-                    }, ["", "Institutional", "Thematique",
-                     "Web dictionary", "Editorial", "Blog",
-                     "Forum", "Social Network", "Search Engine"]
-                    .map(function (type) {
-                        return React.DOM.option({
-                            value: type
-                        }, type)
-                    })
-                ),
+                    value: expressionDomainAnnotations['media_type'],
+                    onChange: function (e) {
+                        var newMediaType = e.target.value;
+
+                        annotate(mixin({ 'media_type': newMediaType }), undefined);
+                    }
+                }, ["", "Institutional", "Thematique",
+                 "Web dictionary", "Editorial", "Blog",
+                 "Forum", "Social Network", "Search Engine"]
+                .map(function (type) {
+                    return React.DOM.option({
+                        value: type
+                    }, type)
+                })),
 
                 // favorite
                 React.DOM.button({
-                    className: ['favorite', (annotations.favorite ? 'active' : '')].join(' '),
+                    className: ['favorite', (resourceAnnotations.favorite ? 'active' : '')].join(' '),
                     onClick: function () {
-                        var newFavorite = !annotations.favorite;
+                        var newFavorite = !resourceAnnotations.favorite;
 
                         annotate(mixin(
                             {},
-                            annotations,
+                            resourceAnnotations,
                             { favorite: newFavorite }
                         ), undefined);
                     }
-                }, annotations.favorite ? '★' : '☆')
+                }, resourceAnnotations.favorite ? '★' : '☆')
             )
 
         );

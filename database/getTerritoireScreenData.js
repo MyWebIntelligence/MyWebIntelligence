@@ -61,7 +61,7 @@ module.exports = function getTerritoireScreenData(territoireId){
     ]).then(function(res){
         console.timeEnd('all data');
         var territoire = res[0];
-
+        
         territoire.graph = res[1];
         territoire.progressIndicators = res[2];
         territoire.expressionById = res[3];

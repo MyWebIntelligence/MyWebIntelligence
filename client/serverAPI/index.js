@@ -58,10 +58,13 @@ module.exports = {
     getTerritoireViewData: function(territoire){
         return sendReq('GET', '/territoire-view-data/'+territoire.id);
     },
-    annotate: function(resourceId, territoireId, annotations, approved){
-        return sendReq('POST', '/'+['annotation', territoireId, resourceId].join('/'), {
+    annotateResource: function(resourceId, territoireId, annotations, approved){
+        return sendReq('POST', '/'+['resource-annotation', territoireId, resourceId].join('/'), {
             approved: approved,
             values: annotations
         });
+    },
+    annotateExpressionDomain: function(expressionDomainId, territoireId, data){
+        return sendReq('POST', '/'+['expression-domain-annotation', territoireId, expressionDomainId].join('/'), data);
     }
 };

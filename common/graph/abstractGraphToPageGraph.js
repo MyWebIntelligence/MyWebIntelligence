@@ -9,7 +9,7 @@ var PageGraph = require('./PageGraph');
     expressionById : StringMap<ExpressionId, Expression>
     annotationsById : DictObject<ResourceId, DictObj<AnnotationType, value>>
 */
-module.exports = function abstractGraphToPageGraph(abGraph, expressionById, annotationsById){
+module.exports = function abstractGraphToPageGraph(abGraph, expressionById, resourceAnnotationsById, expressionDomainAnnotationsById){
     console.time('PageGraph');
     var nodes = abGraph.nodes;
     var edges = abGraph.edges;
@@ -36,7 +36,11 @@ module.exports = function abstractGraphToPageGraph(abGraph, expressionById, anno
             expressionById[expressionId]
         );
         
-        var annotations = annotationsById ? annotationsById[resourceId] : undefined;
+        var resourceAnnotations = resourceAnnotationsById ? resourceAnnotationsById[resourceId] : undefined;
+        var expressionDomainId = resourceAnnotations.expressionDomainId;
+        
+        var expressionDomainAnnotations = expressionDomainAnnotationsById[expressionDomainId];
+        
         
         var name = nextNodeName();
         
@@ -47,10 +51,13 @@ module.exports = function abstractGraphToPageGraph(abGraph, expressionById, anno
                 title: expression.title || '',
                 expressionId: typeof expression.id === "number" ? expression.id : -1
             }, 
-            annotations,
-            annotations ? {
-                tags: annotations.tags.toJSON().join(', ')
-            } : undefined
+            resourceAnnotations,
+            {
+                media_type: expressionDomainAnnotations.media_type || ''
+            },
+            {
+                tags: resourceAnnotations.tags.toJSON().join(', ')
+            }
         ));
 
         var urlToNodeNameKey = String(res.id);

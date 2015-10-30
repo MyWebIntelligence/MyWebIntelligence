@@ -103,23 +103,6 @@ module.exports = {
         
     },
     
-    findById: function(id){
-        return databaseP.then(function(db){
-            var query = resource_annotations
-                .select('*')
-                .where( resource_annotations.id.equals(id) )
-                .toQuery();
-
-            //console.log('ResourceAnnotations findById query', query);
-            
-            return new Promise(function(resolve, reject){
-                db.query(query, function(err, result){
-                    if(err) reject(err); else resolve(result.rows[0]);
-                });
-            });
-        })
-    },
-    
     findNotApproved: function(territoireId){
         return databaseP.then(function(db){
             var query = resource_annotations
@@ -157,11 +140,15 @@ module.exports = {
                 .where(
                     resource_annotations.territoire_id.equals(territoireId).and(
                         // should be:
-                        //resource_annotations.values.isNotNull().and(
+                        //resource_annotations.expression_domain_id.isNotNull().and(
                         //    resource_annotations.approved.equals(true)
                         //)
+                        //
+                        // expression_domain_id.isNotNull() is for the temporary case where prepareResourceForTerritoire 
+                        // is only partially done (resource created, but expression domain not yet)
+                        //
                         // but for now that we don't crawl, do:
-                        resource_annotations.values.isNotNull().and(
+                        resource_annotations.expression_domain_id.isNotNull().and(
                             resource_annotations.approved.equals(true).or(resource_annotations.approved.isNull())
                         )
                     )

@@ -12,10 +12,11 @@ var PageListItem = React.createFactory(require('./PageListItem'));
 
 var abstractGraphToPageGraph = require('../../common/graph/abstractGraphToPageGraph');
 var pageGraphToDomainGraph = require('../../common/graph/pageGraphToDomainGraph');
-var getAbstractGraphHostnames = require('../../common/graph/getAbstractGraphHostnames');
 
-var getAlexaRanks = require('../serverAPI/getAlexaRanks')
-var annotate = require('../serverAPI').annotate;
+var serverAPI = require('../serverAPI');
+
+var annotateResource = serverAPI.annotateResource;
+var annotateExpressionDomain = serverAPI.annotateExpressionDomain;
 
 /*
 
@@ -27,27 +28,18 @@ interface TerritoireViewScreenProps{
 
 */
 
-function generateExpressionGEXF(abstractGraph, expressionById, annotationsById){
-    var pageGraph = abstractGraphToPageGraph(abstractGraph, expressionById, annotationsById);
+function generateExpressionGEXF(abstractGraph, expressionById, resourceAnnotationByResourceId, expressionDomainAnnotationsByEDId){
+    var pageGraph = abstractGraphToPageGraph(abstractGraph, expressionById, resourceAnnotationByResourceId, expressionDomainAnnotationsByEDId);
     
     return pageGraph.exportAsGEXF();
 }
 
 
-function generateDomainGEXF(abstractGraph, expressionById, annotationsById, expressionDomainById){
-    var pageGraph = abstractGraphToPageGraph(abstractGraph, expressionById, annotationsById);
-    var graphHostname = getAbstractGraphHostnames(abstractGraph);
+function generateDomainGEXF(abstractGraph, expressionById, resourceAnnotationByResourceId, expressionDomainAnnotationsByEDId, expressionDomainById){
+    var pageGraph = abstractGraphToPageGraph(abstractGraph, expressionById, resourceAnnotationByResourceId, expressionDomainAnnotationsByEDId);
+    var domainGraph = pageGraphToDomainGraph(pageGraph, expressionDomainById, expressionDomainAnnotationsByEDId);
     
-    var domainGraphP = getAlexaRanks(graphHostname)
-        .then(function(alexaRanks){
-            console.log("alexaRanks", alexaRanks.size, alexaRanks);
-            
-            return pageGraphToDomainGraph(pageGraph, alexaRanks, expressionDomainById);
-        });
-    
-    return domainGraphP.then(function(domainGraph){
-        return domainGraph.exportAsGEXF();
-    })
+    return domainGraph.exportAsGEXF();
 }
 
 
@@ -88,6 +80,7 @@ function computeTerritoireTags(annotationByResourceId){
 
 
 module.exports = React.createClass({
+    displayName: 'TerritoireViewScreen',
     
     _refreshTimeout: undefined,
     _scheduleRefreshIfNecessary: function(){        
@@ -125,28 +118,26 @@ module.exports = React.createClass({
     componentWillReceiveProps: function(nextProps) {
         var territoire = nextProps.territoire;
         
-        console.log('componentWillReceiveProps territoire.annotationByResourceId', territoire.annotationByResourceId, territoire)
         this.setState(Object.assign({}, this.state, {
-            annotationByResourceId: territoire.annotationByResourceId,
-            territoireTags: computeTerritoireTags(territoire.annotationByResourceId)
+            resourceAnnotationByResourceId: territoire.resourceAnnotationByResourceId,
+            expressionDomainAnnotationsByEDId: territoire.expressionDomainAnnotationsByEDId,
+            territoireTags: computeTerritoireTags(territoire.resourceAnnotationByResourceId)
         }));
     },
     
     getInitialState: function() {
         var territoire = this.props.territoire;
-                
-        console.log('getInitialState annotationByResourceId', territoire.annotationByResourceId, territoire);
-        
+                        
         return {
-            territoireTags: computeTerritoireTags(territoire.annotationByResourceId),
-            annotationByResourceId: territoire.annotationByResourceId,
+            territoireTags: computeTerritoireTags(territoire.resourceAnnotationByResourceId),
+            resourceAnnotationByResourceId: territoire.resourceAnnotationByResourceId,
+            expressionDomainAnnotationsByEDId: territoire.expressionDomainAnnotationsByEDId,
             territoireGraph: undefined,
             domainGraph: undefined,
             rejectedResourceIds : new ImmutableSet()
         }
     },
     
-    displayName: 'TerritoireViewScreen',
     
     render: function() {
         var self = this;
@@ -161,10 +152,11 @@ module.exports = React.createClass({
                 abstractGraphToPageGraph(
                     territoire.graph, 
                     territoire.expressionById, 
-                    state.annotationByResourceId
+                    state.resourceAnnotationByResourceId,
+                    state.expressionDomainAnnotationsByEDId
                 ),
-                undefined,
-                territoire.expressionDomainsById
+                territoire.expressionDomainsById,
+                state.expressionDomainAnnotationsByEDId
             )
             
             // this is ugly
@@ -236,7 +228,18 @@ module.exports = React.createClass({
                                     return;
                                 
                                 var expression = territoire.expressionById[expressionId];
-                                                      
+                                var expressionDomainId = state.resourceAnnotationByResourceId ?
+                                    state.resourceAnnotationByResourceId[resourceId].expressionDomainId :
+                                    undefined;
+                                
+                                var resourceAnnotations = state.resourceAnnotationByResourceId ?
+                                    state.resourceAnnotationByResourceId[resourceId] : 
+                                    {tags: new Set()};
+                                var expressionDomainAnnotations = state.expressionDomainAnnotationsByEDId ?
+                                    state.expressionDomainAnnotationsByEDId[expressionDomainId] : 
+                                    undefined;
+                                
+                                
                                 return new PageListItem({
                                     key: resourceId,
 
@@ -247,34 +250,90 @@ module.exports = React.createClass({
                                     excerpt: expression.excerpt,
                                     rejected: state.rejectedResourceIds.has(resourceId),
                                     
-                                    annotations: state.annotationByResourceId ? state.annotationByResourceId[resourceId] : {tags: new Set()},
+                                    resourceAnnotations: resourceAnnotations,
+                                    expressionDomainAnnotations : expressionDomainAnnotations,
+                                    
                                     annotate: function(newAnnotations, approved){
+                                        newAnnotations = newAnnotations || {}
                                         
-                                        // TODO add a pending state or something
-                                        annotate(resourceId, territoire.id, newAnnotations, approved)
+                                        // separate out resource annotations from expression domain annotations
+                                        var deltaExpressionDomainAnnotations;
+                                        var deltaResourceAnnotations;
+                                        
+                                        if(newAnnotations.media_type !== undefined){
+                                            deltaExpressionDomainAnnotations = {
+                                                media_type: newAnnotations.media_type
+                                            };
+                                        }
+                                        
+                                        deltaResourceAnnotations = Object.assign(
+                                            {}, 
+                                            newAnnotations, 
+                                            {media_type: undefined}
+                                        );
+                                        
+                                        // remove merged object
+                                        newAnnotations = undefined;
+                                        
+                                        // is it worth calling annotateResource?
+                                        if(Object.keys(deltaResourceAnnotations)
+                                           .some(function(k){ return deltaResourceAnnotations[k] !== undefined }) ||
+                                           approved !== undefined
+                                          ){
+                                            // TODO add a pending state or something
+                                            annotateResource(resourceId, territoire.id, deltaResourceAnnotations, approved)
                                             .catch(function(err){
-                                                console.error('annotation update error', resourceId, territoire.id, newAnnotations, err);
+                                                console.error(
+                                                    'resource annotation update error', 
+                                                    resourceId, territoire.id, deltaResourceAnnotations, approved, err
+                                                );
                                             });
+                                        }
+                                        
+                                        // is it worth calling annotateExpressionDomain?
+                                        if(deltaExpressionDomainAnnotations){
+                                            annotateExpressionDomain(expressionDomainId, territoire.id, deltaExpressionDomainAnnotations)
+                                            .catch(function(err){
+                                                console.error(
+                                                    'expression domain annotation update error', 
+                                                    expressionDomainId, territoire.id, deltaExpressionDomainAnnotations, err
+                                                );
+                                            });   
+                                        }
                                         
                                         
+                                        // updating annotations locally (optimistically hoping being in sync with the server)
                                         var territoireTags = state.territoireTags;
                                         
                                         // add tags for autocomplete
-                                        newAnnotations.tags.forEach(function(t){
-                                            territoireTags = territoireTags.add(t);
-                                        });
-                                                                            
-                                        state.annotationByResourceId[resourceId] = newAnnotations;
+                                        // tags are only added, never removed for autocomplete purposes
+                                        if(deltaResourceAnnotations.tags){
+                                            deltaResourceAnnotations.tags.forEach(function(t){
+                                                territoireTags = territoireTags.add(t);
+                                            });
+                                        }
                                         
+                                        state.resourceAnnotationByResourceId[resourceId] = Object.assign(
+                                            {},
+                                            resourceAnnotations,
+                                            deltaResourceAnnotations
+                                        );
+                                        state.expressionDomainAnnotationsByEDId[expressionDomainId] = Object.assign(
+                                            {},
+                                            expressionDomainAnnotations,
+                                            deltaExpressionDomainAnnotations
+                                        );
+
                                         var rejectedResourceIds = state.rejectedResourceIds;
                                         if(approved !== undefined){
                                             rejectedResourceIds = approved ?
                                                 rejectedResourceIds.delete(resourceId) :
-                                                rejectedResourceIds = rejectedResourceIds.add(resourceId);
+                                                rejectedResourceIds.add(resourceId);
                                         }
                                         
                                         self.setState(Object.assign({}, state, {
-                                            annotationByResourceId: state.annotationByResourceId, // mutated
+                                            resourceAnnotationByResourceId: state.resourceAnnotationByResourceId, // mutated
+                                            expressionDomainAnnotationsByEDId: state.expressionDomainAnnotationsByEDId, // mutated
                                             territoireTags: territoireTags,
                                             rejectedResourceIds: rejectedResourceIds
                                         }));
@@ -299,10 +358,10 @@ module.exports = React.createClass({
                             onClick: function(e){
                                 e.preventDefault();
                                 
-                                //console.log('before dl', territoire.annotationByResourceId, territoire);
+                                //console.log('before dl', territoire.resourceAnnotationByResourceId, territoire);
                                 
                                 triggerDownload(
-                                    generateExpressionGEXF(territoire.graph, territoire.expressionById, territoire.annotationByResourceId),
+                                    generateExpressionGEXF(territoire.graph, territoire.expressionById, territoire.resourceAnnotationByResourceId),
                                     territoire.name+'-pages.gexf',
                                     "application/gexf+xml"
                                 );
@@ -314,17 +373,19 @@ module.exports = React.createClass({
                             onClick: function(e){
                                 e.preventDefault();
                                 
-                                generateDomainGEXF(territoire.graph, territoire.expressionById, state.annotationByResourceId, territoire.expressionDomainsById)
-                                    .then(function(domainsGEXF){
-                                        triggerDownload(
-                                            domainsGEXF,
-                                            territoire.name+'-domains.gexf',
-                                            "application/gexf+xml"
-                                        );
-                                    })
-                                    .catch(function(err){
-                                        console.error('generateDomainGEXF error', err, err.stack);
-                                    });
+                                var domainsGEXF = generateDomainGEXF(
+                                    territoire.graph, 
+                                    territoire.expressionById, 
+                                    state.resourceAnnotationByResourceId, 
+                                    state.expressionDomainAnnotationsByEDId,
+                                    territoire.expressionDomainsById
+                                )
+                                    
+                                triggerDownload(
+                                    domainsGEXF,
+                                    territoire.name+'-domains.gexf',
+                                    "application/gexf+xml"
+                                );
                             }
                         }, 'Download Domains GEXF')
                     )

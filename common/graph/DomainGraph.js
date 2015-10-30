@@ -10,6 +10,9 @@ var domainNodeDesc = {
     "domain_title": {
         type: "string"
     },
+    "domain_type": {
+        type: "string"
+    },
     "description": {
         type: "string"
     },
@@ -29,11 +32,8 @@ var domainNodeDesc = {
         type: "integer"
     },
     
-    "global_alexarank": {
+    "estimated_potential_audience": {
         type: "integer"
-    },
-    "inverse_global_alexarank": {
-        type: "float"
     },
     
     "min_facebook_like": {

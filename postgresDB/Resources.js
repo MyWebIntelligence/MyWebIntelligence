@@ -21,6 +21,9 @@ module.exports = {
         urls is a Set<url>
     */
     create: function(urls){
+        if(typeof urls === 'string')
+            urls = new Set([urls]);
+        
         return databaseP.then(function(db){
             var query = resources
                 .insert(urls.toJSON().map(function(url){

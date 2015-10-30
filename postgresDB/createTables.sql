@@ -15,7 +15,13 @@ END;
 $$ language 'plpgsql';
 
 
+
 -- Business --
+
+
+/*
+    WEB GRAPH
+*/
 
 CREATE TABLE IF NOT EXISTS expressions (
     id           SERIAL PRIMARY KEY,
@@ -33,7 +39,7 @@ CREATE TABLE IF NOT EXISTS resources (
     alias_of       integer UNIQUE REFERENCES resources (id), -- nullable if it doesn't alias anything
     expression_id  integer UNIQUE REFERENCES expressions (id), -- NULL initially and when url is an alias
     http_status    smallint,
-    content_type   varchar(50),
+    content_type   text,
     other_error    text
 ) INHERITS(lifecycle);
 CREATE TRIGGER updated_at_resources BEFORE UPDATE ON resources FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
@@ -56,6 +62,7 @@ CREATE TRIGGER updated_at_expression_domains BEFORE UPDATE ON expression_domains
 CREATE TABLE IF NOT EXISTS links (
     "source"      integer REFERENCES resources (id) NOT NULL,
     target        integer REFERENCES resources (id) NOT NULL,
+    
     PRIMARY KEY ("source", target)
 ) INHERITS(lifecycle);
 CREATE TRIGGER updated_at_links BEFORE UPDATE ON links FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
@@ -63,13 +70,18 @@ CREATE TRIGGER updated_at_links BEFORE UPDATE ON links FOR EACH ROW EXECUTE PROC
 CREATE INDEX ON links ("source");
 
 
+
+/*
+    ANNOTATIONS
+*/
+
 CREATE TABLE IF NOT EXISTS resource_annotations (
-    approved                boolean DEFAULT NULL, -- NULL means "don't know yet"
-    values                  text, -- JSON blob. This prevents annotation-based queries at the SQL level. Stats will have to be made in JS or maybe in a synthesized document served by ElasticSearch
-    expression_domain_id    integer REFERENCES expression_domains (id),
     resource_id             integer REFERENCES resources (id) NOT NULL,
     territoire_id           integer NOT NULL, -- eventually should be a foreign key for the territoires table
     user_id                 integer, -- eventually should be a foreign key for the users table. NULL means an algorithm made the annotation
+    expression_domain_id    integer REFERENCES expression_domains (id),
+    approved                boolean DEFAULT NULL, -- NULL means "don't know yet"
+    values                  text, -- JSON blob. This prevents annotation-based queries at the SQL level. Stats will have to be made in JS or maybe in a synthesized document served by ElasticSearch
     PRIMARY KEY(territoire_id, resource_id) -- for now
 ) INHERITS(lifecycle);
 CREATE TRIGGER updated_at_resource_annotations BEFORE UPDATE ON resource_annotations FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
@@ -78,16 +90,21 @@ CREATE INDEX ON resource_annotations (territoire_id, approved);
 CREATE INDEX ON resource_annotations (resource_id);
 
 
-CREATE TYPE tasks_status AS ENUM ('todo', 'in progress');
-CREATE TABLE IF NOT EXISTS tasks (
-    id              SERIAL PRIMARY KEY,
-    type            text NOT NULL,
-    resource_id     integer REFERENCES resources (id) NOT NULL,
-    territoire_id   integer NOT NULL,
-    depth           integer NOT NULL,
-    status          tasks_status
+CREATE TABLE IF NOT EXISTS expression_domain_annotations (
+    territoire_id                   integer NOT NULL, -- eventually should be a foreign key for the territoires table
+    expression_domain_id            integer REFERENCES expression_domains (id) NOT NULL,
+    user_id                         integer, -- eventually should be a foreign key for the users table. NULL means an algorithm made the annotation
+    media_type                      text,
+    estimated_potential_audience    integer DEFAULT NULL,
+    keywords                        text[],
+    -- communities                     integer REFERENCES communities (id) -- eventually 
+    
+    PRIMARY KEY(territoire_id, expression_domain_id) -- for now
 ) INHERITS(lifecycle);
-CREATE TRIGGER updated_at_tasks BEFORE UPDATE ON tasks FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
+CREATE TRIGGER updated_at_expression_domain_annotations BEFORE UPDATE ON expression_domain_annotations FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
+
+CREATE INDEX ON expression_domain_annotations (territoire_id);
+CREATE INDEX ON expression_domain_annotations (expression_domain_id);
 
 
 CREATE TABLE IF NOT EXISTS alexa_rank_cache (
@@ -99,5 +116,18 @@ CREATE INDEX ON alexa_rank_cache (site_domain);
 
 
 
+/*
+    TASKS
+*/
 
+CREATE TYPE tasks_status AS ENUM ('todo', 'in progress');
+CREATE TABLE IF NOT EXISTS tasks (
+    id              SERIAL PRIMARY KEY,
+    type            text NOT NULL,
+    resource_id     integer REFERENCES resources (id) NOT NULL,
+    territoire_id   integer NOT NULL,
+    depth           integer NOT NULL,
+    status          tasks_status
+) INHERITS(lifecycle);
+CREATE TRIGGER updated_at_tasks BEFORE UPDATE ON tasks FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
 

@@ -82,6 +82,9 @@ function massageTerritoireData(terrData){
     Object.keys(annotations).forEach(function(id){
         var ann = annotations[id];
         ann.tags = new Set( ann.tags || [] );
+        
+        if(ann.google_pagerank === null)
+            delete ann.google_pagerank;
     })
     
     return terrData;

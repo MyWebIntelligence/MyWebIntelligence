@@ -47,7 +47,6 @@ module.exports = function abstractGraphToPageGraph(abGraph, expressionById, reso
 
             var expressionDomainAnnotations = expressionDomainAnnotationsById[expressionDomainId];
 
-
             var name = nextNodeName();
 
             pageGraph.addNode(name, Object.assign(
@@ -59,9 +58,7 @@ module.exports = function abstractGraphToPageGraph(abGraph, expressionById, reso
                 }, 
                 resourceAnnotations,
                 {
-                    media_type: expressionDomainAnnotations.media_type || ''
-                },
-                {
+                    media_type: expressionDomainAnnotations.media_type || '',
                     tags: resourceAnnotations.tags.toJSON().join(', ')
                 }
             ));

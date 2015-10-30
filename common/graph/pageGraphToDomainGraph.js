@@ -69,7 +69,7 @@ module.exports = function pageGraphToDomainGraph(pageGraph, expressionDomainsByI
 
             var domainGooglePagerank = pageNodes
                 .map(function(node){ return node.google_pagerank; })
-                .filter(function(gRank){ return gRank !== undefined && gRank !== null && gRank !== 12; });
+                .filter(function(gRank){ return gRank !== undefined && gRank !== null; });
 
             var socialImpacts = pageNodes
                 .map(function(node){ return computeSocialImpact(node); })
@@ -121,9 +121,9 @@ module.exports = function pageGraphToDomainGraph(pageGraph, expressionDomainsByI
                     max_linkedin_share: cleanValue(stats.max(domainLinkedinShares), [undefined, null], -1),
                     median_linkedin_share: cleanValue(stats.median(domainLinkedinShares), [undefined, null], -1),
 
-                    min_google_pagerank: cleanValue(stats.min(domainGooglePagerank), [undefined, null], 12),
-                    max_google_pagerank: cleanValue(stats.max(domainGooglePagerank), [undefined, null], 12),
-                    median_google_pagerank: cleanValue(stats.median(domainGooglePagerank), [undefined, null], 12),
+                    min_google_pagerank: cleanValue(stats.min(domainGooglePagerank), [undefined, null], -1),
+                    max_google_pagerank: cleanValue(stats.max(domainGooglePagerank), [undefined, null], -1),
+                    median_google_pagerank: cleanValue(stats.median(domainGooglePagerank), [undefined, null], -1),
 
                     sum_likes: cleanValue(stats.sum(domainFbLikes), [undefined, null], 0),
                     sum_shares: (

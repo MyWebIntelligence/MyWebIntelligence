@@ -15,6 +15,8 @@ var pageGraphToDomainGraph = require('../../common/graph/pageGraphToDomainGraph'
 
 var serverAPI = require('../serverAPI');
 
+var computeSocialImpact = require('../../automatedAnnotation/computeSocialImpact');
+
 var annotateResource = serverAPI.annotateResource;
 var annotateExpressionDomain = serverAPI.annotateExpressionDomain;
 
@@ -168,6 +170,30 @@ module.exports = React.createClass({
             }, 20)
         }
         
+        
+        function nodeCompare(n1, n2){
+            var resourceAnnotationByResourceId = state.resourceAnnotationByResourceId;
+            
+            var rId1 = n1.id;
+            var rId2 = n2.id;
+
+            var rAnn1 = resourceAnnotationByResourceId[rId1];
+            var rAnn2 = resourceAnnotationByResourceId[rId2];
+            
+            var pr1 = rAnn1.google_pagerank || -1;
+            var pr2 = rAnn2.google_pagerank || -1;
+            
+            if(pr1 === pr2){
+                // distinguish on social impact
+                return computeSocialImpact(rAnn2) - computeSocialImpact(rAnn1);
+            }
+            else{
+                return pr2 - pr1;
+            }
+            
+            
+        }
+        
                 
         return React.DOM.div({className: "react-wrapper"}, 
             new Header({
@@ -217,135 +243,138 @@ module.exports = React.createClass({
                         defaultTabNum: 0,
                         tabNames: ['Pages', 'Domains'],
                         classPrefix: 'tabs-'
-                    }, [
+                    },
                         // Pages tab content
                         Object.keys(territoire.expressionById || {}).length >= 1 ? React.DOM.ul(
                             {className: 'result-list'}, 
-                            territoire.graph.nodes.map(function(node){
-                                var expressionId = node.expression_id;
-                                var resourceId = node.id;
-                                if(expressionId === null || expressionId === undefined)
-                                    return;
-                                
-                                var expression = territoire.expressionById[expressionId];
-                                var expressionDomainId = state.resourceAnnotationByResourceId ?
-                                    state.resourceAnnotationByResourceId[resourceId].expressionDomainId :
-                                    undefined;
-                                
-                                var resourceAnnotations = state.resourceAnnotationByResourceId ?
-                                    state.resourceAnnotationByResourceId[resourceId] : 
-                                    {tags: new Set()};
-                                var expressionDomainAnnotations = state.expressionDomainAnnotationsByEDId ?
-                                    state.expressionDomainAnnotationsByEDId[expressionDomainId] : 
-                                    undefined;
-                                
-                                
-                                return new PageListItem({
-                                    key: resourceId,
+                            territoire.graph.nodes
+                                .slice() // clone array
+                                .sort(nodeCompare)
+                                .map(function(node){
+                                    var expressionId = node.expression_id;
+                                    var resourceId = node.id;
+                                    if(expressionId === null || expressionId === undefined)
+                                        return;
 
-                                    resourceId: resourceId,
+                                    var expression = territoire.expressionById[expressionId];
+                                    var expressionDomainId = state.resourceAnnotationByResourceId ?
+                                        state.resourceAnnotationByResourceId[resourceId].expressionDomainId :
+                                        undefined;
 
-                                    url: node.url,
-                                    title: expression.title,
-                                    excerpt: expression.excerpt,
-                                    rejected: state.rejectedResourceIds.has(resourceId),
-                                    
-                                    resourceAnnotations: resourceAnnotations,
-                                    expressionDomainAnnotations : expressionDomainAnnotations,
-                                    
-                                    annotate: function(newAnnotations, approved){
-                                        newAnnotations = newAnnotations || {}
-                                        
-                                        // separate out resource annotations from expression domain annotations
-                                        var deltaExpressionDomainAnnotations;
-                                        var deltaResourceAnnotations;
-                                        
-                                        if(newAnnotations.media_type !== undefined){
-                                            deltaExpressionDomainAnnotations = {
-                                                media_type: newAnnotations.media_type
-                                            };
-                                        }
-                                        
-                                        deltaResourceAnnotations = Object.assign(
-                                            {}, 
-                                            newAnnotations, 
-                                            {media_type: undefined}
-                                        );
-                                        
-                                        // remove merged object
-                                        newAnnotations = undefined;
-                                        
-                                        // is it worth calling annotateResource?
-                                        if(Object.keys(deltaResourceAnnotations)
-                                           .some(function(k){ return deltaResourceAnnotations[k] !== undefined }) ||
-                                           approved !== undefined
-                                          ){
-                                            // TODO add a pending state or something
-                                            annotateResource(resourceId, territoire.id, deltaResourceAnnotations, approved)
-                                            .catch(function(err){
-                                                console.error(
-                                                    'resource annotation update error', 
-                                                    resourceId, territoire.id, deltaResourceAnnotations, approved, err
-                                                );
-                                            });
-                                        }
-                                        
-                                        // is it worth calling annotateExpressionDomain?
-                                        if(deltaExpressionDomainAnnotations){
-                                            annotateExpressionDomain(expressionDomainId, territoire.id, deltaExpressionDomainAnnotations)
-                                            .catch(function(err){
-                                                console.error(
-                                                    'expression domain annotation update error', 
-                                                    expressionDomainId, territoire.id, deltaExpressionDomainAnnotations, err
-                                                );
-                                            });   
-                                        }
-                                        
-                                        
-                                        // updating annotations locally (optimistically hoping being in sync with the server)
-                                        var territoireTags = state.territoireTags;
-                                        
-                                        // add tags for autocomplete
-                                        // tags are only added, never removed for autocomplete purposes
-                                        if(deltaResourceAnnotations.tags){
-                                            deltaResourceAnnotations.tags.forEach(function(t){
-                                                territoireTags = territoireTags.add(t);
-                                            });
-                                        }
-                                        
-                                        state.resourceAnnotationByResourceId[resourceId] = Object.assign(
-                                            {},
-                                            resourceAnnotations,
-                                            deltaResourceAnnotations
-                                        );
-                                        state.expressionDomainAnnotationsByEDId[expressionDomainId] = Object.assign(
-                                            {},
-                                            expressionDomainAnnotations,
-                                            deltaExpressionDomainAnnotations
-                                        );
+                                    var resourceAnnotations = state.resourceAnnotationByResourceId ?
+                                        state.resourceAnnotationByResourceId[resourceId] : 
+                                        {tags: new Set()};
+                                    var expressionDomainAnnotations = state.expressionDomainAnnotationsByEDId ?
+                                        state.expressionDomainAnnotationsByEDId[expressionDomainId] : 
+                                        undefined;
 
-                                        var rejectedResourceIds = state.rejectedResourceIds;
-                                        if(approved !== undefined){
-                                            rejectedResourceIds = approved ?
-                                                rejectedResourceIds.delete(resourceId) :
-                                                rejectedResourceIds.add(resourceId);
+
+                                    return new PageListItem({
+                                        key: resourceId,
+
+                                        resourceId: resourceId,
+
+                                        url: node.url,
+                                        title: expression.title,
+                                        excerpt: expression.excerpt,
+                                        rejected: state.rejectedResourceIds.has(resourceId),
+
+                                        resourceAnnotations: resourceAnnotations,
+                                        expressionDomainAnnotations : expressionDomainAnnotations,
+
+                                        annotate: function(newAnnotations, approved){
+                                            newAnnotations = newAnnotations || {}
+
+                                            // separate out resource annotations from expression domain annotations
+                                            var deltaExpressionDomainAnnotations;
+                                            var deltaResourceAnnotations;
+
+                                            if(newAnnotations.media_type !== undefined){
+                                                deltaExpressionDomainAnnotations = {
+                                                    media_type: newAnnotations.media_type
+                                                };
+                                            }
+
+                                            deltaResourceAnnotations = Object.assign(
+                                                {}, 
+                                                newAnnotations, 
+                                                {media_type: undefined}
+                                            );
+
+                                            // remove merged object
+                                            newAnnotations = undefined;
+
+                                            // is it worth calling annotateResource?
+                                            if(Object.keys(deltaResourceAnnotations)
+                                               .some(function(k){ return deltaResourceAnnotations[k] !== undefined }) ||
+                                               approved !== undefined
+                                              ){
+                                                // TODO add a pending state or something
+                                                annotateResource(resourceId, territoire.id, deltaResourceAnnotations, approved)
+                                                .catch(function(err){
+                                                    console.error(
+                                                        'resource annotation update error', 
+                                                        resourceId, territoire.id, deltaResourceAnnotations, approved, err
+                                                    );
+                                                });
+                                            }
+
+                                            // is it worth calling annotateExpressionDomain?
+                                            if(deltaExpressionDomainAnnotations){
+                                                annotateExpressionDomain(expressionDomainId, territoire.id, deltaExpressionDomainAnnotations)
+                                                .catch(function(err){
+                                                    console.error(
+                                                        'expression domain annotation update error', 
+                                                        expressionDomainId, territoire.id, deltaExpressionDomainAnnotations, err
+                                                    );
+                                                });   
+                                            }
+
+
+                                            // updating annotations locally (optimistically hoping being in sync with the server)
+                                            var territoireTags = state.territoireTags;
+
+                                            // add tags for autocomplete
+                                            // tags are only added, never removed for autocomplete purposes
+                                            if(deltaResourceAnnotations.tags){
+                                                deltaResourceAnnotations.tags.forEach(function(t){
+                                                    territoireTags = territoireTags.add(t);
+                                                });
+                                            }
+
+                                            state.resourceAnnotationByResourceId[resourceId] = Object.assign(
+                                                {},
+                                                resourceAnnotations,
+                                                deltaResourceAnnotations
+                                            );
+                                            state.expressionDomainAnnotationsByEDId[expressionDomainId] = Object.assign(
+                                                {},
+                                                expressionDomainAnnotations,
+                                                deltaExpressionDomainAnnotations
+                                            );
+
+                                            var rejectedResourceIds = state.rejectedResourceIds;
+                                            if(approved !== undefined){
+                                                rejectedResourceIds = approved ?
+                                                    rejectedResourceIds.delete(resourceId) :
+                                                    rejectedResourceIds.add(resourceId);
+                                            }
+
+                                            self.setState(Object.assign({}, state, {
+                                                resourceAnnotationByResourceId: state.resourceAnnotationByResourceId, // mutated
+                                                expressionDomainAnnotationsByEDId: state.expressionDomainAnnotationsByEDId, // mutated
+                                                territoireTags: territoireTags,
+                                                rejectedResourceIds: rejectedResourceIds
+                                            }));
                                         }
-                                        
-                                        self.setState(Object.assign({}, state, {
-                                            resourceAnnotationByResourceId: state.resourceAnnotationByResourceId, // mutated
-                                            expressionDomainAnnotationsByEDId: state.expressionDomainAnnotationsByEDId, // mutated
-                                            territoireTags: territoireTags,
-                                            rejectedResourceIds: rejectedResourceIds
-                                        }));
-                                    }
-                                });
-                            })
+                                    });
+                                })
                         ) : undefined,
                         // Domains tab content
                         new DomainGraph({
                             graph: state.domainGraph ? state.domainGraph : undefined
                         })
-                    ]),
+                    ),
                     
                     React.DOM.div({className: 'exports'},
                         React.DOM.a({

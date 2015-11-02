@@ -3,6 +3,7 @@ app:
    command: nodemon --watch server --watch database --watch postgresDB --watch crawl --watch automatedAnnotation --watch expressionDomain server/index.js
    links:
       - db
+      - elasticanalysis
    ports:
       - 3333:3333
    environment:
@@ -22,3 +23,10 @@ db:
       - ./_storage/log:/var/log/postgresql
       - ./_storage/data:/var/lib/postgresql
       - ./_storage/data/data:/var/lib/postgresql/data
+elasticanalysis: 
+   image: elasticsearch:1.7
+   environment:
+      - ELASTICSEARCH_USER=user
+      - ELASTICSEARCH_PASS=password
+   expose:
+      - 9200

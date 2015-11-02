@@ -24,11 +24,29 @@ $$ language 'plpgsql';
 */
 
 CREATE TABLE IF NOT EXISTS expressions (
-    id           SERIAL PRIMARY KEY,
-    main_html    text,
-    main_text    text,
-    title        text,
-    meta_description   text
+    id                  SERIAL PRIMARY KEY,
+    main_html           text,
+    main_text           text,
+    
+    -- extracting specific and structured elements
+    title               text,
+    
+    meta_description    text,
+    meta_keywords       text[],
+    
+    html_lang           text,
+    
+    h1                  text[],
+    h2                  text[],
+    h3                  text[],
+    h4                  text[],
+    h5                  text[],
+    h6                  text[],
+    
+    strong              text[],
+    em                  text[],
+    b                   text[],
+    i                   text[]
 ) INHERITS(lifecycle);
 CREATE TRIGGER updated_at_expressions BEFORE UPDATE ON expressions FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
 

@@ -376,7 +376,7 @@ app.get('/territoire/:id/expressions.csv', function(req, res){
                     excerpt: simplifiedExpression.excerpt,
                     tags: (resourceAnnotations.tags || []).join(' / '),
                     favorite: resourceAnnotations.favorite,
-                    negative: resourceAnnotations.negative,
+                    sentiment: resourceAnnotations.sentiment,
                     content_length: (expression.main_text || '').length,
                     google_pagerank: resourceAnnotations.google_pagerank,
                     twitter_share: resourceAnnotations.twitter_share,

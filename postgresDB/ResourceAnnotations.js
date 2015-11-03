@@ -136,11 +136,8 @@ module.exports = {
             var query = resource_annotations
                 .select( resource_annotations.star() )
                 .where(
-                    resource_annotations.territoire_id.equals(territoireId).and(
-                        resource_annotations.approved.equals(true).and(
-                            resource_annotations.values.isNotNull()
-                        )
-                    )
+                    resource_annotations.territoire_id.equals(territoireId),
+                    resource_annotations.approved.equals(true)
                 )
                 .toQuery();
 

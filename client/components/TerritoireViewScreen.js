@@ -258,7 +258,7 @@ module.exports = React.createClass({
 
                                     var expression = territoire.expressionById[expressionId];
                                     var expressionDomainId = state.resourceAnnotationByResourceId ?
-                                        state.resourceAnnotationByResourceId[resourceId].expressionDomainId :
+                                        state.resourceAnnotationByResourceId[resourceId].expression_domain_id :
                                         undefined;
 
                                     var resourceAnnotations = state.resourceAnnotationByResourceId ?
@@ -298,6 +298,7 @@ module.exports = React.createClass({
                                             deltaResourceAnnotations = Object.assign(
                                                 {}, 
                                                 newAnnotations, 
+                                                {approved: approved},
                                                 {media_type: undefined}
                                             );
 
@@ -310,7 +311,7 @@ module.exports = React.createClass({
                                                approved !== undefined
                                               ){
                                                 // TODO add a pending state or something
-                                                annotateResource(resourceId, territoire.id, deltaResourceAnnotations, approved)
+                                                annotateResource(resourceId, territoire.id, deltaResourceAnnotations)
                                                 .catch(function(err){
                                                     console.error(
                                                         'resource annotation update error', 

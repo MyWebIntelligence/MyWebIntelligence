@@ -112,8 +112,14 @@ module.exports = {
                 ResourceAnnotations.findByTerritoireId(territoireId)
                     .then(function(annotations){
                         annotations.forEach(function(ann){                        
-                            annotationByResourceId[ann.resource_id] = JSON.parse(ann.values);
-                            annotationByResourceId[ann.resource_id].expressionDomainId = ann.expression_domain_id;
+                            annotationByResourceId[ann.resource_id] = Object.assign(
+                                {},
+                                ann,
+                                {
+                                    territoire_id: undefined,
+                                    resource_id: undefined
+                                }
+                            )
                         });
 
                         return annotationByResourceId;

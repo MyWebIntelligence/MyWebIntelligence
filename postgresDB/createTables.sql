@@ -96,10 +96,26 @@ CREATE INDEX ON links ("source");
 CREATE TABLE IF NOT EXISTS resource_annotations (
     resource_id             integer REFERENCES resources (id) NOT NULL,
     territoire_id           integer NOT NULL, -- eventually should be a foreign key for the territoires table
-    user_id                 integer, -- eventually should be a foreign key for the users table. NULL means an algorithm made the annotation
+    
+    -- Eventually should be a foreign key for the users table. 
+    -- NULL means an algorithm made the annotation, not a human being
+    user_id                 integer, 
     expression_domain_id    integer REFERENCES expression_domains (id),
+    
     approved                boolean DEFAULT NULL, -- NULL means "don't know yet"
-    values                  text, -- JSON blob. This prevents annotation-based queries at the SQL level. Stats will have to be made in JS or maybe in a synthesized document served by ElasticSearch
+    
+    -- automated annotations
+    facebook_like           integer,
+    facebook_share          integer,
+    twitter_share           integer,
+    google_pagerank         integer,
+    linkedin_share          integer,
+    
+    -- manual annotations
+    sentiment               text,
+    favorite                boolean,
+    tags                    text[],
+    
     PRIMARY KEY(territoire_id, resource_id) -- for now
 ) INHERITS(lifecycle);
 CREATE TRIGGER updated_at_resource_annotations BEFORE UPDATE ON resource_annotations FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();

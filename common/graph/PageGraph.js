@@ -52,7 +52,7 @@ var pageNodeDesc = {
         type: "string",
         default: ''
     },
-    expressionDomainId: {
+    expression_domain_id: {
         type: "integer",
         default: -1
     }

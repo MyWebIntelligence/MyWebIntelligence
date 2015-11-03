@@ -27,9 +27,8 @@ Object.keys(annotationFunctions).forEach(function(type){
             return database.ResourceAnnotations.update(
                 resource.id, 
                 territoireId, 
-                undefined, // annotationFunction did the annotation job, so that's not a human user, so undefined
-                values, 
-                undefined // no approved value
+                null, // annotationFunction did the annotation job, so that's not a human user, so undefined
+                values
             );
         })
     });
@@ -37,4 +36,4 @@ Object.keys(annotationFunctions).forEach(function(type){
 })
 
 
-module.exports = exports
+module.exports = exports;

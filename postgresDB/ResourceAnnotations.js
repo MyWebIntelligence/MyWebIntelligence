@@ -35,71 +35,40 @@ module.exports = {
         })
     },
     
-    update: function(resourceId, territoireId, userId, values, approved, expressionDomainId){
+    update: function(resourceId, territoireId, userId, delta){
+        if(arguments.length !== 4)
+            throw new Error('WOW! '+arguments.length+' arguments in RessourceAnnotations.update call');
         
         return databaseP
             .then(function(db){
-            
+                
+                delta = Object.assign(
+                    {},
+                    delta,
+                    // just making user a smart user won't override these in the delta
+                    {
+                        resource_id: resourceId,
+                        territoire_id: territoireId,
+                        user_id: userId
+                    }
+                );
+
                 var query = resource_annotations
-                    .select(resource_annotations.approved, resource_annotations.values)
-                    .where(resource_annotations.resource_id.equals(resourceId).and(
+                    .update(delta)
+                    .where(
+                        resource_annotations.resource_id.equals(resourceId),
                         resource_annotations.territoire_id.equals(territoireId)
-                    ))
+                    )
                     .toQuery();
 
+                //console.log('ResourceAnnotations update query', query);
 
                 return new Promise(function(resolve, reject){
                     db.query(query, function(err, result){
-                        if(err) reject(err); else resolve(result.rows[0]);
+                        if(err) reject(err); else resolve(result.rows);
                     });
                 });
-            })
-            .then(function(currentAnnotation){
-                // /!\ between this instant and when the UPDATE occurs, someone else may call .update
-                // This is a race condition. Of the two .update calls, only the last one will win.
-                // For now, it's considered acceptable as update per (resourceId, territoireId) pair should be rare enough
-            
-                return databaseP
-                    .then(function(db){
-                        var update = {};
-                    
-                        // save the last human user who made an update
-                        if(userId !== undefined)
-                            update.user_id = userId;
-                        if(expressionDomainId !== undefined)
-                            update.expression_domain_id = expressionDomainId;
-                    
-                        var newApproved = typeof approved === 'boolean' && currentAnnotation.approved !== approved ?
-                            approved : undefined;
-                    
-                        if(typeof newApproved === 'boolean')
-                            update.approved = newApproved;
-                    
-                        var newValues = JSON.stringify(
-                            Object.assign(
-                                JSON.parse(currentAnnotation.values || '{}'),
-                                values || {}
-                            )
-                        )
-                        
-                        update.values = newValues;
-                    
-                        var query = resource_annotations
-                            .update(update)
-                            .where(resource_annotations.resource_id.equals(resourceId).and(
-                                resource_annotations.territoire_id.equals(territoireId)
-                            ))
-                            .toQuery();
-
-                        //console.log('ResourceAnnotations update query', query);
-
-                        return new Promise(function(resolve, reject){
-                            db.query(query, function(err, result){
-                                if(err) reject(err); else resolve(result.rows);
-                            });
-                        });
-                    });
-            })
+            });
         
     },
     
@@ -133,25 +102,17 @@ module.exports = {
         return databaseP.then(function(db){
             var query = resource_annotations
                 .select(
-                    resource_annotations.resource_id, 
-                    resource_annotations.values, 
-                    resource_annotations.expression_domain_id
+                    resource_annotations.star()
                 )
                 .where(
-                    resource_annotations.territoire_id.equals(territoireId).and(
-                        // should be:
-                        //resource_annotations.expression_domain_id.isNotNull().and(
-                        //    resource_annotations.approved.equals(true)
-                        //)
-                        //
-                        // expression_domain_id.isNotNull() is for the temporary case where prepareResourceForTerritoire 
-                        // is only partially done (resource created, but expression domain not yet)
-                        //
-                        // but for now that we don't crawl, do:
-                        resource_annotations.expression_domain_id.isNotNull().and(
-                            resource_annotations.approved.equals(true).or(resource_annotations.approved.isNull())
-                        )
-                    )
+                    resource_annotations.territoire_id.equals(territoireId),
+                    // expression_domain_id.isNotNull() is for the temporary case where prepareResourceForTerritoire 
+                    // is only partially done (resource created, but expression domain not yet)
+                    resource_annotations.expression_domain_id.isNotNull(),
+                    // should be:
+                    //    resource_annotations.approved.equals(true)
+                    // but for now that we don't crawl, so:
+                    resource_annotations.approved.equals(true).or(resource_annotations.approved.isNull())
                 )
                 .toQuery();
 

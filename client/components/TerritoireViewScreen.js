@@ -249,6 +249,7 @@ module.exports = React.createClass({
                             {className: 'result-list'}, 
                             territoire.graph.nodes
                                 .slice() // clone array
+                                .filter(function(n){ return state.resourceAnnotationByResourceId[n.id] })
                                 .sort(nodeCompare)
                                 .map(function(node){
                                     var expressionId = node.expression_id;

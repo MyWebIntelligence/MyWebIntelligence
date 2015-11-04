@@ -6,7 +6,7 @@ var analyzeExpression = require('./analyzeExpression');
 var findMostImportantWords = require('./findMostImportantWords');
 
 module.exports = function(resource, territoireId){
-    console.log('analyze_expression task', resource, territoireId);
+    //console.log('analyze_expression task', resource, territoireId);
     
     if(typeof resource.expression_id !== "number")
         return Promise.reject(new Error('Resource '+resource.id+' has no expression'))
@@ -21,7 +21,7 @@ module.exports = function(resource, territoireId){
         return findMostImportantWords(termFreqByField).slice(0, 12);
     })
     .then(function(scoredWords){
-        console.log('scoredWords', scoredWords);
+        //console.log('scoredWords', scoredWords);
         return database.ResourceAnnotations.addTags(resource.id, territoireId, new Set(scoredWords.map(function(sw){
             return sw.word;
         })));

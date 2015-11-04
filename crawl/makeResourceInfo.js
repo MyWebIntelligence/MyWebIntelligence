@@ -39,6 +39,17 @@ module.exports = function(url, html){
         var mainContent = result[1].mainContent;
         var mainContentDispose = result[1].dispose;
     
+        // cleanup mainContent
+        // remove <script> and <style>
+        Array.from(mainContent.querySelectorAll('script')).forEach(function(scriptEl){
+            console.log('makeResourceInfo removing inner <script>')
+            scriptEl.parentNode.removeChild(scriptEl);
+        });
+        Array.from(mainContent.querySelectorAll('style')).forEach(function(styleEl){
+            console.log('makeResourceInfo removing inner <style>')
+            styleEl.parentNode.removeChild(styleEl);
+        });
+        
         // links
         var links = Array.from(mainContent.querySelectorAll('a[href]'));
         var uniqueLinks = new Set(cleanupURLs(links.map(function(a){ return a.href; })));

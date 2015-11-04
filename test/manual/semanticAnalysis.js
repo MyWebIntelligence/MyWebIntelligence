@@ -6,7 +6,7 @@ var semanticAnalysis = require('../../automatedAnnotation/semanticsAnalysis');
 
 var r = {
     id: 25,
-    expression_id: 3
+    expression_id: 1
 };
 
 var territoireId = 9876;

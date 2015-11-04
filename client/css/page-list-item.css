@@ -89,7 +89,7 @@ li.page-list-item .annotations{
 
     display: none;
     flex-direction: row;
-    align-items: center;
+    align-items: flex-end;
     justify-content: space-between;
 }
 
@@ -99,10 +99,13 @@ li.page-list-item:hover .annotations{
 
 li.page-list-item .annotations .tag{
     font-size: 0.7em;
-    padding: 0.3em;
+    padding: 0.1em 0.2em;
     margin: 0 0.2em;
     background-color: lightblue;
-    border-radius: 20%;
+    border-radius: 10%;
+    outline: 1px solid #AAA;
+    
+    display: inline-block;
 }
 
 li.page-list-item .annotations .tag .delete{
@@ -119,8 +122,13 @@ li.page-list-item .annotations .tag .delete::before{
 
 li.page-list-item .annotations button, li.page-list-item .annotations select{
     margin: 0;
+    
     background: white;
     border: 0;
+}
+
+li.page-list-item .annotations select{
+    margin-bottom: 0.5em;
 }
 
 li.page-list-item .annotations button{

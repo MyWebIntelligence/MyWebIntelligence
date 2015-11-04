@@ -36,39 +36,60 @@ module.exports = {
     },
     
     update: function(resourceId, territoireId, userId, delta){
-        if(arguments.length !== 4)
-            throw new Error('WOW! '+arguments.length+' arguments in RessourceAnnotations.update call');
-        
+
         return databaseP
-            .then(function(db){
-                
-                delta = Object.assign(
-                    {},
-                    delta,
-                    // just making user a smart user won't override these in the delta
-                    {
-                        resource_id: resourceId,
-                        territoire_id: territoireId,
-                        user_id: userId
-                    }
-                );
+        .then(function(db){
 
-                var query = resource_annotations
-                    .update(delta)
-                    .where(
-                        resource_annotations.resource_id.equals(resourceId),
-                        resource_annotations.territoire_id.equals(territoireId)
-                    )
-                    .toQuery();
+            delta = Object.assign(
+                {},
+                delta,
+                // just making user a smart user won't override these in the delta
+                {
+                    resource_id: resourceId,
+                    territoire_id: territoireId,
+                    user_id: userId
+                }
+            );
 
-                //console.log('ResourceAnnotations update query', query);
+            var query = resource_annotations
+                .update(delta)
+                .where(
+                    resource_annotations.resource_id.equals(resourceId),
+                    resource_annotations.territoire_id.equals(territoireId)
+                )
+                .toQuery();
 
-                return new Promise(function(resolve, reject){
-                    db.query(query, function(err, result){
-                        if(err) reject(err); else resolve(result.rows);
-                    });
+            //console.log('ResourceAnnotations update query', query);
+
+            return new Promise(function(resolve, reject){
+                db.query(query, function(err, result){
+                    if(err) reject(err); else resolve(result.rows);
                 });
             });
+        });
+    },
+    
+    addTags: function(resourceId, territoireId, tags){
+        return databaseP
+        .then(function(db){
+
+            var query = resource_annotations
+                // this erases any previous value
+                .update({tags: tags.toJSON()})
+                .where(
+                    resource_annotations.resource_id.equals(resourceId),
+                    resource_annotations.territoire_id.equals(territoireId)
+                )
+                .toQuery();
+
+            //console.log('ResourceAnnotations addTags query', query);
+
+            return new Promise(function(resolve, reject){
+                db.query(query, function(err, result){
+                    if(err) reject(err); else resolve(result.rows);
+                });
+            });
+        });
         
     },
     

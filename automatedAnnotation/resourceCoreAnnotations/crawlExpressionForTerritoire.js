@@ -51,13 +51,13 @@ module.exports = function(resource, territoireId, depth){
                         }).catch(errlog("Expressions.create + associateWithExpression"));
 
 
-                    //console.log('task.territoire_id', task.territoire_id)
-
-                    /*
-                        Promise._allResolved(resources.map(function(r){
-                            return database.Tasks.createTasksTodo(r.id, query.belongs_to, 'prepare_resource', depth);
-                        }))
-                    */
+                    expressionUpdatedP
+                    .then(function(){
+                        return database.Tasks.createTasksTodo(resourceId, territoireId, 'analyze_expression', depth);
+                    })
+                    .catch(function(err){
+                        console.error('Error while trying to create analyze_expression tasks', err, err.stack);
+                    })
 
                     linksUpdatedP = resExprLink.links.size >= 1 ? 
                         database.Resources.findByURLsOrCreate(resExprLink.links)

@@ -2,8 +2,13 @@
 
 var langdetect = require('langdetect');
 
+var htmlLangToESLang = {
+    "en-us": "en"
+};
+
 module.exports = function(expression){
-    console.log('find lang', Object.keys(expression), expression.main_text && expression.main_text.length);
+    var htmllang = (expression.html_lang || '').toLowerCase();
+    
     // Until proven otherwise, trust the declared language over the detected one
-    return expression.html_lang || langdetect.detectOne(expression.main_text);
+    return htmlLangToESLang[htmllang] || htmllang || langdetect.detectOne(expression.main_text);
 }

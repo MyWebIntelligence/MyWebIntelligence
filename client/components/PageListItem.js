@@ -121,39 +121,39 @@ module.exports = React.createClass({
                                 }
                             }, ';')
                         )
-                    }),
-                    React.DOM.input({
-                        type: 'text',
-                        list: "tags",
-                        value: state.tagInputValue,
-                        onChange: function (e) {
-                            var value = e.target.value;
-
-                            var res = findTags(value);
-                            var inputTags = res.tags;
-
-                            var newTags = new Set(resourceAnnotations.tags)
-
-                            if (inputTags.size >= 1) {
-                                // merge tags
-                                inputTags.forEach(function (t) {
-                                    newTags.add(t);
-                                });
-
-                                annotate(mixin(
-                                    {},
-                                    resourceAnnotations,
-                                    { tags: newTags }
-                                ), undefined);
-                            }
-
-                            self.setState({
-                                tagInputValue: res.leftover
-                            });
-                            
-                        }
                     })
                 ),
+                React.DOM.input({
+                    type: 'text',
+                    list: "tags",
+                    value: state.tagInputValue,
+                    onChange: function (e) {
+                        var value = e.target.value;
+
+                        var res = findTags(value);
+                        var inputTags = res.tags;
+
+                        var newTags = new Set(resourceAnnotations.tags)
+
+                        if (inputTags.size >= 1) {
+                            // merge tags
+                            inputTags.forEach(function (t) {
+                                newTags.add(t);
+                            });
+
+                            annotate(mixin(
+                                {},
+                                resourceAnnotations,
+                                { tags: newTags }
+                            ), undefined);
+                        }
+
+                        self.setState({
+                            tagInputValue: res.leftover
+                        });
+
+                    }
+                }),
 
                 // sentiment
                 React.DOM.div({

@@ -19,16 +19,22 @@ module.exports = function(expression, resourceId, territoireId){
     var expressionLanguage = findExpressionLanguage(expression);
     var indexName = makeIndexName(territoireId, expressionLanguage);
     var documentId = String(resourceId);
+    var document = expression;
+    
+    //console.log('document', document);
     
     return esapiP
     .then(function(esapi){
-        return esapi.deleteIndex(indexName).then(function(){
-            console.log('Index', indexName, 'deleted');
-            return esapi.createIndex(indexName, makeIndexConfig(expressionLanguage))
-        })
+        return esapi.createIndex(indexName, makeIndexConfig(expressionLanguage))
         .catch(function(err){
-            console.error('createIndex error', err);
-            throw err;
+            if(err && err.message && err.message.includes('IndexAlreadyExistsException') && err.message.includes(indexName)){
+                // index already exists, let it slip
+                return;
+            }
+            else{
+                console.error('createIndex error', err);
+                throw err; // forward
+            }
         })
         .then(function(){
             console.log('Index', indexName, 'created');
@@ -60,10 +66,11 @@ module.exports = function(expression, resourceId, territoireId){
                 var termvector = termvectors[nestedField];
 
                 var terms = Object.keys(termvector.terms);
+                var field = nestedField.slice(0, nestedField.indexOf('.'));
 
                 var termsWithFreq = terms
                     .filter(function(t){
-                        return termvector.terms[t].term_freq >= 2 && t.length >= 1;
+                        return (field !== 'main_content' || termvector.terms[t].term_freq >= 2) && t.length >= 1;
                     })
                     .map(function(t){
                         return {
@@ -71,9 +78,7 @@ module.exports = function(expression, resourceId, territoireId){
                             freq: termvector.terms[t].term_freq
                         };
                     });
-
-                var field = nestedField.slice(0, nestedField.indexOf('.'));
-
+                
                 var currentTermFreq = termFreqByField[field];
 
                 if(currentTermFreq){
@@ -87,13 +92,7 @@ module.exports = function(expression, resourceId, territoireId){
                 termFreqByField[field] = termsWithFreq;
             });
 
-            console.log(JSON.stringify(Object.keys(termFreqByField).map(function(f){
-                return {
-                    field: f,
-                    terms: termFreqByField[f].slice(0, 50)
-                } 
-            }), null, 3))
-
+            return termFreqByField;
         })
     })
 }

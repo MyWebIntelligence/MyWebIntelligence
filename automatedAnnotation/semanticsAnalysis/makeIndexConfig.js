@@ -79,7 +79,7 @@ var analysisByLanguage = {
 var expressionProperties = [
     'main_text', 
     'title', 
-    'meta_description', 'meta_keywords', 'html_lang',
+    'meta_description', 'meta_keywords',
     'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
     'strong', 'b', 'em', 'i'
 ];

@@ -4,20 +4,48 @@ var MYWI_EXPRESSION_DOCUMENT_TYPE = require('./MYWI_EXPRESSION_DOCUMENT_TYPE');
 var FILLER_TOKEN = '_';
 
 var stopwordsByLanguage = {
-    en: ['the', 'a', 'as', 'to', 'of', 'and', 'in', 'that', 'or', 'is', 'us', 'by', 'be', 'for', 'on', 'it', 'not', 'an', 'can', 'some', 'from']
+    en: [
+        'the', 'a', 'as', 'to', 'of', 'and', 'in', 'that', 
+        'or', 'is', 'us', 'by', 'be', 'for', 'on', 'it', 
+        'not', 'an', 'can', 'some', 'from'
+    ],
+    fr: [
+        'je', 'tu', 'il', 'le', 'la', 'les', 'et', 'de', 'sur',
+        'à', 'a', 'pour', 'en', 'du', 'ou', 'un', 'une', 'des'
+    ]
 };
+
+var shingleFilters = Object.freeze({
+    small_shingles: {
+        type: "shingle",
+        min_shingle_size: 2,
+        max_shingle_size: 2,
+        output_unigrams: true,
+        filler_token: FILLER_TOKEN
+    },
+    big_shingles: {
+        type: "shingle",
+        min_shingle_size: 3,
+        max_shingle_size: 5,
+        output_unigrams: false
+    },
+    // http://www.dahuatu.com/qey7l3dLmQ.html
+    // This removes shingles containing at least one stop word
+    "kill_fillers": {
+        "type": "pattern_replace",
+        "pattern": '.*'+FILLER_TOKEN+'.*',
+        "replace": ""
+    }
+});
+
 
 var analysisByLanguage = {
     "en": {
-        "filter": {
+        "filter": Object.assign({
             "english_stop": {
                 "type": "stop",
                 "stopwords": stopwordsByLanguage['en']
             },
-            /*"english_keywords": {
-                "type": "keyword_marker",
-                "keywords": []
-            },*/
             "english_stemmer": {
                 "type": "stemmer",
                 "language": "english"
@@ -25,28 +53,8 @@ var analysisByLanguage = {
             "english_possessive_stemmer": {
                 "type": "stemmer",
                 "language": "possessive_english"
-            },
-            small_shingles: {
-                type: "shingle",
-                min_shingle_size: 2,
-                max_shingle_size: 2,
-                output_unigrams: true,
-                filler_token: FILLER_TOKEN
-            },
-            big_shingles: {
-                type: "shingle",
-                min_shingle_size: 3,
-                max_shingle_size: 5,
-                output_unigrams: false
-            },
-            // http://www.dahuatu.com/qey7l3dLmQ.html
-            // This removes shingles containing at least one stop word
-            "kill_fillers": {
-                "type": "pattern_replace",
-                "pattern": '.*'+FILLER_TOKEN+'.*',
-                "replace": ""
             }
-        },
+        }, shingleFilters),
         "analyzer": {
             "mywi_en_1_2": {
                 "tokenizer": "standard",
@@ -71,6 +79,52 @@ var analysisByLanguage = {
                 ]
             }
         }
+    },
+    
+    "fr": {
+        "filter": Object.assign({
+            "french_elision": {
+                "type": "elision",
+                "articles": [
+                    "l", "m", "t", "qu", "n", "s",
+                    "j", "d", "c", "jusqu", "quoiqu",
+                    "lorsqu", "puisqu"
+                ]
+            },
+            "french_stop": {
+                "type": "stop",
+                "stopwords": stopwordsByLanguage['fr']
+            },
+            "french_stemmer": {
+                "type": "stemmer",
+                "language": "light_french"
+            }
+        }, shingleFilters),
+        "analyzer": {
+            "mywi_fr_1_2": {
+                "tokenizer": "standard",
+                "filter": [
+                    "french_elision",
+                    "lowercase",
+                    "french_stop",
+                    //"french_keywords",
+                    "french_stemmer",
+                    "small_shingles",
+                    "kill_fillers"
+                ]
+            },
+            "mywi_fr_3_5": {
+                "tokenizer": "standard",
+                "filter": [
+                    "french_elision",
+                    "lowercase",
+                    //"french_keywords",
+                    "french_stemmer",
+                    "big_shingles"
+                ]
+            }
+        }
+        
     }
     
 }
@@ -119,10 +173,6 @@ module.exports = function(language){
             return acc;
         }, {})
     };
-    
-    //console.log('indexConfig', JSON.stringify(indexConfig, null, 3))
-    
+        
     return indexConfig;
-    
 }
-

@@ -11,7 +11,8 @@ var stopwordsByLanguage = {
     ],
     fr: [
         'je', 'tu', 'il', 'le', 'la', 'les', 'et', 'de', 'sur',
-        'à', 'a', 'pour', 'en', 'du', 'ou', 'un', 'une', 'des'
+        'à', 'a', 'pour', 'en', 'du', 'ou', 'un', 'une', 'des',
+        'vous', 'vos', 'votre'
     ]
 };
 
@@ -26,7 +27,7 @@ var shingleFilters = Object.freeze({
     big_shingles: {
         type: "shingle",
         min_shingle_size: 3,
-        max_shingle_size: 5,
+        max_shingle_size: 4,
         output_unigrams: false
     },
     // http://www.dahuatu.com/qey7l3dLmQ.html

@@ -5,13 +5,21 @@ var es = require('./elasticsearch');
 var findExpressionLanguage = require('./findExpressionLanguage');
 var makeIndexConfig = require('./makeIndexConfig');
 var makeIndexName = require('./makeIndexName');
-
+var makeNMinus1Grams = require('./makeNMinus1Grams');
 
 var ELASTICSEARCH_ANALYSIS_HOST = "elasticanalysis:9200";
 var MYWI_EXPRESSION_DOCUMENT_TYPE = require('./MYWI_EXPRESSION_DOCUMENT_TYPE');
 
 
-var esapiP = client(ELASTICSEARCH_ANALYSIS_HOST).then(es);
+var esapiP = client(ELASTICSEARCH_ANALYSIS_HOST)
+    .then(es)
+    // at startup delete all previous indices so newer indices can be recreated with the new mappings
+    .then(function(esapi){
+        return esapi.deleteIndex('*')
+        .then(function(){
+            return esapi;
+        })
+    });
 
 
 module.exports = function(expression, resourceId, territoireId){
@@ -70,27 +78,75 @@ module.exports = function(expression, resourceId, territoireId){
 
                 var termsWithFreq = terms
                     .filter(function(t){
-                        return (field !== 'main_content' || termvector.terms[t].term_freq >= 2) && t.length >= 1;
+                        if(t.length === 0)
+                            return false;
+                        
+                        if(t.includes(' ')){
+                            // n-gram must appear at least twice to be a thing at all
+                            return termvector.terms[t].term_freq >= 2;
+                        }
+                        else{
+                            // simple word in non-main content (title, h1, strong, etc.) are all accepted
+                            return field !== 'main_text'
+                        }
                     })
-                    .map(function(t){
-                        return {
-                            word: t,
-                            freq: termvector.terms[t].term_freq
-                        };
-                    });
+                    .reduce(function(acc, t){
+                        acc[t] = termvector.terms[t].term_freq;
+                        
+                        return acc;
+                    }, Object.create(null));
                 
                 var currentTermFreq = termFreqByField[field];
 
                 if(currentTermFreq){
-                    termsWithFreq = [].concat(currentTermFreq).concat(termsWithFreq);   
+                    Object.keys(currentTermFreq).forEach(function(word){
+                        termsWithFreq[word] = currentTermFreq[word]; 
+                    });
                 }
-
-                termsWithFreq.sort(function(tf1, tf2){
-                    return tf2.freq - tf1.freq;
-                });
 
                 termFreqByField[field] = termsWithFreq;
             });
+            
+            // in each field, remove occurences of words if they appear in n-grams
+            Object.keys(termFreqByField).forEach(function(f){
+                var termFreq = termFreqByField[f];
+                
+                // sort the terms so that 4-grams come before 3-grams before bi-grams before words
+                // This makes the substraction (-=) below more accurate
+                var maxGramSortedTerms = Object.keys(termFreq);
+                maxGramSortedTerms.sort(function(t1, t2){
+                    return t2.split(' ').length - t1.split(' ').length;
+                })
+                
+                maxGramSortedTerms.forEach(function(term){                    
+                    var nMinus1Grams = makeNMinus1Grams(term);
+                    var ngramFreq = termFreq[term];
+
+                    nMinus1Grams.forEach(function(nMinus1Gram){                        
+                        // sometimes words in ngrams are not present as words (like stop words "Ville *de* Bordeaux")
+                        if(typeof termFreq[nMinus1Gram] === "number"){
+                            termFreq[nMinus1Gram] -= ngramFreq;
+                        }
+                    })
+                    
+                });
+                
+                var termFreqArray = Object.keys(termFreq)
+                    .filter(function(w){ return termFreq[w] >= 1; })
+                    .map(function(w){
+                        return {
+                            word: w,
+                            freq: termFreq[w]
+                        };
+                    })
+                
+                termFreqArray.sort(function(tf1, tf2){
+                    return tf2.freq - tf1.freq;
+                });
+                
+                termFreqByField[f] = termFreqArray;
+            });
+            
 
             return termFreqByField;
         })

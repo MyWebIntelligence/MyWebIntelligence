@@ -18,6 +18,7 @@ module.exports = function(resource, territoireId){
         return analyzeExpression(expression, resource.id, territoireId);
     })
     .then(function(termFreqByField){
+        //console.log('termFreqByField', termFreqByField)
         return findMostImportantWords(termFreqByField).slice(0, 12);
     })
     .then(function(scoredWords){

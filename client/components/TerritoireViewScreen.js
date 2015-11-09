@@ -180,18 +180,7 @@ module.exports = React.createClass({
             var rAnn1 = resourceAnnotationByResourceId[rId1];
             var rAnn2 = resourceAnnotationByResourceId[rId2];
             
-            var pr1 = rAnn1.google_pagerank || -1;
-            var pr2 = rAnn2.google_pagerank || -1;
-            
-            if(pr1 === pr2){
-                // distinguish on social impact
-                return computeSocialImpact(rAnn2) - computeSocialImpact(rAnn1);
-            }
-            else{
-                return pr2 - pr1;
-            }
-            
-            
+            return computeSocialImpact(rAnn2) - computeSocialImpact(rAnn1);
         }
         
                 

@@ -15,8 +15,7 @@
         "eol-last": 1,
         "no-space-before-semi": 1,
         "new-cap": [2, {
-            "capIsNewExceptions": ["React"],
-            "newIsCapExceptions": ["sigma"]
+            "capIsNewExceptions": ["React"]
         }],
         "semi": 0,
         "quotes": 0,
@@ -32,7 +31,6 @@
         "no-empty": 0
     },
     "globals": {
-        "Promise": true,
-        "sigma": true
+        "Promise": true
     }
 }

@@ -7,7 +7,7 @@ var moment = require('moment');
 
 var Tabs = React.createFactory(require('./external/Tabs.js'));
 var Header = React.createFactory(require('./Header'));
-var DomainGraph = React.createFactory(require('./DomainGraph'));
+var DomainTab = React.createFactory(require('./DomainTab'));
 var PageListItem = React.createFactory(require('./PageListItem'));
 
 var abstractGraphToPageGraph = require('../../common/graph/abstractGraphToPageGraph');
@@ -363,8 +363,9 @@ module.exports = React.createClass({
                                 })
                         ) : undefined,
                         // Domains tab content
-                        new DomainGraph({
-                            graph: state.domainGraph ? state.domainGraph : undefined
+                        new DomainTab({
+                            expressionDomainAnnotationsByEDId: state.expressionDomainAnnotationsByEDId,
+                            expressionDomainsById: territoire.expressionDomainsById
                         })
                     ),
                     

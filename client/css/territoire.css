@@ -52,8 +52,3 @@ main.territoire ul.result-list{
     flex-direction: column;
 }
 
-
-
-main.territoire #sigma-container{
-    min-height: 80vh;
-}

@@ -122,7 +122,6 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.use(express.static(resolve(__dirname, '..', 'client')));
-app.use('/sigma', express.static(resolve(__dirname, '..', 'node_modules', 'sigma', 'build')));
 
 app.use(compression());
 

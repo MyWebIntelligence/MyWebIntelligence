@@ -2,7 +2,10 @@
 
 var React = require('react');
 
+var computeSocialImpact = require('../../automatedAnnotation/computeSocialImpact');
+
 var findTags = require('../findTags');
+
 
 var mixin = Object.assign;
 
@@ -16,6 +19,7 @@ interface PageListItemProps{
     excerpt: string,
     
     resourceAnnotations: object map,
+    expressionDomain: object map,
     expressionDomainAnnotations: object map,
     
     rejected?: boolean, // can only be true. undefined otherwise
@@ -54,17 +58,32 @@ module.exports = React.createClass({
         var annotate = props.annotate;
 
         var resourceAnnotations = props.resourceAnnotations;
+        var expressionDomain = props.expressionDomain;
         var expressionDomainAnnotations = props.expressionDomainAnnotations;
+        
+        //console.log('expressionDomain', expressionDomain);
         
         var classes = ['page-list-item'];
         if (props.rejected) {
             classes.push('rejected');
         }
 
-        return React.DOM.li({
+        return React.DOM.li(
+            {
                 className: classes.join(' '),
                 "data-resource-id": resourceId
             },
+            React.DOM.a(
+                {
+                    href: expressionDomain.main_url,
+                    target: '_blank',
+                    style: {
+                        color: 'grey',
+                        fontSize: '0.8em'
+                    }
+                },
+                expressionDomain.name
+            ),
             React.DOM.a({
                     href: props.url,
                     target: '_blank'
@@ -76,53 +95,111 @@ module.exports = React.createClass({
                 className: 'excerpt'
             }, props.excerpt),
 
-            // rejection/approval button
-            React.DOM.button({
-                className: 'reject',
-                onClick: function (){
-                    // if props.rejected was false (approved === true), we want newApproved to be false (approved === false)
-                    var newApproved = props.rejected;
+            // tags
+            React.DOM.div(
+                {
+                    className: 'tags'
+                },
+                resourceAnnotations.tags.toJSON().map(function (tag) {
+                    return React.DOM.span({
+                            className: 'tag',
+                            key: tag
+                        },
+                        tag,
+                        React.DOM.button({
+                            className: 'delete',
+                            onClick: function () {
+                                var newTags = new Set(resourceAnnotations.tags);
+                                newTags.delete(tag);
 
-                    annotate(undefined, newApproved);
-                }
-            }, '🗑'),
+                                annotate(mixin(
+                                    {},
+                                    resourceAnnotations,
+                                    { tags: newTags }
+                                ), undefined);
+                            }
+                        }, ''),
+                        // invisible semi-colon as tag separator for sweet tag copy/paste
+                        React.DOM.span({
+                            style: {
+                                opacity: 0                                }
+                        }, ';')
+                    )
+                })
+            ),
+                     
 
+            React.DOM.div(
+                {
+                    className: 'annotators'
+                },
+
+                // media-type
+                React.DOM.select({
+                    value: expressionDomainAnnotations['media_type'],
+                    onChange: function (e) {
+                        var newMediaType = e.target.value;
+
+                        annotate(mixin({ 'media_type': newMediaType }), undefined);
+                    }
+                }, ["", "Institutional", "Thematique",
+                 "Web dictionary", "Editorial", "Blog",
+                 "Forum", "Social Network", "Search Engine"]
+                .map(function (type) {
+                    return React.DOM.option({
+                        value: type
+                    }, type)
+                })),
+                
+                // sentiment
+                // only negative sentiment for now          
+                React.DOM.button({
+                    className: ['sentiment', 'negative', (resourceAnnotations.sentiment === 'negative' ? 'active' : '')].join(' '),
+                    onClick: function () {
+                        // empty string means "no sentiment annotation"
+                        var newSentiment = resourceAnnotations.sentiment === 'negative' ? '' : 'negative';
+
+                        annotate(mixin(
+                            {},
+                            resourceAnnotations,
+                            { sentiment: newSentiment }
+                        ), undefined);
+                    }
+                }, '☹'),
+
+                // favorite
+                React.DOM.button({
+                    className: ['favorite', (resourceAnnotations.favorite ? 'active' : '')].join(' '),
+                    onClick: function () {
+                        var newFavorite = !resourceAnnotations.favorite;
+
+                        annotate(mixin(
+                            {},
+                            resourceAnnotations,
+                            { favorite: newFavorite }
+                        ), undefined);
+                    }
+                }, resourceAnnotations.favorite ? '★' : '☆'),
+                
+                // rejection/approval button
+                React.DOM.button({
+                    className: 'reject',
+                    onClick: function (){
+                        // if props.rejected was false (approved === true), we want newApproved to be false (approved === false)
+                        var newApproved = props.rejected;
+
+                        annotate(undefined, newApproved);
+                    }
+                }, React.DOM.i({className: 'fa fa-trash-o'}))
+            ),
+            
+                   
+                            
             // annotations
-            React.DOM.div({
+            React.DOM.div(
+                {
                     className: 'annotations'
                 },
-                // tags
-                React.DOM.div({
-                        className: 'tags'
-                    },
-                    resourceAnnotations.tags.toJSON().map(function (tag) {
-                        return React.DOM.span({
-                                className: 'tag',
-                                key: tag
-                            },
-                            tag,
-                            React.DOM.button({
-                                className: 'delete',
-                                onClick: function () {
-                                    var newTags = new Set(resourceAnnotations.tags);
-                                    newTags.delete(tag);
-
-                                    annotate(mixin(
-                                        {},
-                                        resourceAnnotations,
-                                        { tags: newTags }
-                                    ), undefined);
-                                }
-                            }, ''),
-                            // invisible semi-colon as tag separator for sweet tag copy/paste
-                            React.DOM.span({
-                                style: {
-                                    opacity: '0'
-                                }
-                            }, ';')
-                        )
-                    })
-                ),
                 React.DOM.input({
                     type: 'text',
                     list: "tags",
@@ -153,59 +230,56 @@ module.exports = React.createClass({
                         });
 
                     }
-                }),
-
-                // sentiment
-                React.DOM.div({
-                        className: 'sentiment'
-                    },
-                    // negative
-                    React.DOM.button({
-                        className: ['negative', (resourceAnnotations.sentiment === 'negative' ? 'active' : '')].join(' '),
-                        onClick: function () {
-                            // empty string means "no sentiment annotation"
-                            var newSentiment = resourceAnnotations.sentiment === 'negative' ? '' : 'negative';
-
-                            annotate(mixin(
-                                {},
-                                resourceAnnotations,
-                                { sentiment: newSentiment }
-                            ), undefined);
-                        }
-                    }, '☹')
-                    // only negative sentiment for now          
+                })   
+            ),
+            
+            // automated annotations
+            React.DOM.div(
+                {
+                    className: 'automated-annotations'
+                },
+                React.DOM.span({title: 'Social impact'},
+                    computeSocialImpact(resourceAnnotations),
+                    ' ',
+                    React.DOM.i({className: 'fa fa-share-alt'})
                 ),
-
-                // media-type
-                React.DOM.select({
-                    value: expressionDomainAnnotations['media_type'],
-                    onChange: function (e) {
-                        var newMediaType = e.target.value;
-
-                        annotate(mixin({ 'media_type': newMediaType }), undefined);
-                    }
-                }, ["", "Institutional", "Thematique",
-                 "Web dictionary", "Editorial", "Blog",
-                 "Forum", "Social Network", "Search Engine"]
-                .map(function (type) {
-                    return React.DOM.option({
-                        value: type
-                    }, type)
-                })),
-
-                // favorite
-                React.DOM.button({
-                    className: ['favorite', (resourceAnnotations.favorite ? 'active' : '')].join(' '),
-                    onClick: function () {
-                        var newFavorite = !resourceAnnotations.favorite;
-
-                        annotate(mixin(
-                            {},
-                            resourceAnnotations,
-                            { favorite: newFavorite }
-                        ), undefined);
-                    }
-                }, resourceAnnotations.favorite ? '★' : '☆')
+                React.DOM.span({title: 'Facebook Like', style: {color: "#47639e"}},
+                    resourceAnnotations.facebook_like,
+                    ' ',
+                    React.DOM.i({className: 'fa fa-facebook-square'}),
+                    ' ',
+                    React.DOM.i({className: 'fa fa-thumbs-o-up'})
+                ),
+                React.DOM.span({title: 'Facebook Share', style: {color: "#47639e"}},
+                    resourceAnnotations.facebook_share,
+                    ' ',
+                    React.DOM.i({className: 'fa fa-facebook-square'}),
+                    ' ',
+                    React.DOM.i({className: 'fa fa-share-square-o'})
+                ),
+                React.DOM.span({title: 'Twitter Share', style: {color: "#53abee"}},
+                    resourceAnnotations.twitter_share,
+                    ' ',
+                    React.DOM.i({className: 'fa fa-twitter-square'}),
+                    ' ',
+                    React.DOM.i({className: 'fa fa-share-square-o'})
+                ),
+                React.DOM.span({title: 'Linkedin Share', style: {color: "#2088BD"}},
+                    resourceAnnotations.linkedin_share,
+                    ' ',
+                    React.DOM.i({className: 'fa fa-linkedin-square'}),
+                    ' ',
+                    React.DOM.i({className: 'fa fa-share-square-o'})
+                ),
+                resourceAnnotations.google_pagerank !== undefined ? 
+                    React.DOM.span({title: 'Google PageRank'},
+                        resourceAnnotations.google_pagerank,
+                        ' ',
+                        React.DOM.i({className: 'fa fa-google'}),
+                        ' ',
+                        'PR'
+                    ) :
+                    undefined
             )
 
         );

@@ -14,7 +14,6 @@ li.page-list-item.rejected{
 
 li.page-list-item:hover{
     background-color: #EAEAEA;
-    outline: solid 1px #CCC;
 }
 
 li.page-list-item a{
@@ -39,7 +38,7 @@ li.page-list-item a h4{
 }
 
 li.page-list-item .excerpt{
-    margin-top: 0.2em;
+    margin: 0.3em 0;
     font-size: 0.7em;
     color: rgba(0, 0, 0, 0.75);
 }
@@ -49,110 +48,104 @@ li.page-list-item .excerpt{
 /*
     Annotations
 */
-li.page-list-item button.reject{
-    width: 1.5em;
-    height: 1.5em;
-    position: absolute;
 
-    cursor: pointer;
-    
+/* Annotators */
+li.page-list-item .annotators{
+    position: absolute;
     top: 0;
     right: 0;
     
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+        
     border: 1px solid lightgrey;
     border-width: 0 0 1px 1px;
     
     background-color: antiquewhite; 
-  
-    display: none;   
-    
-    font-size: 2em;
 }
 
+li.page-list-item .annotators > *{
+    background-color: transparent;
+    
+    font-size: 1.5em;
 
-li.page-list-item:hover button.reject{
-    display: block;
+    display: block;   
+    padding: 0.2em;
+    cursor: pointer;
 }
 
+li.page-list-item .annotators button, li.page-list-item .annotators select{
+    margin: 0;
+    border: 0;
+}
 
-
-li.page-list-item .annotations{
-    width: 100%;
-    height: 2em;
-    position: absolute;
-    
-    bottom: 0;
-    left: 0;
-    
-    border-top: 1px solid lightgrey;
+li.page-list-item .annotators select{
     background: white;
-
-    display: none;
-    flex-direction: row;
-    align-items: flex-end;
-    justify-content: space-between;
+    font-size: 1em;
+    outline: 1px solid lightgrey;
 }
 
-li.page-list-item:hover .annotations{
-    display: flex;
+li.page-list-item .annotators .sentiment.negative.active{
+    color: red;
 }
 
-li.page-list-item .annotations .tag{
+li.page-list-item .annotators .favorite{
+    color: gold;
+}
+
+
+
+/* Tags */
+li.page-list-item .tags{
+    margin-top: 1em;
+}
+
+
+li.page-list-item .tags .tag{
     font-size: 0.7em;
     padding: 0.1em 0.2em;
     margin: 0 0.2em;
     background-color: lightblue;
-    border-radius: 10%;
     outline: 1px solid #AAA;
     
     display: inline-block;
 }
 
-li.page-list-item .annotations .tag .delete{
+li.page-list-item .tags .tag .delete{
     background-color: lightblue;
     font-size: 1em;
     padding: 0.2em;
 
-
+    margin: 0;
+    border: 0;
 }
-li.page-list-item .annotations .tag .delete::before{
+
+li.page-list-item .tags .tag .delete::before{
     content: "x";
     color: red;
 }
 
-li.page-list-item .annotations button, li.page-list-item .annotations select{
-    margin: 0;
+/* Automated annotations */
+li.page-list-item .automated-annotations{
+    position: absolute;
     
-    background: white;
-    border: 0;
+    top: 0;
+    left: 0;
+    padding: 0px 0.3em;
+    
+    margin-left: -1em;
+    max-width: 1em;
+    
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end
 }
 
-li.page-list-item .annotations select{
-    margin-bottom: 0.5em;
-}
-
-li.page-list-item .annotations button{
-    font-size: 1.5em;
-}
-
-li.page-list-item .annotations select{
-    outline: 1px solid lightgrey;
-}
-
-li.page-list-item .annotations .sentiment{
-}
-li.page-list-item .annotations .sentiment .negative{
+li.page-list-item .automated-annotations > *{
+    white-space: pre;
     
 }
-li.page-list-item .annotations .sentiment .active{
-    background-color: beige;
-    color: red;
-}
-
-li.page-list-item .annotations .favorite{
-    color: gold;
-}
-
-
 
 

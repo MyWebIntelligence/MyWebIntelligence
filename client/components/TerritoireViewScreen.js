@@ -238,7 +238,10 @@ module.exports = React.createClass({
                             {className: 'result-list'}, 
                             territoire.graph.nodes
                                 .slice() // clone array
-                                .filter(function(n){ return state.resourceAnnotationByResourceId[n.id] })
+                                .filter(function(n){
+                                    return typeof n.expression_id === 'number' && 
+                                        state.resourceAnnotationByResourceId[n.id];
+                                })
                                 .sort(nodeCompare)
                                 .map(function(node){
                                     var expressionId = node.expression_id;
@@ -363,10 +366,19 @@ module.exports = React.createClass({
                                 })
                         ) : undefined,
                         // Domains tab content
-                        new DomainTab({
-                            expressionDomainAnnotationsByEDId: state.expressionDomainAnnotationsByEDId,
-                            expressionDomainsById: territoire.expressionDomainsById
-                        })
+                        Object.keys(territoire.expressionById || {}).length >= 1 ? 
+                            new DomainTab({
+                                approvedExpressionDomainIds: new Set(territoire.graph.nodes
+                                    .filter(function(n){
+                                        return typeof n.expression_id === 'number'
+                                    })
+                                    .map(function(n){
+                                        return state.resourceAnnotationByResourceId[n.id].expression_domain_id;
+                                    })                              
+                                ),
+                                expressionDomainAnnotationsByEDId: state.expressionDomainAnnotationsByEDId,
+                                expressionDomainsById: territoire.expressionDomainsById
+                            }) : undefined
                     ),
                     
                     React.DOM.div({className: 'exports'},

@@ -5,8 +5,10 @@ var React = require('react');
 
 /*
 
-interface DomainGraphProps{
-    graph: Graph<>
+interface DomainTabProps{
+    approvedExpressionDomainIds: Set<ExpressionDomainIds>
+    expressionDomainAnnotationsByEDId: 
+    expressionDomainsById: 
 }
 
 */
@@ -14,11 +16,23 @@ interface DomainGraphProps{
 module.exports = React.createClass({
     displayName: "DomainTab",
     
-    getInitialState: function() {
-        return {};
-    },
-    
     render: function() {
+        var props = this.props;
+        
+        return React.DOM.ul(
+            {
+                className: 'domains'
+            },
+            props.approvedExpressionDomainIds.toJSON().map(function(edid){
+                var expressionDomain = props.expressionDomainsById[edid];
+                console.log('ed', expressionDomain, edid)
+                //var expressionDomainAnnotations = props.expressionDomainAnnotationsByEDId[edid];
 
+                return React.DOM.li({}, expressionDomain.name);
+            })
+        )
+        
+        
+        
     }
 });

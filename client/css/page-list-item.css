@@ -14,7 +14,6 @@ li.page-list-item.rejected{
 
 li.page-list-item:hover{
     background-color: #EAEAEA;
-    outline: solid 1px #CCC;
 }
 
 li.page-list-item a{
@@ -128,8 +127,25 @@ li.page-list-item .tags .tag .delete::before{
     color: red;
 }
 
+/* Automated annotations */
+li.page-list-item .automated-annotations{
+    position: absolute;
+    
+    top: 0;
+    left: 0;
+    padding: 0px 0.3em;
+    
+    margin-left: -1em;
+    max-width: 1em;
+    
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end
+}
 
-
-
+li.page-list-item .automated-annotations > *{
+    white-space: pre;
+    
+}
 
 

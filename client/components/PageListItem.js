@@ -2,7 +2,10 @@
 
 var React = require('react');
 
+var computeSocialImpact = require('../../automatedAnnotation/computeSocialImpact');
+
 var findTags = require('../findTags');
+
 
 var mixin = Object.assign;
 
@@ -16,6 +19,7 @@ interface PageListItemProps{
     excerpt: string,
     
     resourceAnnotations: object map,
+    expressionDomain: object map,
     expressionDomainAnnotations: object map,
     
     rejected?: boolean, // can only be true. undefined otherwise
@@ -54,7 +58,10 @@ module.exports = React.createClass({
         var annotate = props.annotate;
 
         var resourceAnnotations = props.resourceAnnotations;
+        var expressionDomain = props.expressionDomain;
         var expressionDomainAnnotations = props.expressionDomainAnnotations;
+        
+        //console.log('expressionDomain', expressionDomain);
         
         var classes = ['page-list-item'];
         if (props.rejected) {
@@ -66,6 +73,17 @@ module.exports = React.createClass({
                 className: classes.join(' '),
                 "data-resource-id": resourceId
             },
+            React.DOM.a(
+                {
+                    href: expressionDomain.main_url,
+                    target: '_blank',
+                    style: {
+                        color: 'grey',
+                        fontSize: '0.8em'
+                    }
+                },
+                expressionDomain.name
+            ),
             React.DOM.a({
                     href: props.url,
                     target: '_blank'
@@ -212,8 +230,56 @@ module.exports = React.createClass({
                         });
 
                     }
-                })
-                
+                })   
+            ),
+            
+            // automated annotations
+            React.DOM.div(
+                {
+                    className: 'automated-annotations'
+                },
+                React.DOM.span({title: 'Social impact'},
+                    computeSocialImpact(resourceAnnotations),
+                    ' ',
+                    React.DOM.i({className: 'fa fa-share-alt'})
+                ),
+                React.DOM.span({title: 'Facebook Like', style: {color: "#47639e"}},
+                    resourceAnnotations.facebook_like,
+                    ' ',
+                    React.DOM.i({className: 'fa fa-facebook-square'}),
+                    ' ',
+                    React.DOM.i({className: 'fa fa-thumbs-o-up'})
+                ),
+                React.DOM.span({title: 'Facebook Share', style: {color: "#47639e"}},
+                    resourceAnnotations.facebook_share,
+                    ' ',
+                    React.DOM.i({className: 'fa fa-facebook-square'}),
+                    ' ',
+                    React.DOM.i({className: 'fa fa-share-square-o'})
+                ),
+                React.DOM.span({title: 'Twitter Share', style: {color: "#53abee"}},
+                    resourceAnnotations.twitter_share,
+                    ' ',
+                    React.DOM.i({className: 'fa fa-twitter-square'}),
+                    ' ',
+                    React.DOM.i({className: 'fa fa-share-square-o'})
+                ),
+                React.DOM.span({title: 'Linkedin Share', style: {color: "#2088BD"}},
+                    resourceAnnotations.linkedin_share,
+                    ' ',
+                    React.DOM.i({className: 'fa fa-linkedin-square'}),
+                    ' ',
+                    React.DOM.i({className: 'fa fa-share-square-o'})
+                ),
+                resourceAnnotations.google_pagerank !== undefined ? 
+                    React.DOM.span({title: 'Google PageRank'},
+                        resourceAnnotations.google_pagerank,
+                        ' ',
+                        React.DOM.i({className: 'fa fa-google'}),
+                        ' ',
+                        'PR'
+                    ) :
+                    undefined
             )
 
         );

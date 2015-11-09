@@ -281,6 +281,7 @@ module.exports = React.createClass({
                                         rejected: state.rejectedResourceIds.has(resourceId),
 
                                         resourceAnnotations: resourceAnnotations,
+                                        expressionDomain : territoire.expressionDomainsById[expressionDomainId],
                                         expressionDomainAnnotations : expressionDomainAnnotations,
 
                                         annotate: function(newAnnotations, approved){

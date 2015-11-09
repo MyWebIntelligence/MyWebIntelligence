@@ -1,20 +1,31 @@
 "use strict";
 
+var fs = require('fs');
+var path = require('path');
+
 var MYWI_EXPRESSION_DOCUMENT_TYPE = require('./MYWI_EXPRESSION_DOCUMENT_TYPE');
 var FILLER_TOKEN = '_';
 
-var stopwordsByLanguage = {
-    en: [
-        'the', 'a', 'as', 'to', 'of', 'and', 'in', 'that', 
-        'or', 'is', 'us', 'by', 'be', 'for', 'on', 'it', 
-        'not', 'an', 'can', 'some', 'from'
-    ],
-    fr: [
-        'je', 'tu', 'il', 'le', 'la', 'les', 'et', 'de', 'sur',
-        'à', 'a', 'pour', 'en', 'du', 'ou', 'un', 'une', 'des',
-        'vous', 'vos', 'votre'
-    ]
-};
+var STOPWORD_DIR = path.join(__dirname, 'stopwords');
+
+var stopwordsByLanguage = {};
+
+// *Sync ballet. On purpose.
+fs.readdirSync(STOPWORD_DIR)
+    .filter(function(f){ return f.endsWith('.list') })
+    .forEach(function(f){
+        var lang = f.slice(0, f.indexOf('.list'));
+        var content = fs.readFileSync( path.join(STOPWORD_DIR, f), 'utf-8');
+    
+        var stopwords = content
+            .split('\n')
+            .map(function(word){ return word.trim() })
+            .filter(function(word){ return !word.includes(' ') })
+    
+        stopwordsByLanguage[lang] = stopwords;
+    });
+
+
 
 var shingleFilters = Object.freeze({
     small_shingles: {

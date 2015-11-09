@@ -61,7 +61,8 @@ module.exports = React.createClass({
             classes.push('rejected');
         }
 
-        return React.DOM.li({
+        return React.DOM.li(
+            {
                 className: classes.join(' '),
                 "data-resource-id": resourceId
             },
@@ -76,53 +77,111 @@ module.exports = React.createClass({
                 className: 'excerpt'
             }, props.excerpt),
 
-            // rejection/approval button
-            React.DOM.button({
-                className: 'reject',
-                onClick: function (){
-                    // if props.rejected was false (approved === true), we want newApproved to be false (approved === false)
-                    var newApproved = props.rejected;
+            // tags
+            React.DOM.div(
+                {
+                    className: 'tags'
+                },
+                resourceAnnotations.tags.toJSON().map(function (tag) {
+                    return React.DOM.span({
+                            className: 'tag',
+                            key: tag
+                        },
+                        tag,
+                        React.DOM.button({
+                            className: 'delete',
+                            onClick: function () {
+                                var newTags = new Set(resourceAnnotations.tags);
+                                newTags.delete(tag);
 
-                    annotate(undefined, newApproved);
-                }
-            }, '🗑'),
+                                annotate(mixin(
+                                    {},
+                                    resourceAnnotations,
+                                    { tags: newTags }
+                                ), undefined);
+                            }
+                        }, ''),
+                        // invisible semi-colon as tag separator for sweet tag copy/paste
+                        React.DOM.span({
+                            style: {
+                                opacity: 0                                }
+                        }, ';')
+                    )
+                })
+            ),
+                     
 
+            React.DOM.div(
+                {
+                    className: 'annotators'
+                },
+
+                // media-type
+                React.DOM.select({
+                    value: expressionDomainAnnotations['media_type'],
+                    onChange: function (e) {
+                        var newMediaType = e.target.value;
+
+                        annotate(mixin({ 'media_type': newMediaType }), undefined);
+                    }
+                }, ["", "Institutional", "Thematique",
+                 "Web dictionary", "Editorial", "Blog",
+                 "Forum", "Social Network", "Search Engine"]
+                .map(function (type) {
+                    return React.DOM.option({
+                        value: type
+                    }, type)
+                })),
+                
+                // sentiment
+                // only negative sentiment for now          
+                React.DOM.button({
+                    className: ['sentiment', 'negative', (resourceAnnotations.sentiment === 'negative' ? 'active' : '')].join(' '),
+                    onClick: function () {
+                        // empty string means "no sentiment annotation"
+                        var newSentiment = resourceAnnotations.sentiment === 'negative' ? '' : 'negative';
+
+                        annotate(mixin(
+                            {},
+                            resourceAnnotations,
+                            { sentiment: newSentiment }
+                        ), undefined);
+                    }
+                }, '☹'),
+
+                // favorite
+                React.DOM.button({
+                    className: ['favorite', (resourceAnnotations.favorite ? 'active' : '')].join(' '),
+                    onClick: function () {
+                        var newFavorite = !resourceAnnotations.favorite;
+
+                        annotate(mixin(
+                            {},
+                            resourceAnnotations,
+                            { favorite: newFavorite }
+                        ), undefined);
+                    }
+                }, resourceAnnotations.favorite ? '★' : '☆'),
+                
+                // rejection/approval button
+                React.DOM.button({
+                    className: 'reject',
+                    onClick: function (){
+                        // if props.rejected was false (approved === true), we want newApproved to be false (approved === false)
+                        var newApproved = props.rejected;
+
+                        annotate(undefined, newApproved);
+                    }
+                }, React.DOM.i({className: 'fa fa-trash-o'}))
+            ),
+            
+                   
+                            
             // annotations
-            React.DOM.div({
+            React.DOM.div(
+                {
                     className: 'annotations'
                 },
-                // tags
-                React.DOM.div({
-                        className: 'tags'
-                    },
-                    resourceAnnotations.tags.toJSON().map(function (tag) {
-                        return React.DOM.span({
-                                className: 'tag',
-                                key: tag
-                            },
-                            tag,
-                            React.DOM.button({
-                                className: 'delete',
-                                onClick: function () {
-                                    var newTags = new Set(resourceAnnotations.tags);
-                                    newTags.delete(tag);
-
-                                    annotate(mixin(
-                                        {},
-                                        resourceAnnotations,
-                                        { tags: newTags }
-                                    ), undefined);
-                                }
-                            }, ''),
-                            // invisible semi-colon as tag separator for sweet tag copy/paste
-                            React.DOM.span({
-                                style: {
-                                    opacity: '0'
-                                }
-                            }, ';')
-                        )
-                    })
-                ),
                 React.DOM.input({
                     type: 'text',
                     list: "tags",
@@ -153,59 +212,8 @@ module.exports = React.createClass({
                         });
 
                     }
-                }),
-
-                // sentiment
-                React.DOM.div({
-                        className: 'sentiment'
-                    },
-                    // negative
-                    React.DOM.button({
-                        className: ['negative', (resourceAnnotations.sentiment === 'negative' ? 'active' : '')].join(' '),
-                        onClick: function () {
-                            // empty string means "no sentiment annotation"
-                            var newSentiment = resourceAnnotations.sentiment === 'negative' ? '' : 'negative';
-
-                            annotate(mixin(
-                                {},
-                                resourceAnnotations,
-                                { sentiment: newSentiment }
-                            ), undefined);
-                        }
-                    }, '☹')
-                    // only negative sentiment for now          
-                ),
-
-                // media-type
-                React.DOM.select({
-                    value: expressionDomainAnnotations['media_type'],
-                    onChange: function (e) {
-                        var newMediaType = e.target.value;
-
-                        annotate(mixin({ 'media_type': newMediaType }), undefined);
-                    }
-                }, ["", "Institutional", "Thematique",
-                 "Web dictionary", "Editorial", "Blog",
-                 "Forum", "Social Network", "Search Engine"]
-                .map(function (type) {
-                    return React.DOM.option({
-                        value: type
-                    }, type)
-                })),
-
-                // favorite
-                React.DOM.button({
-                    className: ['favorite', (resourceAnnotations.favorite ? 'active' : '')].join(' '),
-                    onClick: function () {
-                        var newFavorite = !resourceAnnotations.favorite;
-
-                        annotate(mixin(
-                            {},
-                            resourceAnnotations,
-                            { favorite: newFavorite }
-                        ), undefined);
-                    }
-                }, resourceAnnotations.favorite ? '★' : '☆')
+                })
+                
             )
 
         );

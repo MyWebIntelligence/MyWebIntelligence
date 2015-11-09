@@ -47,9 +47,7 @@ main.territoire .tabs-and-exports nav.tabs-tab-container{
     width: 100%;
 }
 
-main.territoire ul.result-list{
-    max-width: 60vw;
-    
+main.territoire ul.result-list{    
     display: flex;
     flex-direction: column;
 }

@@ -43,7 +43,7 @@ module.exports = function abstractGraphToPageGraph(abGraph, expressionById, reso
         // as a consequence, resourceAnnotationsById does not have the resource id as key
         // Skip these resources
         if(resourceAnnotations){
-            var expressionDomainId = resourceAnnotations.expressionDomainId;
+            var expressionDomainId = resourceAnnotations.expression_domain_id;
 
             var expressionDomainAnnotations = expressionDomainAnnotationsById[expressionDomainId];
 
@@ -59,7 +59,14 @@ module.exports = function abstractGraphToPageGraph(abGraph, expressionById, reso
                 resourceAnnotations,
                 {
                     media_type: expressionDomainAnnotations.media_type || '',
-                    tags: resourceAnnotations.tags.toJSON().join(', ')
+                    tags: resourceAnnotations.tags.toJSON().join(', '),
+                    sentiment: resourceAnnotations.sentiment || undefined,
+                    favorite: typeof resourceAnnotations.favorite === 'boolean' ? resourceAnnotations.favorite : undefined,
+                    
+                    created_at: undefined,
+                    updated_at: undefined,
+                    user_id: undefined,
+                    approved: undefined
                 }
             ));
 

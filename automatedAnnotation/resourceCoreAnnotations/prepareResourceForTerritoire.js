@@ -42,7 +42,7 @@ module.exports = function(resource, territoireId, depth){
             var expressionDomain = res[0];
 
             return database.ResourceAnnotations.update(
-                resource.id, territoireId, undefined, undefined, undefined, expressionDomain.id
+                resource.id, territoireId, null, {expression_domain_id: expressionDomain.id}
             );
         })
         .then(function(){

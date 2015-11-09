@@ -47,7 +47,7 @@ module.exports = function(url, territoireId){
             .then(function(potentialAudience){
                 if(typeof potentialAudience === 'number'){
                     return database.ExpressionDomainAnnotations.update(
-                        expressionDomain.id, territoireId, undefined, {
+                        expressionDomain.id, territoireId, null, {
                             estimated_potential_audience: potentialAudience
                         }
                     );

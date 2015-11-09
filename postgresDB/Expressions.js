@@ -1,7 +1,5 @@
 "use strict";
 
-var sql = require('sql');
-
 var databaseP = require('./databaseClientP');
 
 var serializeValueForDB = require('./serializeValueForDB');
@@ -15,10 +13,7 @@ justCreatedMarker[databaseJustCreatedSymbol] = true;
     To get the content, use getExpressionsWithContent(ids)
 */
 
-var expressions = sql.define({
-    name: 'expressions',
-    columns: ['id', 'main_html', 'main_text', 'title', 'meta_description']
-});
+var expressions = require('./declarations').expressions;
 
 
 module.exports = {

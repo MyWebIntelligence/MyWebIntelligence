@@ -303,8 +303,14 @@ app.get('/territoire/:id/expressions.csv', function(req, res){
             var annotationByResourceId = Object.create(null);
 
             annotations.forEach(function(ann){                        
-                annotationByResourceId[ann.resource_id] = JSON.parse(ann.values);
-                annotationByResourceId[ann.resource_id].expressionDomainId = ann.expression_domain_id;
+                annotationByResourceId[ann.resource_id] = Object.assign(
+                    {},
+                    ann,
+                    {
+                        territoire_id: undefined,
+                        resource_id: undefined
+                    }
+                )
             });
 
             return annotationByResourceId;
@@ -354,7 +360,7 @@ app.get('/territoire/:id/expressions.csv', function(req, res){
             var expression = Object.freeze(expressionWithResourceId);
             var resourceAnnotations = resourceAnnotationByResourceId[resourceId];
             
-            var expressionDomainId = resourceAnnotations.expressionDomainId;
+            var expressionDomainId = resourceAnnotations.expression_domain_id;
             var expressionDomainAnnotations = expressionDomainAnnotationByEDId[expressionDomainId];
             
             if(expression){
@@ -370,7 +376,7 @@ app.get('/territoire/:id/expressions.csv', function(req, res){
                     excerpt: simplifiedExpression.excerpt,
                     tags: (resourceAnnotations.tags || []).join(' / '),
                     favorite: resourceAnnotations.favorite,
-                    negative: resourceAnnotations.negative,
+                    sentiment: resourceAnnotations.sentiment,
                     content_length: (expression.main_text || '').length,
                     google_pagerank: resourceAnnotations.google_pagerank,
                     twitter_share: resourceAnnotations.twitter_share,
@@ -519,9 +525,9 @@ app.post('/resource-annotation/:territoireId/:resourceId', function(req, res){
     
     var territoireId = Number(req.params.territoireId);
     var resourceId = Number(req.params.resourceId);
-    var data = req.body;
+    var delta = req.body;
     
-    database.ResourceAnnotations.update(resourceId, territoireId, user.id, data.values, data.approved)
+    database.ResourceAnnotations.update(resourceId, territoireId, user.id, delta)
         .then(function(){
             res.status(200).send('');
         })
@@ -540,9 +546,9 @@ app.post('/expression-domain-annotation/:territoireId/:edId', function(req, res)
     
     var territoireId = Number(req.params.territoireId);
     var edId = Number(req.params.edId);
-    var data = req.body;
+    var delta = req.body;
     
-    database.ExpressionDomainAnnotations.update(edId, territoireId, user.id, {media_type: data.media_type})
+    database.ExpressionDomainAnnotations.update(edId, territoireId, user.id, delta)
         .then(function(){
             res.status(200).send('');
         })

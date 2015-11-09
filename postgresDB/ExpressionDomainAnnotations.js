@@ -35,22 +35,28 @@ module.exports = {
         })
     },
     
-    update: function(expressionDomainId, territoireId, userId, values){
+    update: function(expressionDomainId, territoireId, userId, delta){
         
         return databaseP
         .then(function(db){
-            var update = {};
             
-            if(userId !== undefined)
-                update.user_id = userId;
-            
-            Object.assign(update, values);
+            delta = Object.assign(
+                {},
+                delta,
+                // just making user a smart user won't override these in the delta
+                {
+                    expression_domain_id: expressionDomainId,
+                    territoire_id: territoireId,
+                    user_id: userId
+                }
+            );
             
             var query = expression_domain_annotations
-                .update(update)
-                .where(expression_domain_annotations.expression_domain_id.equals(expressionDomainId).and(
+                .update(delta)
+                .where(
+                    expression_domain_annotations.expression_domain_id.equals(expressionDomainId),
                     expression_domain_annotations.territoire_id.equals(territoireId)
-                ))
+                )
                 .toQuery();
 
             //console.log('ExpressionDomainAnnotations update query', query);

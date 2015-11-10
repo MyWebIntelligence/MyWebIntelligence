@@ -20,7 +20,6 @@ interface PageListItemProps{
     
     resourceAnnotations: object map,
     expressionDomain: object map,
-    expressionDomainAnnotations: object map,
     
     rejected?: boolean, // can only be true. undefined otherwise
     annotate: (annotations, approved): void
@@ -59,9 +58,6 @@ module.exports = React.createClass({
 
         var resourceAnnotations = props.resourceAnnotations;
         var expressionDomain = props.expressionDomain;
-        var expressionDomainAnnotations = props.expressionDomainAnnotations;
-        
-        //console.log('expressionDomain', expressionDomain);
         
         var classes = ['territoire-list-item', 'page-list-item'];
         if (props.rejected) {
@@ -132,23 +128,6 @@ module.exports = React.createClass({
                 {
                     className: 'annotators'
                 },
-
-                // media-type
-                React.DOM.select({
-                    value: expressionDomainAnnotations['media_type'],
-                    onChange: function (e) {
-                        var newMediaType = e.target.value;
-
-                        annotate(mixin({ 'media_type': newMediaType }), undefined);
-                    }
-                }, ["", "Institutional", "Thematique",
-                 "Web dictionary", "Editorial", "Blog",
-                 "Forum", "Social Network", "Search Engine"]
-                .map(function (type) {
-                    return React.DOM.option({
-                        value: type
-                    }, type)
-                })),
                 
                 // sentiment
                 // only negative sentiment for now          

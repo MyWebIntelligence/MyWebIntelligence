@@ -257,9 +257,6 @@ module.exports = React.createClass({
                                     var resourceAnnotations = state.resourceAnnotationByResourceId ?
                                         state.resourceAnnotationByResourceId[resourceId] : 
                                         {tags: new Set()};
-                                    var expressionDomainAnnotations = state.expressionDomainAnnotationsByEDId ?
-                                        state.expressionDomainAnnotationsByEDId[expressionDomainId] : 
-                                        undefined;
 
 
                                     return new PageListItem({
@@ -274,26 +271,16 @@ module.exports = React.createClass({
 
                                         resourceAnnotations: resourceAnnotations,
                                         expressionDomain : territoire.expressionDomainsById[expressionDomainId],
-                                        expressionDomainAnnotations : expressionDomainAnnotations,
 
                                         annotate: function(newAnnotations, approved){
                                             newAnnotations = newAnnotations || {}
 
-                                            // separate out resource annotations from expression domain annotations
-                                            var deltaExpressionDomainAnnotations;
                                             var deltaResourceAnnotations;
-
-                                            if(newAnnotations.media_type !== undefined){
-                                                deltaExpressionDomainAnnotations = {
-                                                    media_type: newAnnotations.media_type
-                                                };
-                                            }
 
                                             deltaResourceAnnotations = Object.assign(
                                                 {}, 
                                                 newAnnotations, 
-                                                {approved: approved},
-                                                {media_type: undefined}
+                                                {approved: approved}
                                             );
 
                                             // remove merged object
@@ -314,18 +301,6 @@ module.exports = React.createClass({
                                                 });
                                             }
 
-                                            // is it worth calling annotateExpressionDomain?
-                                            if(deltaExpressionDomainAnnotations){
-                                                annotateExpressionDomain(expressionDomainId, territoire.id, deltaExpressionDomainAnnotations)
-                                                .catch(function(err){
-                                                    console.error(
-                                                        'expression domain annotation update error', 
-                                                        expressionDomainId, territoire.id, deltaExpressionDomainAnnotations, err
-                                                    );
-                                                });   
-                                            }
-
-
                                             // updating annotations locally (optimistically hoping being in sync with the server)
                                             var territoireTags = state.territoireTags;
 
@@ -342,11 +317,6 @@ module.exports = React.createClass({
                                                 resourceAnnotations,
                                                 deltaResourceAnnotations
                                             );
-                                            state.expressionDomainAnnotationsByEDId[expressionDomainId] = Object.assign(
-                                                {},
-                                                expressionDomainAnnotations,
-                                                deltaExpressionDomainAnnotations
-                                            );
 
                                             var rejectedResourceIds = state.rejectedResourceIds;
                                             if(approved !== undefined){
@@ -357,7 +327,6 @@ module.exports = React.createClass({
 
                                             self.setState(Object.assign({}, state, {
                                                 resourceAnnotationByResourceId: state.resourceAnnotationByResourceId, // mutated
-                                                expressionDomainAnnotationsByEDId: state.expressionDomainAnnotationsByEDId, // mutated
                                                 territoireTags: territoireTags,
                                                 rejectedResourceIds: rejectedResourceIds
                                             }));

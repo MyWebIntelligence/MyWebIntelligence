@@ -140,7 +140,8 @@ module.exports = {
                         annotations.forEach(function(ann){                        
                             annotationByEDId[ann.expression_domain_id] = {
                                 estimated_potential_audience: ann.estimated_potential_audience,
-                                media_type: ann.media_type
+                                media_type: ann.media_type,
+                                emitter_type: ann.emitter_type
                             };
                         });
 

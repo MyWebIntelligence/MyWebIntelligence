@@ -45,10 +45,12 @@ module.exports = React.createClass({
         //var state = this.state;
         //var self = this;
 
-        //var annotate = props.annotate;
+        var annotate = props.annotate;
 
         var expressionDomain = props.expressionDomain;
         var expressionDomainAnnotations = props.expressionDomainAnnotations;
+        
+        console.log('expressionDomainAnnotations', expressionDomainAnnotations);
         
         var classes = ['territoire-list-item', 'domain-list-item'];
         
@@ -60,23 +62,25 @@ module.exports = React.createClass({
             },
             React.DOM.header(
                 {},
-                React.DOM.input(
-                    {
-                        placeholder: "Emitter type",
-                        type: 'text'
-                        // autocomplete
+                React.DOM.input({
+                    placeholder: "Emitter type",
+                    type: 'text',
+                    list: 'emitter-types',
+                    defaultValue: expressionDomainAnnotations.emitter_type,
+                    onBlur: function(e){
+                        var newEmitterType = e.target.value;
+
+                        annotate({ 'emitter_type': newEmitterType });
                     }
-                ),
+                }),
                 
-                // media-type
+                // media type
                 React.DOM.select({
                     value: expressionDomainAnnotations['media_type'],
-                    onChange: function () {
-                        //var newMediaType = e.target.value;
-                        
-                        throw 'TODO!';
+                    onChange: function(e){
+                        var newMediaType = e.target.value;
 
-                        //annotate(mixin({ 'media_type': newMediaType }), undefined);
+                        annotate({ 'media_type': newMediaType });
                     }
                 }, ["", "Institutional", "Thematique",
                  "Web dictionary", "Editorial", "Blog",

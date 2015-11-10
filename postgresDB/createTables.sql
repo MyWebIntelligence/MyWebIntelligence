@@ -129,6 +129,7 @@ CREATE TABLE IF NOT EXISTS expression_domain_annotations (
     expression_domain_id            integer REFERENCES expression_domains (id) NOT NULL,
     user_id                         integer, -- eventually should be a foreign key for the users table. NULL means an algorithm made the annotation
     media_type                      text,
+    emitter_type                    text,
     estimated_potential_audience    integer DEFAULT NULL,
     keywords                        text[],
     -- communities                     integer REFERENCES communities (id) -- eventually 

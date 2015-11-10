@@ -13,7 +13,10 @@ var domainNodeDesc = {
     "domain_title": {
         type: "string"
     },
-    "domain_type": {
+    "media_type": {
+        type: "string"
+    },
+    "emitter_type": {
         type: "string"
     },
     "description": {

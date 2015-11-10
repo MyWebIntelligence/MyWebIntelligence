@@ -378,7 +378,26 @@ module.exports = React.createClass({
                                 ),
                                 expressionDomainAnnotationsByEDId: state.expressionDomainAnnotationsByEDId,
                                 expressionDomainsById: territoire.expressionDomainsById,
-                                domainGraph: state.domainGraph
+                                domainGraph: state.domainGraph,
+                                annotate: function(expressionDomainId, delta){
+                                    annotateExpressionDomain(expressionDomainId, territoire.id, delta)
+                                    .catch(function(err){
+                                        console.error(
+                                            'expression domain annotation update error', 
+                                            expressionDomainId, territoire.id, delta, err
+                                        );
+                                    });
+                                    
+                                    state.expressionDomainAnnotationsByEDId[expressionDomainId] = Object.assign(
+                                        {},
+                                        state.expressionDomainAnnotationsByEDId[expressionDomainId],
+                                        delta
+                                    );
+                                    
+                                    self.setState(Object.assign({}, state, {
+                                        expressionDomainAnnotationsByEDId: state.expressionDomainAnnotationsByEDId // mutated
+                                    }));
+                                }
                             }) : undefined
                     ),
                     

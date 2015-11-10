@@ -366,7 +366,7 @@ module.exports = React.createClass({
                                 })
                         ) : undefined,
                         // Domains tab content
-                        Object.keys(territoire.expressionById || {}).length >= 1 ? 
+                        Object.keys(territoire.expressionById || {}).length >= 1 && state.domainGraph? 
                             new DomainTab({
                                 approvedExpressionDomainIds: new Set(territoire.graph.nodes
                                     .filter(function(n){
@@ -377,7 +377,8 @@ module.exports = React.createClass({
                                     })                              
                                 ),
                                 expressionDomainAnnotationsByEDId: state.expressionDomainAnnotationsByEDId,
-                                expressionDomainsById: territoire.expressionDomainsById
+                                expressionDomainsById: territoire.expressionDomainsById,
+                                domainGraph: state.domainGraph
                             }) : undefined
                     ),
                     

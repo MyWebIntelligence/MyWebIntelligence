@@ -1,0 +1,44 @@
+/*
+    Annotations
+*/
+
+/* Annotators */
+li.page-list-item .annotators{
+    position: absolute;
+    top: 0;
+    right: 0;
+    
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+        
+    border: 1px solid lightgrey;
+    border-width: 0 0 1px 1px;
+    
+    background-color: antiquewhite; 
+}
+
+li.page-list-item .annotators > *{
+    background-color: transparent;
+    
+    font-size: 1.5em;
+
+    display: block;   
+    padding: 0.2em;
+    cursor: pointer;
+}
+
+li.page-list-item .annotators button{
+    margin: 0;
+    border: 0;
+}
+
+li.page-list-item .annotators .sentiment.negative.active{
+    color: red;
+}
+
+li.page-list-item .annotators .favorite{
+    color: gold;
+}
+

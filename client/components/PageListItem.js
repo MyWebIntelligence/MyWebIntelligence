@@ -63,7 +63,7 @@ module.exports = React.createClass({
         
         //console.log('expressionDomain', expressionDomain);
         
-        var classes = ['page-list-item'];
+        var classes = ['territoire-list-item', 'page-list-item'];
         if (props.rejected) {
             classes.push('rejected');
         }
@@ -73,16 +73,15 @@ module.exports = React.createClass({
                 className: classes.join(' '),
                 "data-resource-id": resourceId
             },
-            React.DOM.a(
-                {
-                    href: expressionDomain.main_url,
-                    target: '_blank',
-                    style: {
-                        color: 'grey',
-                        fontSize: '0.8em'
-                    }
-                },
-                expressionDomain.name
+            React.DOM.header(
+                {},
+                React.DOM.a(
+                    {
+                        href: expressionDomain.main_url,
+                        target: '_blank'
+                    },
+                    expressionDomain.name
+                )
             ),
             React.DOM.a({
                     href: props.url,
@@ -236,7 +235,7 @@ module.exports = React.createClass({
             // automated annotations
             React.DOM.div(
                 {
-                    className: 'automated-annotations'
+                    className: 'metrics'
                 },
                 React.DOM.span({title: 'Social impact'},
                     computeSocialImpact(resourceAnnotations),

@@ -147,45 +147,7 @@ module.exports = React.createClass({
                     React.DOM.i({className: 'fa fa-plus'}),
                     ' ',
                     React.DOM.i({className: 'fa fa-share-square-o'})
-                ),
-                
-                React.DOM.span({title: 'Max Facebook Like', style: {color: "#47639e"}},
-                    props.expressionDomainMetrics.max_facebook_like,
-                    ' ',
-                    React.DOM.i({className: 'fa fa-facebook-square'}),
-                    ' ',
-                    React.DOM.i({className: 'fa fa-thumbs-o-up'})
-                ),
-                React.DOM.span({title: 'Max Facebook Share', style: {color: "#47639e"}},
-                    props.expressionDomainMetrics.max_facebook_share,
-                    ' ',
-                    React.DOM.i({className: 'fa fa-facebook-square'}),
-                    ' ',
-                    React.DOM.i({className: 'fa fa-share-square-o'})
-                ),
-                React.DOM.span({title: 'Max Twitter Share', style: {color: "#53abee"}},
-                    props.expressionDomainMetrics.max_twitter_share,
-                    ' ',
-                    React.DOM.i({className: 'fa fa-twitter-square'}),
-                    ' ',
-                    React.DOM.i({className: 'fa fa-share-square-o'})
-                ),
-                React.DOM.span({title: 'Max Linkedin Share', style: {color: "#2088BD"}},
-                    props.expressionDomainMetrics.max_linkedin_share,
-                    ' ',
-                    React.DOM.i({className: 'fa fa-linkedin-square'}),
-                    ' ',
-                    React.DOM.i({className: 'fa fa-share-square-o'})
-                ),
-                props.expressionDomainMetrics.max_google_pagerank !== -1 ? 
-                    React.DOM.span({title: 'Max Google PageRank'},
-                        props.expressionDomainMetrics.max_google_pagerank,
-                        ' ',
-                        React.DOM.i({className: 'fa fa-google'}),
-                        ' ',
-                        'PR'
-                    ) :
-                    undefined
+                )
                 
             )
 

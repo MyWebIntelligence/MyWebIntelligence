@@ -67,12 +67,16 @@ module.exports = React.createClass({
                 .filter(function(n){
                     return props.approvedExpressionDomainIds.has(n.expression_domain_id);
                 })
+                .sort(function(n1, n2){
+                    console.log("n1, n2", n1, n2)
+                    return n2.social_impact - n1.social_impact;
+                })
                 .map(function(n){
                     var edid = n.expression_domain_id;
                     var expressionDomain = props.expressionDomainsById[edid];
                     var expressionDomainAnnotations = props.expressionDomainAnnotationsByEDId[edid];
 
-                    //console.log('ed', expressionDomain, edid)
+                    //console.log('ed', expressionDomain, edid, expressionDomainAnnotations.social_impact)
 
                     return new DomainListItem({
                         key: edid,

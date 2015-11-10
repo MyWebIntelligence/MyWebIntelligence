@@ -31,9 +31,9 @@ module.exports = function pageGraphToDomainGraph(pageGraph, expressionDomainsByI
         
         var expressionDomainIdToPageNode = new Map();
         
-        graph.nodes.toJSON().forEach(function(pn){
+        graph.nodes.forEach(function(pn){
             var expressionDomainId = pn.expression_domain_id;
-                        
+                                    
             var expressionDomainPageNodes = expressionDomainIdToPageNode.get(expressionDomainId);
             
             if(!expressionDomainPageNodes){
@@ -92,6 +92,7 @@ module.exports = function pageGraphToDomainGraph(pageGraph, expressionDomainsByI
             // This test prevents problems under these circumstances
             if(expressionDomain){
                 var domainNode = domainGraph.addNode(expressionDomain.name, {
+                    expression_domain_id: expressionDomain.id,
                     base_url: expressionDomain.main_url || expressionDomain.name,
                     depth: depth,
 
@@ -101,7 +102,7 @@ module.exports = function pageGraphToDomainGraph(pageGraph, expressionDomainsByI
                     title: expressionDomain.name,
                     description: expressionDomain.description || '',
                     keywords: (expressionDomain.keywords || []).join(' / '),
-                    nb_expressions: pageNodes.length,
+                    nb_expressions: pageNodes.filter(function(n){ return n.expressionId !== -1 }).length,
 
                     estimated_potential_audience: potentialAudience,
 

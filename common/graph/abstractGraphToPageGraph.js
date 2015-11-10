@@ -27,7 +27,7 @@ module.exports = function abstractGraphToPageGraph(abGraph, expressionById, reso
     var urlToNodeName = new StringMap();
 
     nodes.forEach(function(res){
-        var expressionId = String(res.expression_id); // strinigfy because expressionById is a StringMap
+        var expressionId = res.expression_id;
         var resourceId = res.id;
         
         var expression = Object.assign(
@@ -54,7 +54,7 @@ module.exports = function abstractGraphToPageGraph(abGraph, expressionById, reso
                     url: res.url,
                     depth: expression.depth,
                     title: expression.title || '',
-                    expressionId: typeof expression.id === "number" ? expression.id : -1
+                    expressionId: typeof expressionId === "number" ? expressionId : -1
                 }, 
                 resourceAnnotations,
                 {

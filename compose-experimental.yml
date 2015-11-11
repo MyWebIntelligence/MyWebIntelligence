@@ -3,6 +3,7 @@ app:
    command: node server/index.js
    links:
       - db
+      - elasticanalysis
    ports:
       - 4444:3333
    environment:

@@ -14,3 +14,10 @@ db:
       - POSTGRES_PASSWORD=password
    ports:
       - 5432:5432
+elasticanalysis: 
+   image: elasticsearch:1.7
+   environment:
+      - ELASTICSEARCH_USER=user
+      - ELASTICSEARCH_PASS=password
+   expose:
+      - 9200

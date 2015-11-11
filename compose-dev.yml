@@ -23,6 +23,7 @@ db:
       - ./_storage/log:/var/log/postgresql
       - ./_storage/data:/var/lib/postgresql
       - ./_storage/data/data:/var/lib/postgresql/data
+   log_driver: "none"
 elasticanalysis: 
    image: elasticsearch:1.7
    environment:

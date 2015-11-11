@@ -9,7 +9,7 @@ module.exports = function(resourceId, territoireId, depth){
     // console.log('approve resource', resourceId, territoireId, depth);
     
     return database.ResourceAnnotations.update(
-        resourceId, territoireId, undefined, undefined, true
+        resourceId, territoireId, null, {approved: true}
     )
         .then(function(){
             return Promise.all(socialSignalTypes.map(function(type){

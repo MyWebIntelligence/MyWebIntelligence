@@ -10,12 +10,21 @@ module.exports = function massageExpressionDomain(ed){
     
     var keywords = ed.keywords || '';
     keywords = keywords
-     .trim()
-     .replace(/^\{/, '')
-     .replace(/}$/g, '');
+       .trim()
+       .replace(/^\{/, '')
+       .replace(/}$/g, '');
     
-    keywords = keywords.split(',')
-        .map(function(s){ return s.trim(); });
+    keywords = keywords
+        .split(',')
+        .map(function(s){
+            return s.trim()
+        })
+        .filter(function(s){
+            return s.length >= 1;
+        })
+        .map(function(s){
+            return s.slice(s.indexOf('"')+1, s.lastIndexOf('"'));
+        });
     
     ed.keywords = keywords;
     return ed;

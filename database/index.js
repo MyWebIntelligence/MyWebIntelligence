@@ -21,8 +21,12 @@ var isValidResourceExpression = Resources.isValidResourceExpression;
 var Links = require('../postgresDB/Links');
 var AlexaRankCache = require('../postgresDB/AlexaRankCache');
 var ResourceAnnotations = require('../postgresDB/ResourceAnnotations');
+var ExpressionDomainAnnotations = require('../postgresDB/ExpressionDomainAnnotations');
+
 var Tasks = require('../postgresDB/Tasks');
 var ExpressionDomains = require('../postgresDB/ExpressionDomains');
+
+
 
 var massageExpressionDomain = require('../postgresDB/massageExpressionDomain');
 
@@ -39,6 +43,7 @@ module.exports = {
     Resources: Resources,
     AlexaRankCache: AlexaRankCache,
     ResourceAnnotations: ResourceAnnotations,
+    ExpressionDomainAnnotations: ExpressionDomainAnnotations,
     Tasks: Tasks,
     ExpressionDomains: ExpressionDomains,
     
@@ -100,26 +105,49 @@ module.exports = {
         /*
             graph is an abstract graph
         */
-        getGraphAnnotations: function getGraphAnnotations(graph, territoireId){            
+        getGraphResourceAnnotations: function getGraphAnnotations(graph, territoireId){            
             var annotationByResourceId = Object.create(null);
-
-            var resourceIds = new Set();
-            
-            graph.nodes.forEach(function(node){
-                resourceIds.add(node.id);
-            });
-            
-            return resourceIds.size > 0 ? 
+                        
+            return graph.nodes.length > 0 ? 
                 ResourceAnnotations.findByTerritoireId(territoireId)
                     .then(function(annotations){
                         annotations.forEach(function(ann){                        
-                            annotationByResourceId[ann.resource_id] = JSON.parse(ann.values);
-                            annotationByResourceId[ann.resource_id].expressionDomainId = ann.expression_domain_id;
+                            annotationByResourceId[ann.resource_id] = Object.assign(
+                                {},
+                                ann,
+                                {
+                                    territoire_id: undefined,
+                                    resource_id: undefined
+                                }
+                            )
                         });
 
                         return annotationByResourceId;
                     }) : 
                 Promise.resolve(annotationByResourceId);
+        },
+        
+        
+        /*
+            graph is an abstract graph
+        */
+        getGraphExpressionDomainAnnotations: function getGraphAnnotations(graph, territoireId){            
+            var annotationByEDId = Object.create(null);
+            
+            return graph.nodes.length > 0 ? 
+                ExpressionDomainAnnotations.findByTerritoireId(territoireId)
+                    .then(function(annotations){
+                        annotations.forEach(function(ann){                        
+                            annotationByEDId[ann.expression_domain_id] = {
+                                estimated_potential_audience: ann.estimated_potential_audience,
+                                media_type: ann.media_type,
+                                emitter_type: ann.emitter_type
+                            };
+                        });
+
+                        return annotationByEDId;
+                    }) : 
+                Promise.resolve(annotationByEDId);
         },
         
         
@@ -156,9 +184,7 @@ module.exports = {
         /*
             resourceIds : Set<ResourceId>
         */
-        getExpressionsByResourceIds: function(resourceIds){
-            console.log('getExpressionsByResourceIds', resourceIds.size);
-            
+        getExpressionsByResourceIds: function(resourceIds){            
             var resources = declarations.resources;
             var expressions = declarations.expressions;
                         
@@ -177,8 +203,6 @@ module.exports = {
                     )
                     .where( resources.id.in(resourceIds.toJSON()) )
                     .toQuery();
-
-                console.log('getTerritoireExpressionDomains query', query);
 
                 return new Promise(function(resolve, reject){
                     db.query(query, function(err, result){

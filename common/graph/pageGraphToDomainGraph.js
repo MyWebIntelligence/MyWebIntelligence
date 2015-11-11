@@ -2,17 +2,9 @@
 
 var stats = require('simple-statistics');
 
-var immutableMap = require('immutable').Map;
-
 var DomainGraph = require('./DomainGraph');
 var computeSocialImpact = require('../../automatedAnnotation/computeSocialImpact');
 
-
-var parse = require('url').parse;
-
-function getHostname(url){
-    return parse(url).hostname;
-}
 
 function cleanValue(v, forbidden, replacement){
     if(!Array.isArray(forbidden))
@@ -25,23 +17,23 @@ function cleanValue(v, forbidden, replacement){
 /*
     Right now, only the top1M is saved in the database
 */
-var MAX_ALEXA_RANK = 1000001;
+var DEFAULT_POTENTIAL_AUDIENCE = 100;
 
 /*
     pageGraph : PageGraph
-    alexaRanks: Immutable.Map<hostname, rank>
+    expressionDomainsById
+    expressionDomainAnnotationsByEDId
 */
-module.exports = function pageGraphToDomainGraph(pageGraph, alexaRanks, expressionDomainsById){
+module.exports = function pageGraphToDomainGraph(pageGraph, expressionDomainsById, expressionDomainAnnotationsByEDId){
     var domainGraph = new DomainGraph();
-    alexaRanks = alexaRanks || immutableMap(); // eventually, alexaRanks will just be annotation. See #160
     
     function makeDomainNodes(graph){
         
         var expressionDomainIdToPageNode = new Map();
         
-        graph.nodes.toJSON().forEach(function(pn){
-            var expressionDomainId = pn.expressionDomainId;
-            
+        graph.nodes.forEach(function(pn){
+            var expressionDomainId = pn.expression_domain_id;
+                                    
             var expressionDomainPageNodes = expressionDomainIdToPageNode.get(expressionDomainId);
             
             if(!expressionDomainPageNodes){
@@ -55,35 +47,39 @@ module.exports = function pageGraphToDomainGraph(pageGraph, alexaRanks, expressi
         var pageNodeToDomainNode = new WeakMap();
 
         expressionDomainIdToPageNode.forEach(function(pageNodes, expressionDomainId){
-            var alexaRank = alexaRanks.get(getHostname(pageNodes[0].url)) || MAX_ALEXA_RANK;
+            var expressionNodes = pageNodes.filter(function(n){ return n.expressionId !== -1 });
             
-            var domainFbLikes = pageNodes
+            var edAnnotations = expressionDomainAnnotationsByEDId[expressionDomainId];
+            
+            var potentialAudience = edAnnotations.estimated_potential_audience || DEFAULT_POTENTIAL_AUDIENCE;
+            
+            var domainFbLikes = expressionNodes
                 .map(function(node){ return node.facebook_like; })
                 .filter(function(likes){ return likes !== undefined && likes !== null && likes !== -1; });
 
-            var domainFbShares = pageNodes
+            var domainFbShares = expressionNodes
                 .map(function(node){ return node.facebook_share; })
                 .filter(function(shares){ return shares !== undefined && shares !== null && shares !== -1; });
 
-            var domainTwitterShares = pageNodes
+            var domainTwitterShares = expressionNodes
                 .map(function(node){ return node.twitter_share; })
                 .filter(function(shares){ return shares !== undefined && shares !== null && shares !== -1; });
 
-            var domainLinkedinShares = pageNodes
+            var domainLinkedinShares = expressionNodes
                 .map(function(node){ return node.linkedin_share; })
                 .filter(function(shares){ return shares !== undefined && shares !== null && shares !== -1; });
 
-            var domainGooglePagerank = pageNodes
+            var domainGooglePagerank = expressionNodes
                 .map(function(node){ return node.google_pagerank; })
-                .filter(function(gRank){ return gRank !== undefined && gRank !== null && gRank !== 12; });
+                .filter(function(gRank){ return gRank !== undefined && gRank !== null; });
 
-            var socialImpacts = pageNodes
+            var socialImpacts = expressionNodes
                 .map(function(node){ return computeSocialImpact(node); })
                 .filter(function(si){ return si !== undefined && si !== null && si !== 0; });
 
 
             // depth is min(depth)
-            var depth = pageNodes.reduce(function(acc, node){
+            var depth = expressionNodes.reduce(function(acc, node){
                 var d = node.depth;
                 return d < acc && d !== -1 ? d : acc;
             }, +Infinity);
@@ -98,17 +94,20 @@ module.exports = function pageGraphToDomainGraph(pageGraph, alexaRanks, expressi
             // This test prevents problems under these circumstances
             if(expressionDomain){
                 var domainNode = domainGraph.addNode(expressionDomain.name, {
+                    expression_domain_id: expressionDomain.id,
                     base_url: expressionDomain.main_url || expressionDomain.name,
                     depth: depth,
 
                     domain_title: expressionDomain.title || expressionDomain.name,
+                    media_type: edAnnotations.media_type || '',
+                    emitter_type: edAnnotations.emitter_type || '',
+                    
                     title: expressionDomain.name,
                     description: expressionDomain.description || '',
                     keywords: (expressionDomain.keywords || []).join(' / '),
-                    nb_expressions: pageNodes.length,
+                    nb_expressions: expressionNodes.length,
 
-                    global_alexarank: alexaRank,
-                    inverse_global_alexarank: 1/alexaRank,
+                    estimated_potential_audience: potentialAudience,
 
                     min_facebook_like: cleanValue(stats.min(domainFbLikes), [undefined, null], -1),
                     max_facebook_like: cleanValue(stats.max(domainFbLikes), [undefined, null], -1),
@@ -126,9 +125,9 @@ module.exports = function pageGraphToDomainGraph(pageGraph, alexaRanks, expressi
                     max_linkedin_share: cleanValue(stats.max(domainLinkedinShares), [undefined, null], -1),
                     median_linkedin_share: cleanValue(stats.median(domainLinkedinShares), [undefined, null], -1),
 
-                    min_google_pagerank: cleanValue(stats.min(domainGooglePagerank), [undefined, null], 12),
-                    max_google_pagerank: cleanValue(stats.max(domainGooglePagerank), [undefined, null], 12),
-                    median_google_pagerank: cleanValue(stats.median(domainGooglePagerank), [undefined, null], 12),
+                    min_google_pagerank: cleanValue(stats.min(domainGooglePagerank), [undefined, null], -1),
+                    max_google_pagerank: cleanValue(stats.max(domainGooglePagerank), [undefined, null], -1),
+                    median_google_pagerank: cleanValue(stats.median(domainGooglePagerank), [undefined, null], -1),
 
                     sum_likes: cleanValue(stats.sum(domainFbLikes), [undefined, null], 0),
                     sum_shares: (

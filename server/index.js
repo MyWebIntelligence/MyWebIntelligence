@@ -14,7 +14,6 @@ var bodyParser = require('body-parser');
 var multer = require('multer'); 
 
 var csv = require('fast-csv');
-var tld = require('tldjs')
 var passport = require('passport');
 var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
 var React = require('react');
@@ -123,7 +122,6 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.use(express.static(resolve(__dirname, '..', 'client')));
-app.use('/sigma', express.static(resolve(__dirname, '..', 'node_modules', 'sigma', 'build')));
 
 app.use(compression());
 
@@ -292,145 +290,47 @@ app.delete('/territoire/:id', function(req, res){
 });
 
 
-app.get('/alexa-ranks', function(req, res){
-    // console.log('/alexa-ranks', req.query.hostnames, req.query)
-    
-    var hostnames = new Set(JSON.parse(decodeURIComponent(req.query.hostnames)));
-    
-    var domains = new Set();
-    var domainToHostnames = new Map();
-    
-    hostnames.forEach(function(h){
-        var domain = tld.getDomain(h);
-        
-        domains.add(domain);
-        
-        var domainHostnames = domainToHostnames.get(domain);
-        if(!domainHostnames){
-            domainHostnames = new Set();
-            domainToHostnames.set(domain, domainHostnames);
-        }
-        
-        domainHostnames.add(h);
-    });
-    
-    database.AlexaRankCache.findByDomains(domains)
-        .then(function(arEntries){
-            // console.log('Alexa ranks before sending', results)
-        
-            var results = [];
-        
-            arEntries.forEach(function(are){
-                var domain = are.site_domain;
-                
-                domainToHostnames.get(domain).forEach(function(hostname){
-                    results.push(Object.assign({}, are, {site_domain: hostname}))
-                });
-            });
-        
-            res.send(results);
-        })
-        .catch(function(err){
-            res.status(500).send('database problem '+ err);
-        });
-    
-});
-
-/*
-    Disable server-side exports since from now on exports will happen from the client side.
-    Keeping the code in case for now
-*/
-/*
-app.get('/territoire/:id/expressions.gexf', function(req, res){
-    var user = serializedUsers.get(req.session.passport.user);
-    var id = Number(req.params.id);
-    console.log('expressions.gexf', user.id, 'territoire id', id);
-    
-    var territoireP = database.Territoires.findById(id);
-    console.time('graph from db');
-    var graphP = database.complexQueries.getTerritoireGraph(id);
-    var expressionsByIdP = graphP.then(getGraphExpressions)
-    
-    Promise.all([territoireP, graphP, expressionsByIdP]).then(function(result){
-        console.timeEnd('graph from db')
-        var territoire = result[0];
-        var abstractGraph = result[1];
-        var expressionsById = result[2];
-        
-        var pageGraph = abstractGraphToPageGraph(abstractGraph, expressionsById);
-        
-        // convert the file to GEXF
-        // send with proper content-type
-        res.set('Content-Type', "application/gexf+xml");
-        res.set('Content-disposition', 'attachment; filename="' + territoire.name+'-pages.gexf"');
-        console.time('as gexf');
-        res.status(200).send(pageGraph.exportAsGEXF());
-        console.timeEnd('as gexf');
-    }).catch(function(err){
-        console.error('expressions.gexf error', err, err.stack)
-        
-        res.status(500).send('database problem '+ err);
-    }); 
-});
-
-app.get('/territoire/:id/domains.gexf', function(req, res){
-    var user = serializedUsers.get(req.session.passport.user);
-    var id = Number(req.params.id);
-    console.log('domains.gexf', user.id, 'territoire id', id);
-    
-    var territoireP = database.Territoires.findById(id);
-    console.time('graph from db');
-    
-    var graphP = database.complexQueries.getTerritoireGraph(id);
-    var expressionsByIdP = graphP.then(getGraphExpressions);
-
-    var domainGraphP = Promise.all([graphP, expressionsByIdP])
-        .then(function(results){
-            return abstractGraphToPageGraph(results[0], results[1]);
-        })
-        .then(pageGraphToDomainGraph);
-    
-    Promise.all([territoireP, domainGraphP]).then(function(result){
-        console.timeEnd('graph from db')
-        var territoire = result[0];
-        var graph = result[1];
-        
-        // convert the file to GEXF
-        // send with proper content-type
-        res.set('Content-Type', "application/gexf+xml");
-        res.set('Content-disposition', 'attachment; filename="' + territoire.name+'-domains.gexf"');
-        console.time('as gexf');
-        res.status(200).send(graph.exportAsGEXF());
-        console.timeEnd('as gexf');
-    }).catch(function(err){
-        console.error('expressions.gexf error', err, err.stack)
-        
-        res.status(500).send('database problem '+ err);
-    }); 
-});
-*/
-
 app.get('/territoire/:id/expressions.csv', function(req, res){
     var user = serializedUsers.get(req.session.passport.user);
     var territoireId = Number(req.params.id);
     console.log('expressions.csv', user.id, 'territoire id', territoireId);
     
     var territoireP = database.Territoires.findById(territoireId);
-    console.time('graph from db');
 
-    var annotationByResourceIdP = database.ResourceAnnotations.findApprovedByTerritoireId(territoireId)
+    var resourceAnnotationByResourceIdP = database.ResourceAnnotations.findApprovedByTerritoireId(territoireId)
         .then(function(annotations){
             var annotationByResourceId = Object.create(null);
 
             annotations.forEach(function(ann){                        
-                annotationByResourceId[ann.resource_id] = JSON.parse(ann.values);
-                annotationByResourceId[ann.resource_id].expressionDomainId = ann.expression_domain_id;
+                annotationByResourceId[ann.resource_id] = Object.assign(
+                    {},
+                    ann,
+                    {
+                        territoire_id: undefined,
+                        resource_id: undefined
+                    }
+                )
             });
 
             return annotationByResourceId;
         });
+
+    var expressionDomainAnnotationByEDIdP = database.ExpressionDomainAnnotations.findByTerritoireId(territoireId)
+        .then(function(annotations){
+            var annotationByEDId = Object.create(null);
+            
+            annotations.forEach(function(ann){
+                annotationByEDId[ann.expression_domain_id] = {
+                    estimated_potential_audience: ann.estimated_potential_audience,
+                    media_type: ann.media_type,
+                    emitter_type: ann.emitter_type
+                };
+            });
+
+            return annotationByEDId;
+        });
     
-    var territoireResourceIdsP = annotationByResourceIdP.then(function(annotationByResourceId){
+    var territoireResourceIdsP = resourceAnnotationByResourceIdP.then(function(annotationByResourceId){
         return new Set(Object.keys(annotationByResourceId))
     })
     
@@ -446,22 +346,24 @@ app.get('/territoire/:id/expressions.csv', function(req, res){
         });
     
     Promise.all([
-        territoireP, expressionsWithResourceIdP, annotationByResourceIdP, expressionDomainsByIdP
+        territoireP, expressionsWithResourceIdP, resourceAnnotationByResourceIdP, expressionDomainsByIdP, expressionDomainAnnotationByEDIdP
     ]).then(function(result){
-        console.timeEnd('graph from db')
         var territoire = result[0];
         var expressionsWithResourceId = result[1];
-        var annotationsByResourceId = result[2];
+        var resourceAnnotationByResourceId = result[2];
         var expressionDomainsById = result[3];
-        
+        var expressionDomainAnnotationByEDId = result[4];
                 
         var exportableResources = expressionsWithResourceId.map(function(expressionWithResourceId){
             var resourceId = expressionWithResourceId.resource_id;
             
             var expression = Object.freeze(expressionWithResourceId);
-            var annotations = annotationsByResourceId[resourceId];
-
-            if(expression && annotations){
+            var resourceAnnotations = resourceAnnotationByResourceId[resourceId];
+            
+            var expressionDomainId = resourceAnnotations.expression_domain_id;
+            var expressionDomainAnnotations = expressionDomainAnnotationByEDId[expressionDomainId];
+            
+            if(expression){
                 var simplifiedExpression = simplifyExpression(expression);
                 
                 // Reference : https://docs.google.com/spreadsheets/d/1y2-zKeWAD9POD_hjth-v4KlMlm5HqD7tzKvbPilLb4o/edit?usp=sharing
@@ -472,20 +374,21 @@ app.get('/territoire/:id/expressions.csv', function(req, res){
                     // core_content: expression.main_text, 
 
                     excerpt: simplifiedExpression.excerpt,
-                    tags: (annotations.tags || []).join(' / '),
-                    favorite: annotations.favorite,
-                    negative: annotations.negative,
+                    tags: (resourceAnnotations.tags || []).join(' / '),
+                    favorite: resourceAnnotations.favorite,
+                    sentiment: resourceAnnotations.sentiment,
                     content_length: (expression.main_text || '').length,
-                    google_pagerank: annotations.google_pagerank,
-                    twitter_share: annotations.twitter_share,
-                    facebook_share: annotations.facebook_share,
-                    facebook_like: annotations.facebook_like,
-                    linkedin_share: annotations.linkedin_share,
-                    social_impact: computeSocialImpact(annotations),
+                    google_pagerank: resourceAnnotations.google_pagerank,
+                    twitter_share: resourceAnnotations.twitter_share,
+                    facebook_share: resourceAnnotations.facebook_share,
+                    facebook_like: resourceAnnotations.facebook_like,
+                    linkedin_share: resourceAnnotations.linkedin_share,
+                    social_impact: computeSocialImpact(resourceAnnotations),
                     
                     // related to the domain
-                    media_type: annotations.media_type, // soon enough, this one will have to move up to the domain
-                    domain_title: (expressionDomainsById[annotations.expressionDomainId] || {title: ''}).title
+                    media_type: expressionDomainAnnotations.media_type, 
+                    emitter_type: expressionDomainAnnotations.emitter_type, 
+                    domain_title: expressionDomainsById[expressionDomainId].title || ''
                 }
             }
         }).filter(function(r){ return !!r; });
@@ -614,7 +517,7 @@ app.get('/territoire-view-data/:id', function(req, res){
     });
 });
 
-app.post('/annotation/:territoireId/:resourceId', function(req, res){
+app.post('/resource-annotation/:territoireId/:resourceId', function(req, res){
     var user = serializedUsers.get(req.session.passport.user);
     if(!user || !user.id){
         res.redirect('/');
@@ -623,9 +526,30 @@ app.post('/annotation/:territoireId/:resourceId', function(req, res){
     
     var territoireId = Number(req.params.territoireId);
     var resourceId = Number(req.params.resourceId);
-    var data = req.body;
+    var delta = req.body;
     
-    database.ResourceAnnotations.update(resourceId, territoireId, user.id, data.values, data.approved)
+    database.ResourceAnnotations.update(resourceId, territoireId, user.id, delta)
+        .then(function(){
+            res.status(200).send('');
+        })
+        .catch(function(err){
+            console.error('database problem', err, err.stack);
+            res.status(500).send('database problem '+err);
+        });
+});
+
+app.post('/expression-domain-annotation/:territoireId/:edId', function(req, res){
+    var user = serializedUsers.get(req.session.passport.user);
+    if(!user || !user.id){
+        res.redirect('/');
+        return;
+    }
+    
+    var territoireId = Number(req.params.territoireId);
+    var edId = Number(req.params.edId);
+    var delta = req.body;
+    
+    database.ExpressionDomainAnnotations.update(edId, territoireId, user.id, delta)
         .then(function(){
             res.status(200).send('');
         })

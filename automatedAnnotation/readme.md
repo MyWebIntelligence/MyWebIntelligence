@@ -15,15 +15,24 @@ Elastic search will provide tags
 
 ### Now 
 
+#### Resource annotations
+
 Currently, only 5 types are supported:
 
 | key          | type                              | semantics         |    
 |--------------|-----------------------------------|-------------------|
 | `approved`   | boolean                           | approved/rejected |
-| `media_type` | enum                              | web page media type per @alakel's [list](https://github.com/MyWebIntelligence/MyWebIntelligence/issues/91#issuecomment-95236727) |
-| `sentiment`  | `positive`, `negative`, `neutral`, null | For now, only `negative` is reflected in the UI and stored in the database |
+| `sentiment`  | `positive`, `negative`, `neutral` | For now, only `negative` is reflected in the UI and stored in the database |
 | `favorite`   | boolean                           |     |
 | `tags`       | string[]                          | free list of words |
+
+
+#### Expression domain annotations
+
+| key          | type                              | semantics         |    
+|--------------|-----------------------------------|-------------------|
+| `media_type` | enum                              | web page media type per @alakel's [list](https://github.com/MyWebIntelligence/MyWebIntelligence/issues/91#issuecomment-95236727) |
+
 
 
 ### Future

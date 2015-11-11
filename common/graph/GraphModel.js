@@ -114,19 +114,30 @@ function makeAttributes(desc, specific){
     var opt;
 
     for(opt in specific){
-        if(!(opt in desc))
-            throw new Error("'" + opt + "' (value: "+specific[opt]+") is not a valid option ("+
-                JSON.stringify(enumerablePropNames(desc))+")");
+        if(!(opt in desc)){
+            if(specific[opt] !== undefined){
+                throw new Error("'" + opt + "' (value: "+specific[opt]+") is not a valid option ("+
+                    JSON.stringify(enumerablePropNames(desc))+")");
+            }
+            // ignore otherwise
+        }
+        else{
+            var valueType = typeof specific[opt];
+            var expectedType = desc[opt].type;
+            // TODO complete type matching
+            
+            if((specific[opt] === undefined || specific[opt] === null) && desc[opt].default !== undefined){
+                options[opt] = desc[opt].default;
+            }
+            else{
+                if( !(valueType === 'number' && expectedType === 'integer') &&
+                    !(valueType === 'number' && expectedType === 'float') &&
+                    (typeof specific[opt] !== desc[opt].type))
+                        throw new TypeError("Value for '"+opt+"' option should be a "+desc[opt].type+" and is a "+typeof specific[opt]+' ('+specific[opt]+')');
 
-        var valueType = typeof specific[opt];
-        var expectedType = desc[opt].type;
-        // TODO complete type matching
-        if( !(valueType === 'number' && expectedType === 'integer') &&
-            !(valueType === 'number' && expectedType === 'float') &&
-            (typeof specific[opt] !== desc[opt].type))
-                throw new TypeError("Value for '"+opt+"' option should be a "+desc[opt].type+" and is a "+typeof specific[opt]+' ('+specific[opt]+')');
-
-        options[opt] = specific[opt];
+                options[opt] = specific[opt];
+            }
+        }
     }
 
     for(opt in desc){ // all expected options

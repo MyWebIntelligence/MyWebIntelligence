@@ -77,11 +77,14 @@ page("/territoires", function(){
 
 // Makes sure tags are a Set<string>
 function massageTerritoireData(terrData){
-    var annotations = terrData.annotationByResourceId;
+    var annotations = terrData.resourceAnnotationByResourceId;
     
     Object.keys(annotations).forEach(function(id){
         var ann = annotations[id];
         ann.tags = new Set( ann.tags || [] );
+        
+        if(ann.google_pagerank === null)
+            delete ann.google_pagerank;
     })
     
     return terrData;

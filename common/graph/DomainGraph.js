@@ -4,10 +4,19 @@ var GraphModel = require('./GraphModel');
 
 var domainNodeDesc = {
     // Node attributes description
+    "expression_domain_id": {
+        type: "integer"
+    },
     "title": {
         type: "string"
     },
     "domain_title": {
+        type: "string"
+    },
+    "media_type": {
+        type: "string"
+    },
+    "emitter_type": {
         type: "string"
     },
     "description": {
@@ -29,11 +38,8 @@ var domainNodeDesc = {
         type: "integer"
     },
     
-    "global_alexarank": {
+    "estimated_potential_audience": {
         type: "integer"
-    },
-    "inverse_global_alexarank": {
-        type: "float"
     },
     
     "min_facebook_like": {

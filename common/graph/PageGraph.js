@@ -30,7 +30,7 @@ var pageNodeDesc = {
     },
     'google_pagerank': {
         type: "integer",
-        default: 12
+        default: -1
     },
     'linkedin_share': {
         type: "integer",
@@ -52,7 +52,7 @@ var pageNodeDesc = {
         type: "string",
         default: ''
     },
-    expressionDomainId: {
+    expression_domain_id: {
         type: "integer",
         default: -1
     }

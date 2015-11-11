@@ -2,7 +2,7 @@
 
 var database = require('../../database');
 
-var findOrCreateExpressionDomain = require('../../server/findOrCreateExpressionDomain');
+var prepareExpressionDomainForTerritoire = require('./prepareExpressionDomainForTerritoire');
 
 /*
     Create all the things that go along creating a resource.
@@ -11,12 +11,10 @@ var findOrCreateExpressionDomain = require('../../server/findOrCreateExpressionD
     This function returns a Promise that should always resolve
 */
 
-module.exports = function(resource, territoireId, depth){
-    //console.log('prepareResourceForTerritoire', territoireId, depth, resource.url)
-    
-    var expressionDomainP = findOrCreateExpressionDomain(resource.url)
+module.exports = function(resource, territoireId, depth){    
+    var expressionDomainP = prepareExpressionDomainForTerritoire(resource.url, territoireId)
         .catch(function(err){
-            console.error('findOrCreateExpressionDomain error', err);
+            console.error('prepareExpressionDomainForTerritoire error', err);
             throw err;
         });
 
@@ -44,7 +42,7 @@ module.exports = function(resource, territoireId, depth){
             var expressionDomain = res[0];
 
             return database.ResourceAnnotations.update(
-                resource.id, territoireId, undefined, undefined, undefined, expressionDomain.id
+                resource.id, territoireId, null, {expression_domain_id: expressionDomain.id}
             );
         })
         .then(function(){
@@ -53,7 +51,7 @@ module.exports = function(resource, territoireId, depth){
                 return database.Tasks.createTasksTodo(resource.id, territoireId, 'expression', depth);
         })
         .catch(function(err){
-            console.error('Error while database.ResourceAnnotations.update', err);
+            console.error('Error while database.ResourceAnnotations.update', err, err.stack);
         });
     
 }

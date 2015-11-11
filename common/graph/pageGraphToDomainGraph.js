@@ -31,9 +31,9 @@ module.exports = function pageGraphToDomainGraph(pageGraph, expressionDomainsByI
         
         var expressionDomainIdToPageNode = new Map();
         
-        graph.nodes.toJSON().forEach(function(pn){
+        graph.nodes.forEach(function(pn){
             var expressionDomainId = pn.expression_domain_id;
-                        
+                                    
             var expressionDomainPageNodes = expressionDomainIdToPageNode.get(expressionDomainId);
             
             if(!expressionDomainPageNodes){
@@ -47,37 +47,39 @@ module.exports = function pageGraphToDomainGraph(pageGraph, expressionDomainsByI
         var pageNodeToDomainNode = new WeakMap();
 
         expressionDomainIdToPageNode.forEach(function(pageNodes, expressionDomainId){
+            var expressionNodes = pageNodes.filter(function(n){ return n.expressionId !== -1 });
+            
             var edAnnotations = expressionDomainAnnotationsByEDId[expressionDomainId];
             
             var potentialAudience = edAnnotations.estimated_potential_audience || DEFAULT_POTENTIAL_AUDIENCE;
             
-            var domainFbLikes = pageNodes
+            var domainFbLikes = expressionNodes
                 .map(function(node){ return node.facebook_like; })
                 .filter(function(likes){ return likes !== undefined && likes !== null && likes !== -1; });
 
-            var domainFbShares = pageNodes
+            var domainFbShares = expressionNodes
                 .map(function(node){ return node.facebook_share; })
                 .filter(function(shares){ return shares !== undefined && shares !== null && shares !== -1; });
 
-            var domainTwitterShares = pageNodes
+            var domainTwitterShares = expressionNodes
                 .map(function(node){ return node.twitter_share; })
                 .filter(function(shares){ return shares !== undefined && shares !== null && shares !== -1; });
 
-            var domainLinkedinShares = pageNodes
+            var domainLinkedinShares = expressionNodes
                 .map(function(node){ return node.linkedin_share; })
                 .filter(function(shares){ return shares !== undefined && shares !== null && shares !== -1; });
 
-            var domainGooglePagerank = pageNodes
+            var domainGooglePagerank = expressionNodes
                 .map(function(node){ return node.google_pagerank; })
                 .filter(function(gRank){ return gRank !== undefined && gRank !== null; });
 
-            var socialImpacts = pageNodes
+            var socialImpacts = expressionNodes
                 .map(function(node){ return computeSocialImpact(node); })
                 .filter(function(si){ return si !== undefined && si !== null && si !== 0; });
 
 
             // depth is min(depth)
-            var depth = pageNodes.reduce(function(acc, node){
+            var depth = expressionNodes.reduce(function(acc, node){
                 var d = node.depth;
                 return d < acc && d !== -1 ? d : acc;
             }, +Infinity);
@@ -92,16 +94,18 @@ module.exports = function pageGraphToDomainGraph(pageGraph, expressionDomainsByI
             // This test prevents problems under these circumstances
             if(expressionDomain){
                 var domainNode = domainGraph.addNode(expressionDomain.name, {
+                    expression_domain_id: expressionDomain.id,
                     base_url: expressionDomain.main_url || expressionDomain.name,
                     depth: depth,
 
                     domain_title: expressionDomain.title || expressionDomain.name,
-                    domain_type: edAnnotations.media_type || '',
+                    media_type: edAnnotations.media_type || '',
+                    emitter_type: edAnnotations.emitter_type || '',
                     
                     title: expressionDomain.name,
                     description: expressionDomain.description || '',
                     keywords: (expressionDomain.keywords || []).join(' / '),
-                    nb_expressions: pageNodes.length,
+                    nb_expressions: expressionNodes.length,
 
                     estimated_potential_audience: potentialAudience,
 

@@ -4,13 +4,19 @@ var GraphModel = require('./GraphModel');
 
 var domainNodeDesc = {
     // Node attributes description
+    "expression_domain_id": {
+        type: "integer"
+    },
     "title": {
         type: "string"
     },
     "domain_title": {
         type: "string"
     },
-    "domain_type": {
+    "media_type": {
+        type: "string"
+    },
+    "emitter_type": {
         type: "string"
     },
     "description": {

@@ -20,7 +20,6 @@ interface PageListItemProps{
     
     resourceAnnotations: object map,
     expressionDomain: object map,
-    expressionDomainAnnotations: object map,
     
     rejected?: boolean, // can only be true. undefined otherwise
     annotate: (annotations, approved): void
@@ -59,11 +58,8 @@ module.exports = React.createClass({
 
         var resourceAnnotations = props.resourceAnnotations;
         var expressionDomain = props.expressionDomain;
-        var expressionDomainAnnotations = props.expressionDomainAnnotations;
         
-        //console.log('expressionDomain', expressionDomain);
-        
-        var classes = ['page-list-item'];
+        var classes = ['territoire-list-item', 'page-list-item'];
         if (props.rejected) {
             classes.push('rejected');
         }
@@ -73,16 +69,15 @@ module.exports = React.createClass({
                 className: classes.join(' '),
                 "data-resource-id": resourceId
             },
-            React.DOM.a(
-                {
-                    href: expressionDomain.main_url,
-                    target: '_blank',
-                    style: {
-                        color: 'grey',
-                        fontSize: '0.8em'
-                    }
-                },
-                expressionDomain.name
+            React.DOM.header(
+                {},
+                React.DOM.a(
+                    {
+                        href: expressionDomain.main_url,
+                        target: '_blank'
+                    },
+                    expressionDomain.name
+                )
             ),
             React.DOM.a({
                     href: props.url,
@@ -133,23 +128,6 @@ module.exports = React.createClass({
                 {
                     className: 'annotators'
                 },
-
-                // media-type
-                React.DOM.select({
-                    value: expressionDomainAnnotations['media_type'],
-                    onChange: function (e) {
-                        var newMediaType = e.target.value;
-
-                        annotate(mixin({ 'media_type': newMediaType }), undefined);
-                    }
-                }, ["", "Institutional", "Thematique",
-                 "Web dictionary", "Editorial", "Blog",
-                 "Forum", "Social Network", "Search Engine"]
-                .map(function (type) {
-                    return React.DOM.option({
-                        value: type
-                    }, type)
-                })),
                 
                 // sentiment
                 // only negative sentiment for now          
@@ -236,7 +214,7 @@ module.exports = React.createClass({
             // automated annotations
             React.DOM.div(
                 {
-                    className: 'automated-annotations'
+                    className: 'metrics'
                 },
                 React.DOM.span({title: 'Social impact'},
                     computeSocialImpact(resourceAnnotations),

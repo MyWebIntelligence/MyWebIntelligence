@@ -122,7 +122,6 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.use(express.static(resolve(__dirname, '..', 'client')));
-app.use('/sigma', express.static(resolve(__dirname, '..', 'node_modules', 'sigma', 'build')));
 
 app.use(compression());
 
@@ -320,10 +319,11 @@ app.get('/territoire/:id/expressions.csv', function(req, res){
         .then(function(annotations){
             var annotationByEDId = Object.create(null);
             
-            annotations.forEach(function(ann){                        
+            annotations.forEach(function(ann){
                 annotationByEDId[ann.expression_domain_id] = {
                     estimated_potential_audience: ann.estimated_potential_audience,
-                    media_type: ann.media_type
+                    media_type: ann.media_type,
+                    emitter_type: ann.emitter_type
                 };
             });
 
@@ -387,6 +387,7 @@ app.get('/territoire/:id/expressions.csv', function(req, res){
                     
                     // related to the domain
                     media_type: expressionDomainAnnotations.media_type, 
+                    emitter_type: expressionDomainAnnotations.emitter_type, 
                     domain_title: expressionDomainsById[expressionDomainId].title || ''
                 }
             }

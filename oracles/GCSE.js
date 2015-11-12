@@ -10,23 +10,25 @@ var GCSE_BASE_URL = "https://www.googleapis.com/customsearch/v1?";
 var MAX_GCSE_NUM = 10;
 var STARTS = [1, 11, 21, 31, 41, 51, 61, 71, 81, 91];
 
-function makeArray(length, val){
-    // should be array#fill
-    var a = Array(length);
-    for(var i = 0; i < length; i++){
-        a[i] = val;
-    }
-    return a;
-}
 
 // duration in days
-function makeRangesFromNow(duration, number){
-    var now = moment();
+function makeRanges(from, to, count){
+    from = moment(from);
+    to = moment(to);
+    var nbDays = to.diff(from, 'days')
+    var duration = nbDays/count;
     
-    return makeArray(number).map(function(e, i){
+    console.log('makeRanges', count, nbDays, duration);
+    
+    if(duration < 1){
+        count = nbDays;
+        duration = 1;
+    }
+    
+    return Array(count).fill().map(function(e, i){
         return {
-            start: now.clone().subtract((i+1)*duration, 'days'),
-            end: now.clone().subtract(i*duration, 'days')
+            start: to.clone().subtract((i+1)*duration, 'days'),
+            end: to.clone().subtract(i*duration, 'days')
         };
     });
 }
@@ -93,6 +95,7 @@ module.exports = function prepareGCSEOracle(credentials){
 
     function getGCSEResults(url){
         console.log('getting gcse fur url', url);
+                
         return new Promise(function(resolve, reject){
             request(url, function(error, response, body){
                 if(error){
@@ -124,37 +127,28 @@ module.exports = function prepareGCSEOracle(credentials){
         });
     }
 
-    return function GCSEOracle(q, oracleOptions){
-        var regularGCSEResults = getGCSEResultsForAllStarts({
-            query: q,
-            lr: oracleOptions && oracleOptions.lr
+    return function GCSEOracle(q, oracleOptions){   
+        var dateRange = oracleOptions['date-range'];
+        var maxResults = oracleOptions['max-results'] || 100;
+
+        // 8*3 month === 24 month
+        var rangeResultPs = makeRanges(dateRange.from, dateRange.to, Math.ceil(maxResults/100)).map(function(range){
+            return getGCSEResultsForAllStarts({
+                query: q,
+                dateRange: range,
+                lr: oracleOptions && oracleOptions.lr
+            });
         });
-        
-        if(oracleOptions && oracleOptions.add24MonthHistory){
-            // 8*3 month === 24 month
-            var rangeResults = makeRangesFromNow(90, 8).map(function(range){
-                return getGCSEResultsForAllStarts({
-                    query: q,
-                    dateRange: range,
-                    lr: oracleOptions && oracleOptions.lr
-                });
+
+        return Promise.all(rangeResultPs).then(function(allResultSets){
+            var res = new Set();
+
+            allResultSets.forEach(function(resultSet){
+                resultSet.forEach(function(url){ res.add(url); })
             });
-            
-            var allResults = rangeResults.concat(regularGCSEResults);
-            
-            return Promise.all(allResults).then(function(allResultSets){
-                var res = new Set();
-                
-                allResultSets.forEach(function(resultSet){
-                    resultSet.forEach(function(url){ res.add(url); })
-                });
-                
-                return res;
-            });
-        }
-        else{
-            return regularGCSEResults;
-        }
-    };
+
+            return res;
+        });
+    }
 
 };

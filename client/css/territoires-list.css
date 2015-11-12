@@ -143,11 +143,11 @@ main ul.territoires > li ul.queries > li .QueryForm-react-component{
     font-size: 1.1em;
 }
 
-.QueryForm-react-component form.query section label *:first-child{
+.QueryForm-react-component form.query section label > *:first-child{
     width: 40%;
     text-transform: capitalize;
 }
-.QueryForm-react-component form.query section label *:nth-child(2){
+.QueryForm-react-component form.query section label > *:nth-child(2){
     width: 100%;
 }
 

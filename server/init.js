@@ -3,6 +3,8 @@
 var client = require('../automatedAnnotation/semanticsAnalysis/elasticsearch/client');
 var es = require('../automatedAnnotation/semanticsAnalysis/elasticsearch');
 
+require('../oracles/init');
+
 var ELASTICSEARCH_ANALYSIS_HOST = "elasticanalysis:9200";
 
 client(ELASTICSEARCH_ANALYSIS_HOST)

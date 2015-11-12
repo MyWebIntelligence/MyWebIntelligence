@@ -6,21 +6,14 @@ var findExpressionLanguage = require('./findExpressionLanguage');
 var makeIndexConfig = require('./makeIndexConfig');
 var makeIndexName = require('./makeIndexName');
 var makeNMinus1Grams = require('./makeNMinus1Grams');
+var expressionProperties = require('./expressionProperties')
 
 var ELASTICSEARCH_ANALYSIS_HOST = "elasticanalysis:9200";
 var MYWI_EXPRESSION_DOCUMENT_TYPE = require('./MYWI_EXPRESSION_DOCUMENT_TYPE');
 
 
 var esapiP = client(ELASTICSEARCH_ANALYSIS_HOST)
-    .then(es)
-    // at startup delete all previous indices so newer indices can be recreated with the new mappings
-    .then(function(esapi){
-        return esapi.deleteIndex('*')
-        .then(function(){
-            return esapi;
-        })
-    });
-
+    .then(es);
 
 module.exports = function(expression, resourceId, territoireId){
     
@@ -49,12 +42,12 @@ module.exports = function(expression, resourceId, territoireId){
             return esapi.indexDocument(indexName, MYWI_EXPRESSION_DOCUMENT_TYPE, document, documentId)
         })
         .then(function(){
-            //console.log('document indexed')
+            console.log('Document', documentId, 'indexed')
             return esapi.refreshIndex(indexName);
         })
         .then(function(){
-            //console.log('Index refreshed');
-            var docKeys = Object.keys(document);
+            console.log('Index refreshed');
+            var docKeys = expressionProperties;
 
             var smallFields = docKeys.map(function(k){ return k+'.small' });
             var bigFields = docKeys.map(function(k){ return k+'.big' });
@@ -64,7 +57,7 @@ module.exports = function(expression, resourceId, territoireId){
             return esapi.termvector(indexName, MYWI_EXPRESSION_DOCUMENT_TYPE, documentId, fields);
         })
         .then(function(result){
-            //console.log('result', result);
+            //console.log('result', JSON.stringify(result, null, 3));
 
             var termvectors = result.term_vectors;
 

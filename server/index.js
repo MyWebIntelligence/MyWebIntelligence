@@ -33,6 +33,7 @@ var OraclesScreen = React.createFactory(require('../client/components/OraclesScr
 var TerritoireViewScreen = React.createFactory(require('../client/components/TerritoireViewScreen'));
 
 // start tasks processors
+require('./init');
 require('../crawl');
 require('../automatedAnnotation');
 

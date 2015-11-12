@@ -11,4 +11,4 @@ var r = {
 
 var territoireId = 9876;
 
-semanticAnalysis(r, territoireId);
+semanticAnalysis(r, territoireId); 

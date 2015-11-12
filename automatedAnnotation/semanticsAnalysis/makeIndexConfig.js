@@ -4,6 +4,8 @@ var fs = require('fs');
 var path = require('path');
 
 var MYWI_EXPRESSION_DOCUMENT_TYPE = require('./MYWI_EXPRESSION_DOCUMENT_TYPE');
+var expressionProperties = require('./expressionProperties')
+
 var FILLER_TOKEN = '_';
 
 var STOPWORD_DIR = path.join(__dirname, 'stopwords');
@@ -68,7 +70,7 @@ var analysisByLanguage = {
             }
         }, shingleFilters),
         "analyzer": {
-            "mywi_en_1_2": {
+            "mywi_en_small": {
                 "tokenizer": "standard",
                 "filter": [
                     "english_possessive_stemmer",
@@ -80,7 +82,7 @@ var analysisByLanguage = {
                     "kill_fillers"
                 ]
             },
-            "mywi_en_3_5": {
+            "mywi_en_big": {
                 "tokenizer": "standard",
                 "filter": [
                     "english_possessive_stemmer",
@@ -113,7 +115,7 @@ var analysisByLanguage = {
             }
         }, shingleFilters),
         "analyzer": {
-            "mywi_fr_1_2": {
+            "mywi_fr_small": {
                 "tokenizer": "standard",
                 "filter": [
                     "french_elision",
@@ -125,7 +127,7 @@ var analysisByLanguage = {
                     "kill_fillers"
                 ]
             },
-            "mywi_fr_3_5": {
+            "mywi_fr_big": {
                 "tokenizer": "standard",
                 "filter": [
                     "french_elision",
@@ -142,13 +144,7 @@ var analysisByLanguage = {
 }
 
 
-var expressionProperties = [
-    'main_text', 
-    'title', 
-    'meta_description', 'meta_keywords',
-    'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
-    'strong', 'b', 'em', 'i'
-];
+
 
 
 module.exports = function(language){
@@ -163,8 +159,8 @@ module.exports = function(language){
         mappings: {}
     };
     
-    var analyzer_1_2 = 'mywi_'+language+'_1_2';
-    var analyzer_3_5 = 'mywi_'+language+'_3_5';
+    var analyzer_small = 'mywi_'+language+'_small';
+    var analyzer_big = 'mywi_'+language+'_big';
     
     indexConfig.mappings[MYWI_EXPRESSION_DOCUMENT_TYPE] = {
         properties: expressionProperties.reduce(function(acc, prop){
@@ -173,11 +169,11 @@ module.exports = function(language){
                 "fields": {
                     small: {
                         type: 'string',
-                        analyzer: analyzer_1_2
+                        analyzer: analyzer_small
                     },
                     big: {
                         type: 'string',
-                        analyzer: analyzer_3_5
+                        analyzer: analyzer_big
                     }
                 }
             }

@@ -5,6 +5,7 @@ var langdetect = require('langdetect');
 var htmlLangToESLang = {
     "en": "en",
     "en-us": "en",
+    "en-gb": "en",
     
     "fr": "fr",
     "fr-fr": "fr"

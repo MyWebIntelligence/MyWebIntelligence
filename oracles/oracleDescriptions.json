@@ -21,10 +21,6 @@
                 "name": "language",
                 "type": [
                     {
-                        "value": "",
-                        "text": "- any -"
-                    },
-                    {
                         "value": "lang_ar",
                         "text": "Arabic"
                     },

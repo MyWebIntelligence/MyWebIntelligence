@@ -161,10 +161,16 @@ module.exports = React.createClass({
                         var id = opt.id;
                         var input;
                         
+                        var defaultValue = queryOracleOptions[id];
+                        
+                        if(selectedOracle.name === "Google Custom Search Engine" && opt.id === "lr" && !defaultValue){
+                            defaultValue = 'lang_'+(navigator.language || 'en');
+                        }
+                                                
                         if(Array.isArray(opt.type)){ // enum
                             input = React.DOM.select({
                                 name: id,
-                                defaultValue: queryOracleOptions[id]
+                                defaultValue: defaultValue
                             }, opt.type.map(function(optOpt){
                                 return React.DOM.option({
                                     value: optOpt.value,

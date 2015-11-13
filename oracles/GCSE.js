@@ -129,9 +129,10 @@ module.exports = function prepareGCSEOracle(credentials){
 
     return function GCSEOracle(q, oracleOptions){   
         var dateRange = oracleOptions['date-range'];
-        var maxResults = oracleOptions['max-results'] || 100;
+        var maxResults = oracleOptions['max-results']
+        if(typeof maxResults !== "number" || maxResults < 100)
+            maxResults = 100;
 
-        // 8*3 month === 24 month
         var rangeResultPs = makeRanges(dateRange.from, dateRange.to, Math.ceil(maxResults/100)).map(function(range){
             return getGCSEResultsForAllStarts({
                 query: q,

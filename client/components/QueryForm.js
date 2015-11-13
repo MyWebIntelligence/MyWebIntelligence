@@ -210,14 +210,14 @@ module.exports = React.createClass({
                                         React.DOM.input({
                                             name: 'from',
                                             defaultValue: (queryOracleOptions[id] || {}).from ||
-                                                moment().format('YYYY-MM-DD'),
+                                                moment().subtract(2, 'years').format('YYYY-MM-DD'),
                                             placeholder: 'YYYY-MM-DD',
                                             type: 'date'
                                         }),
                                         React.DOM.input({
                                             name: 'to',
                                             defaultValue: (queryOracleOptions[id] || {}).to || 
-                                                moment().subtract(2, 'years').format('YYYY-MM-DD'),
+                                                moment().format('YYYY-MM-DD'),
                                             placeholder: 'YYYY-MM-DD',
                                             type: 'date'
                                         })

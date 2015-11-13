@@ -4,18 +4,22 @@
         "oracleNodeModuleName": "GCSE",
         "options": [
             {
-                "id": "add24MonthHistory", 
-                "name": "add 24-month history",
-                "type": "boolean"
+                "id": "date-range", 
+                "name": "Date range",
+                "type": "date range"
+            },
+            {
+                "id": "max-results", 
+                "name": "Max results",
+                "default": 100,
+                "min": 0,
+                "step": 10,
+                "type": "number"
             },
             {
                 "id": "lr", 
                 "name": "language",
                 "type": [
-                    {
-                        "value": "",
-                        "text": "- any -"
-                    },
                     {
                         "value": "lang_ar",
                         "text": "Arabic"

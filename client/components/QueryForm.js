@@ -1,6 +1,7 @@
 "use strict";
 
 var React = require('react');
+var moment = require('moment');
 
 var cleanupURLs = require('../../common/cleanupURLs');
 
@@ -39,6 +40,7 @@ module.exports = React.createClass({
         });
         var queryOracleOptions = (query.oracleOptions && JSON.parse(query.oracleOptions)) || {};
         
+        console.log('selectedOracle', selectedOracle, queryOracleOptions);
         
         return React.DOM.div({className: "QueryForm-react-component"}, [
             React.DOM.form({
@@ -56,32 +58,44 @@ module.exports = React.createClass({
                     }
                     
                     var oracleOptionsSection = self.refs['oracle-options'];
-                    var oracleOptionInputs = oracleOptionsSection.getDOMNode().querySelectorAll('input[name], select[name], textarea[name]');
+                    var oracleOptionElements = oracleOptionsSection.getDOMNode().querySelectorAll('*[data-oracle-option-id]');
                     
                     var oracleOptions = Object.create(null);
                     
-                    Array.prototype.forEach.call(oracleOptionInputs, function(input){
-                        var id = input.name;
+                    Array.from(oracleOptionElements).forEach(function(el){
+                        var oracleOptionId = el.getAttribute('data-oracle-option-id');
                         var value;
-                        
+                                                
                         var type = selectedOracle.options.find(function(opt){
-                            return opt.id === id;
+                            return opt.id === oracleOptionId;
                         }).type;
                         
-                        if(type === 'list'){
-                            value = cleanupURLs(input.value.split('\n'))
-                        }
-                        else{
-                            if(type === 'boolean'){
-                                value = input.checked;
-                            }
-                            else{
-                                // works for Array.isArray(type)
-                                value = input.value;
-                            }
+                        switch(type){
+                            case 'list':
+                                value = cleanupURLs(el.value.split('\n'));
+                                break;
+                            case 'boolean':
+                                value = el.checked;
+                                break;
+                            case 'date range':
+                                value = {};
+                                var fromInput = el.querySelector('input[name="from"]');
+                                var from = fromInput.value;
+                                if(from)
+                                    value.from = from;
+                                
+                                var toInput = el.querySelector('input[name="to"]');
+                                var to = toInput.value;
+                                if(to)
+                                    value.to = to;
+                                
+                                break;
+                            default:
+                                // works for Array.isArray(type) (select/option)
+                                value = el.value;       
                         }
                         
-                        oracleOptions[id] = value;
+                        oracleOptions[oracleOptionId] = value;
                     });
                     
                     formData.oracleOptions = JSON.stringify(oracleOptions);
@@ -147,10 +161,16 @@ module.exports = React.createClass({
                         var id = opt.id;
                         var input;
                         
+                        var defaultValue = queryOracleOptions[id];
+                        
+                        if(selectedOracle.name === "Google Custom Search Engine" && opt.id === "lr" && !defaultValue){
+                            defaultValue = 'lang_'+(navigator.language || 'en');
+                        }
+                                                
                         if(Array.isArray(opt.type)){ // enum
                             input = React.DOM.select({
                                 name: id,
-                                defaultValue: queryOracleOptions[id]
+                                defaultValue: defaultValue
                             }, opt.type.map(function(optOpt){
                                 return React.DOM.option({
                                     value: optOpt.value,
@@ -159,31 +179,65 @@ module.exports = React.createClass({
                             }));
                         }
                         else{
-                            if(opt.type === 'list'){
-                                input = React.DOM.textarea({
-                                    name: id,
-                                    defaultValue: (queryOracleOptions[id] || []).join('\n'),
-                                    rows: 5
-                                })
-                            }
-                            else{
-                                if(opt.type === 'boolean'){
+                            switch(opt.type){
+                                case 'list':
+                                    input = React.DOM.textarea({
+                                        "data-oracle-option-id": id,
+                                        name: id,
+                                        defaultValue: (queryOracleOptions[id] || []).join('\n'),
+                                        rows: 5
+                                    })
+                                    break;
+                                case 'boolean':
                                     input = React.DOM.input({
+                                        "data-oracle-option-id": id,
                                         name: id,
                                         defaultChecked: queryOracleOptions[id],
                                         type: 'checkbox'
                                     });
-                                }
-                                else{
+                                    break;
+                                case 'number':
+                                    input = React.DOM.input({
+                                        "data-oracle-option-id": id,
+                                        name: id,
+                                        defaultValue: queryOracleOptions[id] || opt.default,
+                                        min: opt.min,
+                                        max: opt.max,
+                                        step: opt.step,
+                                        type: 'number'
+                                    });
+                                    break;
+                                case 'date range':
+                                    input = React.DOM.div(
+                                        {
+                                            "data-oracle-option-id": id,
+                                            className: 'date-range-input'
+                                        },
+                                        React.DOM.input({
+                                            name: 'from',
+                                            defaultValue: (queryOracleOptions[id] || {}).from ||
+                                                moment().subtract(2, 'years').format('YYYY-MM-DD'),
+                                            placeholder: 'YYYY-MM-DD',
+                                            type: 'date'
+                                        }),
+                                        React.DOM.input({
+                                            name: 'to',
+                                            defaultValue: (queryOracleOptions[id] || {}).to || 
+                                                moment().format('YYYY-MM-DD'),
+                                            placeholder: 'YYYY-MM-DD',
+                                            type: 'date'
+                                        })
+                                    );
+                                    break;
+                                default:
                                     console.error('unknown oracle option type', opt.type, selectedOracle.name, opt.name, opt.id);
-                                }
                             }
                         }
                         
-                        return React.DOM.label({}, [
+                        return React.DOM.label({}, 
                             React.DOM.span({}, opt.name),
                             input
-                        ]);
+                        );
                     })
                 ]) : undefined,
                 React.DOM.button({

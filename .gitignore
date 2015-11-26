@@ -5,7 +5,9 @@ node_modules
 
 browserify-*.js
 
-*-credentials.json
+config/*
+*-credentials*.json
+!config/google-credentials.sample.json
 
 
 client/components/external

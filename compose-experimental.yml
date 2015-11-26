@@ -5,7 +5,7 @@ app:
       - db
       - elasticanalysis
    ports:
-      - 4444:3333
+      - 3333:3333
    environment:
       - POSTGRES_PASSWORD=password
       - NODE_ENV=experimental
@@ -13,6 +13,11 @@ db:
    image: postgres:9.4
    environment:
       - POSTGRES_PASSWORD=password
+   volumes:
+      - /etc/postgresql
+      - /var/log/postgresql
+      - /var/lib/postgresql
+      - /var/lib/postgresql/data
    ports:
       - 5432:5432
 elasticanalysis: 

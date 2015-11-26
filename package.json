@@ -14,13 +14,16 @@
     "build-test-container": "docker build --tag=\"mywi/test\" .",
     "start-test-db-container": "docker rm mywi-test-db; docker run --name mywi-test-db -p 5600:5432 -e POSTGRES_PASSWORD=password -d mywi/database",
     "start-test": "docker run -p=6666:3333 -e \"NODE_ENV=test\" --link mywi-test-db:mywi-test-db mywi/test node server/index.js",
+      
     "build-dev": "docker-compose -f compose-dev.yml build",
     "up-dev": "docker-compose -f compose-dev.yml up --force-recreate",
+    
     "build-experimental": "docker-compose -f compose-experimental.yml build",
-    "up-experimental": "docker-compose -f compose-experimental.yml up -d",
-    "build-stable-container": "docker build --tag=\"mywi/stable\" .",
-    "start-stable-db-container": "docker rm mywi-stable-db; docker run --name mywi-stable-db -p 5300:5432 -e POSTGRES_PASSWORD=password -d mywi/database",
-    "start-stable": "docker run -d -p=3333:3333 -e \"NODE_ENV=stable\" --link mywi-stable-db:mywi-stable-db mywi/stable node server/index.js",
+    "up-experimental": "docker-compose -f compose-experimental.yml -p mywiexperimental up -d",
+      
+    "build-stable": "docker-compose -f compose-stable.yml build",
+    "up-stable": "docker-compose -f compose-stable.yml -p mywistable up -d",
+
     "bundle": "jsx node_modules/react-tabs-component/ client/components/external/ Tabs && browserify client/index.js -o client/browserify-bundle.js --ignore request --ignore jsdom",
     "watch": "watchify client/index.js -o client/browserify-bundle.js -d -v --ignore request --ignore jsdom",
     "lint": "eslint ./",

@@ -22,6 +22,8 @@ interface MyWITerritoire{
 */
 
 module.exports = React.createClass({
+    displayName: "TerritoireForm",
+    
     getInitialState: function(){
         return {};
     },
@@ -31,24 +33,25 @@ module.exports = React.createClass({
         
         var territoire = props.territoire || {};
         
-        return React.DOM.div({className: 'TerritoireForm-react-component'}, [
-            React.DOM.form({
-                className: "table-layout",
-                onSubmit: function(e){
-                    e.preventDefault();
+        return React.DOM.div({className: 'TerritoireForm-react-component'},
+            React.DOM.form(
+                {
+                    className: "",
+                    onSubmit: function(e){
+                        e.preventDefault();
 
-                    var formElement = e.target;
+                        var formElement = e.target;
 
-                    var formData = Object.create(null);
-                    formData.name = formElement.querySelector('input[name="name"]').value;
-                    formData.description = formElement.querySelector('textarea[name="description"]').value;
+                        var formData = Object.create(null);
+                        formData.name = formElement.querySelector('input[name="name"]').value;
+                        formData.description = formElement.querySelector('textarea[name="description"]').value;
 
-                    console.log('formData', formData);
+                        console.log('formData', formData);
 
-                    props.onSubmit(formData);
-                }
-            }, [
-                React.DOM.label({}, [
+                        props.onSubmit(formData);
+                    }
+                },
+                React.DOM.label({}, 
                     React.DOM.span({}, 'Name'),
                     React.DOM.input({
                         name: 'name',
@@ -61,26 +64,54 @@ module.exports = React.createClass({
                         //pattern: '\s*(\S+\s*)+', 
                         defaultValue: territoire.name
                     })
-                ]),
-                React.DOM.label({}, [
+                ),
+                React.DOM.label({}, 
                     React.DOM.span({}, 'Description'),
                     React.DOM.textarea({
                         name: 'description',
-                        cols: "50",
+                        cols: "30",
                         rows: "5",
                         defaultValue: territoire.description
                     })
-                ]),
+                ),
                 React.DOM.button({
                     type: "submit"
                 }, "ok")
-            ]),
+            ),
+            React.DOM.form(
+                {
+                    className: "import",
+                    onSubmit: function(e){
+                        e.preventDefault();
+
+                        var formElement = e.target;
+
+                        var formData = Object.create(null);
+                        throw 'TODO';
+
+                        console.log('formData', formData);
+
+                        props.onSubmit(formData);
+                    }
+                },
+                React.DOM.label({}, 
+                    React.DOM.span({}, 'Import territoire file'),
+                    React.DOM.input({
+                        name: 'name',
+                        type: 'file',
+                        required: true
+                    })
+                ),
+                React.DOM.button({
+                    type: "submit"
+                }, "ok")
+            ),
             props.territoire ? new DeleteButton({
                 onDelete: function(){
                     props.deleteTerritoire(props.territoire);
                 }
             }) : undefined
-        ])
+        )
         
         
         

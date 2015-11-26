@@ -167,14 +167,33 @@ form.query button[type="submit"]{
 form.query label{
 }
 
-.QueryForm-react-component .delete{
-    position: absolute;
-    
-    top: 0.2em;
-    right: 0.2em;
-    padding: 0.2em;
+
+.TerritoireForm-react-component{
+    display: flex;
+    flex-direction: row;
 }
 
+.TerritoireForm-react-component form{
+    display: flex;
+    flex-direction: column;
+    padding: 0 1em;
+}
+
+.TerritoireForm-react-component form:hover{
+    background-color: #EAEAEA;
+}
+
+/*.TerritoireForm-react-component form:nth-of-type(1){
+    flex: 2;
+}
+.TerritoireForm-react-component form:nth-of-type(2){
+    flex: 1;
+}*/
+
+/*
+    Delete button
+*/
+.QueryForm-react-component .delete,
 .TerritoireForm-react-component .delete{
     position: absolute;
     
@@ -182,3 +201,5 @@ form.query label{
     right: 0.2em;
     padding: 0.2em;
 }
+
+

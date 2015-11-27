@@ -497,6 +497,34 @@ module.exports = {
                 
             });
             
+        },
+        
+        
+        exportTerritoireHumanEffort: function(territoireId){
+            
+            var territoireP = Territoires.findById(territoireId);
+            var queriesP = Queries.findByBelongsTo(territoireId);
+            
+            
+            return Promise.all([territoireP, queriesP])
+            .then(function(res){
+                var territoire = res[0];
+                var queries = res[1];
+                
+                return {
+                    name: territoire.name,
+                    description: territoire.description,
+                    queries: queries.map(function(q){
+                        return {
+                            q: q.q,
+                            oracleOptions: q.oracleOptions
+                        }
+                    })
+                }
+                
+            })
+            
+            
         }
         
     }

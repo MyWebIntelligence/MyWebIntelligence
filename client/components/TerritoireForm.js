@@ -84,14 +84,14 @@ module.exports = React.createClass({
                     onSubmit: function(e){
                         e.preventDefault();
 
-                        var formElement = e.target;
+                        /*var formElement = e.target;
 
                         var formData = Object.create(null);
                         throw 'TODO';
 
                         console.log('formData', formData);
 
-                        props.onSubmit(formData);
+                        props.onSubmit(formData);*/
                     }
                 },
                 React.DOM.label({}, 

@@ -13,17 +13,48 @@ main ul.territoires > li{
     position: relative;
 }
 
-main ul.territoires > li > a{
-    width: 90%;
+main ul.territoires > li header{
+    padding: 0;
+    border: 0;
+    
+    height: auto;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+main ul.territoires > li header > *{
     height: 100%;
+}
+
+main ul.territoires > li header > *{
+    flex: 1;
+}
+main ul.territoires > li header > *:first-child{
+    flex: 6;
+}
+
+main ul.territoires > li header a{
     text-decoration: none;
     color: black;
 }
 
-/* TODO use the "responsive square" trick */
-main ul.territoires > li > button.delete{
-    width: 10%;
-    height: 100%;
+main ul.territoires > li header button.edit,
+main ul.territoires > li header a.export{
+    padding: 0.2em 0;
+    font-size: 1.4em;
+    background-color: transparent;
+    color: black;
+    border: 0;
+    text-align: center;
+}
+
+main ul.territoires > li header .description{
+    font-size: 0.8em;
+    color: #999;
+}
+
+main ul.territoires > li button.delete{
 }
 
 main ul.territoires > li h1.name{
@@ -36,23 +67,7 @@ main ul.territoires > li h1.name{
     justify-content: space-between;
 }
 
-main ul.territoires > li button.edit{
-    font-size: 1.4em;
-    padding: 0.2em;
-    position: absolute;
-    
-    right: 0.2em;
-    top: 0.2em;
-    
-    background-color: transparent;
-    
-    border: 0;
-}
 
-main ul.territoires > li .description{
-    font-size: 0.8em;
-    color: #999;
-}
 
 main ul.territoires > li.add{
     background-color: lightgreen;

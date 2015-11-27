@@ -78,21 +78,36 @@ module.exports = React.createClass({
         }
         else{
             children = [
-                React.DOM.a({
-                    href: "/territoire/"+t.id
-                }, [
-                    React.DOM.h1({className: "name"}, t.name),
-                    React.DOM.p({className: "description"}, t.description)
-                ]),
-                React.DOM.button({
-                    className: 'edit',
-                    onClick: function(){
-                        self.setState({
-                            openQueryForms: state.openQueryForms,
-                            editMode: true
-                        })
-                    }
-                }, React.DOM.i({className: 'fa fa-pencil '}, '')),
+                React.DOM.header({}, 
+                    React.DOM.a(
+                        {
+                            href: "/territoire/"+t.id
+                        },
+                        React.DOM.h1({className: "name"}, t.name),
+                        React.DOM.p({className: "description"}, t.description)
+                    ),
+                    React.DOM.a(
+                        {
+                            title: 'Export',
+                            className: 'export',
+                            href: "/territoire/export/"+t.id
+                        }, 
+                        React.DOM.i({className: 'fa fa-download '}, '')
+                    ),
+                    React.DOM.button(
+                        {
+                            className: 'edit',
+                            onClick: function(){
+                                self.setState({
+                                    openQueryForms: state.openQueryForms,
+                                    editMode: true
+                                })
+                            }
+                        }, 
+                        React.DOM.i({className: 'fa fa-pencil '}, '')
+                    )   
+                ),
+                
                 React.DOM.ul({className: "queries"}, t.queries.map(function(q){
                     return React.DOM.li({
                         className: state.openQueryForms.has(q.id) ? 'open' : ''

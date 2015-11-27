@@ -119,7 +119,7 @@ module.exports = {
     /*        
         This function is meant for exports.
     */
-    findByTerritoireId: function(territoireId){        
+    findApprovedAndPeripheryByTerritoireId: function(territoireId){        
         return databaseP.then(function(db){
             var query = resource_annotations
                 .select(
@@ -159,6 +159,29 @@ module.exports = {
                 .where(
                     resource_annotations.territoire_id.equals(territoireId),
                     resource_annotations.approved.equals(true)
+                )
+                .toQuery();
+
+            //console.log('ResourceAnnotations findByTerritoireId query', query);
+            
+            return new Promise(function(resolve, reject){
+                db.query(query, function(err, result){
+                    if(err) reject(err); else resolve(result.rows);
+                });
+            });
+        })
+    },
+    
+    /*
+        Raw values, no filter.
+    */
+    findByTerritoireId: function(territoireId){    
+        
+        return databaseP.then(function(db){
+            var query = resource_annotations
+                .select( resource_annotations.star() )
+                .where(
+                    resource_annotations.territoire_id.equals(territoireId)
                 )
                 .toQuery();
 

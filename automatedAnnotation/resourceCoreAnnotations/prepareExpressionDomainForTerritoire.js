@@ -2,7 +2,6 @@
 
 var database = require('../../database');
 
-var findOrCreateExpressionDomain = require('../../server/findOrCreateExpressionDomain');
 var estimatePotentialAudience = require('../estimatePotentialAudience');
 
 
@@ -12,51 +11,42 @@ var estimatePotentialAudience = require('../estimatePotentialAudience');
     
     This function returns a Promise that should always resolve
 */
-module.exports = function(url, territoireId){ 
-    var expressionDomainP = findOrCreateExpressionDomain(url);
-    
-    var expressionDomainAnnotationCreatedP = expressionDomainP
-    .then(function(ed){
-        return database.ExpressionDomainAnnotations.create({
-            expression_domain_id: ed.id,
-            territoire_id: territoireId
-        })
-        .catch(function(err){
-            if(err && err.constraint === "expression_domain_annotations_pkey"){
-                // This (attempt to recreate annotations for the same (expression domain, territoire) pair)
-                // may happen and we can't know beforehand unless a cache of the database 
-                // resource_annotations table is kept (which is impractical for memory reasons)
-                // or if we check beforehands (but results in 2 queries each time instead of one)
-                // Ignore silently, it's an expected error
-                return; 
-            }
-            else{
-                // forward any other error
-                console.error('ExpressionDomainsAnnotations.create error', err);
-                throw err;
-            }
-        }); 
+module.exports = function(expressionDomain, territoireId){ 
+    var expressionDomainAnnotationCreatedP = database.ExpressionDomainAnnotations.create({
+        expression_domain_id: expressionDomain.id,
+        territoire_id: territoireId
+    })
+    .catch(function(err){
+        if(err && err.constraint === "expression_domain_annotations_pkey"){
+            // This (attempt to recreate annotations for the same (expression domain, territoire) pair)
+            // may happen and we can't know beforehand unless a cache of the database 
+            // resource_annotations table is kept (which is impractical for memory reasons)
+            // or if we check beforehands (but results in 2 queries each time instead of one)
+            // Ignore silently, it's an expected error
+            return; 
+        }
+        else{
+            // forward any other error
+            console.error('ExpressionDomainsAnnotations.create error', err);
+            throw err;
+        }
     });
         
 
-    return Promise.all([expressionDomainP, expressionDomainAnnotationCreatedP])
-        .then(function(res){
-            var expressionDomain = res[0];
-            
-            return estimatePotentialAudience(expressionDomain)
-            .then(function(potentialAudience){
-                if(typeof potentialAudience === 'number'){
-                    return database.ExpressionDomainAnnotations.update(
-                        expressionDomain.id, territoireId, null, {
-                            estimated_potential_audience: potentialAudience
-                        }
-                    );
-                }
-                
-            })
-            .then(function(){
-                return expressionDomain;
-            })
-        });
+    return expressionDomainAnnotationCreatedP
+    .then(function(){
+        return estimatePotentialAudience(expressionDomain)
+        .then(function(potentialAudience){
+            if(typeof potentialAudience === 'number'){
+                return database.ExpressionDomainAnnotations.update(
+                    expressionDomain.id, territoireId, null, {
+                        estimated_potential_audience: potentialAudience
+                    }
+                );
+            }
+
+        })
+        
+    });
     
 }

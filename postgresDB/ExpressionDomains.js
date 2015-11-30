@@ -39,6 +39,33 @@ module.exports = {
         })
     },
     
+    findOrCreateByName: function(name){
+        var self = this;
+        
+        return databaseP.then(function(db){
+            var query = expression_domains
+                .select( expression_domains.star() )
+                .where(
+                    expression_domains.name.equal(name)
+                )
+                .toQuery();
+
+            //console.log('Resources findByURL query', query);
+            
+            return (new Promise(function(resolve, reject){
+                db.query(query, function(err, result){
+                    if(err) reject(err); else resolve(result.rows[0]);
+                });
+            }))
+                .then(function(r){
+                    return r ?
+                        r : 
+                        self.create({name: name}).then(function(ress){ return ress[0] });
+                });
+        });
+    },
+    
+    
     findByName: function(name){
         return databaseP.then(function(db){
             var query = expression_domains

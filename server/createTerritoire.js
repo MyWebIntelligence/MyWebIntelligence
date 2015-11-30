@@ -3,6 +3,7 @@
 var database = require('../database');
 
 var prepareResourceForTerritoire = require('../automatedAnnotation/resourceCoreAnnotations/prepareResourceForTerritoire');
+var prepareExpressionDomainForTerritoire = require('../automatedAnnotation/resourceCoreAnnotations/prepareExpressionDomainForTerritoire');
 var onQueryCreated = require('./onQueryCreated');
 
 
@@ -23,7 +24,7 @@ module.exports = function(territoireData, user){
     
     var queries = territoireData.queries || [];
     var resources = territoireData.resources || [];
-    //var expressionDomains = territoireData.expressionDomains || [];
+    var expressionDomains = territoireData.expressionDomains || [];
     
     return database.Territoires.create(territoireOwnData)
     .then(function(t){
@@ -54,9 +55,21 @@ module.exports = function(territoireData, user){
                     return database.ResourceAnnotations.update(resource.id, territoireId, user.id, annotations)
                 });
             })
-        }))
+        }));
         
-        return Promise.all([queriesReadyP, resourcesReadyP]).then(function(){
+        var expressionDomainReadyP = Promise._allResolved(expressionDomains.map(function(ed){
+            var annotations = ed.annotations;
+            
+            return database.ExpressionDomains.findOrCreateByName(ed.name)
+            .then(function(expressionDomain){
+                return prepareExpressionDomainForTerritoire(expressionDomain, territoireId)
+                .then(function(){
+                    return database.ExpressionDomainAnnotations.update(expressionDomain.id, territoireId, user.id, annotations)
+                });
+            })
+        }));
+        
+        return Promise.all([queriesReadyP, resourcesReadyP, expressionDomainReadyP]).then(function(){
             return t;
         });
     });

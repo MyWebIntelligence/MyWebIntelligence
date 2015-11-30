@@ -249,7 +249,7 @@ app.get('/territoire/:id', function(req, res){
     data/JSON routes
 ***/
 
-app.post('/territoire', function(req, res){
+app.put('/territoire', function(req, res){
     var user = serializedUsers.get(req.session.passport.user);
     var territoireData = req.body;
     territoireData.created_by = user.id;
@@ -429,6 +429,8 @@ app.get('/territoire/export/:id', function(req, res){
     
     database.complexQueries.exportTerritoireHumanEffort(territoireId)
     .then(function(territoireExport){
+        territoireExport.version = 1;
+        
         res.status(200);
         res.set('Content-Type', "application/json");
         res.set('Content-disposition', 'attachment; filename="' + territoireExport.name.replace(/\"/g, '') + '-export.json"');

@@ -30,7 +30,7 @@ function sendReq(method, url, data){
 
 module.exports = {
     createTerritoire: function(data){
-        return sendReq('POST', '/territoire', data);
+        return sendReq('PUT', '/territoire', data);
     },
     updateTerritoire: function(territoireDelta){
         var id = territoireDelta.id;

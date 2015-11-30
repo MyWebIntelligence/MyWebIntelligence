@@ -25,10 +25,9 @@ var ExpressionDomainAnnotations = require('../postgresDB/ExpressionDomainAnnotat
 
 var Tasks = require('../postgresDB/Tasks');
 var ExpressionDomains = require('../postgresDB/ExpressionDomains');
-
-
-
 var massageExpressionDomain = require('../postgresDB/massageExpressionDomain');
+
+var exportTerritoireHumanEffort = require('./exportTerritoireHumanEffort');
 
 
 module.exports = {
@@ -69,7 +68,7 @@ module.exports = {
             return Promise.all([userP, relevantTerritoiresP, oraclesP]).then(function(res){
                 var user = res[0];
                 var relevantTerritoires = res[1];
-                var oracles = res[2].map(function(o){ delete o.oracleNodeModuleName; return o; });
+                var oracles = res[2];
                 
                 var territoiresReadyPs = relevantTerritoires.map(function(t){
                     return Queries.findByBelongsTo(t.id).then(function(queries){
@@ -500,106 +499,7 @@ module.exports = {
         },
         
         
-        exportTerritoireHumanEffort: function(territoireId){
-            var territoireP = Territoires.findById(territoireId);
-            var queriesP = Queries.findByBelongsTo(territoireId);
-            var oraclesP = Oracles.getAll();
-            var resourceAnnotationsP = ResourceAnnotations.findByTerritoireId(territoireId);
-            var resourcesP = resourceAnnotationsP.then(function(resourceAnnotations){
-                var ids = new Set( resourceAnnotations.map(function(rAnn){ return rAnn.resource_id; }) );
-                return Resources.findValidByIds(ids);
-            });
-            var expressionDomainsAnnotationsP = ExpressionDomainAnnotations.findByTerritoireId(territoireId);
-            var expressionDomainsP = expressionDomainsAnnotationsP.then(function(edAnns){
-                var ids = new Set( edAnns.map(function(edAnn){ return edAnn.expression_domain_id; }) );
-                return ExpressionDomains.findByExpressionDomainIds(ids);
-            });
-            
-            return Promise.all([
-                territoireP, queriesP, oraclesP, resourceAnnotationsP, resourcesP, expressionDomainsAnnotationsP, expressionDomainsP
-            ])
-            .then(function(res){
-                var territoire = res[0];
-                var queries = res[1];
-                var oracles = res[2];
-                var resourceAnnotations = res[3];
-                var resources = res[4];
-                var expressionDomainsAnnotations = res[5];
-                var expressionDomains = res[6];
-                
-                return {
-                    name: territoire.name,
-                    description: territoire.description,
-                    queries: queries.map(function(query){
-                        var oracle = oracles.find(function(o){
-                            return o.id === query.oracle_id;
-                        });
-                        
-                        return {
-                            name: query.name,
-                            q: query.q,
-                            oracleOptions: query.oracleOptions,
-                            oracleNodeModuleName: oracle.oracleNodeModuleName
-                        }
-                    }),
-                    resources: resources
-                        .map(function(r){
-                            var rid = r.id;
-
-                            var annotations = resourceAnnotations.find(function(rAnn){ return rAnn.resource_id === rid; })
-                            var humanAnnotations = {
-                                approved: annotations.approved,
-                                sentiment: annotations.sentiment,
-                                favorite: annotations.favorite,
-                                tags: annotations.tags
-                            };
-
-                            if(Object.keys(humanAnnotations).every(function(k){
-                                var v = humanAnnotations[k];
-                                return v === undefined || v === null;
-                            })){
-                                return undefined;
-                            }
-                            else{
-                                return {
-                                    url: r.url,
-                                    annotations: humanAnnotations
-                                }
-                            }
-                        })
-                        .filter(function(r){ return !!r }),
-                    expressionDomains: expressionDomains
-                        .map(function(ed){
-                            var edid = ed.id;
-
-                            var annotations = expressionDomainsAnnotations.find(function(edAnn){
-                                return edAnn.expression_domain_id === edid;
-                            })
-                            var humanAnnotations = {
-                                media_type: annotations.media_type,
-                                emitter_type: annotations.emitter_type
-                            };
-
-                            if(Object.keys(humanAnnotations).every(function(k){
-                                var v = humanAnnotations[k];
-                                return v === undefined || v === null;
-                            })){
-                                return undefined;
-                            }
-                            else{
-                                return {
-                                    name: ed.name,
-                                    annotations: humanAnnotations
-                                }
-                            }
-                        })
-                        .filter(function(r){ return !!r })
-                }
-                
-            })
-            
-            
-        }
+        exportTerritoireHumanEffort: exportTerritoireHumanEffort
         
     }
             

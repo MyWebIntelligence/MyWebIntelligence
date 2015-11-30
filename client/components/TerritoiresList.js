@@ -10,6 +10,7 @@ var TerritoireForm = React.createFactory(require('./TerritoireForm'));
 
 interface TerritoireListProps{
     territoires: MyWITerritoire[],
+    oracles: MyWIOracle[]
     onTerritoireChange: function(ts: MyWITerritoire[]){}
     createTerritoire: (territoireData) => void
     deleteTerritoire: (territoire: MyWITerritoire) => void
@@ -50,13 +51,18 @@ module.exports = React.createClass({
         */
         
         return React.DOM.ul({className: "territoires"}, [
-            React.DOM.li({className: state.newTerritoireFormOpen ? '' : 'add'}, 
+            React.DOM.li(
+                {
+                    className: state.newTerritoireFormOpen ? '' : 'add',
+                    key: '+'
+                }, 
                 state.newTerritoireFormOpen ?
                     new TerritoireForm({
                         onSubmit: function(territoireData){
                             props.createTerritoire(territoireData);
                             self.setState({ newTerritoireFormOpen: false });
-                        }
+                        },
+                        oracles: props.oracles
                     }) :
                     React.DOM.button({
                         onClick: function(){
@@ -65,6 +71,7 @@ module.exports = React.createClass({
                     }, '+')
             )].concat(props.territoires.map(function(t){
                 return new TerritoireListItem({
+                    key: t.id,
                     territoire: t,
                     oracles: props.oracles,
                     onTerritoireChange: props.onTerritoireChange,

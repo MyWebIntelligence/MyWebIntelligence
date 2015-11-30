@@ -47,6 +47,7 @@ module.exports = React.createClass({
         if(state.editMode){
             children = [ new TerritoireForm({
                 territoire: t,
+                oracles: props.oracles,
                 onSubmit: function(formData){
                     var keysWithChange = Object.keys(formData).filter(function(k){
                         return t[k] !== formData[k];
@@ -109,9 +110,10 @@ module.exports = React.createClass({
                 ),
                 
                 React.DOM.ul({className: "queries"}, t.queries.map(function(q){
-                    return React.DOM.li({
-                        className: state.openQueryForms.has(q.id) ? 'open' : ''
-                    }, [
+                    return React.DOM.li(
+                        {
+                            className: state.openQueryForms.has(q.id) ? 'open' : ''
+                        },
                         state.openQueryForms.has(q.id) ?
                             new QueryForm({
                                 oracles: props.oracles,
@@ -143,27 +145,27 @@ module.exports = React.createClass({
                                     props.removeQueryFromTerritoire(query, t);
                                 }
                             }) :
-                            React.DOM.button({
-                                onClick: function(){
-                                    if(state.openQueryForms.has(q.id))
-                                        state.openQueryForms.delete(q.id);
-                                    else
-                                        state.openQueryForms.add(q.id);
+                            React.DOM.button(
+                                {
+                                    onClick: function(){
+                                        if(state.openQueryForms.has(q.id))
+                                            state.openQueryForms.delete(q.id);
+                                        else
+                                            state.openQueryForms.add(q.id);
 
-                                    self.setState({
-                                        openQueryForms: state.openQueryForms,
-                                        editMode: false
-                                    });
-                                }
-                            }, [
+                                        self.setState({
+                                            openQueryForms: state.openQueryForms,
+                                            editMode: false
+                                        });
+                                    }
+                                },
                                 React.DOM.strong({}, q.name),
                                 React.DOM.span({}, props.oracles.find(function(o){
                                     return o.id === q.oracle_id;
                                 }).name),
-                                React.DOM.span({}, '"'+q.q+'"'),
-                                React.DOM.span({}, '0/'+q.nbPage)
-                            ])
-                    ]);
+                                React.DOM.span({}, '"'+q.q+'"')
+                            )
+                    );
                 }).concat([
                     React.DOM.li({
                         className: ['add', (state.openQueryForms.has('+') ? 'open' : '')].join(' ')

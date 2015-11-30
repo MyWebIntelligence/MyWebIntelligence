@@ -24,6 +24,7 @@ var database = require('../database');
 //var dropAllTables = require('../postgresDB/dropAllTables');
 //var createTables = require('../postgresDB/createTables');
 var onQueryCreated = require('./onQueryCreated');
+var createTerritoire = require('./createTerritoire');
 var getTerritoireScreenData = require('../database/getTerritoireScreenData');
 var simplifyExpression = require('./simplifyExpression');
 var computeSocialImpact = require('../automatedAnnotation/computeSocialImpact');
@@ -252,10 +253,9 @@ app.get('/territoire/:id', function(req, res){
 app.put('/territoire', function(req, res){
     var user = serializedUsers.get(req.session.passport.user);
     var territoireData = req.body;
-    territoireData.created_by = user.id;
     console.log('creating territoire', user.id, territoireData);
 
-    database.Territoires.create(territoireData).then(function(newTerritoire){
+    createTerritoire(territoireData, user).then(function(newTerritoire){
         res.status(201).send(newTerritoire);
     }).catch(function(err){
         res.status(500).send('database problem '+ err);
@@ -428,9 +428,7 @@ app.get('/territoire/export/:id', function(req, res){
     console.log('export territoire', territoireId);
     
     database.complexQueries.exportTerritoireHumanEffort(territoireId)
-    .then(function(territoireExport){
-        territoireExport.version = 1;
-        
+    .then(function(territoireExport){        
         res.status(200);
         res.set('Content-Type', "application/json");
         res.set('Content-disposition', 'attachment; filename="' + territoireExport.name.replace(/\"/g, '') + '-export.json"');

@@ -4,19 +4,64 @@ var React = require('react');
 
 var DeleteButton = React.createFactory(require('./DeleteButton'));
 
+
+
+function findValidationErrors(fileString, oracles){
+    console.log('findValidationErrors', oracles);
+    
+    var territoireData;
+    var errors = [];
+    var warnings = [];
+    
+    try{
+        territoireData = JSON.parse(fileString);
+    }
+    catch(e){
+        errors.push(e);
+        
+        return {
+            errors : errors.length >= 1 ? errors : undefined
+        }; 
+    }
+    
+    if(territoireData.name === undefined)
+        errors.push(new Error('Missing territoire.name'))
+    if(territoireData.description === undefined)
+        errors.push(new Error('Missing territoire.description'))
+    
+    var queries = territoireData.queries;
+    if(Array.isArray(queries)){
+        // make sure there is a corresponding oracle in this instance of MyWI
+        territoireData.queries = queries.filter(function(q){
+            var oracle = oracles.find(function(o){
+                return o.oracleNodeModuleName === q.oracleNodeModuleName;
+            });
+            
+            if(!oracle){
+                warnings.push(new Error('No oracle named "'+q.oracleNodeModuleName+'". Query "'+q.name+'" not imported'))
+                return false;
+            }
+            
+            q.oracle_id = oracle.id;
+            
+            return true;
+        })
+    }
+        
+    return {
+        territoireData: territoireData,
+        errors : errors.length >= 1 ? errors : undefined,
+        warnings : warnings.length >= 1 ? warnings : undefined
+    }; 
+}
+
 /*
 
 interface TerritoireFormProps{
     territoire: MyWITerritoire
     deleteTerritoire: (t: MyWITerritoire) => void
-}
-
-
-interface MyWITerritoire{
-    id: MyWITerritoireId
-    name: string
-    description: string 
-    queries: MyWIQuery[]
+    onSubmit(formData),
+    oracles: MyWIOracle[]
 }
 
 */
@@ -25,10 +70,13 @@ module.exports = React.createClass({
     displayName: "TerritoireForm",
     
     getInitialState: function(){
-        return {};
+        return {
+            territoireImportFileData: undefined
+        };
     },
     
     render: function(){
+        var self = this;
         var props = this.props;
         
         var territoire = props.territoire || {};
@@ -84,14 +132,12 @@ module.exports = React.createClass({
                     onSubmit: function(e){
                         e.preventDefault();
 
-                        /*var formElement = e.target;
-
-                        var formData = Object.create(null);
-                        throw 'TODO';
-
-                        console.log('formData', formData);
-
-                        props.onSubmit(formData);*/
+                        console.log('self.state.territoireImportFileData', self.state)
+                        
+                        if(self.state.territoireImportFileData)
+                            props.onSubmit(self.state.territoireImportFileData);
+                        else
+                            console.error('self.state.territoireImportFileData', self.state.territoireImportFileData)
                     }
                 },
                 React.DOM.label({}, 
@@ -99,7 +145,41 @@ module.exports = React.createClass({
                     React.DOM.input({
                         name: 'name',
                         type: 'file',
-                        required: true
+                        required: true,
+                        onChange: function(e){
+                            var file = e.target.files[0];
+                            var reader = new FileReader();
+
+                            reader.onload = function(ev) {
+                                var fileContent = ev.target.result;
+
+                                var res = findValidationErrors(fileContent, props.oracles);
+                                var territoireData = res.territoireData;
+                                var errors = res.errors;
+                                var warnings = res.warnings;
+
+                                if(Array.isArray(errors)){
+                                    errors.forEach(function(err){
+                                        console.error('File import validation error for file', file.name, err);
+                                    })
+                                }
+                                if(Array.isArray(warnings)){
+                                    warnings.forEach(function(w){
+                                        console.warn('File import validation warning for file', file.name, w);
+                                    })
+                                }
+
+                                console.log('territoireImportFileData', res);
+                                
+                                self.setState({
+                                    territoireImportFileData: !errors || errors.length === 0 ?
+                                        territoireData :
+                                        undefined
+                                });
+                            };
+
+                            reader.readAsText(file);
+                        }
                     })
                 ),
                 React.DOM.button({

@@ -31,7 +31,6 @@ module.exports = React.createClass({
         var self = this;
         var props = this.props;
         var state = this.state;
-        console.log('oracles', props.oracles);
         
         var editionMode = !!props.query; // by opposition to creationMode
         var query = props.query || {};
@@ -39,9 +38,7 @@ module.exports = React.createClass({
             return o.id === state.selectedOracleId
         });
         var queryOracleOptions = (query.oracleOptions && JSON.parse(query.oracleOptions)) || {};
-        
-        console.log('selectedOracle', selectedOracle, queryOracleOptions);
-        
+                
         return React.DOM.div({className: "QueryForm-react-component"}, [
             React.DOM.form({
                 className: "query",

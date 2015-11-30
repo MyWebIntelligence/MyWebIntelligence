@@ -93,6 +93,26 @@ module.exports = {
         
     },
     
+    find: function(territoireId, resourceId){
+        return databaseP.then(function(db){
+            var query = resource_annotations
+                .select( resource_annotations.star() )
+                .where(
+                    resource_annotations.territoire_id.equals(territoireId),
+                    resource_annotations.resource_id.equals(resourceId)
+                )
+                .toQuery();
+
+            //console.log('ResourceAnnotations findNotApproved query', query);
+            
+            return new Promise(function(resolve, reject){
+                db.query(query, function(err, result){
+                    if(err) reject(err); else resolve(result.rows[0]);
+                });
+            });
+        })
+    },
+    
     findNotApproved: function(territoireId){
         return databaseP.then(function(db){
             var query = resource_annotations

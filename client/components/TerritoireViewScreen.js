@@ -109,13 +109,16 @@ module.exports = React.createClass({
     },
     componentDidUpdate: function(){
         this._scheduleRefreshIfNecessary();
+        
+        Array.from(document.querySelectorAll('main.territoire ul li')).forEach(function(el){
+            console.log(el, window.getComputedStyle(el).height);
+        })
     },
     
     componentWillUnmount: function(){
         clearTimeout(this._refreshTimeout);
         this._refreshTimeout = undefined;
     },
-    
     
     componentWillReceiveProps: function(nextProps) {
         var territoire = nextProps.territoire;

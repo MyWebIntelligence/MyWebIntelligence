@@ -10,7 +10,7 @@ var MAXIMUM_NICENESS = 19;
 
 var ONE_HOUR = 60*60*1000;
 
-var CACHE_ENTRY_NO_ACCESS_MAX_TIME = ONE_HOUR;
+var CACHE_ENTRY_NO_ACCESS_MAX_TIME = 24*ONE_HOUR;
 
 /*
     territoireId => mutable{

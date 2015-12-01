@@ -25,10 +25,9 @@ var ExpressionDomainAnnotations = require('../postgresDB/ExpressionDomainAnnotat
 
 var Tasks = require('../postgresDB/Tasks');
 var ExpressionDomains = require('../postgresDB/ExpressionDomains');
-
-
-
 var massageExpressionDomain = require('../postgresDB/massageExpressionDomain');
+
+var exportTerritoireHumanEffort = require('./exportTerritoireHumanEffort');
 
 
 module.exports = {
@@ -69,7 +68,7 @@ module.exports = {
             return Promise.all([userP, relevantTerritoiresP, oraclesP]).then(function(res){
                 var user = res[0];
                 var relevantTerritoires = res[1];
-                var oracles = res[2].map(function(o){ delete o.oracleNodeModuleName; return o; });
+                var oracles = res[2];
                 
                 var territoiresReadyPs = relevantTerritoires.map(function(t){
                     return Queries.findByBelongsTo(t.id).then(function(queries){
@@ -109,7 +108,7 @@ module.exports = {
             var annotationByResourceId = Object.create(null);
                         
             return graph.nodes.length > 0 ? 
-                ResourceAnnotations.findByTerritoireId(territoireId)
+                ResourceAnnotations.findApprovedAndPeripheryByTerritoireId(territoireId)
                     .then(function(annotations){
                         annotations.forEach(function(ann){                        
                             annotationByResourceId[ann.resource_id] = Object.assign(
@@ -497,7 +496,10 @@ module.exports = {
                 
             });
             
-        }
+        },
+        
+        
+        exportTerritoireHumanEffort: exportTerritoireHumanEffort
         
     }
             

@@ -24,6 +24,7 @@ var database = require('../database');
 //var dropAllTables = require('../postgresDB/dropAllTables');
 //var createTables = require('../postgresDB/createTables');
 var onQueryCreated = require('./onQueryCreated');
+var createTerritoire = require('./createTerritoire');
 var getTerritoireScreenData = require('../database/getTerritoireScreenData');
 var simplifyExpression = require('./simplifyExpression');
 var computeSocialImpact = require('../automatedAnnotation/computeSocialImpact');
@@ -249,13 +250,12 @@ app.get('/territoire/:id', function(req, res){
     data/JSON routes
 ***/
 
-app.post('/territoire', function(req, res){
+app.put('/territoire', function(req, res){
     var user = serializedUsers.get(req.session.passport.user);
     var territoireData = req.body;
-    territoireData.created_by = user.id;
     console.log('creating territoire', user.id, territoireData);
 
-    database.Territoires.create(territoireData).then(function(newTerritoire){
+    createTerritoire(territoireData, user).then(function(newTerritoire){
         res.status(201).send(newTerritoire);
     }).catch(function(err){
         res.status(500).send('database problem '+ err);
@@ -402,7 +402,7 @@ app.get('/territoire/:id/expressions.csv', function(req, res){
         // ready to send
         res.status(200);
         res.set('Content-Type', "text/csv");
-        res.set('Content-disposition', 'attachment; filename="' + territoire.name + '-pages.csv"');
+        res.set('Content-disposition', 'attachment; filename="' + territoire.name.replace(/\"/g, '') + '-pages.csv"');
         
         csvStream.pipe(res);
     }).catch(function(err){
@@ -411,6 +411,39 @@ app.get('/territoire/:id/expressions.csv', function(req, res){
         res.status(500).send('database problem '+ err);
     }); 
 });
+
+
+/*
+    Export a territoire.
+    The main goal here is to provide a one-click solution to extract all human-created information.
+    Human time is precious. If people worked on something, they shouldn't have to do it again.
+    This returns everything that was created by people for the purpose of being able to recreate a territoire later.
+    Among other things, this also incidentally allows to export a territoire from one MyWI instance and import in another.
+    
+    
+    
+*/
+app.get('/territoire/export/:id', function(req, res){
+    var territoireId = Number(req.params.id);
+    console.log('export territoire', territoireId);
+    
+    database.complexQueries.exportTerritoireHumanEffort(territoireId)
+    .then(function(territoireExport){        
+        res.status(200);
+        res.set('Content-Type', "application/json");
+        res.set('Content-disposition', 'attachment; filename="' + territoireExport.name.replace(/\"/g, '') + '-export.json"');
+        
+        res.send(JSON.stringify(territoireExport, null, 3));
+    })
+    .catch(function(err){
+        console.error('export.json error', err, err.stack)
+        
+        res.status(500).send('database problem '+ err);
+    }); 
+    
+})
+
+
 
 // to create a query
 app.post('/territoire/:id/query', function(req, res){

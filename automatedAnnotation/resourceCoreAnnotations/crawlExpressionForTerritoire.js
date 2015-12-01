@@ -13,6 +13,9 @@ var approveResource = require('../../server/approveResource');
 
 function errlog(context){
     return function(err){
+        if(err.query)
+            err.query = JSON.stringify(err.query);
+        
         console.error(context, err);
     }
 }

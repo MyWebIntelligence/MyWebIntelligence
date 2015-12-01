@@ -3,6 +3,8 @@
 var database = require('../../database');
 
 var prepareExpressionDomainForTerritoire = require('./prepareExpressionDomainForTerritoire');
+var findOrCreateExpressionDomain = require('../../server/findOrCreateExpressionDomain');
+
 
 /*
     Create all the things that go along creating a resource.
@@ -12,11 +14,18 @@ var prepareExpressionDomainForTerritoire = require('./prepareExpressionDomainFor
 */
 
 module.exports = function(resource, territoireId, depth){    
-    var expressionDomainP = prepareExpressionDomainForTerritoire(resource.url, territoireId)
+    var expressionDomainP = findOrCreateExpressionDomain(resource.url)
+    .then(function(expressionDomain){
+        return prepareExpressionDomainForTerritoire(expressionDomain, territoireId)
+        .then(function(){
+            return expressionDomain;
+        })
         .catch(function(err){
             console.error('prepareExpressionDomainForTerritoire error', err);
             throw err;
         });
+    });
+    
 
     var resourceAnnotationCreatedP = database.ResourceAnnotations.create({
         resource_id: resource.id,

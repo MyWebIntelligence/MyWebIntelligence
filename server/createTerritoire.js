@@ -1,0 +1,81 @@
+"use strict";
+
+var database = require('../database');
+
+var prepareResourceForTerritoire = require('../automatedAnnotation/resourceCoreAnnotations/prepareResourceForTerritoire');
+var prepareExpressionDomainForTerritoire = require('../automatedAnnotation/resourceCoreAnnotations/prepareExpressionDomainForTerritoire');
+var onQueryCreated = require('./onQueryCreated');
+
+
+/*
+    This function is used to import a territoire after an export.
+    Any change should be made with backward-compatibility in mind (people who exported a territoire
+    a long time ago should still be able to re-import it)
+*/
+
+module.exports = function(territoireData, user){
+    console.log('createTerritoire', territoireData, user.id);
+    
+    var territoireOwnData = {
+        name: territoireData.name,
+        description: territoireData.description,
+        created_by: user.id
+    };
+    
+    var queriesData = territoireData.queries || [];
+    var resources = territoireData.resources || [];
+    var expressionDomains = territoireData.expressionDomains || [];
+    
+    return database.Territoires.create(territoireOwnData)
+    .then(function(t){
+        var territoireId = t.id;
+        
+        /*
+            Create the queries
+        */
+        var queriesReadyP = Promise._allResolved(queriesData.map(function(queryData){
+            queryData.belongs_to = territoireId;
+            return database.Queries.create(queryData)
+            .then(function(query){
+                return onQueryCreated(query, user)
+                .then(function(){
+                    return query;
+                });
+            })
+            .catch(function(err){
+                console.error('Error trying to create a query', queryData, err);
+            });
+            
+        }));
+        
+        var resourcesReadyP = Promise._allResolved(resources.map(function(r){
+            var annotations = r.annotations;
+            
+            return database.Resources.findByURLOrCreate(r.url)
+            .then(function(resource){
+                return prepareResourceForTerritoire(resource, territoireId, 0)
+                .then(function(){
+                    return database.ResourceAnnotations.update(resource.id, territoireId, user.id, annotations)
+                });
+            })
+        }));
+        
+        var expressionDomainReadyP = Promise._allResolved(expressionDomains.map(function(ed){
+            var annotations = ed.annotations;
+            
+            return database.ExpressionDomains.findOrCreateByName(ed.name)
+            .then(function(expressionDomain){
+                return prepareExpressionDomainForTerritoire(expressionDomain, territoireId)
+                .then(function(){
+                    return database.ExpressionDomainAnnotations.update(expressionDomain.id, territoireId, user.id, annotations)
+                });
+            })
+        }));
+        
+        return Promise.all([queriesReadyP, resourcesReadyP, expressionDomainReadyP]).then(function(res){
+            var queries = res[0];
+            t.queries = queries;
+            return t;
+        });
+    });
+}

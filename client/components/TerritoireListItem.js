@@ -47,6 +47,7 @@ module.exports = React.createClass({
         if(state.editMode){
             children = [ new TerritoireForm({
                 territoire: t,
+                initialCreation: false,
                 oracles: props.oracles,
                 onSubmit: function(formData){
                     var keysWithChange = Object.keys(formData).filter(function(k){

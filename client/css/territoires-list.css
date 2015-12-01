@@ -194,9 +194,30 @@ form.query label{
     padding: 0 1em;
 }
 
+.TerritoireForm-react-component form textarea,
+.TerritoireForm-react-component form input[type="text"]{
+    width: 100%;
+}
+
 .TerritoireForm-react-component form:hover{
     background-color: #EAEAEA;
 }
+
+.TerritoireForm-react-component form.import{
+    flex-grow: 1;
+    width: 50%;
+
+}
+
+.TerritoireForm-react-component form.manual{
+    flex-grow: 2;
+}
+
+.TerritoireForm-react-component form label span:first-child{
+    vertical-align: top;
+}
+
+
 
 /*.TerritoireForm-react-component form:nth-of-type(1){
     flex: 2;

@@ -61,7 +61,11 @@ interface TerritoireFormProps{
     territoire: MyWITerritoire
     deleteTerritoire: (t: MyWITerritoire) => void
     onSubmit(formData),
-    oracles: MyWIOracle[]
+    oracles: MyWIOracle[],
+    
+    // Indicates whether the form is meant to be used for initial creation or just edition
+    // At this time, it's only used for the purpose of display the import input[type="file"]
+    initialCreation: boolean 
 }
 
 */
@@ -84,7 +88,7 @@ module.exports = React.createClass({
         return React.DOM.div({className: 'TerritoireForm-react-component'},
             React.DOM.form(
                 {
-                    className: "",
+                    className: "table-layout manual",
                     onSubmit: function(e){
                         e.preventDefault();
 
@@ -117,7 +121,6 @@ module.exports = React.createClass({
                     React.DOM.span({}, 'Description'),
                     React.DOM.textarea({
                         name: 'description',
-                        cols: "30",
                         rows: "5",
                         defaultValue: territoire.description
                     })
@@ -126,7 +129,7 @@ module.exports = React.createClass({
                     type: "submit"
                 }, "ok")
             ),
-            React.DOM.form(
+            props.initialCreation ? React.DOM.form(
                 {
                     className: "import",
                     onSubmit: function(e){
@@ -185,7 +188,7 @@ module.exports = React.createClass({
                 React.DOM.button({
                     type: "submit"
                 }, "ok")
-            ),
+            ) : undefined,
             props.territoire ? new DeleteButton({
                 onDelete: function(){
                     props.deleteTerritoire(props.territoire);

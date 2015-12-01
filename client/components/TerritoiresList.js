@@ -58,6 +58,7 @@ module.exports = React.createClass({
                 }, 
                 state.newTerritoireFormOpen ?
                     new TerritoireForm({
+                        initialCreation: true,
                         onSubmit: function(territoireData){
                             props.createTerritoire(territoireData);
                             self.setState({ newTerritoireFormOpen: false });

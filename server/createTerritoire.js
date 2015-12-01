@@ -22,7 +22,7 @@ module.exports = function(territoireData, user){
         created_by: user.id
     };
     
-    var queries = territoireData.queries || [];
+    var queriesData = territoireData.queries || [];
     var resources = territoireData.resources || [];
     var expressionDomains = territoireData.expressionDomains || [];
     
@@ -33,11 +33,14 @@ module.exports = function(territoireData, user){
         /*
             Create the queries
         */
-        var queriesReadyP = Promise._allResolved(queries.map(function(queryData){
+        var queriesReadyP = Promise._allResolved(queriesData.map(function(queryData){
             queryData.belongs_to = territoireId;
             return database.Queries.create(queryData)
             .then(function(query){
-                return onQueryCreated(query, user);
+                return onQueryCreated(query, user)
+                .then(function(){
+                    return query;
+                });
             })
             .catch(function(err){
                 console.error('Error trying to create a query', queryData, err);
@@ -69,7 +72,9 @@ module.exports = function(territoireData, user){
             })
         }));
         
-        return Promise.all([queriesReadyP, resourcesReadyP, expressionDomainReadyP]).then(function(){
+        return Promise.all([queriesReadyP, resourcesReadyP, expressionDomainReadyP]).then(function(res){
+            var queries = res[0];
+            t.queries = queries;
             return t;
         });
     });

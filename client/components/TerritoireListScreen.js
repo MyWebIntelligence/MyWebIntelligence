@@ -54,7 +54,7 @@ module.exports = React.createClass({
                             return t === temporaryTerritoire;
                         });
 
-                        serverTerritoire.queries = [];
+                        serverTerritoire.queries = serverTerritoire.queries || [];
                         state.user.territoires[index] = serverTerritoire;
 
                         // some element of the state.user.territoires array was mutated
@@ -63,19 +63,7 @@ module.exports = React.createClass({
                         });
 
                     }).catch(function(err){
-                        console.error('TODO add error message to UI '+err);
-
-                        /*var index = state.user.territoires.findIndex(function(t){
-                            return t === territoire;
-                        });
-
-                        state.user.territoires.unshift(index, 1);
-
-                        // some element of the state.user.territoires array was mutated
-                        self.setState({
-                            user: state.user,
-                            currentTerritoire: state.currentTerritoire
-                        });*/
+                        console.error('TODO add error message to UI', err);
                     });
 
                 },

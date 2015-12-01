@@ -41,7 +41,7 @@ module.exports = React.createClass({
         var self = this;
         
         var t = props.territoire;
-        
+    
         var children;
         
         if(state.editMode){

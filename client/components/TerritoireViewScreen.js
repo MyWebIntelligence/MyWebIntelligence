@@ -4,6 +4,7 @@ var React = require('react');
 
 var ImmutableSet = require('immutable').Set;
 var moment = require('moment');
+var documentOffset = require('global-offset');
 
 var Tabs = React.createFactory(require('./external/Tabs.js'));
 var Header = React.createFactory(require('./Header'));
@@ -19,6 +20,13 @@ var computeSocialImpact = require('../../automatedAnnotation/computeSocialImpact
 
 var annotateResource = serverAPI.annotateResource;
 var annotateExpressionDomain = serverAPI.annotateExpressionDomain;
+
+var DEFAULT_LIST_ITEM_HEIGHT = 20; // very small value by default so that worst case, more items are shown
+var DEFAULT_LIST_TOP_OFFSET = 0; // pretend it's at the top so worst case more items are shown
+
+var LIST_START_PADDING = 2;
+var LIST_END_PADDING = LIST_START_PADDING;
+
 
 /*
 
@@ -85,14 +93,13 @@ module.exports = React.createClass({
     displayName: 'TerritoireViewScreen',
     
     _refreshTimeout: undefined,
+    // Territoire data refresh
     _scheduleRefreshIfNecessary: function(){        
         var props = this.props;
         var self = this;
         var t = props.territoire;
         var territoireTaskCount = t && t.progressIndicators && t.progressIndicators.territoireTaskCount;
-        
-        console.log("scheduleRefreshIfNecessary", territoireTaskCount, t.graph && t.graph.edges.length, self._refreshTimeout);
-        
+                
         // for perceived performance purposes, sometimes only a graph with the query results is sent initially.
         // refresh the graph if no edge was found in the graph
         if( self._refreshTimeout === undefined && ((territoireTaskCount && territoireTaskCount >= 1) || (t.graph && t.graph.edges.length === 0))){
@@ -103,31 +110,130 @@ module.exports = React.createClass({
         }
     },
     
+    _scheduledRender: undefined,
+    // scroll event happen too often, so they need to be throttled via rAF
+    _scheduleRender: function(){
+        var self = this;
+        
+        if(self._scheduledRender === undefined){
+            self._scheduledRender = requestAnimationFrame(function(){
+                self._scheduledRender = undefined;
+                self.setState(Object.assign({}, self.state, {
+                    pageY: self._pageY,
+                    windowHeight: self._windowHeight
+                }));
+            })
+        }
+    },
+
+    _pageY: undefined,
+    _windowHeight: (typeof window !== 'undefined' && window.innerHeight) || 1000,
+    _scrollListener: function() {        
+        this._pageY = window.pageYOffset;
+        this._scheduleRender();
+    },
+    _resizeListener: function() {
+        this._windowHeight = window.innerHeight;
+        this._scheduleRender();
+    },
+    
+    
     // maybe schedule a refresh on mount and when receiving props
     componentDidMount: function(){
         this._scheduleRefreshIfNecessary();
-    },
-    componentDidUpdate: function(){
-        this._scheduleRefreshIfNecessary();
         
-        Array.from(document.querySelectorAll('main.territoire ul li')).forEach(function(el){
-            console.log(el, window.getComputedStyle(el).height);
-        })
+        window.addEventListener('scroll', this._scrollListener);
+        window.addEventListener('resize', this._resizeListener);
     },
     
     componentWillUnmount: function(){
         clearTimeout(this._refreshTimeout);
         this._refreshTimeout = undefined;
+        
+        cancelAnimationFrame(this._scheduledRender);
+        this._scheduledRender = undefined;
+        window.removeEventListener('scroll', this._scrollListener);
+        window.removeEventListener('resize', this._resizeListener);
+    },
+
+
+    
+    
+    // It is assumed all lis have the same height. The rest of the component will not work if that's not the case
+    // Make sure it is with all necessary measures in CSS and HTML
+    _listItemHeight: undefined,
+    _listTopOffset: undefined,
+    componentDidUpdate: function(){
+        this._scheduleRefreshIfNecessary();
+        
+        if(!this._listItemHeight){ // covers undefined, NaN and 0 
+            var thisElement = this.getDOMNode();
+            
+            var firstLi = thisElement.querySelector('main.territoire ul li');
+
+            if(firstLi){
+                this._listItemHeight = parseInt( window.getComputedStyle(firstLi).height );
+                this._listTopOffset = documentOffset(thisElement.querySelector('main.territoire ul')).top;
+            }
+        }
     },
     
     componentWillReceiveProps: function(nextProps) {
+        var state = this.state;
         var territoire = nextProps.territoire;
         
-        this.setState(Object.assign({}, this.state, {
+        var deltaState = {
             resourceAnnotationByResourceId: territoire.resourceAnnotationByResourceId,
             expressionDomainAnnotationsByEDId: territoire.expressionDomainAnnotationsByEDId,
-            territoireTags: computeTerritoireTags(territoire.resourceAnnotationByResourceId)
-        }));
+            territoireTags: computeTerritoireTags(territoire.resourceAnnotationByResourceId),
+            pageListItems: Object.keys(territoire.expressionById || {}).length >= 1 ? 
+                territoire.graph.nodes
+                    .filter(function(n){
+                        return typeof n.expression_id === 'number' && 
+                            territoire.resourceAnnotationByResourceId[n.id];
+                    })
+                    .sort(function nodeCompare(n1, n2){
+                        var resourceAnnotationByResourceId = territoire.resourceAnnotationByResourceId;
+
+                        var rId1 = n1.id;
+                        var rId2 = n2.id;
+
+                        var rAnn1 = resourceAnnotationByResourceId[rId1];
+                        var rAnn2 = resourceAnnotationByResourceId[rId2];
+
+                        return computeSocialImpact(rAnn2) - computeSocialImpact(rAnn1);
+                    }) 
+                : undefined,
+            territoireGraph: territoire && territoire.graph
+        };
+        
+        if(territoire.graph && state.territoireGraph !== territoire.graph){
+            if(state.resourceAnnotationByResourceId){
+                deltaState.approvedExpressionDomainIds = new Set(territoire.graph.nodes
+                    .filter(function(n){
+                        return typeof n.expression_id === 'number'
+                    })
+                    .map(function(n){
+                        return state.resourceAnnotationByResourceId[n.id].expression_domain_id;
+                    })                              
+                )   
+            }
+            
+            if(territoire.expressionDomainsById){
+                deltaState.domainGraph = pageGraphToDomainGraph(
+                    abstractGraphToPageGraph(
+                        territoire.graph, 
+                        territoire.expressionById, 
+                        state.resourceAnnotationByResourceId,
+                        state.expressionDomainAnnotationsByEDId
+                    ),
+                    territoire.expressionDomainsById,
+                    state.expressionDomainAnnotationsByEDId
+                );
+            }
+        }
+        
+        this.setState(Object.assign({}, this.state, deltaState));
     },
     
     getInitialState: function() {
@@ -139,7 +245,14 @@ module.exports = React.createClass({
             expressionDomainAnnotationsByEDId: territoire.expressionDomainAnnotationsByEDId,
             territoireGraph: undefined,
             domainGraph: undefined,
-            rejectedResourceIds : new ImmutableSet()
+            rejectedResourceIds : new ImmutableSet(),
+            approvedExpressionDomainIds: undefined,
+            
+            // largely inspired from http://jlongster.com/Removing-User-Interface-Complexity,-or-Why-React-is-Awesome#p78
+            // <3 @jlongster
+            pageY: 0,
+            windowHeight: (typeof window !== "undefined" && window.innerHeight) || 1000,
+            pageListItems: undefined
         }
     },
     
@@ -150,41 +263,18 @@ module.exports = React.createClass({
         var state = this.state;
         var territoire = props.territoire;
         
-        console.log('territoire', territoire, territoire.graph && territoire.graph.edges.length);
+        var listItemHeight = this._listItemHeight || DEFAULT_LIST_ITEM_HEIGHT;
+        var listTopOffset = this._listTopOffset || DEFAULT_LIST_TOP_OFFSET;
         
-        if(territoire.graph && territoire.expressionDomainsById && state.territoireGraph !== territoire.graph){
-            var domainGraph = pageGraphToDomainGraph(
-                abstractGraphToPageGraph(
-                    territoire.graph, 
-                    territoire.expressionById, 
-                    state.resourceAnnotationByResourceId,
-                    state.expressionDomainAnnotationsByEDId
-                ),
-                territoire.expressionDomainsById,
-                state.expressionDomainAnnotationsByEDId
-            )
-            
-            // this is ugly
-            setTimeout(function(){
-                self.setState(Object.assign({}, state, {
-                    domainGraph: domainGraph,
-                    territoireGraph: territoire.graph
-                }));
-            }, 20)
-        }
+        console.log('scroll info', state.pageY, state.windowHeight, listItemHeight, listTopOffset);
         
+        var startOffset = state.pageY - listTopOffset;
+        var listStartIndex = Math.max(0, Math.floor(startOffset/listItemHeight) - LIST_START_PADDING)
         
-        function nodeCompare(n1, n2){
-            var resourceAnnotationByResourceId = state.resourceAnnotationByResourceId;
-            
-            var rId1 = n1.id;
-            var rId2 = n2.id;
-
-            var rAnn1 = resourceAnnotationByResourceId[rId1];
-            var rAnn2 = resourceAnnotationByResourceId[rId2];
-            
-            return computeSocialImpact(rAnn2) - computeSocialImpact(rAnn1);
-        }
+        var numberOfDisplayedItems = Math.ceil(state.windowHeight/listItemHeight);
+        var listEndIndex = listStartIndex + LIST_START_PADDING + numberOfDisplayedItems + LIST_END_PADDING;
+        
+        console.log('items', listStartIndex, numberOfDisplayedItems, listEndIndex);
         
                 
         return React.DOM.div({className: "react-wrapper"}, 
@@ -231,21 +321,29 @@ module.exports = React.createClass({
                 ),
                 
                 React.DOM.div({className: 'tabs-and-exports'},
-                    new Tabs({
-                        defaultTabNum: 0,
-                        tabNames: ['Pages', 'Domains'],
-                        classPrefix: 'tabs-'
-                    },
+                    new Tabs(
+                        {
+                            defaultTabNum: 0,
+                            tabNames: ['Pages', 'Domains'],
+                            classPrefix: 'tabs-'
+                        },
                         // Pages tab content
-                        Object.keys(territoire.expressionById || {}).length >= 1 ? React.DOM.ul(
-                            {className: 'result-list'}, 
-                            territoire.graph.nodes
-                                .slice() // clone array
-                                .filter(function(n){
-                                    return typeof n.expression_id === 'number' && 
-                                        state.resourceAnnotationByResourceId[n.id];
-                                })
-                                .sort(nodeCompare)
+                        state.pageListItems ? React.DOM.div(
+                            {
+                                className: 'page-list-container',
+                                style: {
+                                    height: state.pageListItems.length * listItemHeight + 'px'
+                                }
+                            },
+                            React.DOM.ul(
+                            {
+                                className: 'result-list',
+                                style: {
+                                    transform: 'translateY('+listStartIndex*listItemHeight+'px)'
+                                }
+                            }, 
+                            state.pageListItems
+                                .slice(listStartIndex, listEndIndex)
                                 .map(function(node){
                                     var expressionId = node.expression_id;
                                     var resourceId = node.id;
@@ -336,18 +434,12 @@ module.exports = React.createClass({
                                         }
                                     });
                                 })
+                            )
                         ) : undefined,
                         // Domains tab content
                         Object.keys(territoire.expressionById || {}).length >= 1 && state.domainGraph? 
                             new DomainTab({
-                                approvedExpressionDomainIds: new Set(territoire.graph.nodes
-                                    .filter(function(n){
-                                        return typeof n.expression_id === 'number'
-                                    })
-                                    .map(function(n){
-                                        return state.resourceAnnotationByResourceId[n.id].expression_domain_id;
-                                    })                              
-                                ),
+                                approvedExpressionDomainIds: state.approvedExpressionDomainIds,
                                 expressionDomainAnnotationsByEDId: state.expressionDomainAnnotationsByEDId,
                                 expressionDomainsById: territoire.expressionDomainsById,
                                 domainGraph: state.domainGraph,

@@ -22,12 +22,26 @@ interface DomainTabProps{
 module.exports = React.createClass({
     displayName: "DomainTab",
     
+    _makeDomainGraphNodeList: function(domainGraph){
+        return domainGraph.nodes.toJSON()
+        .filter(function(n){
+            return this.props.approvedExpressionDomainIds.has(n.expression_domain_id);
+        })
+        .sort(function(n1, n2){
+            console.log("n1, n2", n1, n2)
+            return n2.social_impact - n1.social_impact;
+        })
+    },
+    
     componentWillReceiveProps: function(newProps){
         this.setState({
             emitterTypes: new ImmutableSet( Object.keys(newProps.expressionDomainAnnotationsByEDId)
                 .map(function(edid){ return newProps.expressionDomainAnnotationsByEDId[edid].emitter_type; }) 
                 .filter(function(emitterType){ return !!emitterType; }) 
-            )
+            ),
+            domainGraphNodeList: newProps.domainGraph !== this.props.domainGraph ?
+                this._makeDomainGraphNodeList(newProps.domainGraph) :
+                this.state.domainGraphNodeList
         })
     },
     
@@ -38,7 +52,8 @@ module.exports = React.createClass({
             emitterTypes: new ImmutableSet( Object.keys(expressionDomainAnnotationsByEDId)
                 .map(function(edid){ return expressionDomainAnnotationsByEDId[edid].emitter_type; }) 
                 .filter(function(emitterType){ return !!emitterType; }) 
-            )
+            ),
+            domainGraphNodeList: this._makeDomainGraphNodeList(this.props.domainGraph)
         }  
     },
     
@@ -63,14 +78,7 @@ module.exports = React.createClass({
                 {
                     className: 'domains'
                 },
-                domainGraph.nodes.toJSON()
-                .filter(function(n){
-                    return props.approvedExpressionDomainIds.has(n.expression_domain_id);
-                })
-                .sort(function(n1, n2){
-                    console.log("n1, n2", n1, n2)
-                    return n2.social_impact - n1.social_impact;
-                })
+                state.domainGraphNodeList
                 .map(function(n){
                     var edid = n.expression_domain_id;
                     var expressionDomain = props.expressionDomainsById[edid];

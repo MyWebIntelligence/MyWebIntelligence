@@ -116,7 +116,7 @@ module.exports = React.createClass({
                     React.DOM.i({className: 'fa fa-users'})
                 ),
                 React.DOM.span({title: 'Social Impact'},
-                    props.expressionDomainMetrics.social_impact,
+                    props.expressionDomainMetrics.social_impact_index,
                     ' ',
                     React.DOM.i({className: 'fa fa-share-alt'})
                 ),

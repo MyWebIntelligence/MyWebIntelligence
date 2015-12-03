@@ -14,9 +14,7 @@ function cleanValue(v, forbidden, replacement){
     return forbidden.includes(v) ? replacement : v;
 }
 
-/*
-    Right now, only the top1M is saved in the database
-*/
+
 var DEFAULT_POTENTIAL_AUDIENCE = 100;
 
 /*
@@ -44,46 +42,9 @@ module.exports = function pageGraphToDomainGraph(pageGraph, expressionDomainsByI
             expressionDomainPageNodes.push(pn);
         });
         
-        var pageNodeToDomainNode = new WeakMap();
-
+        var expressionDomainDataMap = new Map();
+        
         expressionDomainIdToPageNode.forEach(function(pageNodes, expressionDomainId){
-            var expressionNodes = pageNodes.filter(function(n){ return n.expressionId !== -1 });
-            
-            var edAnnotations = expressionDomainAnnotationsByEDId[expressionDomainId];
-            
-            var potentialAudience = edAnnotations.estimated_potential_audience || DEFAULT_POTENTIAL_AUDIENCE;
-            
-            var domainFbLikes = expressionNodes
-                .map(function(node){ return node.facebook_like; })
-                .filter(function(likes){ return likes !== undefined && likes !== null && likes !== -1; });
-
-            var domainFbShares = expressionNodes
-                .map(function(node){ return node.facebook_share; })
-                .filter(function(shares){ return shares !== undefined && shares !== null && shares !== -1; });
-
-            var domainTwitterShares = expressionNodes
-                .map(function(node){ return node.twitter_share; })
-                .filter(function(shares){ return shares !== undefined && shares !== null && shares !== -1; });
-
-            var domainLinkedinShares = expressionNodes
-                .map(function(node){ return node.linkedin_share; })
-                .filter(function(shares){ return shares !== undefined && shares !== null && shares !== -1; });
-
-            var domainGooglePagerank = expressionNodes
-                .map(function(node){ return node.google_pagerank; })
-                .filter(function(gRank){ return gRank !== undefined && gRank !== null; });
-
-            var socialImpacts = expressionNodes
-                .map(function(node){ return computeSocialImpact(node); })
-                .filter(function(si){ return si !== undefined && si !== null && si !== 0; });
-
-
-            // depth is min(depth)
-            var depth = expressionNodes.reduce(function(acc, node){
-                var d = node.depth;
-                return d < acc && d !== -1 ? d : acc;
-            }, +Infinity);
-            
             var expressionDomain = expressionDomainsById[expressionDomainId];
             
             // Currently, the graph is built unrelated to the territoire
@@ -93,9 +54,51 @@ module.exports = function pageGraphToDomainGraph(pageGraph, expressionDomainsByI
             // This leads to expressionDomainId === undefined and expressionDomain === undefined
             // This test prevents problems under these circumstances
             if(expressionDomain){
-                var domainNode = domainGraph.addNode(expressionDomain.name, {
+                var expressionNodes = pageNodes.filter(function(n){ return n.expressionId !== -1 });
+
+                var edAnnotations = expressionDomainAnnotationsByEDId[expressionDomainId];
+
+                var potentialAudience = edAnnotations.estimated_potential_audience || DEFAULT_POTENTIAL_AUDIENCE;
+
+                var domainFbLikes = expressionNodes
+                    .map(function(node){ return node.facebook_like; })
+                    .filter(function(likes){ return likes !== undefined && likes !== null && likes !== -1; });
+
+                var domainFbShares = expressionNodes
+                    .map(function(node){ return node.facebook_share; })
+                    .filter(function(shares){ return shares !== undefined && shares !== null && shares !== -1; });
+
+                var domainTwitterShares = expressionNodes
+                    .map(function(node){ return node.twitter_share; })
+                    .filter(function(shares){ return shares !== undefined && shares !== null && shares !== -1; });
+
+                var domainLinkedinShares = expressionNodes
+                    .map(function(node){ return node.linkedin_share; })
+                    .filter(function(shares){ return shares !== undefined && shares !== null && shares !== -1; });
+
+                var domainGooglePagerank = expressionNodes
+                    .map(function(node){ return node.google_pagerank; })
+                    .filter(function(gRank){ return gRank !== undefined && gRank !== null; });
+
+                var socialImpacts = expressionNodes
+                    .map(function(node){ return computeSocialImpact(node); })
+                    .filter(function(si){ return si !== undefined && si !== null && si !== 0; });
+
+                var socialImpact = cleanValue(stats.sum(socialImpacts), [undefined, null], 0)
+
+                // depth is min(depth)
+                var depth = expressionNodes.reduce(function(acc, node){
+                    var d = node.depth;
+                    return d < acc && d !== -1 ? d : acc;
+                }, +Infinity);
+
+
+                expressionDomainDataMap.set(expressionDomain.id, {
                     expression_domain_id: expressionDomain.id,
                     base_url: expressionDomain.main_url || expressionDomain.name,
+                    urls: expressionNodes.map(function(n){
+                        return n.url;
+                    }).join(' | '),
                     depth: depth,
 
                     domain_title: expressionDomain.title || expressionDomain.name,
@@ -106,8 +109,6 @@ module.exports = function pageGraphToDomainGraph(pageGraph, expressionDomainsByI
                     description: expressionDomain.description || '',
                     keywords: (expressionDomain.keywords || []).join(' / '),
                     nb_expressions: expressionNodes.length,
-
-                    estimated_potential_audience: potentialAudience,
 
                     min_facebook_like: cleanValue(stats.min(domainFbLikes), [undefined, null], -1),
                     max_facebook_like: cleanValue(stats.max(domainFbLikes), [undefined, null], -1),
@@ -136,15 +137,57 @@ module.exports = function pageGraphToDomainGraph(pageGraph, expressionDomainsByI
                         cleanValue(stats.sum(domainLinkedinShares), [undefined, null], 0)
                     ),
 
-                    social_impact: cleanValue(stats.sum(socialImpacts), [undefined, null], 0)
-
-                });
-
+                    estimated_potential_audience: potentialAudience,
+                    social_impact: socialImpact
+                })
+            }
+            
+        })
+        
+        // make estimated_potential_audience_index and social_impact_index
+        var estimatedPotentialAudiences = [];
+        var socialImpacts = [];
+        
+        expressionDomainDataMap.forEach(function(data){
+            estimatedPotentialAudiences.push(data.estimated_potential_audience);
+            socialImpacts.push(data.social_impact);
+        });
+        
+        var minEstimatedPotentialAudience = Math.min.apply(undefined, estimatedPotentialAudiences);
+        var maxEstimatedPotentialAudience = Math.max.apply(undefined, estimatedPotentialAudiences);
+        var estimatedPotentialAudienceRange = maxEstimatedPotentialAudience - minEstimatedPotentialAudience;
+        
+        var minSocialImpact = Math.min.apply(undefined, socialImpacts);
+        var maxSocialImpact = Math.max.apply(undefined, socialImpacts);
+        var socialImpactRange = maxSocialImpact - minSocialImpact;
+        
+        expressionDomainDataMap.forEach(function(data){
+            data.social_impact_index = Math.ceil( 100*(data.social_impact - minSocialImpact)/socialImpactRange );
+            delete data.social_impact; // because it's completely useless on its own
+            
+            data.estimated_potential_audience_index = Math.ceil( 
+                100*(data.estimated_potential_audience - minEstimatedPotentialAudience)
+                /estimatedPotentialAudienceRange 
+            );
+        });
+        
+        
+        var pageNodeToDomainNode = new WeakMap();
+        
+        expressionDomainIdToPageNode.forEach(function(pageNodes, expressionDomainId){
+            var expressionDomain = expressionDomainsById[expressionDomainId];
+            
+            if(expressionDomain){
+                var domainNode = domainGraph.addNode(expressionDomain.name, expressionDomainDataMap.get(expressionDomainId));
+                
                 pageNodes.forEach(function(pn){
                     pageNodeToDomainNode.set(pn, domainNode);
-                });
+                });  
             }
-        })
+                                                     
+                                                
+        });
+            
 
         return pageNodeToDomainNode;
     }

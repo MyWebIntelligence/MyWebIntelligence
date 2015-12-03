@@ -10,6 +10,9 @@ var domainNodeDesc = {
     "title": {
         type: "string"
     },
+    "urls": {
+        type: "string"
+    },
     "domain_title": {
         type: "string"
     },
@@ -35,10 +38,6 @@ var domainNodeDesc = {
         type: "string"
     },
     "depth": {
-        type: "integer"
-    },
-    
-    "estimated_potential_audience": {
         type: "integer"
     },
     
@@ -102,8 +101,15 @@ var domainNodeDesc = {
     "sum_shares": {
         type: "float"
     },
-    "social_impact": {
-        type: "float"
+    "social_impact_index": {
+        type: "integer"
+    },
+    
+    "estimated_potential_audience": {
+        type: "integer"
+    },
+    "estimated_potential_audience_index": {
+        type: "integer"
     }
 };
 

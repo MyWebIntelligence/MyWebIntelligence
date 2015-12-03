@@ -23,35 +23,21 @@ This component has no state (besides for tags input leftover) and is only handle
 module.exports = React.createClass({
     displayName: 'DomainListItem',
     
-    getInitialState: function () {
-        return {
-            //tagInputValue: ''
-        };
-    },
-    
-    shouldComponentUpdate: function(/*nextProps, nextState*/){
-        /*var props = this.props;
-        var state = this.state;
+    shouldComponentUpdate: function(nextProps){
+        var props = this.props;
         
-        return props.rejected !== nextProps.rejected ||
-            props.resourceAnnotations !== nextProps.resourceAnnotations ||
-            props.expressionDomainAnnotations !== nextProps.expressionDomainAnnotations ||
-            state.tagInputValue !== nextState.tagInputValue;*/
-        return true;
+        return props.expressionDomainAnnotations.emitter_type !== nextProps.expressionDomainAnnotations.emitter_type ||
+            props.expressionDomainAnnotations.media_type !== nextProps.expressionDomainAnnotations.media_type;
     },
     
     render: function () {
         var props = this.props;
-        //var state = this.state;
-        //var self = this;
 
         var annotate = props.annotate;
 
         var expressionDomain = props.expressionDomain;
         var expressionDomainAnnotations = props.expressionDomainAnnotations;
-        
-        console.log('expressionDomainAnnotations', expressionDomainAnnotations);
-        
+                
         var classes = ['territoire-list-item', 'domain-list-item'];
         
 
@@ -76,7 +62,7 @@ module.exports = React.createClass({
                 
                 // media type
                 React.DOM.select({
-                    value: expressionDomainAnnotations['media_type'],
+                    value: expressionDomainAnnotations.media_type,
                     onChange: function(e){
                         var newMediaType = e.target.value;
 
@@ -108,7 +94,7 @@ module.exports = React.createClass({
                 {
                     className: 'tags'
                 },
-                expressionDomain.keywords.map(function(tag) {
+                (new Set(expressionDomain.keywords)).toJSON().map(function(tag) {
                     return React.DOM.span(
                         {
                             className: 'tag',
@@ -130,7 +116,7 @@ module.exports = React.createClass({
                     React.DOM.i({className: 'fa fa-users'})
                 ),
                 React.DOM.span({title: 'Social Impact'},
-                    props.expressionDomainMetrics.social_impact,
+                    props.expressionDomainMetrics.social_impact_index,
                     ' ',
                     React.DOM.i({className: 'fa fa-share-alt'})
                 ),

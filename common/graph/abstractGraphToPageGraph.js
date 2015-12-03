@@ -37,7 +37,7 @@ module.exports = function abstractGraphToPageGraph(abGraph, expressionById, reso
         );
         
         var resourceAnnotations = resourceAnnotationsById ? resourceAnnotationsById[resourceId] : undefined;
-        
+                
         // Sometimes, prepareResourceForTerritoire isn't done yet and 
         // the ResourceAnnotation is created while there is no expression domain yet.
         // as a consequence, resourceAnnotationsById does not have the resource id as key
@@ -88,6 +88,8 @@ module.exports = function abstractGraphToPageGraph(abGraph, expressionById, reso
             pageGraph.addEdge(sourceNode, targetNode, { weight: 1 });
         }
     });
+    
+    console.log('pageGraph', pageGraph.nodes.size);
     
     console.timeEnd('PageGraph');
 

@@ -27,7 +27,7 @@ var onQueryCreated = require('./onQueryCreated');
 var createTerritoire = require('./createTerritoire');
 var getTerritoireScreenData = require('../database/getTerritoireScreenData');
 var simplifyExpression = require('./simplifyExpression');
-var computeSocialImpact = require('../automatedAnnotation/computeSocialImpact');
+var makeResourceSocialImpactIndexMap = require('../automatedAnnotation/makeResourceSocialImpactIndexMap');
 
 var TerritoireListScreen = React.createFactory(require('../client/components/TerritoireListScreen'));
 var OraclesScreen = React.createFactory(require('../client/components/OraclesScreen'));
@@ -354,6 +354,8 @@ app.get('/territoire/:id/expressions.csv', function(req, res){
         var resourceAnnotationByResourceId = result[2];
         var expressionDomainsById = result[3];
         var expressionDomainAnnotationByEDId = result[4];
+        
+        var socialImpactIndexMap = makeResourceSocialImpactIndexMap(resourceAnnotationByResourceId);
                 
         var exportableResources = expressionsWithResourceId.map(function(expressionWithResourceId){
             var resourceId = expressionWithResourceId.resource_id;
@@ -384,7 +386,7 @@ app.get('/territoire/:id/expressions.csv', function(req, res){
                     facebook_share: resourceAnnotations.facebook_share,
                     facebook_like: resourceAnnotations.facebook_like,
                     linkedin_share: resourceAnnotations.linkedin_share,
-                    social_impact: computeSocialImpact(resourceAnnotations),
+                    social_impact: socialImpactIndexMap.get(resourceId),
                     
                     // related to the domain
                     media_type: expressionDomainAnnotations.media_type, 

@@ -2,8 +2,6 @@
 
 var React = require('react');
 
-var computeSocialImpact = require('../../automatedAnnotation/computeSocialImpact');
-
 var findTags = require('../findTags');
 
 
@@ -20,6 +18,7 @@ interface PageListItemProps{
     
     resourceAnnotations: object map,
     expressionDomain: object map,
+    socialImpactIndex: number
     
     rejected?: boolean, // can only be true. undefined otherwise
     annotate: (annotations, approved): void
@@ -63,7 +62,7 @@ module.exports = React.createClass({
         if (props.rejected) {
             classes.push('rejected');
         }
-
+        
         return React.DOM.li(
             {
                 className: classes.join(' '),
@@ -216,8 +215,8 @@ module.exports = React.createClass({
                 {
                     className: 'metrics'
                 },
-                React.DOM.span({title: 'Social impact'},
-                    computeSocialImpact(resourceAnnotations),
+                React.DOM.span({title: 'Social impact index'},
+                    props.socialImpactIndex,
                     ' ',
                     React.DOM.i({className: 'fa fa-share-alt'})
                 ),

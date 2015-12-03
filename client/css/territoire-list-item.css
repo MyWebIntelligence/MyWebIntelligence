@@ -1,7 +1,7 @@
 li.territoire-list-item{
     text-align: left;
     margin-bottom: 0.5em;
-    min-height: 8em;
+    height: 10em;
     padding: 0.4em;
     
     position: relative;
@@ -59,12 +59,17 @@ li.territoire-list-item .excerpt{
     margin: 0.3em 0;
     font-size: 0.7em;
     color: rgba(0, 0, 0, 0.75);
+    max-height: 4em;
+    
+    hyphens: auto;
+    
+    overflow: hidden;
 }
 
 
 /* Tags */
 li.territoire-list-item .tags{
-    margin-top: 1em;
+    margin-top: 0.2em;
 }
 
 

@@ -49,9 +49,7 @@ module.exports = React.createClass({
 
         var expressionDomain = props.expressionDomain;
         var expressionDomainAnnotations = props.expressionDomainAnnotations;
-        
-        console.log('expressionDomainAnnotations', expressionDomainAnnotations);
-        
+                
         var classes = ['territoire-list-item', 'domain-list-item'];
         
 

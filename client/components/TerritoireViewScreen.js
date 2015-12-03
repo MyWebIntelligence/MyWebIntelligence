@@ -182,10 +182,15 @@ module.exports = React.createClass({
         var state = this.state;
         var territoire = nextProps.territoire;
         
+        var resourceAnnotationByResourceId = territoire.resourceAnnotationByResourceId || state.resourceAnnotationByResourceId;
+        var expressionDomainAnnotationsByEDId = territoire.expressionDomainAnnotationsByEDId || state.expressionDomainAnnotationsByEDId;
+        
         var deltaState = {
-            resourceAnnotationByResourceId: territoire.resourceAnnotationByResourceId,
-            expressionDomainAnnotationsByEDId: territoire.expressionDomainAnnotationsByEDId,
-            territoireTags: computeTerritoireTags(territoire.resourceAnnotationByResourceId),
+            resourceAnnotationByResourceId: resourceAnnotationByResourceId,
+            expressionDomainAnnotationsByEDId: expressionDomainAnnotationsByEDId,
+            territoireTags: state.resourceAnnotationByResourceId !== nextProps.territoire.resourceAnnotationByResourceId ?
+                computeTerritoireTags(resourceAnnotationByResourceId) :
+                state.territoireTags,
             pageListItems: Object.keys(territoire.expressionById || {}).length >= 1 ? 
                 territoire.graph.nodes
                     .filter(function(n){
@@ -193,8 +198,6 @@ module.exports = React.createClass({
                             territoire.resourceAnnotationByResourceId[n.id];
                     })
                     .sort(function nodeCompare(n1, n2){
-                        var resourceAnnotationByResourceId = territoire.resourceAnnotationByResourceId;
-
                         var rId1 = n1.id;
                         var rId2 = n2.id;
 
@@ -207,28 +210,30 @@ module.exports = React.createClass({
             territoireGraph: territoire && territoire.graph
         };
         
+        console.log('componentWillReceiveProps', territoire.graph, state.territoireGraph !== territoire.graph, territoire.expressionDomainsById)
+        
         if(territoire.graph && state.territoireGraph !== territoire.graph){
-            if(state.resourceAnnotationByResourceId){
+            if(resourceAnnotationByResourceId){
                 deltaState.approvedExpressionDomainIds = new Set(territoire.graph.nodes
                     .filter(function(n){
                         return typeof n.expression_id === 'number'
                     })
                     .map(function(n){
-                        return state.resourceAnnotationByResourceId[n.id].expression_domain_id;
+                        return resourceAnnotationByResourceId[n.id].expression_domain_id;
                     })                              
                 )   
             }
             
-            if(territoire.expressionDomainsById){
+            if(expressionDomainAnnotationsByEDId && resourceAnnotationByResourceId){
                 deltaState.domainGraph = pageGraphToDomainGraph(
                     abstractGraphToPageGraph(
                         territoire.graph, 
                         territoire.expressionById, 
-                        state.resourceAnnotationByResourceId,
-                        state.expressionDomainAnnotationsByEDId
+                        resourceAnnotationByResourceId,
+                        expressionDomainAnnotationsByEDId
                     ),
                     territoire.expressionDomainsById,
-                    state.expressionDomainAnnotationsByEDId
+                    expressionDomainAnnotationsByEDId
                 );
             }
         }
@@ -276,7 +281,10 @@ module.exports = React.createClass({
         
         console.log('items', listStartIndex, numberOfDisplayedItems, listEndIndex);
         
-                
+        console.log('state.domainGraph', state.domainGraph);
+        
+        //throw 'Perf improvement idea: hook to tab events. Manage state here. Only generate the correct child.'
+        
         return React.DOM.div({className: "react-wrapper"}, 
             new Header({
                  user: props.user,

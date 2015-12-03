@@ -23,12 +23,13 @@ module.exports = React.createClass({
     displayName: "DomainTab",
     
     _makeDomainGraphNodeList: function(domainGraph){
+        var self = this;
+        
         return domainGraph.nodes.toJSON()
         .filter(function(n){
-            return this.props.approvedExpressionDomainIds.has(n.expression_domain_id);
+            return self.props.approvedExpressionDomainIds.has(n.expression_domain_id);
         })
         .sort(function(n1, n2){
-            console.log("n1, n2", n1, n2)
             return n2.social_impact - n1.social_impact;
         })
     },
@@ -63,7 +64,7 @@ module.exports = React.createClass({
         
         var domainGraph = props.domainGraph;
         
-        console.log('DomainTab domainGraph', domainGraph);
+        console.log('DomainTab domainGraph', domainGraph, domainGraph.nodes.toJSON());
         
         return React.DOM.div(
             {},

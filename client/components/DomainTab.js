@@ -61,11 +61,7 @@ module.exports = React.createClass({
     render: function() {
         var props = this.props;
         var state = this.state;
-        
-        var domainGraph = props.domainGraph;
-        
-        console.log('DomainTab domainGraph', domainGraph, domainGraph.nodes.toJSON());
-        
+                
         return React.DOM.div(
             {},
             React.DOM.datalist({id: "emitter-types"}, state.emitterTypes.toArray().map(function(t){

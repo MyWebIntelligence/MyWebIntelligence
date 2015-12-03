@@ -16,7 +16,7 @@ var pageGraphToDomainGraph = require('../../common/graph/pageGraphToDomainGraph'
 
 var serverAPI = require('../serverAPI');
 
-var computeSocialImpact = require('../../automatedAnnotation/computeSocialImpact');
+var makeResourceSocialImpactIndexMap = require('../../automatedAnnotation/makeResourceSocialImpactIndexMap');
 
 var annotateResource = serverAPI.annotateResource;
 var annotateExpressionDomain = serverAPI.annotateExpressionDomain;
@@ -37,6 +37,9 @@ interface TerritoireViewScreenProps{
 }
 
 */
+
+
+
 
 function generateExpressionGEXF(abstractGraph, expressionById, resourceAnnotationByResourceId, expressionDomainAnnotationsByEDId){
     var pageGraph = abstractGraphToPageGraph(abstractGraph, expressionById, resourceAnnotationByResourceId, expressionDomainAnnotationsByEDId);
@@ -185,9 +188,14 @@ module.exports = React.createClass({
         var resourceAnnotationByResourceId = territoire.resourceAnnotationByResourceId || state.resourceAnnotationByResourceId;
         var expressionDomainAnnotationsByEDId = territoire.expressionDomainAnnotationsByEDId || state.expressionDomainAnnotationsByEDId;
         
+        var resourceSocialImpactIndexMap = state.resourceAnnotationByResourceId !== nextProps.territoire.resourceAnnotationByResourceId ?
+            makeResourceSocialImpactIndexMap(resourceAnnotationByResourceId) :
+            state.resourceSocialImpactIndexMap;
+        
         var deltaState = {
             resourceAnnotationByResourceId: resourceAnnotationByResourceId,
             expressionDomainAnnotationsByEDId: expressionDomainAnnotationsByEDId,
+            resourceSocialImpactIndexMap: resourceSocialImpactIndexMap,
             territoireTags: state.resourceAnnotationByResourceId !== nextProps.territoire.resourceAnnotationByResourceId ?
                 computeTerritoireTags(resourceAnnotationByResourceId) :
                 state.territoireTags,
@@ -201,10 +209,7 @@ module.exports = React.createClass({
                         var rId1 = n1.id;
                         var rId2 = n2.id;
 
-                        var rAnn1 = resourceAnnotationByResourceId[rId1];
-                        var rAnn2 = resourceAnnotationByResourceId[rId2];
-
-                        return computeSocialImpact(rAnn2) - computeSocialImpact(rAnn1);
+                        return resourceSocialImpactIndexMap.get(rId2) - resourceSocialImpactIndexMap.get(rId1);
                     }) 
                 : undefined,
             territoireGraph: territoire && territoire.graph
@@ -252,6 +257,7 @@ module.exports = React.createClass({
             domainGraph: undefined,
             rejectedResourceIds : new ImmutableSet(),
             approvedExpressionDomainIds: undefined,
+            resourceSocialImpactIndexMap: undefined,
             
             // largely inspired from http://jlongster.com/Removing-User-Interface-Complexity,-or-Why-React-is-Awesome#p78
             // <3 @jlongster
@@ -361,7 +367,6 @@ module.exports = React.createClass({
                                         state.resourceAnnotationByResourceId[resourceId] : 
                                         {tags: new Set()};
 
-
                                     return new PageListItem({
                                         key: resourceId,
 
@@ -371,7 +376,8 @@ module.exports = React.createClass({
                                         title: expression.title,
                                         excerpt: expression.excerpt,
                                         rejected: state.rejectedResourceIds.has(resourceId),
-
+                                        socialImpactIndex: state.resourceSocialImpactIndexMap.get(resourceId),
+                                        
                                         resourceAnnotations: resourceAnnotations,
                                         expressionDomain : territoire.expressionDomainsById[expressionDomainId],
 

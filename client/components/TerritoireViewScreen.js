@@ -216,7 +216,7 @@ module.exports = React.createClass({
             if(resourceAnnotationByResourceId){
                 deltaState.approvedExpressionDomainIds = new Set(territoire.graph.nodes
                     .filter(function(n){
-                        return typeof n.expression_id === 'number'
+                        return typeof n.expression_id === 'number' && resourceAnnotationByResourceId[n.id]
                     })
                     .map(function(n){
                         return resourceAnnotationByResourceId[n.id].expression_domain_id;
@@ -271,17 +271,11 @@ module.exports = React.createClass({
         var listItemHeight = this._listItemHeight || DEFAULT_LIST_ITEM_HEIGHT;
         var listTopOffset = this._listTopOffset || DEFAULT_LIST_TOP_OFFSET;
         
-        console.log('scroll info', state.pageY, state.windowHeight, listItemHeight, listTopOffset);
-        
         var startOffset = state.pageY - listTopOffset;
         var listStartIndex = Math.max(0, Math.floor(startOffset/listItemHeight) - LIST_START_PADDING)
         
         var numberOfDisplayedItems = Math.ceil(state.windowHeight/listItemHeight);
         var listEndIndex = listStartIndex + LIST_START_PADDING + numberOfDisplayedItems + LIST_END_PADDING;
-        
-        console.log('items', listStartIndex, numberOfDisplayedItems, listEndIndex);
-        
-        console.log('state.domainGraph', state.domainGraph);
         
         //throw 'Perf improvement idea: hook to tab events. Manage state here. Only generate the correct child.'
         

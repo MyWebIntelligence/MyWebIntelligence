@@ -4,6 +4,7 @@ var url = require('url');
 
 var request = require('request');
 
+var defaultRequestOptions = require('../../crawl/defaultRequestOptions');
 var makeDocument = require('../../common/makeDocument');
 
 /*
@@ -61,7 +62,12 @@ module.exports = {
         var expressionDomainBaseURL = url.format(parsedURL);
         
         return new Promise(function(resolve, reject){
-            request(expressionDomainBaseURL, function(error, response, body){
+            request(Object.assign(
+                {
+                    url: expressionDomainBaseURL
+                },
+                defaultRequestOptions
+            ), function(error, response, body){
                 if(error){
                     reject(error);
                     return;

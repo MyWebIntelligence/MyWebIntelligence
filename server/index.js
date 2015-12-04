@@ -377,7 +377,7 @@ app.get('/territoire/:id/expressions.csv', function(req, res){
                 var data = {
                     url: expressionWithResourceId.url,
                     title: expression.title,
-                    excerpt: simplifiedExpression.excerpt,
+                    excerpt: (simplifiedExpression.excerpt || '').trim(),
                     tags: (resourceAnnotations.tags || []).join(' / '),
                     favorite: resourceAnnotations.favorite,
                     sentiment: resourceAnnotations.sentiment,
@@ -392,11 +392,11 @@ app.get('/territoire/:id/expressions.csv', function(req, res){
                     // related to the domain
                     media_type: expressionDomainAnnotations.media_type, 
                     emitter_type: expressionDomainAnnotations.emitter_type, 
-                    domain_title: expressionDomainsById[expressionDomainId].title || ''
+                    domain_title: (expressionDomainsById[expressionDomainId].title || '').trim()
                 }
                 
                 if(mainText)
-                    data.main_text = expression.main_text;
+                    data.main_text = (expression.main_text || '').trim();
                 
                 return data;
             }

@@ -86,8 +86,6 @@ module.exports = function(expressionDomain, territoireId){
                 delta.estimated_potential_audience = potentialAudience;
             }
             
-            console.log('prepareExpressionDomainForTerritoire', allExpressionDomainAnnotations, delta)
-            
             return database.ExpressionDomainAnnotations.update(
                 expressionDomain.id, territoireId, null, delta
             );

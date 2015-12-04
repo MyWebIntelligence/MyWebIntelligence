@@ -3,6 +3,8 @@
 var http = require('http');
 
 var request = require('request');
+var defaultRequestOptions = require('./defaultRequestOptions')
+
 
 var MAXIMUM_IN_PROGRESS_BY_HOSTNAME = 20;
 http.globalAgent.maxSockets = MAXIMUM_IN_PROGRESS_BY_HOSTNAME;
@@ -17,15 +19,12 @@ module.exports = function(url){
     
     return new Promise(function(resolve, reject){
 
-        request.get({
-            url: url,
-            headers: {
-                // Firefox Accept header
-                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-                "User-Agent": "My Web Intelligence crawler"
+        request.get(Object.assign(
+            {
+                url: url
             },
-            gzip: true
-        }, function(error, response, httpBody){
+            defaultRequestOptions
+        ), function(error, response, httpBody){
 
             if(error)
                 reject(error);

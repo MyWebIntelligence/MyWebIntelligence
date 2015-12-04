@@ -4,6 +4,29 @@ var database = require('../../database');
 
 var estimatePotentialAudience = require('../estimatePotentialAudience');
 
+function findMostFrequentValue(allExpressionDomainAnnotations, field){
+    var fieldValueOccurences = Object.create(null);
+
+    allExpressionDomainAnnotations.forEach(function(ann){
+        if(!ann[field]) // covers null, undefined and empty string
+            return
+        
+        if(!(ann[field] in fieldValueOccurences))
+            fieldValueOccurences[ann[field]] = 0;
+
+        fieldValueOccurences[ann[field]]++
+    });
+
+    var mostFrequentFieldValue;
+
+    Object.keys(fieldValueOccurences).forEach(function(fieldValue){
+        if(!mostFrequentFieldValue || fieldValueOccurences[fieldValue] > fieldValueOccurences[mostFrequentFieldValue])
+            mostFrequentFieldValue = fieldValue;
+    });
+
+    return mostFrequentFieldValue;
+}
+
 
 /*
     Create all the things that go along creating an expression domain.
@@ -35,15 +58,39 @@ module.exports = function(expressionDomain, territoireId){
 
     return expressionDomainAnnotationCreatedP
     .then(function(){
-        return estimatePotentialAudience(expressionDomain)
-        .then(function(potentialAudience){
+        var estimatedAudienceP = estimatePotentialAudience(expressionDomain)
+        var allExpressionDomainAnnotationsP = database.ExpressionDomainAnnotations.findByExpressionDomainId(expressionDomain.id)
+        
+        Promise.all([estimatedAudienceP, allExpressionDomainAnnotationsP])
+        .then(function(res){
+            var potentialAudience = res[0];
+            var allExpressionDomainAnnotations = res[1];
+            
+            var delta = Object.create(null);
+            
+            // media_type
+            var mostFrequentMediaType = findMostFrequentValue(allExpressionDomainAnnotations, 'media_type')
+    
+            if(mostFrequentMediaType)
+                delta['media_type'] = mostFrequentMediaType;
+            
+            // emitter_type
+            var mostFrequentEmitterType = findMostFrequentValue(allExpressionDomainAnnotations, 'emitter_type')
+    
+            if(mostFrequentEmitterType)
+                delta['emitter_type'] = mostFrequentEmitterType;
+            
+            
+            // estimated_potential_audience
             if(typeof potentialAudience === 'number'){
-                return database.ExpressionDomainAnnotations.update(
-                    expressionDomain.id, territoireId, null, {
-                        estimated_potential_audience: potentialAudience
-                    }
-                );
+                delta.estimated_potential_audience = potentialAudience;
             }
+            
+            console.log('prepareExpressionDomainForTerritoire', allExpressionDomainAnnotations, delta)
+            
+            return database.ExpressionDomainAnnotations.update(
+                expressionDomain.id, territoireId, null, delta
+            );
 
         })
         

@@ -88,6 +88,26 @@ module.exports = {
                 });
             });
         })
+    },
+    
+    /*        
+        
+    */
+    findByExpressionDomainId: function(id){        
+        return databaseP.then(function(db){
+            var query = expression_domain_annotations
+                .select( expression_domain_annotations.star() )
+                .where( expression_domain_annotations.expression_domain_id.equals(id) )
+                .toQuery();
+
+            //console.log('ResourceAnnotations findByTerritoireId query', query);
+            
+            return new Promise(function(resolve, reject){
+                db.query(query, function(err, result){
+                    if(err) reject(err); else resolve(result.rows);
+                });
+            });
+        })
     }
     
     

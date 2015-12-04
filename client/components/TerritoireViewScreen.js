@@ -477,7 +477,11 @@ module.exports = React.createClass({
                         React.DOM.a({
                             href: "/territoire/"+territoire.id+"/expressions.csv",
                             download: true
-                        }, 'Download Pages CSV'),
+                        }, 'Download Page CSV'),
+                        React.DOM.a({
+                            href: "/territoire/"+territoire.id+"/expressions.csv?main_text=true",
+                            download: true
+                        }, 'Download Page CSV with main text'),
                         React.DOM.a({
                             href: "/territoire/"+territoire.id+"/expressions.gexf",
                             download: territoire.name+'-pages.gexf',

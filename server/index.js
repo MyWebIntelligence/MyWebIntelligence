@@ -296,6 +296,8 @@ app.get('/territoire/:id/expressions.csv', function(req, res){
     var territoireId = Number(req.params.id);
     console.log('expressions.csv', user.id, 'territoire id', territoireId);
     
+    var mainText = req.query.main_text === 'true';
+    
     var territoireP = database.Territoires.findById(territoireId);
 
     var resourceAnnotationByResourceIdP = database.ResourceAnnotations.findApprovedByTerritoireId(territoireId)
@@ -346,6 +348,7 @@ app.get('/territoire/:id/expressions.csv', function(req, res){
             return o;
         });
     
+    
     Promise.all([
         territoireP, expressionsWithResourceIdP, resourceAnnotationByResourceIdP, expressionDomainsByIdP, expressionDomainAnnotationByEDIdP
     ]).then(function(result){
@@ -370,12 +373,10 @@ app.get('/territoire/:id/expressions.csv', function(req, res){
                 var simplifiedExpression = simplifyExpression(expression);
                 
                 // Reference : https://docs.google.com/spreadsheets/d/1y2-zKeWAD9POD_hjth-v4KlMlm5HqD7tzKvbPilLb4o/edit?usp=sharing
-                return {
+                
+                var data = {
                     url: expressionWithResourceId.url,
                     title: expression.title,
-                    // remove content as it's currently not necessary and pollutes CSV exports
-                    // core_content: expression.main_text, 
-
                     excerpt: simplifiedExpression.excerpt,
                     tags: (resourceAnnotations.tags || []).join(' / '),
                     favorite: resourceAnnotations.favorite,
@@ -393,6 +394,11 @@ app.get('/territoire/:id/expressions.csv', function(req, res){
                     emitter_type: expressionDomainAnnotations.emitter_type, 
                     domain_title: expressionDomainsById[expressionDomainId].title || ''
                 }
+                
+                if(mainText)
+                    data.main_text = expression.main_text;
+                
+                return data;
             }
         }).filter(function(r){ return !!r; });
         

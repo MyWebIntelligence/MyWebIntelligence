@@ -9,7 +9,11 @@ function xmlEscape(s){
     return s.replace(/&/g, '&amp;')
         .replace(/"/g, "&quot;")
         .replace(/</g, "&gt;")
-        .replace(/>/g, "&lt;");
+        .replace(/>/g, "&lt;")
+        // See https://github.com/MyWebIntelligence/MyWebIntelligence/issues/216
+        // The web has these chars and Gephi really doesn't like them. They don't carry textual meaning
+        // getting rid of them as a consequence
+        .replace(/[\u0001-\u0008]/g, ''); 
 }
 
 function createElement(tagname, attributes, content){

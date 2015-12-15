@@ -10,9 +10,6 @@
     "postinstall": "cp git-hooks/pre-commit .git/hooks/pre-commit; chmod a+x .git/hooks/pre-commit",
     "test": "mocha test/automated/database/* test/automated/graph/test-cases/* test/automated/*",
     "start": "node server/index.js",
-    "build-db-container": "docker build --tag=\"mywi/database\" ./postgresDB",
-    "build-test-container": "docker build --tag=\"mywi/test\" .",
-    "start-test-db-container": "docker rm mywi-test-db; docker run --name mywi-test-db -p 5600:5432 -e POSTGRES_PASSWORD=password -d mywi/database",
     "start-test": "docker run -p=6666:3333 -e \"NODE_ENV=test\" --link mywi-test-db:mywi-test-db mywi/test node server/index.js",
     "build-dev": "docker-compose -f compose-dev.yml build",
     "up-dev": "docker-compose -f compose-dev.yml up --force-recreate",
@@ -25,7 +22,7 @@
     "lint": "eslint ./",
     "build-test-crawl-docker-image": "docker build --tag=\"mywi/test-crawl\" --file=test/automated/crawl/Dockerfile .",
     "test-crawl": "docker run --add-host a.web:127.0.0.1 mywi/test-crawl /usr/bin/supervisord -c /usr/mywi/test/automated/crawl/supervisord.conf",
-    "sql-generate": "node-sql-generate --dsn postgres://postgres:password@db:5432/postgres > ./postgresDB/declarations.js",
+    "sql-generate": "node-sql-generate --dsn postgres://postgres:password@db:5432/postgres > ./database/management/declarations.js",
     "create-sql-tables": "node tools/createSQLTables.js"
   },
   "repository": {

@@ -2,30 +2,26 @@
 
 var cleanupURLs = require('../common/cleanupURLs');
 
-// JSON database models
 var Users = require('./models/Users');
 var Territoires = require('./models/Territoires');
 var Queries = require('./models/Queries');
 var Oracles = require('./models/Oracles');
 var OracleCredentials = require('./models/OracleCredentials');
 var QueryResults = require('./models/QueryResults');
-
-var databaseP = require('../postgresDB/databaseClientP');
-var declarations = require('../postgresDB/declarations.js');
-
-// PostGREs models
-var Expressions = require('../postgresDB/Expressions');
-var Resources = require('../postgresDB/Resources');
+var Expressions = require('./models/Expressions');
+var Resources = require('./models/Resources');
 var isValidResourceExpression = Resources.isValidResourceExpression;
+var Links = require('./models/Links');
+var AlexaRankCache = require('./models/AlexaRankCache');
+var ResourceAnnotations = require('./models/ResourceAnnotations');
+var ExpressionDomainAnnotations = require('./models/ExpressionDomainAnnotations');
+var Tasks = require('./models/Tasks');
+var ExpressionDomains = require('./models/ExpressionDomains');
 
-var Links = require('../postgresDB/Links');
-var AlexaRankCache = require('../postgresDB/AlexaRankCache');
-var ResourceAnnotations = require('../postgresDB/ResourceAnnotations');
-var ExpressionDomainAnnotations = require('../postgresDB/ExpressionDomainAnnotations');
+var databaseP = require('./management/databaseClientP');
+var declarations = require('./management/declarations.js');
 
-var Tasks = require('../postgresDB/Tasks');
-var ExpressionDomains = require('../postgresDB/ExpressionDomains');
-var massageExpressionDomain = require('../postgresDB/massageExpressionDomain');
+var massageExpressionDomain = require('./models/massageExpressionDomain');
 
 var exportTerritoireHumanEffort = require('./exportTerritoireHumanEffort');
 

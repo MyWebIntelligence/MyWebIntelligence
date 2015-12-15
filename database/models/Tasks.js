@@ -3,9 +3,9 @@
 var sql = require('sql');
 sql.setDialect('postgres');
 
-var databaseP = require('./databaseClientP');
+var databaseP = require('../management/databaseClientP');
 
-var tasks = require('./declarations.js').tasks;
+var tasks = require('../management/declarations.js').tasks;
 
 var databaseJustCreatedSymbol = require('./databaseJustCreatedSymbol');
 var justCreatedMarker = {};

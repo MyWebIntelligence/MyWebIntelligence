@@ -3,9 +3,9 @@
 var sql = require('sql');
 sql.setDialect('postgres');
 
-var databaseP = require('./databaseClientP');
+var databaseP = require('../management/databaseClientP');
 
-var alexaRankCache = require('./declarations.js').alexa_rank_cache;
+var alexaRankCache = require('../management/declarations.js').alexa_rank_cache;
 
 var databaseJustCreatedSymbol = require('./databaseJustCreatedSymbol');
 var justCreatedMarker = {};

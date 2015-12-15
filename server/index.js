@@ -21,8 +21,6 @@ var serializeDocumentToHTML = require('jsdom').serializeDocument;
 
 var makeDocument = require('../common/makeDocument');
 var database = require('../database');
-//var dropAllTables = require('../postgresDB/dropAllTables');
-//var createTables = require('../postgresDB/createTables');
 var onQueryCreated = require('./onQueryCreated');
 var createTerritoire = require('./createTerritoire');
 var getTerritoireScreenData = require('../database/getTerritoireScreenData');

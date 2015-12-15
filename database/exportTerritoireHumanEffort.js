@@ -3,10 +3,10 @@
 var Territoires = require('./models/Territoires');
 var Queries = require('./models/Queries');
 var Oracles = require('./models/Oracles');
-var Resources = require('../postgresDB/Resources');
-var ResourceAnnotations = require('../postgresDB/ResourceAnnotations');
-var ExpressionDomainAnnotations = require('../postgresDB/ExpressionDomainAnnotations');
-var ExpressionDomains = require('../postgresDB/ExpressionDomains');
+var Resources = require('./models/Resources');
+var ResourceAnnotations = require('./models/ResourceAnnotations');
+var ExpressionDomainAnnotations = require('./models/ExpressionDomainAnnotations');
+var ExpressionDomains = require('./models/ExpressionDomains');
 
 module.exports = function(territoireId){
     var territoireP = Territoires.findById(territoireId);

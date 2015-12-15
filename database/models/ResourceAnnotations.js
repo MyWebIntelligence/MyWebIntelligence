@@ -3,13 +3,13 @@
 var sql = require('sql');
 sql.setDialect('postgres');
 
-var databaseP = require('./databaseClientP');
+var databaseP = require('../management/databaseClientP');
 
 var databaseJustCreatedSymbol = require('./databaseJustCreatedSymbol');
 var justCreatedMarker = {};
 justCreatedMarker[databaseJustCreatedSymbol] = true;
 
-var resource_annotations = require('./declarations.js').resource_annotations;
+var resource_annotations = require('../management/declarations.js').resource_annotations;
 
 module.exports = {
 

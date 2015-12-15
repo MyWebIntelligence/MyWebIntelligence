@@ -2,7 +2,7 @@
 
 require('../ES-mess');
 
-var createTables = require('../postgresDB/createTables');
+var createTables = require('../database/management/createTables');
 
 console.log('Creating SQL Tables', process.env.NODE_ENV);
 

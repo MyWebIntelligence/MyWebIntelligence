@@ -11,8 +11,8 @@ var fs = require('fs');
 var path = require('path');
 
 var db = require('../../../database');
-var dropAllTables = require('../../../postgresDB/dropAllTables');
-var createTables = require('../../../postgresDB/createTables');
+var dropAllTables = require('../../../database/management/dropAllTables');
+var createTables = require('../../../database/management/createTables');
 
 var onQueryCreated = require('../../../server/onQueryCreated');
 

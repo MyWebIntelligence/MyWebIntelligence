@@ -11,6 +11,8 @@ var TerritoireForm = React.createFactory(require('./TerritoireForm'));
 interface TerritoireListProps{
     territoires: MyWITerritoire[],
     oracles: MyWIOracle[]
+    oracleWithValidCredentials: Set<MyWIOracleId>
+    
     onTerritoireChange: function(ts: MyWITerritoire[]){}
     createTerritoire: (territoireData) => void
     deleteTerritoire: (territoire: MyWITerritoire) => void
@@ -75,6 +77,7 @@ module.exports = React.createClass({
                     key: t.id,
                     territoire: t,
                     oracles: props.oracles,
+                    oracleWithValidCredentials: props.oracleWithValidCredentials,
                     onTerritoireChange: props.onTerritoireChange,
                     deleteTerritoire: props.deleteTerritoire,
                     createQueryInTerritoire: props.createQueryInTerritoire,

@@ -27,11 +27,14 @@ module.exports = React.createClass({
         var props = this.props;
         var state = this.state;
 
+        console.log('TerritoireListScreen', props.user, props.user.oracleWithValidCredentials);
+        
         var mainChildren = [
             React.DOM.h1({}, "Territoires"),
             new TerritoiresList({
                 territoires: state.user.territoires,
                 oracles: props.oracles,
+                oracleWithValidCredentials: new Set(props.user.oracleWithValidCredentials),
                 onTerritoireListChange: function(newTerritoireList){
                     state.user.territoires = newTerritoireList;
                     self.setState({

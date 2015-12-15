@@ -4,6 +4,9 @@ var React = require('react');
 
 var Header = require('./Header');
 
+var pendingOracleCredentialsContext = require('../pendingOracleCredentialsContext');
+
+
 /*
 
 interface OraclesScreenProps{
@@ -11,6 +14,7 @@ interface OraclesScreenProps{
     oracles: MyWIOracle[]
     oracleCredentials: Object // dictionary key'd on oracleId
     onOracleCredentialsChange: (f: FormData) => void
+    
 }
 
 */
@@ -53,9 +57,8 @@ module.exports = React.createClass({
                                 onSubmit: function(e){
                                     e.preventDefault();
                                     var fd = new FormData(e.target);
-                                    fd.append('oracleId', o.id);
                                     
-                                    props.onOracleCredentialsChange(fd);
+                                    props.onOracleCredentialsChange(o.id, fd);
                                 }
                             }, Object.keys(o.needsCredentials).map(function(k){                                
                                 return React.DOM.label({}, [
@@ -82,7 +85,11 @@ module.exports = React.createClass({
                         )
                     }
                     
-                    return React.DOM.li({}, liChildren);
+                    return React.DOM.li({
+                        className: pendingOracleCredentialsContext.oracle && pendingOracleCredentialsContext.oracle.id === o.id ? 
+                            'expecting-credentials' :
+                            ''
+                    }, liChildren);
                 }))
             ])
         ]);

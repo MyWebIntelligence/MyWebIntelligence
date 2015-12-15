@@ -64,11 +64,13 @@ module.exports = {
             var userP = Users.findById(userId);
             var relevantTerritoiresP = Territoires.findByCreatedBy(userId);
             var oraclesP = Oracles.getAll();
+            var userOracleCredentialsP = OracleCredentials.findByUserId(userId);
             
-            return Promise.all([userP, relevantTerritoiresP, oraclesP]).then(function(res){
+            return Promise.all([userP, relevantTerritoiresP, oraclesP, userOracleCredentialsP]).then(function(res){
                 var user = res[0];
                 var relevantTerritoires = res[1];
                 var oracles = res[2];
+                var userOracleCredentials = res[3];
                 
                 var territoiresReadyPs = relevantTerritoires.map(function(t){
                     return Queries.findByBelongsTo(t.id).then(function(queries){
@@ -78,6 +80,11 @@ module.exports = {
                 
                 user.territoires = relevantTerritoires;
                 user.pictureURL = user.google_pictureURL;
+                // List oracles for which there are valid credentials without sending such credentials
+                // validity is not verified right now (december 2015), but that's the intention
+                user.oracleWithValidCredentials = userOracleCredentials.map(function(uoc){
+                    return uoc.oracleId;
+                })
                 
                 return Promise.all(territoiresReadyPs).then(function(){
                     return {

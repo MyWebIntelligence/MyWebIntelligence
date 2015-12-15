@@ -1,12 +1,11 @@
 # Oracles
 
-In essence, Oracles are functions that take keywords are input and return a list of URLs that are supposed to be relevant for these keywords.
+In essence, oracles can be thought as functions that take keywords as input and return a list of URLs that are expected to be relevant for these keywords.
+In details, different oracles have various options and some need authentication and/or an account to a service.
 
-It's not the role of MyWebIntelligence to provide oracles. There are already too many of them in the web (search engines to begin with). Our role is to interface with them.
-So, in practive, the function returns a promise to a list of URLs (maybe a stream even?). 
-In practice also, this function cannot be called unless it has access to some credentials (and/or if an authentication dance occured beforehand). In pratice also, a search is more than just keywords. It can contain a time range, a language restricton, etc.
+In the scope of MyWebIntelligence, it is only expected to interface with existing "oracle" services (search engines, etc.), not to create such services. We provide an implementation for a couple of them. Other oracles are welcome in the form of [pull requests](https://help.github.com/articles/using-pull-requests/).
 
-In conclusion, the signature for Oracles will be something like:
+An oracle function looks like:
 
 ```js
 function(authData){
@@ -23,4 +22,43 @@ function(authData){
 }
 ```
 
-Over time, it is expected from oracles to mostly return fresh URLs.
+## How to create an oracle
+
+1) Add an entry in `oracleDescriptions.json`
+
+| key          | type                              | semantics         |    
+|--------------|-----------------------------------|-------------------|
+| `name`                  | string                 | oracle name       |
+| `oracleNodeModuleName`  | string | name of the module file in the `oracles` directory |
+| `options`?              | Array of `{id, name, type}` objects. `type` can be `date range`, `number`, a `string[]` | oracle options  |
+| `needsCredentials`      | boolean or `{name: type}` object | whether the oracle needs credentials and which |
+
+````json
+{
+    "name": "Google Custom Search Engine",
+    "oracleNodeModuleName": "GCSE",
+    "options": [
+        {
+            "id": "date-range", 
+            "name": "Date range",
+            "type": "date range"
+        },
+        {
+            "id": "max-results", 
+            "name": "Max results",
+            "default": 100,
+            "min": 0,
+            "step": 10,
+            "type": "number"
+        }
+    ],
+    "needsCredentials": {
+        "API key": "text",
+        "cx": "text"
+    }
+}
+
+````
+
+2) Create a module in the `oracles` directory with the declared `oracleNodeModuleName` as file name. Adjust signature based on whether the oracle needs credentials or not. See existing oracles for examples.
+

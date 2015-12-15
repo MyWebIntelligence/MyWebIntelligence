@@ -6,14 +6,16 @@ var moment = require('moment');
 var cleanupURLs = require('../../common/cleanupURLs');
 
 var DeleteButton = React.createFactory(require('./DeleteButton'));
-
+var requestOracleCredentials = require('../requestOracleCredentials');
 
 
 /*
 
 interface QueryFormProps{
     query: MyWIQuery
-    oracles: MyWIOracle[]
+    oracles: MyWIOracle[],
+    oracleWithValidCredentials: Set<MyWIOracleId>
+
     deleteQuery: (q: MyWIQuery) => void
 }
 
@@ -140,9 +142,20 @@ module.exports = React.createClass({
                                 name: 'oracle_id',
                                 defaultValue: state.selectedOracleId,
                                 onChange: function(e){
-                                    self.setState({
-                                        selectedOracleId: Number(e.target.value)
-                                    })
+                                    var oracleId = Number(e.target.value);
+                                    var oracle = props.oracles.find(function(o){
+                                        return o.id === oracleId;
+                                    });
+                                    
+                                    console.log('selected oracle', oracleId, oracle, props.oracleWithValidCredentials);
+                                    if(oracle.needsCredentials && !props.oracleWithValidCredentials.has(oracleId)){
+                                        requestOracleCredentials(oracle);
+                                    }
+                                    else{
+                                        self.setState({
+                                            selectedOracleId: oracleId
+                                        })
+                                    }
                                 }
                             }, props.oracles.map(function(o){
                                 return React.DOM.option({

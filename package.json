@@ -11,8 +11,8 @@
     "test": "mocha test/automated/database/* test/automated/graph/test-cases/* test/automated/*",
     "start": "node server/index.js",
     "start-test": "docker run -p=6666:3333 -e \"NODE_ENV=test\" --link mywi-test-db:mywi-test-db mywi/test node server/index.js",
-    "build-dev": "docker-compose -f compose-dev.yml build",
-    "up-dev": "docker-compose -f compose-dev.yml up --force-recreate",
+    "build-dev": "docker-compose -p mywi -f compose-dev.yml build",
+    "up-dev": "docker-compose -p mywi -f compose-dev.yml up --force-recreate",
     "build-experimental": "docker-compose -f compose-experimental.yml build",
     "up-experimental": "docker-compose -f compose-experimental.yml -p mywiexperimental up -d",
     "build-stable": "docker-compose -f compose-stable.yml build",
@@ -22,7 +22,7 @@
     "lint": "eslint ./",
     "build-test-crawl-docker-image": "docker build --tag=\"mywi/test-crawl\" --file=test/automated/crawl/Dockerfile .",
     "test-crawl": "docker run --add-host a.web:127.0.0.1 mywi/test-crawl /usr/bin/supervisord -c /usr/mywi/test/automated/crawl/supervisord.conf",
-    "sql-generate": "node-sql-generate --dsn postgres://postgres:password@db:5432/postgres > ./database/management/declarations.js",
+    "sql-generate": "docker exec mywi_app_1 ./node_modules/.bin/node-sql-generate --dsn postgres://postgres:password@db:5432/postgres > ./database/management/declarations.js",
     "create-sql-tables": "node tools/createSQLTables.js"
   },
   "repository": {

@@ -10,7 +10,8 @@ interface TerritoireListItemProps{
     territoire?: MyWITerritoire
     oracles: MyWIOracle[]
     onTerritoireChange : (t: MyWITerritoire) => void
-    deleteTerritoire: (t: MyWITerritoire) => void
+    deleteTerritoire: (t: MyWITerritoire) => void,
+    oracleWithValidCredentials: Set<MyWIOracleId>
     
     createQueryInTerritoire: (q: MyWIQueryData, t: MyWITerritoire) => void
     removeQueryFromTerritoire: (q: MyWIQueryData, t: MyWITerritoire) => void
@@ -118,6 +119,7 @@ module.exports = React.createClass({
                         state.openQueryForms.has(q.id) ?
                             new QueryForm({
                                 oracles: props.oracles,
+                                oracleWithValidCredentials: props.oracleWithValidCredentials,
                                 query: q,
                                 onSubmit: function(formData){
                                     var keysWithChange = Object.keys(formData).filter(function(k){
@@ -183,6 +185,7 @@ module.exports = React.createClass({
                         }, '+'),
                         state.openQueryForms.has('+') ? new QueryForm({
                             oracles: props.oracles,
+                            oracleWithValidCredentials: props.oracleWithValidCredentials,
                             onSubmit: function(formData){
                                 props.createQueryInTerritoire(formData, t);
 

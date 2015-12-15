@@ -13,6 +13,8 @@ var TerritoireListScreen = React.createFactory(require('./components/TerritoireL
 var OraclesScreen = React.createFactory(require('./components/OraclesScreen'));
 var TerritoireViewScreen = React.createFactory(require('./components/TerritoireViewScreen'));
 
+var pendingOracleCredentialsContext = require('./pendingOracleCredentialsContext');
+
 /*
     "all" data. Reference data/state to be used in UI components.
 */
@@ -41,8 +43,14 @@ page("/index.html", "/");
 page("/oracles", function(){
     var screenData = Object.assign(
         {
-            onOracleCredentialsChange: function onOracleCredentialsChange(formData){
-                serverAPI.updateOracleCredentials(formData);
+            onOracleCredentialsChange: function onOracleCredentialsChange(oracleId, formData){
+                formData.append('oracleId', oracleId);
+                return serverAPI.updateOracleCredentials(formData)
+                .then(function(){
+                    pendingOracleCredentialsContext.oracle = undefined;
+                    data.user.oracleWithValidCredentials.push(oracleId);
+                    page('/territoires');
+                });
             }
         },
         data

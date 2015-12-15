@@ -18,6 +18,93 @@ $$ language 'plpgsql';
 
 -- Business --
 
+/*
+    USER
+*/
+
+CREATE TABLE IF NOT EXISTS users (
+    id                  SERIAL PRIMARY KEY,
+    name                text,
+    emails              text[],
+    google_id           text,
+    google_name         text,
+    google_pictureURL   text
+) INHERITS(lifecycle);
+CREATE TRIGGER updated_at_users BEFORE UPDATE ON users FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
+
+CREATE INDEX ON users ("google_id");
+CREATE INDEX ON users ("emails");
+
+
+/*
+    TERRITOIRE
+*/
+
+CREATE TABLE IF NOT EXISTS territoires (
+    id                  SERIAL PRIMARY KEY,
+    name                text,
+    description         text,
+    user_id             integer NOT NULL REFERENCES users (id) ON DELETE CASCADE
+) INHERITS(lifecycle);
+CREATE TRIGGER updated_at_territoires BEFORE UPDATE ON territoires FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
+
+CREATE INDEX ON territoires ("user_id");
+
+
+CREATE TABLE IF NOT EXISTS oracles (
+    id                      SERIAL PRIMARY KEY,
+    name                    text NOT NULL,
+    oracle_node_module_name text NOT NULL,
+    options                 jsonb,
+    credentials_form_infos  jsonb      
+) INHERITS(lifecycle);
+CREATE TRIGGER updated_at_oracles BEFORE UPDATE ON oracles FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
+
+CREATE INDEX ON oracles ("oracle_node_module_name");
+
+
+CREATE TABLE IF NOT EXISTS oracle_credentials (
+    id                  SERIAL PRIMARY KEY,
+    credentials         jsonb,
+    oracle_id           integer NOT NULL REFERENCES oracles (id) ON DELETE CASCADE,
+    user_id             integer NOT NULL REFERENCES users (id) ON DELETE CASCADE
+) INHERITS(lifecycle);
+CREATE TRIGGER updated_at_oracle_credentials BEFORE UPDATE ON oracle_credentials FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
+
+CREATE INDEX ON oracle_credentials ("user_id");
+CREATE INDEX ON oracle_credentials ("oracle_id");
+
+
+CREATE TABLE IF NOT EXISTS queries (
+    id                  SERIAL PRIMARY KEY,
+    name                text,
+    q                   text,
+    oracle_options      jsonb,
+    oracle_id           integer NOT NULL REFERENCES oracles (id) ON DELETE CASCADE,
+    territoire_id       integer NOT NULL REFERENCES territoires (id) ON DELETE CASCADE
+) INHERITS(lifecycle);
+CREATE TRIGGER updated_at_queries BEFORE UPDATE ON queries FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
+
+CREATE INDEX ON queries ("territoire_id");
+CREATE INDEX ON queries ("oracle_id");
+
+
+
+CREATE TABLE IF NOT EXISTS query_results (
+    id                  SERIAL PRIMARY KEY,
+    results             text[],
+    query_id            integer NOT NULL REFERENCES queries (id) ON DELETE CASCADE
+) INHERITS(lifecycle);
+CREATE TRIGGER updated_at_query_results BEFORE UPDATE ON query_results FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
+
+CREATE INDEX ON query_results ("query_id");
+
+
+
+
+
+
+
 
 /*
     WEB GRAPH
@@ -95,11 +182,10 @@ CREATE INDEX ON links ("source");
 
 CREATE TABLE IF NOT EXISTS resource_annotations (
     resource_id             integer REFERENCES resources (id) NOT NULL,
-    territoire_id           integer NOT NULL, -- eventually should be a foreign key for the territoires table
+    territoire_id           integer NOT NULL REFERENCES territoires (id) ON DELETE CASCADE,
     
-    -- Eventually should be a foreign key for the users table. 
     -- NULL means an algorithm made the annotation, not a human being
-    user_id                 integer, 
+    user_id                 integer REFERENCES users (id) ON DELETE CASCADE,
     expression_domain_id    integer REFERENCES expression_domains (id),
     
     approved                boolean DEFAULT NULL, -- NULL means "don't know yet"
@@ -125,9 +211,9 @@ CREATE INDEX ON resource_annotations (resource_id);
 
 
 CREATE TABLE IF NOT EXISTS expression_domain_annotations (
-    territoire_id                   integer NOT NULL, -- eventually should be a foreign key for the territoires table
+    territoire_id                   integer NOT NULL REFERENCES territoires (id) ON DELETE CASCADE,
     expression_domain_id            integer REFERENCES expression_domains (id) NOT NULL,
-    user_id                         integer, -- eventually should be a foreign key for the users table. NULL means an algorithm made the annotation
+    user_id                         integer REFERENCES users (id) ON DELETE CASCADE,
     media_type                      text,
     emitter_type                    text,
     estimated_potential_audience    integer DEFAULT NULL,
@@ -159,8 +245,8 @@ CREATE TYPE tasks_status AS ENUM ('todo', 'in progress');
 CREATE TABLE IF NOT EXISTS tasks (
     id              SERIAL PRIMARY KEY,
     type            text NOT NULL,
-    resource_id     integer REFERENCES resources (id) NOT NULL,
-    territoire_id   integer NOT NULL,
+    resource_id     integer NOT NULL REFERENCES resources (id) ON DELETE CASCADE,
+    territoire_id   integer NOT NULL REFERENCES territoires (id) ON DELETE CASCADE,
     depth           integer NOT NULL,
     status          tasks_status
 ) INHERITS(lifecycle);

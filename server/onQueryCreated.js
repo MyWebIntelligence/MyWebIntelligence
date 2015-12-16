@@ -9,7 +9,7 @@ module.exports = function onQueryCreated(query, user){
     
     return database.Oracles.findById(query.oracle_id)
         .then(function(oracle){
-            var oracleOptions = query.oracleOptions ? JSON.parse(query.oracleOptions) : undefined;
+            var oracleOptions = query.oracle_options;
         
             if(oracle.credentials_infos){
                 return database.OracleCredentials.findByUserAndOracleId(user.id, oracle.id).then(function(uoCreds){

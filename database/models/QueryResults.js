@@ -1,70 +1,144 @@
 "use strict";
 
-var makeJSONDatabaseModel = require('../makeJSONDatabaseModel');
-var makePromiseQueuer = require('../makePromiseQueue')();
+var sql = require('sql');
+sql.setDialect('postgres');
 
-module.exports = makeJSONDatabaseModel('QueryResults', {
-    // return in array
+var databaseP = require('../management/databaseClientP');
+
+var databaseJustCreatedSymbol = require('./databaseJustCreatedSymbol');
+var justCreatedMarker = {};
+justCreatedMarker[databaseJustCreatedSymbol] = true;
+
+var query_results = require('../management/declarations.js').query_results;
+
+module.exports = {
+
     getAll: function(){
-        return this._getStorageFile().then(function(all){
-            return Object.keys(all).map(function(k){ return all[k]});
-        });
-    },
-    findById: function(QueryResultId){
-        return this._getStorageFile().then(function(all){
-            return all[QueryResultId];
-        });
-    },
-    findLatestByQueryId: function(queryId){
-        return this.getAll().then(function(arr){
-            var queryResults = arr.filter(function(queryResult){
-                return queryResult.query_id === queryId;
-            });
+       return databaseP.then(function(db){
+            var query = query_results
+                .select(query_results.star())
+                .toQuery();
+
+            //console.log('QuerieResults getAll query', query);
             
-            return queryResults.length === 0 ?
-                undefined :
-                queryResults.reduce(function(latest, res){
-                    return Date.parse(latest.created_at) > Date.parse(res.created_at) ?
-                        latest :
-                        res;
+            return new Promise(function(resolve, reject){
+                db.query(query, function(err, result){
+                    if(err) reject(err); else resolve(result.rows);
                 });
-        });
+            });
+        })
     },
-    create: makePromiseQueuer(function(QueryResultData){
-        var self = this;
-        var id = this._nextId();
+    
+    findById: function(queryResultId){
+        return databaseP.then(function(db){
+            var query = query_results
+                .select(query_results.star())
+                .where(
+                    query_results.id.equals(queryResultId)
+                )
+                .toQuery();
 
-        return this._getStorageFile().then(function(all){
-            var newQueryResult = Object.assign({id: id}, QueryResultData);
-
-            all[id] = newQueryResult;
-            return self._save(all).then(function(){
-                return newQueryResult;
+            //console.log('QuerieResults findById query', query);
+            
+            return new Promise(function(resolve, reject){
+                db.query(query, function(err, result){
+                    if(err) reject(err); else resolve(result.rows[0]);
+                });
             });
-        });
-    }),
-    update: makePromiseQueuer(function(QueryResult){ // QueryResult can be a delta-QueryResult
-        var self = this;
-        var id = QueryResult.id;
+        })
+    },
+    
+    findLatestByQueryId: function(queryId){
+        return databaseP.then(function(db){
+            var query = query_results
+                .select(query_results.star())
+                .where(
+                    query_results.query_id.equals(queryId)
+                )
+                .order(query_results.created_at.desc)
+                .limit(1)
+                .toQuery();
 
-        return this._getStorageFile().then(function(all){
-            var updatedQueryResult = Object.assign({}, all[id], QueryResult);
-
-            all[id] = updatedQueryResult;
-            return self._save(all).then(function(){
-                return updatedQueryResult;
+            //console.log('QuerieResults findLatestByQueryId query', query);
+            
+            return new Promise(function(resolve, reject){
+                db.query(query, function(err, result){
+                    if(err) reject(err); else resolve(result.rows[0]);
+                });
             });
-        });
-    }),
-    delete: makePromiseQueuer(function(QueryResultId){
-        var self = this;
+        })
+    },
+    
+    create: function(queryResultData){
+        if(!Array.isArray(queryResultData))
+            queryResultData = [queryResultData];
+        
+        return databaseP.then(function(db){
+            var query = query_results
+                .insert(queryResultData)
+                .returning(query_results.star())
+                .toQuery();
 
-        return this._getStorageFile().then(function(all){            
-            delete all[QueryResultId];
-            return self._save(all);
-        });
-    }),
+            // console.log('QuerieResults create query', query); 
+            
+            return new Promise(function(resolve, reject){
+                db.query(query, function(err, result){
+                    if(err) reject(Object.assign(err, {query: query}));
+                    else resolve( result.rows.map(function(r){
+                        return Object.assign( r, justCreatedMarker );
+                    }) );
+                });
+            });
+        })
+    },
+    
+    update: function(queryResult){
+        return databaseP.then(function(db){
+            var query = query_results
+                .update(queryResult)
+                .where(query_results.id.equals(queryResult.id))
+                .toQuery();
+
+            //console.log('QuerieResults update query', query);
+            
+            return new Promise(function(resolve, reject){
+                db.query(query, function(err, result){
+                    if(err) reject(err); else resolve(result.rows[0]);
+                });
+            });
+        })
+    },
+    
+    delete: function(queryResultId){
+        return databaseP.then(function(db){
+            var query = query_results
+                .delete()
+                .where(query_results.id.equals(queryResultId))
+                .toQuery();
+
+            //console.log('QuerieResults delete query', query);
+            
+            return new Promise(function(resolve, reject){
+                db.query(query, function(err, result){
+                    if(err) reject(err); else resolve(result.rows[0]);
+                });
+            });
+        })
+    },
+    
     deleteAll: function(){
-        return this._save({});
+        return databaseP.then(function(db){
+            var query = query_results
+                .delete()
+                .toQuery();
+
+            //console.log('QuerieResults delete query', query);
+            
+            return new Promise(function(resolve, reject){
+                db.query(query, function(err, result){
+                    if(err) reject(err); else resolve(result.rows);
+                });
+            });
+        })
     }
-});
+};

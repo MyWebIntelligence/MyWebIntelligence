@@ -58,7 +58,7 @@ module.exports = {
     complexQueries: {
         getUserInitData: function(userId){
             var userP = Users.findById(userId);
-            var relevantTerritoiresP = Territoires.findByCreatedBy(userId);
+            var relevantTerritoiresP = Territoires.findByUserId(userId);
             var oraclesP = Oracles.getAll();
             
             return Promise.all([userP, relevantTerritoiresP, oraclesP]).then(function(res){
@@ -73,7 +73,7 @@ module.exports = {
                 });
                 
                 user.territoires = relevantTerritoires;
-                user.pictureURL = user.google_pictureURL;
+                user.pictureURL = user.google_picture_url;
                 
                 return Promise.all(territoiresReadyPs).then(function(){
                     return {

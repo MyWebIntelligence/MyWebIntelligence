@@ -7,8 +7,6 @@ var cleanupURLs = require('../../common/cleanupURLs');
 
 var DeleteButton = React.createFactory(require('./DeleteButton'));
 
-
-
 /*
 
 interface QueryFormProps{
@@ -51,7 +49,7 @@ module.exports = React.createClass({
                     
                     if(!editionMode){    
                         formData.q = self.refs['form-q'].getDOMNode().value;
-                        formData.oracle_id = Number( self.refs['form-oracle_id'].getDOMNode().value );
+                        formData.oracle_id = self.refs['form-oracle_id'].getDOMNode().value;
                     }
                     
                     var oracleOptionsSection = self.refs['oracle-options'];
@@ -141,7 +139,7 @@ module.exports = React.createClass({
                                 defaultValue: state.selectedOracleId,
                                 onChange: function(e){
                                     self.setState({
-                                        selectedOracleId: Number(e.target.value)
+                                        selectedOracleId: e.target.value
                                     })
                                 }
                             }, props.oracles.map(function(o){
@@ -161,7 +159,7 @@ module.exports = React.createClass({
                         var defaultValue = queryOracleOptions[id];
                         
                         if(selectedOracle.name === "Google Custom Search Engine" && opt.id === "lr" && !defaultValue){
-                            defaultValue = 'lang_'+(navigator.language || 'en');
+                            defaultValue = 'lang_'+( (typeof navigator !== 'undefined' && navigator.language) || 'en');
                         }
                                                 
                         if(Array.isArray(opt.type)){ // enum

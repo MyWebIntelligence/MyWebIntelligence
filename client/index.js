@@ -91,7 +91,7 @@ function massageTerritoireData(terrData){
 }
 
 page("/territoire/:id", function displayTerritoireViewScreen(context){
-    var territoireId = Number(context.params.id);
+    var territoireId = context.params.id;
     var t = data.user.territoires.find(function(terr){
         return terr.id === territoireId;
     });

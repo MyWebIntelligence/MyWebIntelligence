@@ -47,7 +47,7 @@ module.exports = React.createClass({
                     
                     var liChildren = [o.name];
                     
-                    if(o.needsCredentials){
+                    if(o.credentials_infos){
                         liChildren.push(
                             React.DOM.form({
                                 onSubmit: function(e){
@@ -57,7 +57,7 @@ module.exports = React.createClass({
                                     
                                     props.onOracleCredentialsChange(fd);
                                 }
-                            }, Object.keys(o.needsCredentials).map(function(k){                                
+                            }, Object.keys(o.credentials_infos).map(function(k){                                
                                 return React.DOM.label({}, [
                                     k + ' ',
                                     React.DOM.input({

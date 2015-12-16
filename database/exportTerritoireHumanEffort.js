@@ -48,7 +48,7 @@ module.exports = function(territoireId){
                     name: query.name,
                     q: query.q,
                     oracleOptions: query.oracleOptions,
-                    oracleNodeModuleName: oracle.oracleNodeModuleName
+                    oracle_node_module_name: oracle.oracle_node_module_name
                 }
             }),
             resources: resources

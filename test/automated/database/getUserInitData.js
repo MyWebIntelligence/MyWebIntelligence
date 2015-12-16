@@ -24,16 +24,16 @@ var userData = [
 var oracleData = [
     {
         "name": "Google Custom Search Engine",
-        "oracleNodeModuleName": "GCSE",
-        "needsCredentials": {
+        "oracle_node_module_name": "GCSE",
+        "credentials_infos": {
             "API key": "text",
             "cx": "text"
         }
     },
     {
         "name": "URL list",
-        "oracleNodeModuleName": "URLList",
-        "needsCredentials": false
+        "oracle_node_module_name": "URLList",
+        "credentials_infos": null
     }
 ]
 
@@ -109,7 +109,7 @@ describe('Complex queries: getUserInitData', function(){
         before(function(){
             
             return Promise.all(territoireData.map(function(td){
-                td["created_by"] = users[0].id;
+                td["user_id"] = users[0].id;
                 return db.Territoires.create(td)
             }))
         })
@@ -152,7 +152,7 @@ describe('Complex queries: getUserInitData', function(){
             var territoires;
             
             var territoiresP = Promise.all(territoireData.map(function(td){
-                td["created_by"] = users[0].id;
+                td["user_id"] = users[0].id;
                 return db.Territoires.create(td);
             })).then(function(_territoires){
                 territoires = _territoires;

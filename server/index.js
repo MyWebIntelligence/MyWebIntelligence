@@ -90,8 +90,9 @@ passport.use(new GoogleStrategy({
                 emails: [googleUser.email],
                 google_id: googleUser.id,
                 google_name: googleUser.name,
-                google_pictureURL: googleUser.picture
-            }).then(function(u){
+                google_picture_url: googleUser.picture
+            }).then(function(users){
+                var u = users[0];
                 console.log('created new user', u);
                 done(null, u);
             });
@@ -202,7 +203,7 @@ app.get('/oracles', function(req, res){
 
 app.get('/territoire/:id', function(req, res){
     var user = serializedUsers.get(req.session.passport.user);
-    var territoireId = Number(req.params.id);
+    var territoireId = req.params.id;
     
     if(!user || !user.id){
         res.redirect('/');
@@ -263,7 +264,7 @@ app.put('/territoire', function(req, res){
 
 app.post('/territoire/:id', function(req, res){
     var user = serializedUsers.get(req.session.passport.user);
-    var id = Number(req.params.id);
+    var id = req.params.id;
     var territoireData = req.body;
     territoireData.id = id; // preventive measure to force consistency between URL and body
     console.log('updating territoire', user.id, 'territoire', territoireData);
@@ -278,7 +279,7 @@ app.post('/territoire/:id', function(req, res){
 
 app.delete('/territoire/:id', function(req, res){
     var user = serializedUsers.get(req.session.passport.user);
-    var id = Number(req.params.id);
+    var id = req.params.id;
     console.log('deleting territoire', user.id, 'territoire id', id);
 
     database.Territoires.delete(id).then(function(){
@@ -291,7 +292,7 @@ app.delete('/territoire/:id', function(req, res){
 
 app.get('/territoire/:id/expressions.csv', function(req, res){
     var user = serializedUsers.get(req.session.passport.user);
-    var territoireId = Number(req.params.id);
+    var territoireId = req.params.id;
     console.log('expressions.csv', user.id, 'territoire id', territoireId);
     
     var mainText = req.query.main_text === 'true';
@@ -430,7 +431,7 @@ app.get('/territoire/:id/expressions.csv', function(req, res){
     
 */
 app.get('/territoire/export/:id', function(req, res){
-    var territoireId = Number(req.params.id);
+    var territoireId = req.params.id;
     console.log('export territoire', territoireId);
     
     database.complexQueries.exportTerritoireHumanEffort(territoireId)
@@ -456,7 +457,7 @@ app.post('/territoire/:id/query', function(req, res){
     var user = serializedUsers.get(req.session.passport.user);
     // TODO  this should 403 if the user doesn't own the territoire or something
     
-    var territoireId = Number(req.params.id);
+    var territoireId = req.params.id;
     var queryData = req.body;
 
     console.log('creating query', territoireId, queryData);
@@ -474,7 +475,7 @@ app.post('/territoire/:id/query', function(req, res){
 // update query
 app.post('/query/:id', function(req, res){
     var user = serializedUsers.get(req.session.passport.user);
-    var id = Number(req.params.id);
+    var id = req.params.id;
     var queryData = req.body;
     queryData.id = id; // preventive measure to force consistency between URL and body
     console.log('updating query', user.id, 'query', queryData);
@@ -489,7 +490,7 @@ app.post('/query/:id', function(req, res){
 
 app.delete('/query/:id', function(req, res){
     var user = serializedUsers.get(req.session.passport.user);
-    var id = Number(req.params.id);
+    var id = req.params.id;
     console.log('deleting query', user.id, 'query id', id);
 
     database.Queries.delete(id).then(function(){
@@ -509,7 +510,7 @@ app.post('/oracle-credentials', function(req, res){
         
         var oracleCredentialsData = req.body;
         
-        oracleCredentialsData.oracleId = Number(oracleCredentialsData.oracleId);
+        oracleCredentialsData.oracleId = oracleCredentialsData.oracleId;
         oracleCredentialsData.userId = userId;
         
         console.log('updating oracle credentials', oracleCredentialsData);
@@ -547,7 +548,7 @@ app.get('/territoire-view-data/:id', function(req, res){
         return;
     }
     
-    var territoireId = Number(req.params.id);
+    var territoireId = req.params.id;
     
     getTerritoireScreenData(territoireId).then(function(territoireData){
         res.status(200).send(territoireData);
@@ -564,8 +565,8 @@ app.post('/resource-annotation/:territoireId/:resourceId', function(req, res){
         return;
     }
     
-    var territoireId = Number(req.params.territoireId);
-    var resourceId = Number(req.params.resourceId);
+    var territoireId = req.params.territoireId;
+    var resourceId = req.params.resourceId;
     var delta = req.body;
     
     database.ResourceAnnotations.update(resourceId, territoireId, user.id, delta)
@@ -585,8 +586,8 @@ app.post('/expression-domain-annotation/:territoireId/:edId', function(req, res)
         return;
     }
     
-    var territoireId = Number(req.params.territoireId);
-    var edId = Number(req.params.edId);
+    var territoireId = req.params.territoireId;
+    var edId = req.params.edId;
     var delta = req.body;
     
     database.ExpressionDomainAnnotations.update(edId, territoireId, user.id, delta)

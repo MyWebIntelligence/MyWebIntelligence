@@ -43,12 +43,12 @@ interface MyWIOracleId extends Number{ __MyWIOracleId: MyWIOracleId }
 interface MyWIOracle{
     id: MyWIOracleId
     name: string
-    oracleNodeModuleName: string
+    oracle_node_module_name: string
     options: {
         name: string,
         type: any // "number" or "string" or string[] (enum)
     }[]
-    needsCredentials: boolean | any // any is a dictionary object describing how the credentials form shoud be presented
+    credentials_infos: null | any // any is a dictionary object describing how the credentials form shoud be presented
 }
 
 interface InitData{

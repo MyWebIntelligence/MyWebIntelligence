@@ -15,16 +15,16 @@ var deleteAllOracles = db.Oracles.deleteAll.bind(db.Oracles);
 var oracleData = [
     {
         "name": "Google Custom Search Engine",
-        "oracleNodeModuleName": "GCSE",
-        "needsCredentials": {
+        "oracle_node_module_name": "GCSE",
+        "credentials_infos": {
             "API key": "text",
             "cx": "text"
         }
     },
     {
         "name": "URL list",
-        "oracleNodeModuleName": "URLList",
-        "needsCredentials": false
+        "oracle_node_module_name": "URLList",
+        "credentials_infos": null
     }
 ];
 var oracles;

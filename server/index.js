@@ -461,9 +461,11 @@ app.post('/territoire/:id/query', function(req, res){
     var queryData = req.body;
 
     console.log('creating query', territoireId, queryData);
-    queryData.belongs_to = territoireId;
+    queryData.territoire_id = territoireId;
 
-    database.Queries.create(queryData).then(function(newQuery){
+    database.Queries.create(queryData).then(function(queries){
+        var newQuery = queries[0];
+        
         res.status(201).send(newQuery);
         onQueryCreated(newQuery, user);
     }).catch(function(err){

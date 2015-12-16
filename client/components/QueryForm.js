@@ -35,7 +35,7 @@ module.exports = React.createClass({
         var selectedOracle = props.oracles.find(function(o){
             return o.id === state.selectedOracleId
         });
-        var queryOracleOptions = (query.oracleOptions && JSON.parse(query.oracleOptions)) || {};
+        var queryOracleOptions = query.oracle_options || {};
                 
         return React.DOM.div({className: "QueryForm-react-component"}, [
             React.DOM.form({
@@ -93,8 +93,7 @@ module.exports = React.createClass({
                         oracleOptions[oracleOptionId] = value;
                     });
                     
-                    formData.oracleOptions = JSON.stringify(oracleOptions);
-                    
+                    formData.oracle_options = JSON.stringify(oracleOptions);
                     
                     console.log('formData', formData);
 

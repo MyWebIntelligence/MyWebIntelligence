@@ -35,7 +35,7 @@ module.exports = function(territoireData, user){
             Create the queries
         */
         var queriesReadyP = Promise._allResolved(queriesData.map(function(queryData){
-            queryData.belongs_to = territoireId;
+            queryData.territoire_id = territoireId;
             return database.Queries.create(queryData)
             .then(function(query){
                 return onQueryCreated(query, user)

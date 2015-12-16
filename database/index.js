@@ -67,7 +67,7 @@ module.exports = {
                 var oracles = res[2];
                 
                 var territoiresReadyPs = relevantTerritoires.map(function(t){
-                    return Queries.findByBelongsTo(t.id).then(function(queries){
+                    return Queries.findByTerritoireId(t.id).then(function(queries){
                         t.queries = queries;
                     });
                 });
@@ -428,7 +428,7 @@ module.exports = {
         
         getTerritoireQueryResults: function(territoireId){
             
-            return Queries.findByBelongsTo(territoireId)
+            return Queries.findByTerritoireId(territoireId)
                 .then(function(queries){
                     return Promise.all(queries.map(function(q){
                         return QueryResults.findLatestByQueryId(q.id);

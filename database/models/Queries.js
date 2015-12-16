@@ -1,62 +1,142 @@
 "use strict";
 
-var makeJSONDatabaseModel = require('../makeJSONDatabaseModel');
-var makePromiseQueuer = require('../makePromiseQueue')();
+var sql = require('sql');
+sql.setDialect('postgres');
 
-module.exports = makeJSONDatabaseModel('Queries', {
-    // return in array
+var databaseP = require('../management/databaseClientP');
+
+var databaseJustCreatedSymbol = require('./databaseJustCreatedSymbol');
+var justCreatedMarker = {};
+justCreatedMarker[databaseJustCreatedSymbol] = true;
+
+var queries = require('../management/declarations.js').queries;
+
+module.exports = {
+    
     getAll: function(){
-        return this._getStorageFile().then(function(all){
-            return Object.keys(all).map(function(k){ return all[k]});
-        });
-    },
-    findById: function(QueryId){
-        return this._getStorageFile().then(function(all){
-            return all[QueryId];
-        });
-    },
-    findByBelongsTo: function(territoireId){
-        return this.getAll().then(function(arr){
-            return arr.filter(function(query){
-                return query.belongs_to === territoireId;
+        return databaseP.then(function(db){
+            var query = queries
+                .select(queries.star())
+                .toQuery();
+
+            //console.log('Queries getAll query', query);
+            
+            return new Promise(function(resolve, reject){
+                db.query(query, function(err, result){
+                    if(err) reject(err); else resolve(result.rows);
+                });
             });
-        });
+        })
     },
-    create: makePromiseQueuer(function(QueryData){
-        var self = this;
-        var id = this._nextId();
+    
+    findById: function(queryId){
+        return databaseP.then(function(db){
+            var query = queries
+                .select(queries.star())
+                .where(
+                    queries.id.equals(queryId)
+                )
+                .toQuery();
 
-        return this._getStorageFile().then(function(all){
-            var newQuery = Object.assign({id: id}, QueryData);
-
-            all[id] = newQuery;
-            return self._save(all).then(function(){
-                return newQuery;
+            //console.log('Queries findById query', query);
+            
+            return new Promise(function(resolve, reject){
+                db.query(query, function(err, result){
+                    if(err) reject(err); else resolve(result.rows[0]);
+                });
             });
-        });
-    }),
-    update: makePromiseQueuer(function(Query){ // Query can be a delta-Query
-        var self = this;
-        var id = Query.id;
+        })
+    },
+    
+    findByTerritoireId: function(territoireId){
+        return databaseP.then(function(db){
+            var query = queries
+                .select(queries.star())
+                .where(
+                    queries.territoire_id.equals(territoireId)
+                )
+                .toQuery();
 
-        return this._getStorageFile().then(function(all){
-            var updatedQuery = Object.assign({}, all[id], Query);
-
-            all[id] = updatedQuery;
-            return self._save(all).then(function(){
-                return updatedQuery;
+            //console.log('Queries findByTerritoireId query', query);
+            
+            return new Promise(function(resolve, reject){
+                db.query(query, function(err, result){
+                    if(err) reject(err); else resolve(result.rows);
+                });
             });
-        });
-    }),
-    delete: makePromiseQueuer(function(QueryId){
-        var self = this;
+        })
+    },
+    
+    create: function(queryData){
+       if(!Array.isArray(queryData))
+            queryData = [queryData];
+        
+        return databaseP.then(function(db){
+            var query = queries
+                .insert(queryData)
+                .returning(queries.star())
+                .toQuery();
 
-        return this._getStorageFile().then(function(all){            
-            delete all[QueryId];
-            return self._save(all);
-        });
-    }),
+            // console.log('Queries create query', query); 
+            
+            return new Promise(function(resolve, reject){
+                db.query(query, function(err, result){
+                    if(err) reject(Object.assign(err, {query: query}));
+                    else resolve( result.rows.map(function(r){
+                        return Object.assign( r, justCreatedMarker );
+                    }) );
+                });
+            });
+        })
+    },
+    
+    update: function(queryDelta){
+        return databaseP.then(function(db){
+            var query = queries
+                .update(queryDelta)
+                .where(queries.id.equals(queryDelta.id))
+                .toQuery();
+
+            //console.log('Queries update query', query);
+            
+            return new Promise(function(resolve, reject){
+                db.query(query, function(err, result){
+                    if(err) reject(err); else resolve(result.rows[0]);
+                });
+            });
+        })
+    },
+    
+    delete: function(queryId){
+        return databaseP.then(function(db){
+            var query = queries
+                .delete()
+                .where(queries.id.equals(queryId))
+                .toQuery();
+
+            //console.log('Queries delete query', query);
+            
+            return new Promise(function(resolve, reject){
+                db.query(query, function(err, result){
+                    if(err) reject(err); else resolve(result.rows[0]);
+                });
+            });
+        })
+    },
+    
     deleteAll: function(){
-        return this._save({});
+        return databaseP.then(function(db){
+            var query = queries
+                .delete()
+                .toQuery();
+
+            //console.log('Queries deleteAll query', query);
+            
+            return new Promise(function(resolve, reject){
+                db.query(query, function(err, result){
+                    if(err) reject(err); else resolve(result.rows);
+                });
+            });
+        })
     }
-});
+};

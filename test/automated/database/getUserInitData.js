@@ -160,7 +160,7 @@ describe('Complex queries: getUserInitData', function(){
             
             var queriesP = territoiresP.then(function(){
                 return Promise.all(queryData.map(function(qd){
-                    qd["belongs_to"] = territoires[0].id;
+                    qd["territoire_id"] = territoires[0].id;
                     return db.Queries.create(qd);
                 }));
             });

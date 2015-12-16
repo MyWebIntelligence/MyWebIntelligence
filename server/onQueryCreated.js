@@ -5,7 +5,7 @@ var interogateOracle = require('../oracles/interogateOracle');
 var cleanupURLs = require('../common/cleanupURLs');
 
 module.exports = function onQueryCreated(query, user){
-    console.log("onQueryCreated", query.name, query.belongs_to, user.name);
+    console.log("onQueryCreated", query.name, query.territoire_id, user.name);
     
     return database.Oracles.findById(query.oracle_id)
         .then(function(oracle){
@@ -24,7 +24,7 @@ module.exports = function onQueryCreated(query, user){
         
             var cleanQueryResults = new Set(cleanupURLs(queryResults.toJSON()));
         
-            console.log('query.belongs_to', query.belongs_to)
+            console.log('query.territoire_id', query.territoire_id)
         
             return Promise.all([
                 database.QueryResults.create({
@@ -35,7 +35,7 @@ module.exports = function onQueryCreated(query, user){
                 database.Resources.findByURLsOrCreate(cleanQueryResults)
                     .then(function(resources){
                         return Promise._allResolved(resources.map(function(r){
-                            return database.Tasks.createTasksTodo(r.id, query.belongs_to, 'prepare_resource', 0);
+                            return database.Tasks.createTasksTodo(r.id, query.territoire_id, 'prepare_resource', 0);
                         }))
                     })
             ]);

@@ -10,7 +10,7 @@ var ExpressionDomains = require('./models/ExpressionDomains');
 
 module.exports = function(territoireId){
     var territoireP = Territoires.findById(territoireId);
-    var queriesP = Queries.findByBelongsTo(territoireId);
+    var queriesP = Queries.findByTerritoireId(territoireId);
     var oraclesP = Oracles.getAll();
     var resourceAnnotationsP = ResourceAnnotations.findByTerritoireId(territoireId);
     var resourcesP = resourceAnnotationsP.then(function(resourceAnnotations){
@@ -47,7 +47,7 @@ module.exports = function(territoireId){
                 return {
                     name: query.name,
                     q: query.q,
-                    oracleOptions: query.oracleOptions,
+                    oracle_options: query.oracle_options,
                     oracle_node_module_name: oracle.oracle_node_module_name
                 }
             }),

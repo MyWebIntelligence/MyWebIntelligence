@@ -506,12 +506,15 @@ app.post('/oracle-credentials', function(req, res){
         res.redirect('/');
     }
     else{
-        var userId = user.id;
+        var oracleCredentialsBody = req.body;
+        var oracleId = oracleCredentialsBody.oracle_id;
+        delete oracleCredentialsBody.oracle_id;
         
-        var oracleCredentialsData = req.body;
-        
-        oracleCredentialsData.oracleId = oracleCredentialsData.oracleId;
-        oracleCredentialsData.userId = userId;
+        var oracleCredentialsData = {
+            user_id: user.id,
+            oracle_id: oracleId,
+            credentials: JSON.stringify(oracleCredentialsBody)
+        };
         
         console.log('updating oracle credentials', oracleCredentialsData);
 

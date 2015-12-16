@@ -52,7 +52,7 @@ page("/oracles", function(){
         var credentialsByOracleId = Object.create(null);
         
         credentials.forEach(function(c){
-            credentialsByOracleId[c.oracleId] = c;
+            credentialsByOracleId[c.oracle_id] = c.credentials;
         });
         
         screenData.oracleCredentials = credentialsByOracleId;

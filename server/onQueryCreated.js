@@ -12,8 +12,8 @@ module.exports = function onQueryCreated(query, user){
             var oracleOptions = query.oracleOptions ? JSON.parse(query.oracleOptions) : undefined;
         
             if(oracle.credentials_infos){
-                return database.OracleCredentials.findByUserAndOracleId(user.id, oracle.id).then(function(creds){
-                    return interogateOracle(oracle, query.q, oracleOptions, creds);
+                return database.OracleCredentials.findByUserAndOracleId(user.id, oracle.id).then(function(uoCreds){
+                    return interogateOracle(oracle, query.q, oracleOptions, uoCreds.credentials);
                 });
             }
             else{

@@ -16,6 +16,8 @@ interface OraclesScreenProps{
 */
 
 module.exports = React.createClass({
+    displayName: 'OraclesScreen',
+    
     getInitialState: function() {
         var oracleCredentials = this.props.oracleCredentials ? this.props.oracleCredentials : Object.create(null);
         
@@ -53,7 +55,7 @@ module.exports = React.createClass({
                                 onSubmit: function(e){
                                     e.preventDefault();
                                     var fd = new FormData(e.target);
-                                    fd.append('oracleId', o.id);
+                                    fd.append('oracle_id', o.id);
                                     
                                     props.onOracleCredentialsChange(fd);
                                 }

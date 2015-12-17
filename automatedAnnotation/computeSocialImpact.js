@@ -9,7 +9,6 @@
 
 module.exports = function(annotations){
     return (annotations.facebook_like || 0) + 10*(
-        (annotations.twitter_share || 0) +
         (annotations.facebook_share || 0) +
         (annotations.linkedin_share || 0)
     )

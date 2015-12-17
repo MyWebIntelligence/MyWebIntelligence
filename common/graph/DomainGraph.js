@@ -63,17 +63,6 @@ var domainNodeDesc = {
         type: "float"
     },
     
-    "min_twitter_share": {
-        type: "integer"
-    },
-    "max_twitter_share": {
-        type: "integer"
-    },
-    "median_twitter_share": {
-        // if array has an even length, average of the two middle value is performed. Can end up with a x.5
-        type: "float"
-    },
-    
     "min_linkedin_share": {
         type: "integer"
     },

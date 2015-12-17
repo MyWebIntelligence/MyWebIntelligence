@@ -234,13 +234,6 @@ module.exports = React.createClass({
                     ' ',
                     React.DOM.i({className: 'fa fa-share-square-o'})
                 ),
-                React.DOM.span({title: 'Twitter Share', style: {color: "#53abee"}},
-                    resourceAnnotations.twitter_share,
-                    ' ',
-                    React.DOM.i({className: 'fa fa-twitter-square'}),
-                    ' ',
-                    React.DOM.i({className: 'fa fa-share-square-o'})
-                ),
                 React.DOM.span({title: 'Linkedin Share', style: {color: "#2088BD"}},
                     resourceAnnotations.linkedin_share,
                     ' ',

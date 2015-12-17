@@ -68,10 +68,6 @@ module.exports = function pageGraphToDomainGraph(pageGraph, expressionDomainsByI
                     .map(function(node){ return node.facebook_share; })
                     .filter(function(shares){ return shares !== undefined && shares !== null && shares !== -1; });
 
-                var domainTwitterShares = expressionNodes
-                    .map(function(node){ return node.twitter_share; })
-                    .filter(function(shares){ return shares !== undefined && shares !== null && shares !== -1; });
-
                 var domainLinkedinShares = expressionNodes
                     .map(function(node){ return node.linkedin_share; })
                     .filter(function(shares){ return shares !== undefined && shares !== null && shares !== -1; });
@@ -118,10 +114,6 @@ module.exports = function pageGraphToDomainGraph(pageGraph, expressionDomainsByI
                     max_facebook_share: cleanValue(stats.max(domainFbShares), [undefined, null], -1),
                     median_facebook_share: cleanValue(stats.median(domainFbShares), [undefined, null], -1),
 
-                    min_twitter_share: cleanValue(stats.min(domainTwitterShares), [undefined, null], -1),
-                    max_twitter_share: cleanValue(stats.max(domainTwitterShares), [undefined, null], -1),
-                    median_twitter_share: cleanValue(stats.median(domainTwitterShares), [undefined, null], -1),
-
                     min_linkedin_share: cleanValue(stats.min(domainLinkedinShares), [undefined, null], -1),
                     max_linkedin_share: cleanValue(stats.max(domainLinkedinShares), [undefined, null], -1),
                     median_linkedin_share: cleanValue(stats.median(domainLinkedinShares), [undefined, null], -1),
@@ -133,7 +125,6 @@ module.exports = function pageGraphToDomainGraph(pageGraph, expressionDomainsByI
                     sum_likes: cleanValue(stats.sum(domainFbLikes), [undefined, null], 0),
                     sum_shares: (
                         cleanValue(stats.sum(domainFbShares), [undefined, null], 0) +
-                        cleanValue(stats.sum(domainTwitterShares), [undefined, null], 0) +
                         cleanValue(stats.sum(domainLinkedinShares), [undefined, null], 0)
                     ),
 

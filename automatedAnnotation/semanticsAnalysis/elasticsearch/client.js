@@ -8,7 +8,8 @@ module.exports = function connect(host) {
     var client = new elasticsearch.Client({
         host: host,
         log: 'error',
-        apiVersion : "1.7"
+        apiVersion : "1.7",
+        requestTimeout : 60*1000
     });
     
     return new Promise(function (resolve, reject) {

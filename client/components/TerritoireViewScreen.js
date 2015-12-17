@@ -13,6 +13,7 @@ var PageListItem = React.createFactory(require('./PageListItem'));
 
 var abstractGraphToPageGraph = require('../../common/graph/abstractGraphToPageGraph');
 var pageGraphToDomainGraph = require('../../common/graph/pageGraphToDomainGraph');
+var makeWordGraph = require('../../common/graph/makeWordGraph');
 
 var serverAPI = require('../serverAPI');
 
@@ -516,7 +517,26 @@ module.exports = React.createClass({
                                     "application/gexf+xml"
                                 );
                             }
-                        }, 'Download Domains GEXF')
+                        }, 'Download Domains GEXF'),
+                        React.DOM.a({
+                            href: "/territoire/"+territoire.id+"/cognitive-map.gexf",
+                            download: territoire.name+'-cognitive-map.gexf',
+                            onClick: function(e){
+                                e.preventDefault();
+                                
+                                var cognitiveMapGraph = makeWordGraph(
+                                    territoire.graph.nodes,
+                                    territoire.expressionById,
+                                    state.resourceAnnotationByResourceId
+                                );
+                                    
+                                triggerDownload(
+                                    cognitiveMapGraph.exportAsGEXF(),
+                                    territoire.name+'-cognitive-map.gexf',
+                                    "application/gexf+xml"
+                                );
+                            }
+                        }, 'Download Cognitive Map GEXF')
                     )
                 
                 )

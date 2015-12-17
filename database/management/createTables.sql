@@ -195,7 +195,6 @@ CREATE TABLE IF NOT EXISTS resource_annotations (
     -- automated annotations
     facebook_like           integer,
     facebook_share          integer,
-    twitter_share           integer,
     google_pagerank         integer,
     linkedin_share          integer,
     

@@ -189,7 +189,6 @@ exports.resource_annotations = sql.define({
 		{ name: 'approved' },
 		{ name: 'facebook_like' },
 		{ name: 'facebook_share' },
-		{ name: 'twitter_share' },
 		{ name: 'google_pagerank' },
 		{ name: 'linkedin_share' },
 		{ name: 'sentiment' },

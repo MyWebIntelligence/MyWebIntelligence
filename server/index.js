@@ -382,7 +382,6 @@ app.get('/territoire/:id/expressions.csv', function(req, res){
                     sentiment: resourceAnnotations.sentiment,
                     content_length: (expression.main_text || '').length,
                     google_pagerank: resourceAnnotations.google_pagerank,
-                    twitter_share: resourceAnnotations.twitter_share,
                     facebook_share: resourceAnnotations.facebook_share,
                     facebook_like: resourceAnnotations.facebook_like,
                     linkedin_share: resourceAnnotations.linkedin_share,

@@ -10,7 +10,6 @@ var database = require('../../database');
 var annotationFunctions = {
     'facebook_like': require('./facebookLikes'),
     'facebook_share': require('./facebookShares'),
-    'twitter_share': require('./twitterShares'),
     'google_pagerank': require('./googlePageRank'),
     'linkedin_share': require('./linkedinShares')
 };

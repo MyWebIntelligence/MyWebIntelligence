@@ -54,7 +54,7 @@ module.exports = function abstractGraphToPageGraph(abGraph, expressionById, reso
                     url: res.url,
                     depth: expression.depth,
                     title: expression.title || '',
-                    expressionId: typeof expressionId === "number" ? expressionId : -1
+                    expressionId: typeof expressionId === "string" ? expressionId : ''
                 }, 
                 resourceAnnotations,
                 {
@@ -70,7 +70,7 @@ module.exports = function abstractGraphToPageGraph(abGraph, expressionById, reso
                 }
             ));
 
-            var urlToNodeNameKey = String(res.id);
+            var urlToNodeNameKey = res.id;
             //console.log(urlToNodeNameKey);
 
             urlToNodeName.set(urlToNodeNameKey, name);

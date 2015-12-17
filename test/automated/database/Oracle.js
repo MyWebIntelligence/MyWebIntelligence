@@ -40,7 +40,7 @@ describe('Oracles', function(){
             return db.Oracles.create( oracleData[0] )
                 .then(function(o){
                     assert.ok(Object(o) === o);
-                    assert.equal(typeof o.id, "number");
+                    assert.equal(typeof o.id, "string");
                 
                     return db.Oracles.getAll().then(function(all){
                         assert.isArray(all);

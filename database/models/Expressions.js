@@ -19,7 +19,7 @@ var expressions = require('../management/declarations').expressions;
 module.exports = {
     // expressionData is an array
     create: function(expressionData){
-        if(typeof expressionData.id === "number")
+        if(expressionData.id)
             throw new Error('Expression.create. Data already has an id '+expressionData.id+' '+expressionData.uri)
             
         return databaseP.then(function(db){

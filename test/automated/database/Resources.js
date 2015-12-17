@@ -29,7 +29,7 @@ describe('Resources', function(){
                 .then(function(resourceIds){
                     assert.isArray(resourceIds);
                     assert.equal(resourceIds.length, 1);
-                    assert.equal(typeof resourceIds[0].id, "number");
+                    assert.equal(typeof resourceIds[0].id, "string");
                 
                     return db.Resources.findValidByURLs( new Set([url]) ).then(function(resources){
                         assert.isArray(resources);
@@ -96,7 +96,7 @@ describe('Resources', function(){
                     return db.Resources.findValidByURLs( new Set([urls[1]]) )
                         .then(function(rs){
                             var r = rs[0];
-                            assert.equal(typeof r.id, "number");
+                            assert.equal(typeof r.id, "string");
                             assert.notStrictEqual(r.id, url0resourceId);
                             assert.strictEqual(r.url, urls[1]);
                             assert.strictEqual(r.alias_of, null);

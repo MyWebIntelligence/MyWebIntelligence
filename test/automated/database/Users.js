@@ -31,7 +31,7 @@ describe('Users', function(){
             return db.Users.create( userData[0] )
                 .then(function(u){
                     assert.ok(Object(u) === u);
-                    assert.equal(typeof u.id, "number");
+                    assert.equal(typeof u.id, "string");
                 
                     return db.Users.getAll().then(function(all){
                         assert.isTrue(Array.isArray(all));

@@ -2,7 +2,7 @@
     Symbolic interface 
 */
 
-interface MyWIUserId extends Number{ __MyWIUserId: MyWIUserId }
+interface MyWIUserId extends String{ __MyWIUserId: MyWIUserId }
 
 interface MyWIUser{
     id: MyWIUserId
@@ -11,7 +11,7 @@ interface MyWIUser{
     territoires : MyWITerritoire[]
 }
 
-interface MyWITerritoireId extends Number{ __MyWITerritoireId: MyWITerritoireId }
+interface MyWITerritoireId extends String{ __MyWITerritoireId: MyWITerritoireId }
 
 interface MyWITerritoire{
     id: MyWITerritoireId
@@ -27,7 +27,7 @@ interface MyWITerritoire{
     // resultGraph: Graph<domain> // for later
 }
 
-interface MyWIQueryId extends Number{ __MyWIQueryId: MyWIQueryId }
+interface MyWIQueryId extends String{ __MyWIQueryId: MyWIQueryId }
 
 interface MyWIQuery{
     id: MyWIQueryId,
@@ -38,7 +38,7 @@ interface MyWIQuery{
     oracle: MyWIOracleId
 }
 
-interface MyWIOracleId extends Number{ __MyWIOracleId: MyWIOracleId }
+interface MyWIOracleId extends String{ __MyWIOracleId: MyWIOracleId }
 
 interface MyWIOracle{
     id: MyWIOracleId

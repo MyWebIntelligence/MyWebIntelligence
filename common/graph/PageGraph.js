@@ -14,7 +14,7 @@ var pageNodeDesc = {
         type: "integer"
     },
     "expressionId": {
-        type: "integer"
+        type: "string"
     },
     'facebook_like': {
         type: "integer",
@@ -53,8 +53,8 @@ var pageNodeDesc = {
         default: ''
     },
     expression_domain_id: {
-        type: "integer",
-        default: -1
+        type: "string",
+        default: ''
     }
 };
 

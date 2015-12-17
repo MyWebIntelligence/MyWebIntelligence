@@ -80,7 +80,7 @@ describe('Queries', function(){
             return db.Queries.create( queryData[0] )
                 .then(function(q){
                     assert.ok(Object(q) === q);
-                    assert.equal(typeof q.id, "number");
+                    assert.equal(typeof q.id, "string");
                 
                     return db.Queries.getAll().then(function(all){
                         assert.isTrue(Array.isArray(all));

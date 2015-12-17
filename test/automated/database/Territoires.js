@@ -70,7 +70,7 @@ describe('Territoires', function(){
                 })
                 .then(function(t){
                     assert.ok(Object(t) === t);
-                    assert.equal(typeof t.id, "number");
+                    assert.equal(typeof t.id, "string");
                 
                     return db.Territoires.getAll().then(function(all){
                         assert.isTrue(Array.isArray(all));

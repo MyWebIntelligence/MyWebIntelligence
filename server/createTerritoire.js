@@ -19,7 +19,7 @@ module.exports = function(territoireData, user){
     var territoireOwnData = {
         name: territoireData.name,
         description: territoireData.description,
-        created_by: user.id
+        user_id: user.id
     };
     
     var queriesData = territoireData.queries || [];
@@ -27,14 +27,15 @@ module.exports = function(territoireData, user){
     var expressionDomains = territoireData.expressionDomains || [];
     
     return database.Territoires.create(territoireOwnData)
-    .then(function(t){
+    .then(function(territoires){
+        var t = territoires[0];
         var territoireId = t.id;
         
         /*
             Create the queries
         */
         var queriesReadyP = Promise._allResolved(queriesData.map(function(queryData){
-            queryData.belongs_to = territoireId;
+            queryData.territoire_id = territoireId;
             return database.Queries.create(queryData)
             .then(function(query){
                 return onQueryCreated(query, user)

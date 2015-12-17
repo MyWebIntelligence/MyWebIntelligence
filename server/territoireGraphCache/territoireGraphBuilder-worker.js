@@ -6,7 +6,7 @@ require('../../ES-mess');
 
 var database = require('../../database');
 
-var territoireId = Number(process.argv[2]);
+var territoireId = process.argv[2];
 
 database.complexQueries.getTerritoireGraph(territoireId)
     .then(function(graph){

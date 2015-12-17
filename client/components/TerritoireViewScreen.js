@@ -202,8 +202,7 @@ module.exports = React.createClass({
             pageListItems: Object.keys(territoire.expressionById || {}).length >= 1 ? 
                 territoire.graph.nodes
                     .filter(function(n){
-                        return typeof n.expression_id === 'number' && 
-                            territoire.resourceAnnotationByResourceId[n.id];
+                        return n.expression_id && territoire.resourceAnnotationByResourceId[n.id];
                     })
                     .sort(function nodeCompare(n1, n2){
                         var rId1 = n1.id;
@@ -221,7 +220,7 @@ module.exports = React.createClass({
             if(resourceAnnotationByResourceId){
                 deltaState.approvedExpressionDomainIds = new Set(territoire.graph.nodes
                     .filter(function(n){
-                        return typeof n.expression_id === 'number' && resourceAnnotationByResourceId[n.id]
+                        return n.expression_id&& resourceAnnotationByResourceId[n.id]
                     })
                     .map(function(n){
                         return resourceAnnotationByResourceId[n.id].expression_domain_id;

@@ -4,5 +4,5 @@ client/browserify-bundle.js
 test/**/*.js
 ES-mess
 client/components/external
-postgresDB/declarations.js
+database/management/declarations.js
 _storage

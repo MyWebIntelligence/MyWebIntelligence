@@ -3,7 +3,7 @@
 var sql = require('sql');
 sql.setDialect('postgres');
 
-var databaseP = require('./databaseClientP');
+var databaseP = require('../management/databaseClientP');
 
 var massageExpressionDomain = require('./massageExpressionDomain');
 
@@ -11,7 +11,7 @@ var databaseJustCreatedSymbol = require('./databaseJustCreatedSymbol');
 var justCreatedMarker = {};
 justCreatedMarker[databaseJustCreatedSymbol] = true;
 
-var expression_domains = require('./declarations.js').expression_domains;
+var expression_domains = require('../management/declarations.js').expression_domains;
 
 
 module.exports = {

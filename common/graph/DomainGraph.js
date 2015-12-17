@@ -5,7 +5,7 @@ var GraphModel = require('./GraphModel');
 var domainNodeDesc = {
     // Node attributes description
     "expression_domain_id": {
-        type: "integer"
+        type: "string"
     },
     "title": {
         type: "string"

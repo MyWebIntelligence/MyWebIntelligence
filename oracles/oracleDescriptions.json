@@ -1,7 +1,7 @@
 [
     {
         "name": "Google Custom Search Engine",
-        "oracleNodeModuleName": "GCSE",
+        "oracle_node_module_name": "GCSE",
         "options": [
             {
                 "id": "date-range", 
@@ -163,14 +163,14 @@
                 ]
             }
         ],
-        "needsCredentials": {
+        "credentials_infos": {
             "API key": "text",
             "cx": "text"
         }
     },
     {
         "name": "URL list",
-        "oracleNodeModuleName": "URLList",
+        "oracle_node_module_name": "URLList",
         "options": [
             {
                 "id": "list",
@@ -178,6 +178,6 @@
                 "type": "list"
             }
         ],
-        "needsCredentials": false
+        "credentials_infos": null
     }
 ]

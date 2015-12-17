@@ -8,8 +8,8 @@ var assert = assert = require('chai').assert;
 require('chai-as-promised');
 
 var db = require('../../../../database/index.js');
-var dropAllTables = require('../../../../postgresDB/dropAllTables');
-var createTables = require('../../../../postgresDB/createTables');
+var dropAllTables = require('../../../../database/management/dropAllTables');
+var createTables = require('../../../../database/management/createTables');
 
 var deleteAllResources = db.Resources.deleteAll.bind(db.Resources);
 

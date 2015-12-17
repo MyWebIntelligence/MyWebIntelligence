@@ -34,11 +34,11 @@ function findValidationErrors(fileString, oracles){
         // make sure there is a corresponding oracle in this instance of MyWI
         territoireData.queries = queries.filter(function(q){
             var oracle = oracles.find(function(o){
-                return o.oracleNodeModuleName === q.oracleNodeModuleName;
+                return o.oracle_node_module_name === q.oracle_node_module_name;
             });
             
             if(!oracle){
-                warnings.push(new Error('No oracle named "'+q.oracleNodeModuleName+'". Query "'+q.name+'" not imported'))
+                warnings.push(new Error('No oracle named "'+q.oracle_node_module_name+'". Query "'+q.name+'" not imported'))
                 return false;
             }
             

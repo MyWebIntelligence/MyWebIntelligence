@@ -1,71 +1,153 @@
 "use strict";
 
-var makeJSONDatabaseModel = require('../makeJSONDatabaseModel');
-var makePromiseQueuer = require('../makePromiseQueue')();
+var sql = require('sql');
+sql.setDialect('postgres');
 
-module.exports = makeJSONDatabaseModel('OracleCredentials', {
+var databaseP = require('../management/databaseClientP');
+
+var databaseJustCreatedSymbol = require('./databaseJustCreatedSymbol');
+var justCreatedMarker = {};
+justCreatedMarker[databaseJustCreatedSymbol] = true;
+
+var oracle_credentials = require('../management/declarations.js').oracle_credentials;
+
+module.exports = {
     // return in array
     getAll: function(){
-        return this._getStorageFile().then(function(all){
-            return Object.keys(all).map(function(k){ return all[k]});
-        });
+        return databaseP.then(function(db){
+            var query = oracle_credentials
+                .select(oracle_credentials.star())
+                .toQuery();
+
+            //console.log('OracleCredentials getAll query', query);
+            
+            return new Promise(function(resolve, reject){
+                db.query(query, function(err, result){
+                    if(err) reject(err); else resolve(result.rows);
+                });
+            });
+        })
     },
+    
     findByUserAndOracleId: function(userId, oracleId){
-        return this.getAll().then(function(all){
-            return all.find(function(oc){
-                return oc.userId === userId && oc.oracleId === oracleId;
+        return databaseP.then(function(db){
+            var query = oracle_credentials
+                .select(oracle_credentials.star())
+                .where(
+                    oracle_credentials.user_id.equals(userId),
+                    oracle_credentials.oracle_id.equals(oracleId)
+                )
+                .toQuery();
+
+            //console.log('OracleCredentials findByUserAndOracleId query', query);
+            
+            return new Promise(function(resolve, reject){
+                db.query(query, function(err, result){
+                    if(err) reject(err); else resolve(result.rows);
+                });
             });
-        });
+        })
     },
+    
     findByUserId: function(userId){
-        return this.getAll().then(function(all){
-            return all.filter(function(oc){
-                return oc.userId === userId;
+        return databaseP.then(function(db){
+            var query = oracle_credentials
+                .select(oracle_credentials.star())
+                .where(
+                    oracle_credentials.user_id.equals(userId)
+                )
+                .toQuery();
+
+            //console.log('OracleCredentials findByUserAndOracleId query', query);
+            
+            return new Promise(function(resolve, reject){
+                db.query(query, function(err, result){
+                    if(err) reject(err); else resolve(result.rows);
+                });
             });
-        });
+        })
     },
-    create: makePromiseQueuer(function(OracleCredentialsData){
-        var self = this;
-        var id = this._nextId();
+    
+    create: function(oracleCredentialsData){
+        if(!Array.isArray(oracleCredentialsData))
+            oracleCredentialsData = [oracleCredentialsData];
+        
+        return databaseP.then(function(db){
+            var query = oracle_credentials
+                .insert(oracleCredentialsData)
+                .returning(oracle_credentials.star())
+                .toQuery();
 
-        return this._getStorageFile().then(function(all){
-            var newOracleCredentials = Object.assign({id: id}, OracleCredentialsData);
-
-            all[id] = newOracleCredentials;
-            return self._save(all).then(function(){
-                return newOracleCredentials;
+            // console.log('OracleCredentials create query', query); 
+            
+            return new Promise(function(resolve, reject){
+                db.query(query, function(err, result){
+                    if(err) reject(Object.assign(err, {query: query}));
+                    else resolve( result.rows.map(function(r){
+                        return Object.assign( r, justCreatedMarker );
+                    }) );
+                });
             });
-        });
-    }),
-    update: makePromiseQueuer(function(OracleCredentials){ // OracleCredentials can be a delta-OracleCredentials
-        var self = this;
-        var id = OracleCredentials.id;
+        })
+    },
+    
+    update: function(oracleCredentialsData){        
+        return databaseP.then(function(db){
+            var query = oracle_credentials
+                .update(oracleCredentialsData)
+                .where(oracle_credentials.id.equals(oracleCredentialsData.id))
+                .toQuery();
 
-        return this._getStorageFile().then(function(all){
-            var updatedOracleCredentials = Object.assign({}, all[id], OracleCredentials);
-
-            all[id] = updatedOracleCredentials;
-            return self._save(all).then(function(){
-                return updatedOracleCredentials;
+            //console.log('oracleCredentialsData update query', query);
+            
+            return new Promise(function(resolve, reject){
+                db.query(query, function(err, result){
+                    if(err) reject(err); else resolve(result.rows[0]);
+                });
             });
-        });
-    }),
+        })
+    },
+    
     createOrUpdate: function(oracleCredentialsData){
         var self = this;
         
-        return this.findByUserAndOracleId(oracleCredentialsData.userId, oracleCredentialsData.oracleId).then(function(o){
-            return o ?
-                self.update(Object.assign(o, oracleCredentialsData)) : 
-                self.create(oracleCredentialsData);
-        });
-        
-    },
-    delete: makePromiseQueuer(function(OracleCredentialsId){
-        var self = this;
+        return databaseP.then(function(db){
+            var query = oracle_credentials
+                .select(oracle_credentials.star())
+                .where(
+                    oracle_credentials.user_id.equals(oracleCredentialsData.user_id),
+                    oracle_credentials.oracle_id.equals(oracleCredentialsData.oracle_id)
+                )
+                .toQuery();
 
-        return this._getStorageFile().then(function(all){            
-            delete all[OracleCredentialsId];
-            return self._save(all);
-        });
-    })
-});
+            // console.log('OracleCredentials createOrUpdate query', query); 
+            
+            return new Promise(function(resolve, reject){
+                db.query(query, function(err, result){
+                    if(err) reject(Object.assign(err, {query: query}));
+                    else resolve( result.rows[0] ?
+                        self.update(oracleCredentialsData) :
+                        self.create(oracleCredentialsData)
+                    );
+                });
+            });
+        })
+    },
+    
+    delete: function(oracleCredentialsId){
+        return databaseP.then(function(db){
+            var query = oracle_credentials
+                .delete()
+                .where(oracle_credentials.id.equals(oracleCredentialsId))
+                .toQuery();
+
+            //console.log('Oracles deleteAll query', query);
+            
+            return new Promise(function(resolve, reject){
+                db.query(query, function(err, result){
+                    if(err) reject(err); else resolve(result.rows[0]);
+                });
+            });
+        })
+    }
+};

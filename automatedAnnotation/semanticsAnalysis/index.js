@@ -8,7 +8,7 @@ var findMostImportantWords = require('./findMostImportantWords');
 module.exports = function(resource, territoireId){
     //console.log('analyze_expression task', resource, territoireId);
     
-    if(typeof resource.expression_id !== "number")
+    if(resource.expression_id === null)
         return Promise.reject(new Error('Resource '+resource.id+' has no expression'))
     
     return database.Expressions.getExpressionsWithContent(new Set([resource.expression_id]))

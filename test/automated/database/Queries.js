@@ -15,16 +15,16 @@ var deleteAllOracles = db.Oracles.deleteAll.bind(db.Oracles);
 var oracleData = [
     {
         "name": "Google Custom Search Engine",
-        "oracleNodeModuleName": "GCSE",
-        "needsCredentials": {
+        "oracle_node_module_name": "GCSE",
+        "credentials_infos": {
             "API key": "text",
             "cx": "text"
         }
     },
     {
         "name": "URL list",
-        "oracleNodeModuleName": "URLList",
-        "needsCredentials": false
+        "oracle_node_module_name": "URLList",
+        "credentials_infos": null
     }
 ];
 var oracles;
@@ -39,28 +39,28 @@ describe('Queries', function(){
             "q": "a",
             "lang": "none",
             "nbPage": 400,
-            "belongs_to": 1
+            "territoire_id": 1
         },
         {
             "name": "Amar Lakel",
             "q": "Amar Lakel",
             "lang": "none",
             "nbPage": 400,
-            "belongs_to": 2
+            "territoire_id": 2
         },
         {
             "name": "Alex",
             "q": "Alexandre Vallette",
             "lang": "none",
             "nbPage": 400,
-            "belongs_to": 1
+            "territoire_id": 1
         },
         {
             "name": "Orelsan",
             "q": "Orelsan",
             "lang": "none",
             "nbPage": 400,
-            "belongs_to": 2
+            "territoire_id": 2
         }
     ];
     
@@ -80,7 +80,7 @@ describe('Queries', function(){
             return db.Queries.create( queryData[0] )
                 .then(function(q){
                     assert.ok(Object(q) === q);
-                    assert.equal(typeof q.id, "number");
+                    assert.equal(typeof q.id, "string");
                 
                     return db.Queries.getAll().then(function(all){
                         assert.isTrue(Array.isArray(all));
@@ -166,13 +166,13 @@ describe('Queries', function(){
     });
 
     
-    describe('findByBelongsTo', function(){
+    describe('findByTerritoireId', function(){
         before(function(){
             return Promise.all(queryData.map(function(td){ return db.Queries.create(td); }));
         });
         
-        it('should find queries by findByBelongsTo', function(){            
-            return db.Queries.findByBelongsTo( 2 )
+        it('should find queries by findByTerritoireId', function(){            
+            return db.Queries.findByTerritoireId( 2 )
                 .then(function(qs){
                     assert.ok(Array.isArray(qs));
                     assert.strictEqual(qs.length, 2);
@@ -180,8 +180,8 @@ describe('Queries', function(){
                 });
         });
         
-        it('should not find queries by findByBelongsTo', function(){            
-            return db.Queries.findByBelongsTo( 37 )
+        it('should not find queries by findByTerritoireId', function(){            
+            return db.Queries.findByTerritoireId( 37 )
                 .then(function(qs){
                     assert.ok(Array.isArray(qs));
                     assert.strictEqual(qs.length, 0);

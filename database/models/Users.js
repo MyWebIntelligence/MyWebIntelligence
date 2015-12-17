@@ -1,64 +1,138 @@
 "use strict";
 
-var makeJSONDatabaseModel = require('../makeJSONDatabaseModel');
-var makePromiseQueuer = require('../makePromiseQueue')();
+var sql = require('sql');
+sql.setDialect('postgres');
 
+var databaseP = require('../management/databaseClientP');
 
-module.exports = makeJSONDatabaseModel('Users', {
-    /* return in array form */
+var databaseJustCreatedSymbol = require('./databaseJustCreatedSymbol');
+var justCreatedMarker = {};
+justCreatedMarker[databaseJustCreatedSymbol] = true;
+
+var users = require('../management/declarations.js').users;
+
+module.exports = {
+
     getAll: function(){
-        return this._getStorageFile().then(function(all){
-            return Object.keys(all).map(function(k){ return all[k]});
-        });
+        return databaseP.then(function(db){
+            var query = users
+                .select(users.star())
+                .toQuery();
+
+            //console.log('Users getAll query', query);
+            
+            return new Promise(function(resolve, reject){
+                db.query(query, function(err, result){
+                    if(err) reject(err); else resolve(result.rows);
+                });
+            });
+        })
     },
+    
     findById: function(userId){
-        return this._getStorageFile().then(function(all){
-            return all[userId];
-        });
+        return databaseP.then(function(db){
+            var query = users
+                .select(users.star())
+                .where(users.id.equals(userId))
+                .toQuery();
+
+            //console.log('Users findById query', query);
+            
+            return new Promise(function(resolve, reject){
+                db.query(query, function(err, result){
+                    if(err) reject(err); else resolve(result.rows[0]);
+                });
+            });
+        })
     },
+    
     findByGoogleId: function(googleId){
+        return databaseP.then(function(db){
+            var query = users
+                .select(users.star())
+                .where(users.google_id.equals(googleId))
+                .toQuery();
 
-        return this.getAll().then(function(arr){
-            return arr.find(function(user){
-                return user.google_id === googleId;
+            //console.log('Users findByGoogleId query', query);
+            
+            return new Promise(function(resolve, reject){
+                db.query(query, function(err, result){
+                    if(err) reject(err); else resolve(result.rows[0]);
+                });
             });
-        });
+        })
     },
-    create: makePromiseQueuer(function(userData){
-        var self = this;
-        var id = this._nextId();
+    
+    create: function(userData){
+        if(!Array.isArray(userData))
+            userData = [userData];
+        
+        return databaseP.then(function(db){
+            var query = users
+                .insert(userData)
+                .returning(users.star())
+                .toQuery();
 
-        return this._getStorageFile().then(function(all){
-            var newUser = Object.assign({id: id}, userData);
-
-            all[id] = newUser;
-            return self._save(all).then(function(){
-                return newUser;
+            //console.log('Users create query', query);
+            
+            return new Promise(function(resolve, reject){
+                db.query(query, function(err, result){
+                    if(err) reject(Object.assign(err, {query: query}));
+                    else resolve( result.rows.map(function(r){
+                        return Object.assign( r, justCreatedMarker );
+                    }) );
+                });
             });
-        });
-    }),
-    update: makePromiseQueuer(function(user){ // user can be a delta-user
-        var self = this;
-        var id = user.id;
+        })
+    },
+    
+    update: function(user){ 
+        return databaseP.then(function(db){
+            var query = users
+                .update(user)
+                .where(users.id.equals(user.id))
+                .toQuery();
 
-        return this._getStorageFile().then(function(all){
-            var updatedUser = Object.assign(all[id], user);
-
-            all[id] = updatedUser;
-            return self._save(all).then(function(){
-                return updatedUser;
+            //console.log('Users update query', query);
+            
+            return new Promise(function(resolve, reject){
+                db.query(query, function(err, result){
+                    if(err) reject(err); else resolve(result.rows[0]);
+                });
             });
-        });
-    }),
-    delete: makePromiseQueuer(function(userId){
-        var self = this;
+        })
+    },
+    
+    delete: function(userId){
+        return databaseP.then(function(db){
+            var query = users
+                .delete()
+                .where(users.id.equals(userId))
+                .toQuery();
 
-        return this._getStorageFile().then(function(all){
-            delete all[userId];
-            return self._save(all);
-        });
-    }),
+            //console.log('Users delete query', query);
+            
+            return new Promise(function(resolve, reject){
+                db.query(query, function(err, result){
+                    if(err) reject(err); else resolve(result.rows[0]);
+                });
+            });
+        })
+    },
+    
     deleteAll: function(){
-        return this._save({});
+        return databaseP.then(function(db){
+            var query = users
+                .delete()
+                .toQuery();
+
+            //console.log('Users deleteAll query', query);
+            
+            return new Promise(function(resolve, reject){
+                db.query(query, function(err, result){
+                    if(err) reject(err); else resolve(result.rows);
+                });
+            });
+        })
     }
-});
+};

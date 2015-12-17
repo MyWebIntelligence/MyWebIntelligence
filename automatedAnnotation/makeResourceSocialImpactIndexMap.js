@@ -13,7 +13,6 @@ module.exports = function makeResourceSocialImpactIndexMap(resourceAnnotationsBy
     
     // Computing absolute values for everyone
     Object.keys(resourceAnnotationsById).forEach(function(id){
-        id = Number(id);
         var annotations = resourceAnnotationsById[id];
         
         var absoluteSocialImpact = computeSocialImpact(annotations);

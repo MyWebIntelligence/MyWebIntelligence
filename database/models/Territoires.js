@@ -1,79 +1,139 @@
 "use strict";
 
-var Queries = require('./Queries');
+var sql = require('sql');
+sql.setDialect('postgres');
 
-var makeJSONDatabaseModel = require('../makeJSONDatabaseModel');
-var makePromiseQueuer = require('../makePromiseQueue')();
+var databaseP = require('../management/databaseClientP');
+
+var databaseJustCreatedSymbol = require('./databaseJustCreatedSymbol');
+var justCreatedMarker = {};
+justCreatedMarker[databaseJustCreatedSymbol] = true;
+
+var territoires = require('../management/declarations.js').territoires;
 
 
-module.exports = makeJSONDatabaseModel('Territoires', {
+module.exports = {
     // return in array form
     getAll: function(){
-        return this._getStorageFile().then(function(all){
-            return Object.keys(all).map(function(k){ return all[k]});
-        });
-    },
-    findById: function(territoireId){
-        return this._getStorageFile().then(function(all){
-            return all[territoireId];
-        });
-    },
-    findByCreatedBy: function(userId){
-        return this.getAll().then(function(arr){
-            return arr.filter(function(territoire){
-                return territoire.created_by === userId;
-            });
-        });
-    },
-    create: makePromiseQueuer(function(territoireData){
-        var self = this;
-        var id = this._nextId();
-        
-        return this._getStorageFile().then(function(all){
-            var newTerritoire = Object.assign({}, territoireData, {id: id});
+        return databaseP.then(function(db){
+            var query = territoires
+                .select(territoires.star())
+                .toQuery();
 
-            all[id] = newTerritoire;
-            return self._save(all).then(function(){
-                return newTerritoire;
-            });
-        });
-    }),
-    update: makePromiseQueuer(function(Territoire){ // Territoire can be a delta-Territoire 
-        var self = this;
-        var id = Territoire.id;
-
-        return this._getStorageFile().then(function(all){
-            var updatedTerritoire = Object.assign({}, all[id], Territoire);
-
-            all[id] = updatedTerritoire;
-            return self._save(all).then(function(){
-                return updatedTerritoire;
-            });
-        });
-    }),
-    delete: makePromiseQueuer(function(territoireId){
-        var self = this;
-
-        var relatedQueriesDeletedP = Queries.findByBelongsTo(territoireId).then(function(queries){
-            //console.log('found', queries.length, "relevant queries");
+            //console.log('Territoires getAll query', query);
             
-            return Promise.all(queries.map(function(q){ return Queries.delete(q.id); }));
-        });
-        
-        return relatedQueriesDeletedP.then(function(){
-            return self._getStorageFile().then(function(all){
-                delete all[territoireId];
-                return self._save(all);
+            return new Promise(function(resolve, reject){
+                db.query(query, function(err, result){
+                    if(err) reject(err); else resolve(result.rows);
+                });
             });
-        }); 
-    }),
-    deleteAll: function(){
-        var self = this;
+        })
+    },
+    
+    findById: function(territoireId){
+        return databaseP.then(function(db){
+            var query = territoires
+                .select(territoires.star())
+                .where(territoires.id.equals(territoireId))
+                .toQuery();
 
-        return this.getAll().then(function(all){
-            return Promise.all(all.map(function(t){
-                return self.delete(t.id);
-            }))
+            //console.log('Territoires findById query', query);
+            
+            return new Promise(function(resolve, reject){
+                db.query(query, function(err, result){
+                    if(err) reject(err); else resolve(result.rows[0]);
+                });
+            });
+        })
+    },
+    
+    findByUserId: function(userId){
+        return databaseP.then(function(db){
+            var query = territoires
+                .select(territoires.star())
+                .where(territoires.user_id.equals(userId))
+                .toQuery();
+
+            //console.log('Territoires findByUserId query', query);
+            
+            return new Promise(function(resolve, reject){
+                db.query(query, function(err, result){
+                    if(err) reject(err); else resolve(result.rows);
+                });
+            });
+        })
+    },
+    
+    create: function(territoireData){
+        if(!Array.isArray(territoireData))
+            territoireData = [territoireData];
+        
+        return databaseP.then(function(db){
+            var query = territoires
+                .insert(territoireData)
+                .returning(territoires.star())
+                .toQuery();
+
+            //console.log('Territoires create query', query);
+            
+            return new Promise(function(resolve, reject){
+                db.query(query, function(err, result){
+                    if(err) reject(Object.assign(err, {query: query}));
+                    else resolve( result.rows.map(function(r){
+                        return Object.assign( r, justCreatedMarker );
+                    }) );
+                });
+            });
+        })
+    },
+    
+    update: function(territoireDelta){ // Territoire can be a delta-Territoire 
+        return databaseP.then(function(db){
+            var query = territoires
+                .update(territoireDelta)
+                .where(territoires.id.equals(territoireDelta.id))
+                .toQuery();
+
+            //console.log('Territoires update query', query);
+            
+            return new Promise(function(resolve, reject){
+                db.query(query, function(err, result){
+                    if(err) reject(err); else resolve(result.rows[0]);
+                });
+            });
+        })
+    },
+    
+    delete: function(territoireId){
+        return databaseP.then(function(db){
+            var query = territoires
+                .delete()
+                .where(territoires.id.equals(territoireId))
+                .toQuery();
+
+            //console.log('Territoires delete query', query);
+            
+            return new Promise(function(resolve, reject){
+                db.query(query, function(err, result){
+                    if(err) reject(err); else resolve(result.rows[0]);
+                });
+            });
+        })
+    },
+    
+    deleteAll: function(){
+        return databaseP.then(function(db){
+            var query = territoires
+                .delete()
+                .toQuery();
+
+            //console.log('Territoires deleteAll query', query);
+            
+            return new Promise(function(resolve, reject){
+                db.query(query, function(err, result){
+                    if(err) reject(err); else resolve(result.rows);
+                });
+            });
         })
     }
-});
+};

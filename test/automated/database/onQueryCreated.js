@@ -11,8 +11,8 @@ var fs = require('fs');
 var path = require('path');
 
 var db = require('../../../database');
-var dropAllTables = require('../../../postgresDB/dropAllTables');
-var createTables = require('../../../postgresDB/createTables');
+var dropAllTables = require('../../../database/management/dropAllTables');
+var createTables = require('../../../database/management/createTables');
 
 var onQueryCreated = require('../../../server/onQueryCreated');
 
@@ -64,8 +64,8 @@ describe('onQueryCreated', function(){
             "name": "Bla",
             "q": "Bla",
             "oracle_id": oracleId,
-            "belongs_to": 123456,
-            "oracleOptions": JSON.stringify({
+            "territoire_id": 123456,
+            "oracle_options": JSON.stringify({
                 list: URLs
             })
         })
@@ -101,8 +101,8 @@ describe('onQueryCreated', function(){
                 "name": "Bla",
                 "q": "Bla",
                 "oracle_id": oracleId,
-                "belongs_to": 123456,
-                "oracleOptions": JSON.stringify({
+                "territoire_id": 123456,
+                "oracle_options": JSON.stringify({
                     list: [URLs[0], URLs[1]]
                 })
             })
@@ -113,8 +113,8 @@ describe('onQueryCreated', function(){
                 "name": "Bli",
                 "q": "Blou",
                 "oracle_id": oracleId,
-                "belongs_to": 123456,
-                "oracleOptions": JSON.stringify({
+                "territoire_id": 123456,
+                "oracle_options": JSON.stringify({
                     list: [URLs[0], URLs[2]]
                 })
             })

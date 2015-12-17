@@ -52,7 +52,7 @@ page("/oracles", function(){
         var credentialsByOracleId = Object.create(null);
         
         credentials.forEach(function(c){
-            credentialsByOracleId[c.oracleId] = c;
+            credentialsByOracleId[c.oracle_id] = c.credentials;
         });
         
         screenData.oracleCredentials = credentialsByOracleId;
@@ -91,7 +91,7 @@ function massageTerritoireData(terrData){
 }
 
 page("/territoire/:id", function displayTerritoireViewScreen(context){
-    var territoireId = Number(context.params.id);
+    var territoireId = context.params.id;
     var t = data.user.territoires.find(function(terr){
         return terr.id === territoireId;
     });

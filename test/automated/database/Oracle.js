@@ -18,16 +18,16 @@ describe('Oracles', function(){
     var oracleData = [
         {
             "name": "Google Custom Search Engine",
-            "oracleNodeModuleName": "GCSE",
-            "needsCredentials": {
+            "oracle_node_module_name": "GCSE",
+            "credentials_infos": {
                 "API key": "text",
                 "cx": "text"
             }
         },
         {
             "name": "URL list",
-            "oracleNodeModuleName": "URLList",
-            "needsCredentials": false
+            "oracle_node_module_name": "URLList",
+            "credentials_infos": null
         }
     ];
     
@@ -40,7 +40,7 @@ describe('Oracles', function(){
             return db.Oracles.create( oracleData[0] )
                 .then(function(o){
                     assert.ok(Object(o) === o);
-                    assert.equal(typeof o.id, "number");
+                    assert.equal(typeof o.id, "string");
                 
                     return db.Oracles.getAll().then(function(all){
                         assert.isArray(all);
@@ -133,7 +133,7 @@ describe('Oracles', function(){
             return db.Oracles.findByOracleNodeModuleName( "GCSE" )
                 .then(function(o){
                     assert.ok(Object(o) === o);
-                    assert.strictEqual(o.oracleNodeModuleName, "GCSE");
+                    assert.strictEqual(o.oracle_node_module_name, "GCSE");
                 });
         });
         

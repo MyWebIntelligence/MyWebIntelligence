@@ -1,89 +1,102 @@
 "use strict";
 
-var makeJSONDatabaseModel = require('../makeJSONDatabaseModel');
-var makePromiseQueuer = require('../makePromiseQueue')();
+var databaseP = require('../management/databaseClientP');
 
-module.exports = makeJSONDatabaseModel('Expressions', {
-    // return in array
-    getAll: function(){
-        return this._getStorageFile().then(function(all){
-            return Object.keys(all).map(function(k){ return all[k]});
-        });
-    },
-    findById: function(expressionId){
-        return this._getStorageFile().then(function(all){
-            return all[expressionId];
-        });
-    },
-    /* uris is a Set */
-    findByURIAndAliases: function(uris){
-        return this.getAll().then(function(all){
-            return all.filter(function(expression){
-                return uris.has(expression.uri) || (expression.aliases || []).some(function(alias){
-                    return uris.has(alias);
-                });
-            })
-        });
-    },
-    findByCanonicalURI: function(uri){
-        return this.getAll().then(function(all){
-            return all.find(function(expression){
-                return uri === expression.uri;
-            });
-        });
-    },
-    create: makePromiseQueuer(function(expressionData){
-        var self = this;
-        var id = self._nextId();
-        
-        return self._getStorageFile().then(function(all){
-            var newexpression = Object.assign({id: id}, expressionData);
+var serializeValueForDB = require('./serializeValueForDB');
 
-            all[id] = newexpression;
-            return self._save(all).then(function(){
-                return newexpression;
-            });
-        });
-    }),
-    createByBatch: makePromiseQueuer(function(expressionsData){
-        var self = this;
-        
-        return self._getStorageFile().then(function(all){
-            var newExpression = expressionsData.map(function(ed){
-                var id = self._nextId();
-                
-                var newexpression = Object.assign({id: id}, ed);
-                all[id] = newexpression;
-                return newexpression
-            });
+var databaseJustCreatedSymbol = require('./databaseJustCreatedSymbol');
+var justCreatedMarker = {};
+justCreatedMarker[databaseJustCreatedSymbol] = true;
+
+/*
+    Expressions contain large bodies of content. This API is designed so that most "get/find" methods only return "structure" fields.
+    To get the content, use getExpressionsWithContent(ids)
+*/
+
+var expressions = require('../management/declarations').expressions;
+
+
+module.exports = {
+    // expressionData is an array
+    create: function(expressionData){
+        if(expressionData.id)
+            throw new Error('Expression.create. Data already has an id '+expressionData.id+' '+expressionData.uri)
             
-            return self._save(all).then(function(){
-                return newExpression;
+        return databaseP.then(function(db){
+            var query = expressions
+                .insert(expressionData)
+                .returning('id')
+                .toQuery();
+
+            //console.log('Expressions create query', query);
+            
+            return new Promise(function(resolve, reject){
+                db.query(query, function(err, result){
+                    if(err) reject(Object.assign(err, {query: query}));
+                    else resolve( result.rows.map(function(r){
+                        return Object.assign( r, justCreatedMarker );
+                    }) ) 
+                });
+            });
+        })
+    },
+    
+    /* ids: set of ids */
+    getExpressionsWithContent: function(ids){
+        return databaseP.then(function(db){
+            
+            var query = [
+                'SELECT * FROM',
+                "expressions",
+                "WHERE",
+                "id IN ("+ids.toJSON().map(serializeValueForDB).join(',')+')'
+            ].join(' ') + ';';
+            
+            //console.log('getExpressionsWithContent query', query);
+            
+            return new Promise(function(resolve, reject){
+                db.query(query, function(err, result){
+                    if(err) reject(err); else resolve(result.rows);
+                });
             });
         });
-    }),
-    update: makePromiseQueuer(function(expression){ // expression can be a delta-expression
-        var self = this;
-        var id = expression.id;
+    },
+    
+    update: function(expressionData){
+        // UPDATE weather SET temp_lo = temp_lo+1, temp_hi = temp_lo+15, prcp = DEFAULT WHERE city = 'San Francisco' AND date = '2003-07-03';
+        return databaseP.then(function(db){
+            var keys = Object.keys(expressionData);
+            var serializedSETs = keys.map(function(k){
+                if(k === 'id')
+                    return undefined;
 
-        return self._getStorageFile().then(function(all){
-            var updatedexpression = Object.assign({}, all[id], expression);
+                var serK = '"'+k+'"'
+                var v = expressionData[k];
+                return serK + ' = ' + serializeValueForDB(v);
+            }).filter(function(v){ return !!v; }).join(', ');
 
-            all[id] = updatedexpression;
-            return self._save(all).then(function(){
-                return updatedexpression;
+            var query = [
+                "UPDATE",
+                "expressions",
+                "SET",
+                serializedSETs,
+                "WHERE",
+                "id = "+expressionData.id
+            ].join(' ') + ';';
+
+            //console.log('query', query);
+
+            return new Promise(function(resolve, reject){
+                db.query(query, function(err, result){
+                    if(err) reject(err); else resolve(result);
+                });
             });
         });
-    }),
-    delete: makePromiseQueuer(function(expressionId){
-        var self = this;
-
-        return self._getStorageFile().then(function(all){            
-            delete all[expressionId];
-            return self._save(all);
-        });
-    }),
+    },
+    
     deleteAll: function(){
-        return this._save({});
+        // doesn't delete anything yet
+        return Promise.reject('not implemented');
     }
-});
+    
+};

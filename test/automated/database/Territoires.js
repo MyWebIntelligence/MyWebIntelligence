@@ -41,7 +41,7 @@ describe('Territoires', function(){
     ];
     
     /*
-        Add created_by fields to the 2 first territoire
+        Add user_id fields to the 2 first territoire
         None for the rest for now.
     */
     before(function(){
@@ -50,8 +50,8 @@ describe('Territoires', function(){
         }).then(function(_u){
             u = _u;
             
-            territoireData[0].created_by = u.id;
-            territoireData[1].created_by = u.id;
+            territoireData[0].user_id = u.id;
+            territoireData[1].user_id = u.id;
         });
     });
     
@@ -60,9 +60,9 @@ describe('Territoires', function(){
         it('should create one territoire', function(){
             return db.Territoires.create( territoireData[0] )
                 .then(function(t){
-                    return db.Users.findById(t.created_by)
+                    return db.Users.findById(t.user_id)
                         .then(function(u){
-                            assert.ok(Object(u) === u, "The created_by field of the created object corresponds to an actual userId");
+                            assert.ok(Object(u) === u, "The user_id field of the created object corresponds to an actual userId");
                         })
                         .then(function(){
                             return t;
@@ -70,7 +70,7 @@ describe('Territoires', function(){
                 })
                 .then(function(t){
                     assert.ok(Object(t) === t);
-                    assert.equal(typeof t.id, "number");
+                    assert.equal(typeof t.id, "string");
                 
                     return db.Territoires.getAll().then(function(all){
                         assert.isTrue(Array.isArray(all));
@@ -156,13 +156,13 @@ describe('Territoires', function(){
     });
 
     
-    describe('findByCreatedBy', function(){
+    describe('findByUserId', function(){
         before(function(){
             return Promise.all(territoireData.map(function(td){ return db.Territoires.create(td); }));
         });
         
-        it('should find users by findByCreatedBy', function(){            
-            return db.Territoires.findByCreatedBy( u.id )
+        it('should find users by findByUserId', function(){            
+            return db.Territoires.findByUserId( u.id )
                 .then(function(ts){
                     assert.ok(Array.isArray(ts));
                     assert.strictEqual(ts.length, 2);
@@ -170,8 +170,8 @@ describe('Territoires', function(){
                 });
         });
         
-        it('should not find users by findByCreatedBy', function(){            
-            return db.Territoires.findByCreatedBy( "_whatever_" )
+        it('should not find users by findByUserId', function(){            
+            return db.Territoires.findByUserId( "_whatever_" )
                 .then(function(ts){
                     assert.ok(Array.isArray(ts));
                     assert.strictEqual(ts.length, 0);

@@ -2,8 +2,8 @@
 
 require('../ES-mess');
 
-var createTables = require('../postgresDB/createTables');
-var dropAllTables = require('../postgresDB/dropAllTables');
+var createTables = require('../database/management/createTables');
+var dropAllTables = require('../database/management/dropAllTables');
 
 console.log('Dropping and creating SQL tables', process.env.NODE_ENV);
 

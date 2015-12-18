@@ -62,6 +62,7 @@ module.exports = function abstractGraphToPageGraph(abGraph, expressionById, reso
                     tags: resourceAnnotations.tags.toJSON().join(', '),
                     sentiment: resourceAnnotations.sentiment || undefined,
                     favorite: typeof resourceAnnotations.favorite === 'boolean' ? resourceAnnotations.favorite : undefined,
+                    publication_date: typeof resourceAnnotations.publication_date === 'string' ? resourceAnnotations.publication_date : '',
                     
                     created_at: undefined,
                     updated_at: undefined,

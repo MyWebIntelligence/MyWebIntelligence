@@ -16,6 +16,9 @@ var pageNodeDesc = {
     "expressionId": {
         type: "string"
     },
+    "publication_date": {
+        type: "string"
+    },
     'facebook_like': {
         type: "integer",
         default: -1

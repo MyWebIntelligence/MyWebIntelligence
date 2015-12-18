@@ -1,8 +1,8 @@
 -- Useful things --
 
 CREATE TABLE IF NOT EXISTS lifecycle(
-    created_at  timestamp without time zone DEFAULT current_timestamp,
-    updated_at  timestamp without time zone DEFAULT current_timestamp
+    created_at  timestamp with time zone DEFAULT current_timestamp,
+    updated_at  timestamp with time zone DEFAULT current_timestamp
 );
 
 -- http://www.revsys.com/blog/2006/aug/04/automatically-updating-a-timestamp-column-in-postgresql/
@@ -15,7 +15,7 @@ END;
 $$ language 'plpgsql';
 
 
-CREATE EXTENSION IF NOT EXISTS pgcrypto; 
+CREATE EXTENSION IF NOT EXISTS pgcrypto; -- to use gen_random_uuid
 
 
 -- Business --
@@ -120,10 +120,12 @@ CREATE TABLE IF NOT EXISTS expressions (
     -- extracting specific and structured elements
     title               text,
     
+    html_lang           text,    
+    
     meta_description    text,
     meta_keywords       text[],
     
-    html_lang           text,
+    publication_date    timestamp with time zone,
     
     h1                  text[],
     h2                  text[],
@@ -135,7 +137,7 @@ CREATE TABLE IF NOT EXISTS expressions (
     strong              text[],
     em                  text[],
     b                   text[],
-    i                   text[]
+    i                   text[]    
 ) INHERITS(lifecycle);
 CREATE TRIGGER updated_at_expressions BEFORE UPDATE ON expressions FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
 
@@ -202,6 +204,7 @@ CREATE TABLE IF NOT EXISTS resource_annotations (
     sentiment               text,
     favorite                boolean,
     tags                    text[],
+    publication_date        timestamp with time zone,
     
     PRIMARY KEY(territoire_id, resource_id) -- for now
 ) INHERITS(lifecycle);
@@ -232,7 +235,7 @@ CREATE INDEX ON expression_domain_annotations (expression_domain_id);
 CREATE TABLE IF NOT EXISTS alexa_rank_cache (
     site_domain      text NOT NULL,
     rank             integer NOT NULL,
-    download_date    timestamp without time zone NOT NULL
+    download_date    timestamp with time zone NOT NULL
 );
 CREATE INDEX ON alexa_rank_cache (site_domain);
 

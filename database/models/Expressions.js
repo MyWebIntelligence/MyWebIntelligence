@@ -25,10 +25,10 @@ module.exports = {
         return databaseP.then(function(db){
             var query = expressions
                 .insert(expressionData)
-                .returning('id')
+                .returning(expressions.star())
                 .toQuery();
 
-            //console.log('Expressions create query', query);
+            // console.log('Expressions create query', query);
             
             return new Promise(function(resolve, reject){
                 db.query(query, function(err, result){
@@ -45,12 +45,10 @@ module.exports = {
     getExpressionsWithContent: function(ids){
         return databaseP.then(function(db){
             
-            var query = [
-                'SELECT * FROM',
-                "expressions",
-                "WHERE",
-                "id IN ("+ids.toJSON().map(serializeValueForDB).join(',')+')'
-            ].join(' ') + ';';
+            var query = expressions
+                .select(expressions.star())
+                .where( expressions.id.in(ids.toJSON()) )
+                .toQuery();
             
             //console.log('getExpressionsWithContent query', query);
             

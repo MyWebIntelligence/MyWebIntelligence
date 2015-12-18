@@ -117,7 +117,8 @@ module.exports = React.createClass({
                         // invisible semi-colon as tag separator for sweet tag copy/paste
                         React.DOM.span({
                             style: {
-                                opacity: 0                                }
+                                opacity: 0                                
+                            }
                         }, ';')
                     )
                 })
@@ -147,6 +148,10 @@ module.exports = React.createClass({
                         }
                     }
                 }),
+                React.DOM.a({
+                    target: '_blank',
+                    href: 'https://www.google.com/search?q='+encodeURIComponent(props.url)+"&as_qdr=y15"
+                }, React.DOM.i({className: 'fa fa-clock-o'})),
                 
                 // sentiment
                 // only negative sentiment for now          

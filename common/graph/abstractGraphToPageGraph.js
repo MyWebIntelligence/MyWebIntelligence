@@ -1,6 +1,7 @@
 "use strict";
 
 var StringMap = require('stringmap');
+var moment = require('moment');
 
 var PageGraph = require('./PageGraph');
 
@@ -49,6 +50,11 @@ module.exports = function abstractGraphToPageGraph(abGraph, expressionById, reso
 
             var name = nextNodeName();
 
+            var publicationDate = typeof resourceAnnotations.publication_date === 'string' ?
+                resourceAnnotations.publication_date : undefined;
+            
+            var lifetime = publicationDate ? {start: moment(publicationDate).format('YYYY-MM-DD')} : undefined;
+            
             pageGraph.addNode(name, Object.assign(
                 {
                     url: res.url,
@@ -62,14 +68,14 @@ module.exports = function abstractGraphToPageGraph(abGraph, expressionById, reso
                     tags: resourceAnnotations.tags.toJSON().join(', '),
                     sentiment: resourceAnnotations.sentiment || undefined,
                     favorite: typeof resourceAnnotations.favorite === 'boolean' ? resourceAnnotations.favorite : undefined,
-                    publication_date: typeof resourceAnnotations.publication_date === 'string' ? resourceAnnotations.publication_date : '',
+                    publication_date: publicationDate ? moment(publicationDate).format('YYYY-MM-DD') : '',
                     
                     created_at: undefined,
                     updated_at: undefined,
                     user_id: undefined,
                     approved: undefined
                 }
-            ));
+            ), lifetime);
 
             var urlToNodeNameKey = res.id;
             //console.log(urlToNodeNameKey);

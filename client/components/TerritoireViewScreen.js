@@ -491,7 +491,12 @@ module.exports = React.createClass({
                                 //console.log('before dl', territoire.resourceAnnotationByResourceId, territoire);
                                 
                                 triggerDownload(
-                                    generateExpressionGEXF(territoire.graph, territoire.expressionById, territoire.resourceAnnotationByResourceId),
+                                    generateExpressionGEXF(
+                                        territoire.graph, 
+                                        territoire.expressionById, 
+                                        territoire.resourceAnnotationByResourceId,
+                                        state.expressionDomainAnnotationsByEDId
+                                    ),
                                     territoire.name+'-pages.gexf',
                                     "application/gexf+xml"
                                 );

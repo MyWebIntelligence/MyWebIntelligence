@@ -1,6 +1,7 @@
 "use strict";
 
 var React = require('react');
+var moment = require('moment');
 
 var findTags = require('../findTags');
 
@@ -127,6 +128,25 @@ module.exports = React.createClass({
                 {
                     className: 'annotators'
                 },
+                
+                React.DOM.input({
+                    className: 'publication-date',
+                    placeholder: 'YYYY-MM-DD',
+                    title: 'Publication date',
+                    type: 'date',
+                    defaultValue: resourceAnnotations.publication_date ? moment(resourceAnnotations.publication_date).format('YYYY-MM-DD') : undefined,
+                    onChange: function(e) {
+                        var newPublicationDate = e.target.value;
+                        
+                        if(moment(newPublicationDate, 'YYYY-MM-DD', true).isValid()){
+                            annotate(mixin(
+                                {},
+                                resourceAnnotations,
+                                { publication_date: newPublicationDate }
+                            ), undefined);
+                        }
+                    }
+                }),
                 
                 // sentiment
                 // only negative sentiment for now          

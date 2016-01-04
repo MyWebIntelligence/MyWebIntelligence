@@ -5,7 +5,7 @@ app:
       - db
       - elasticanalysis
    ports:
-      - 4444:3333
+      - 3333:3333
    volumes:
       - ./config/google-credentials-stable.json:/usr/mywi/config/google-credentials.json
    environment:

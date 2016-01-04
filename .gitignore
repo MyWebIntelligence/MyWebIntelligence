@@ -4,6 +4,7 @@ logs
 node_modules
 
 browserify-*.js
+client/.browserify-bundle.js
 
 config/*
 *-credentials*.json

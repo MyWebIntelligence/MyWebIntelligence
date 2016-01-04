@@ -99,6 +99,10 @@ var domainNodeDesc = {
     },
     "estimated_potential_audience_index": {
         type: "integer"
+    },
+    
+    "min_publication_date": {
+        type: "string"
     }
 };
 

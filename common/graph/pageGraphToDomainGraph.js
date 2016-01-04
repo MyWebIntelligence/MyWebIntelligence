@@ -1,6 +1,7 @@
 "use strict";
 
 var stats = require('simple-statistics');
+var moment = require('moment');
 
 var DomainGraph = require('./DomainGraph');
 var computeSocialImpact = require('../../automatedAnnotation/computeSocialImpact');
@@ -24,6 +25,9 @@ var DEFAULT_POTENTIAL_AUDIENCE = 100;
 */
 module.exports = function pageGraphToDomainGraph(pageGraph, expressionDomainsById, expressionDomainAnnotationsByEDId){
     var domainGraph = new DomainGraph();
+    
+    throw new Error('Add logic that computes the domain node lifetime from the page nodes lifetime (min of start dates)');
+    throw new Error("Add logic that computes the domain edge lifetime from the page edges lifetime (of all the edges (p1 -> p2) from d1 to d2, the start date is the min of all the p1's publication dates");
     
     function makeDomainNodes(graph){
         
@@ -88,6 +92,8 @@ module.exports = function pageGraphToDomainGraph(pageGraph, expressionDomainsByI
                     return d < acc && d !== -1 ? d : acc;
                 }, +Infinity);
 
+                var publicationDates = expressionNodes
+                    .map(function(node){ return moment(node.publication_date); });
 
                 expressionDomainDataMap.set(expressionDomain.id, {
                     expression_domain_id: expressionDomain.id,
@@ -129,6 +135,10 @@ module.exports = function pageGraphToDomainGraph(pageGraph, expressionDomainsByI
                     ),
 
                     estimated_potential_audience: potentialAudience,
+                    
+                    min_publication_date: publicationDates.length >= 1 ? 
+                        moment.min.apply(moment, publicationDates).format('YYYY-MM-DD') : 
+                        '',
                     social_impact: socialImpact
                 })
             }
@@ -169,7 +179,13 @@ module.exports = function pageGraphToDomainGraph(pageGraph, expressionDomainsByI
             var expressionDomain = expressionDomainsById[expressionDomainId];
             
             if(expressionDomain){
-                var domainNode = domainGraph.addNode(expressionDomain.name, expressionDomainDataMap.get(expressionDomainId));
+                var domainData = expressionDomainDataMap.get(expressionDomainId);
+                
+                var lifetime = publicationDates.length >= 1 ? 
+                    {start: moment.min.apply(moment, publicationDates).format('YYYY-MM-DD')} : 
+                    undefined;
+                
+                var domainNode = domainGraph.addNode(expressionDomain.name, domainData);
                 
                 pageNodes.forEach(function(pn){
                     pageNodeToDomainNode.set(pn, domainNode);

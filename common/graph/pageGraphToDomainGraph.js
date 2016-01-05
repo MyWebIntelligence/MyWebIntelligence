@@ -96,12 +96,18 @@ module.exports = function pageGraphToDomainGraph(pageGraph, expressionDomainsByI
                     .filter(function(date){ return !!date })
                     .map(function(date){return moment(date)});
 
+                var urls = expressionNodes.map(function(n){
+                    return n.url;
+                });
+                
+                urls.toString = function(){
+                    return this.join(' | ');
+                };
+                
                 expressionDomainDataMap.set(expressionDomain.id, {
                     expression_domain_id: expressionDomain.id,
                     base_url: expressionDomain.main_url || expressionDomain.name,
-                    urls: expressionNodes.map(function(n){
-                        return n.url;
-                    }).join(' | '),
+                    urls: urls,
                     depth: depth,
 
                     domain_title: expressionDomain.title || expressionDomain.name,

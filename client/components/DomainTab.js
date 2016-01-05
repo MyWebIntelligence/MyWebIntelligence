@@ -81,8 +81,6 @@ module.exports = React.createClass({
                     var expressionDomain = props.expressionDomainsById[edid];
                     var expressionDomainAnnotations = props.expressionDomainAnnotationsByEDId[edid];
 
-                    //console.log('ed', expressionDomain, edid, expressionDomainAnnotations.social_impact)
-
                     return new DomainListItem({
                         key: edid,
                         expressionDomain: expressionDomain,

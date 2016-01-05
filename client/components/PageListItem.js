@@ -1,6 +1,7 @@
 "use strict";
 
 var React = require('react');
+var moment = require('moment');
 
 var findTags = require('../findTags');
 
@@ -116,7 +117,8 @@ module.exports = React.createClass({
                         // invisible semi-colon as tag separator for sweet tag copy/paste
                         React.DOM.span({
                             style: {
-                                opacity: 0                                }
+                                opacity: 0                                
+                            }
                         }, ';')
                     )
                 })
@@ -127,6 +129,29 @@ module.exports = React.createClass({
                 {
                     className: 'annotators'
                 },
+                
+                React.DOM.input({
+                    className: 'publication-date',
+                    placeholder: 'YYYY-MM-DD',
+                    title: 'Publication date',
+                    type: 'date',
+                    defaultValue: resourceAnnotations.publication_date ? moment(resourceAnnotations.publication_date).format('YYYY-MM-DD') : undefined,
+                    onChange: function(e) {
+                        var newPublicationDate = e.target.value;
+                        
+                        if(moment(newPublicationDate, 'YYYY-MM-DD', true).isValid()){
+                            annotate(mixin(
+                                {},
+                                resourceAnnotations,
+                                { publication_date: newPublicationDate }
+                            ), undefined);
+                        }
+                    }
+                }),
+                React.DOM.a({
+                    target: '_blank',
+                    href: 'https://www.google.com/search?q='+encodeURIComponent(props.url)+"&as_qdr=y15"
+                }, React.DOM.i({className: 'fa fa-clock-o'})),
                 
                 // sentiment
                 // only negative sentiment for now          

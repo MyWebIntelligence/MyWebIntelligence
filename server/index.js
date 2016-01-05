@@ -17,6 +17,7 @@ var csv = require('fast-csv');
 var passport = require('passport');
 var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
 var React = require('react');
+var moment = require('moment');
 var serializeDocumentToHTML = require('jsdom').serializeDocument;
 
 var makeDocument = require('../common/makeDocument');
@@ -380,6 +381,8 @@ app.get('/territoire/:id/expressions.csv', function(req, res){
                     tags: (resourceAnnotations.tags || []).join(' / '),
                     favorite: resourceAnnotations.favorite,
                     sentiment: resourceAnnotations.sentiment,
+                    publication_date: resourceAnnotations.publication_date ? 
+                        moment(resourceAnnotations.publication_date).format('YYYY-MM-DD') : '',
                     content_length: (expression.main_text || '').length,
                     google_pagerank: resourceAnnotations.google_pagerank,
                     facebook_share: resourceAnnotations.facebook_share,

@@ -61,6 +61,11 @@ module.exports = function(url, html){
         var metaKeywords = document.querySelector('meta[name="keywords"]');
         var htmlElement = document.querySelector('html');
         
+        var metaArticlePublishedTime = document.querySelector('meta[property="article:published_time"]');
+        var itempropPublishedTime = document.querySelector('[itemprop="datePublished"]');
+        var publicationDate = (metaArticlePublishedTime && metaArticlePublishedTime.getAttribute('content')) || 
+            (itempropPublishedTime && itempropPublishedTime.getAttribute('content'));
+         
         // <hn>
         var h1 = Array.from(mainContent.querySelectorAll('h1')).map(textContent);
         var h2 = Array.from(mainContent.querySelectorAll('h2')).map(textContent);
@@ -83,13 +88,15 @@ module.exports = function(url, html){
                 
                 title: document.title,
                 
-                "meta_description": (metaDesc && metaDesc.getAttribute('content')),
-                "meta_keywords": ((metaKeywords && metaKeywords.getAttribute('content')) || '')
+                html_lang: htmlElement.getAttribute('lang'),
+
+                meta_description: (metaDesc && metaDesc.getAttribute('content')),
+                meta_keywords: ((metaKeywords && metaKeywords.getAttribute('content')) || '')
                     .split(',')
                     .map(function(k){ return k.trim(); })
                     .filter(function(k){ return k.length >= 1; }),
-                
-                html_lang: htmlElement.getAttribute('lang'),
+
+                publication_date: publicationDate,
                 
                 h1: h1,
                 h2: h2,

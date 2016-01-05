@@ -29,6 +29,14 @@ li.page-list-item .annotators > *{
     cursor: pointer;
 }
 
+li.page-list-item .annotators > .publication-date{
+    font-size: 1em;
+    text-align: center;
+    max-width: 11em;
+}
+
+
+
 li.page-list-item .annotators button{
     margin: 0;
     border: 0;

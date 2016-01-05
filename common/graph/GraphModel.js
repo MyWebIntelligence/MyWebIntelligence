@@ -10,6 +10,7 @@
  */
 
 var csv = require('fast-csv');
+var moment = require('moment');
 
 var DOM = require('./DOMBuilder.js');
 
@@ -226,11 +227,13 @@ function GraphModel(nodeAttributes, edgeAttributes, options){
 
 
     var nodeByName = Object.create(null);
+    var lifetimeByNode = new Map();
+    var lifetimeByEdge = new Map();
     var edges = new WeakMap(); // for efficient search by nodes
     var edgesList = []; // to return the list
 
     return {
-        addNode: function(name, optargs){
+        addNode: function(name, optargs, lifetime){
             if(typeof name !== 'string')
                 throw new TypeError("First argument of GraphModel.addNode should be a string ("+typeof name+")");
 
@@ -241,6 +244,14 @@ function GraphModel(nodeAttributes, edgeAttributes, options){
 
             var node = new GraphNode(name, opts);
             nodeByName[name] = node;
+            
+            if(lifetime){
+                if(Object(lifetime) !== lifetime || (!lifetime.start && !lifetime.end))
+                    throw new Error('Invalid lifetime for node '+name+'. Expected {start?, end?} object');
+                else{
+                    lifetimeByNode.set(node, lifetime);
+                }
+            }
 
             return node;
         },
@@ -258,6 +269,10 @@ function GraphModel(nodeAttributes, edgeAttributes, options){
 
             return nodeByName[name];
         },
+        
+        getLifetimeByNode: function(n){
+            return lifetimeByNode.get(n);
+        },
 
         get nodes(){
             return new Set(Object.keys(nodeByName).map(function(name){
@@ -265,7 +280,7 @@ function GraphModel(nodeAttributes, edgeAttributes, options){
             }));
         },
 
-        addEdge: function(node1, node2, attributesArgs){
+        addEdge: function(node1, node2, attributesArgs, lifetime){
             // Input validation
             if(typeof node1 === 'string'){
                 if(node1 in nodeByName)
@@ -342,6 +357,14 @@ function GraphModel(nodeAttributes, edgeAttributes, options){
                 theseNodeEdges.push(edge);
                 edgesList.push(edge);
             }
+            
+            if(lifetime){
+                if(Object(lifetime) !== lifetime || (!lifetime.start && !lifetime.end))
+                    throw new Error('Invalid lifetime for edge ('+node1.name+', '+node2.name+'), . Expected {start?, end?} object');
+                else{
+                    lifetimeByEdge.set(edge, lifetime);
+                }
+            }
 
             return edge;
         },
@@ -386,6 +409,10 @@ function GraphModel(nodeAttributes, edgeAttributes, options){
             // return a copy
             return new Set(edgesList.slice(0));
         },
+        
+        getLifetimeByEdge: function(e){
+            return lifetimeByEdge.get(e);
+        },
 
         exportAsGEXF: function(){
             var PREAMBULE = '<?xml version="1.0" encoding="UTF-8"?>\n';
@@ -420,7 +447,19 @@ function GraphModel(nodeAttributes, edgeAttributes, options){
                         return DOM.attvalue({"for":opt, value: n[opt]===null ? NULL: n[opt]});
                     });
 
-                return DOM.node({id:nodeName, label:nodeName}, [
+                var nodeAttrs = {id:nodeName, label:nodeName};
+                
+                var nodeLifetime = lifetimeByNode.get(n);
+                if(nodeLifetime){
+                    var start = moment(nodeLifetime.start);
+                    if(nodeLifetime.start && start.isValid())
+                        nodeAttrs.start = start.format('YYYY-MM-DD');
+                    var end = moment(nodeLifetime.end);
+                    if(nodeLifetime.end && end.isValid())
+                        nodeAttrs.end = end.format('YYYY-MM-DD');
+                }
+                
+                return DOM.node(nodeAttrs, [
                     DOM.attvalues({}, attrvalues)
                 ]);
             });
@@ -458,15 +497,36 @@ function GraphModel(nodeAttributes, edgeAttributes, options){
                     })
                     .filter(function(x){ return !!x; });
 
-                return DOM.edge({id:i, source:e.node1.name, target:e.node2.name, weight:e.weight}, [
+                var edgeAttrs = {id:i, source:e.node1.name, target:e.node2.name, weight:e.weight};
+                
+                var edgeLifetime = lifetimeByEdge.get(e);
+                if(edgeLifetime){
+                    var start = moment(edgeLifetime.start);
+                    if(edgeLifetime.start && start.isValid())
+                        edgeAttrs.start = start.format('YYYY-MM-DD');
+                    var end = moment(edgeLifetime.end);
+                    if(edgeLifetime.end && end.isValid())
+                        edgeAttrs.end = end.format('YYYY-MM-DD');
+                }
+                
+                return DOM.edge(edgeAttrs, [
                     DOM.attvalues({}, attrvalues)
                 ]);
             });
 
-
+            var dynamic = lifetimeByNode.size > 0 || lifetimeByEdge.size > 0;
+            var graphAttrs = {
+                mode: dynamic ? "dynamic" : "static", 
+                defaultedgetype: defaultedgetype
+            }
+            
+            if(dynamic)
+                graphAttrs.timeformat = "date";
+            
+            
             var graph =
                 DOM.gexf({xmlns:"http://www.gexf.net/1.2draft", version:"1.2"}, [
-                    DOM.graph({mode:"static", defaultedgetype: defaultedgetype}, [
+                    DOM.graph(graphAttrs, [
                         DOM.attributes({class: 'node'}, nodeAttributesDeclaration),
                         DOM.attributes({class: 'edge'}, edgeAttributesDeclaration),
                         DOM.nodes({}, graphNodes),

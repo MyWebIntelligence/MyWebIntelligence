@@ -215,8 +215,6 @@ module.exports = React.createClass({
             territoireGraph: territoire && territoire.graph
         };
         
-        console.log('componentWillReceiveProps', territoire.graph, state.territoireGraph !== territoire.graph, territoire.expressionDomainsById)
-        
         if(territoire.graph && state.territoireGraph !== territoire.graph){
             if(resourceAnnotationByResourceId){
                 deltaState.approvedExpressionDomainIds = new Set(territoire.graph.nodes

@@ -497,7 +497,19 @@ function GraphModel(nodeAttributes, edgeAttributes, options){
                     })
                     .filter(function(x){ return !!x; });
 
-                return DOM.edge({id:i, source:e.node1.name, target:e.node2.name, weight:e.weight}, [
+                var edgeAttrs = {id:i, source:e.node1.name, target:e.node2.name, weight:e.weight};
+                
+                var edgeLifetime = lifetimeByEdge.get(e);
+                if(edgeLifetime){
+                    var start = moment(edgeLifetime.start);
+                    if(edgeLifetime.start && start.isValid())
+                        edgeAttrs.start = start.format('YYYY-MM-DD');
+                    var end = moment(edgeLifetime.end);
+                    if(edgeLifetime.end && end.isValid())
+                        edgeAttrs.end = end.format('YYYY-MM-DD');
+                }
+                
+                return DOM.edge(edgeAttrs, [
                     DOM.attvalues({}, attrvalues)
                 ]);
             });

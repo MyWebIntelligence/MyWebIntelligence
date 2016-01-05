@@ -26,8 +26,7 @@ var DEFAULT_POTENTIAL_AUDIENCE = 100;
 module.exports = function pageGraphToDomainGraph(pageGraph, expressionDomainsById, expressionDomainAnnotationsByEDId){
     var domainGraph = new DomainGraph();
     
-    throw new Error('Add logic that computes the domain node lifetime from the page nodes lifetime (min of start dates)');
-    throw new Error("Add logic that computes the domain edge lifetime from the page edges lifetime (of all the edges (p1 -> p2) from d1 to d2, the start date is the min of all the p1's publication dates");
+    //throw new Error("Add logic that computes the domain edge lifetime from the page edges lifetime (of all the edges (p1 -> p2) from d1 to d2, the start date is the min of all the p1's publication dates");
     
     function makeDomainNodes(graph){
         
@@ -93,7 +92,9 @@ module.exports = function pageGraphToDomainGraph(pageGraph, expressionDomainsByI
                 }, +Infinity);
 
                 var publicationDates = expressionNodes
-                    .map(function(node){ return moment(node.publication_date); });
+                    .map(function(node){ return node.publication_date })
+                    .filter(function(date){ return !!date })
+                    .map(function(date){return moment(date)});
 
                 expressionDomainDataMap.set(expressionDomain.id, {
                     expression_domain_id: expressionDomain.id,
@@ -181,11 +182,11 @@ module.exports = function pageGraphToDomainGraph(pageGraph, expressionDomainsByI
             if(expressionDomain){
                 var domainData = expressionDomainDataMap.get(expressionDomainId);
                 
-                var lifetime = publicationDates.length >= 1 ? 
-                    {start: moment.min.apply(moment, publicationDates).format('YYYY-MM-DD')} : 
+                var lifetime = domainData.min_publication_date ? 
+                    {start: domainData.min_publication_date} : 
                     undefined;
                 
-                var domainNode = domainGraph.addNode(expressionDomain.name, domainData);
+                var domainNode = domainGraph.addNode(expressionDomain.name, domainData, lifetime);
                 
                 pageNodes.forEach(function(pn){
                     pageNodeToDomainNode.set(pn, domainNode);
@@ -201,7 +202,7 @@ module.exports = function pageGraphToDomainGraph(pageGraph, expressionDomainsByI
     
             
     var pageNodeToDomainNode = makeDomainNodes(pageGraph);
-    var sourceToTargetToCount = new Map();
+    var sourceToTargetToEdgeData = new Map();
 
     pageGraph.edges.forEach(function(e){
         var domainSource = pageNodeToDomainNode.get(e.node1);
@@ -220,25 +221,45 @@ module.exports = function pageGraphToDomainGraph(pageGraph, expressionDomainsByI
         if(domainSource === domainTarget)
             return; // self-reference, no need to create an edge
 
-        var targetToCount = sourceToTargetToCount.get(domainSource);
-        if(!targetToCount){
-            targetToCount = new Map();
-            sourceToTargetToCount.set(domainSource, targetToCount);
+        var targetToEdgeData = sourceToTargetToEdgeData.get(domainSource);
+        if(!targetToEdgeData){
+            targetToEdgeData = new Map();
+            sourceToTargetToEdgeData.set(domainSource, targetToEdgeData);
         }
 
-        var count = targetToCount.get(domainTarget) || 0;
-        targetToCount.set(domainTarget, count+1);
+        var edgeData = targetToEdgeData.get(domainTarget) || {count: 0, start: undefined};
+        var sourceMinPublicationDate = domainSource.min_publication_date;
+        
+        if(!edgeData.start){
+            edgeData.start = moment(sourceMinPublicationDate);
+        }
+        else{
+            if(sourceMinPublicationDate){
+                edgeData.start = moment.min(
+                    moment(sourceMinPublicationDate),
+                    edgeData.start
+                );
+            }
+        }
+            
+        edgeData.count++;
+        
+        targetToEdgeData.set(domainTarget, edgeData);
     });
 
-    //console.log("sourceToTargetToCount", sourceToTargetToCount.size);
-
-    sourceToTargetToCount.forEach(function(targetToCount, source){
-        //console.log("targetToCount", source, targetToCount.size);
-
-        targetToCount.forEach(function(count, target){
+    sourceToTargetToEdgeData.forEach(function(targetToEdgeData, source){
+        targetToEdgeData.forEach(function(edgeData, target){
+            var lifetime;
+            
+            if(edgeData.start){
+                lifetime = {
+                    start: edgeData.start.format('YYYY-MM-DD')
+                }
+            }
+            
             domainGraph.addEdge(source, target, {
-                weight: count
-            });
+                weight: edgeData.count
+            }, lifetime);
         });
     });
 

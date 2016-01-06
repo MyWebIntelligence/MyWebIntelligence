@@ -104,6 +104,29 @@ module.exports = React.createClass({
                     )
                 })
             ),
+            
+            React.DOM.ul(
+                {
+                    className: 'urls'
+                },
+                props.expressionDomainMetrics.urls.map(function(resource){
+                    var url = resource.url;
+                    
+                    return React.DOM.li(
+                        {},
+                        React.DOM.a(
+                            {  
+                                href: url,
+                                title: url,
+                                target: '_blank'
+                            },
+                            url
+                        )
+                    )
+                    
+                    
+                })
+            ),
              
             // automated annotations
             React.DOM.div(

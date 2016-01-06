@@ -57,7 +57,7 @@ module.exports = function pageGraphToDomainGraph(pageGraph, expressionDomainsByI
             // This leads to expressionDomainId === undefined and expressionDomain === undefined
             // This test prevents problems under these circumstances
             if(expressionDomain){
-                var expressionNodes = pageNodes.filter(function(n){ return n.expressionId !== -1 });
+                var expressionNodes = pageNodes.filter(function(n){ return !!n.expressionId });
 
                 var edAnnotations = expressionDomainAnnotationsByEDId[expressionDomainId];
 
@@ -97,11 +97,14 @@ module.exports = function pageGraphToDomainGraph(pageGraph, expressionDomainsByI
                     .map(function(date){return moment(date)});
 
                 var urls = expressionNodes.map(function(n){
-                    return n.url;
+                    return {
+                        resource_id: n.id,
+                        url: n.url
+                    };
                 });
                 
                 urls.toString = function(){
-                    return this.join(' | ');
+                    return this.map(function(o){ return o.url; }).join(' | ');
                 };
                 
                 expressionDomainDataMap.set(expressionDomain.id, {

@@ -13,7 +13,8 @@ module.exports = function onQueryCreated(query, user){
         
             if(oracle.credentials_infos){
                 return database.OracleCredentials.findByUserAndOracleId(user.id, oracle.id).then(function(uoCreds){
-                    return interogateOracle(oracle, query.q, oracleOptions, uoCreds.credentials);
+                    var creds = uoCreds[0];
+                    return interogateOracle(oracle, query.q, oracleOptions, creds.credentials);
                 });
             }
             else{

@@ -1,6 +1,7 @@
 "use strict";
 
 var React = require('react');
+var ImmutableSet = require('immutable').Set;
 
 //var computeSocialImpact = require('../../automatedAnnotation/computeSocialImpact');
 
@@ -12,7 +13,8 @@ interface DomainListItemProps{
     expressionDomain
     expressionDomainAnnotations
     expressionDomainMetrics
-    annotate: (annotations): void
+    annotate: (annotations): void,
+    approveResource:():void
 }
 
 This component has no state (besides for tags input leftover) and is only handled by its parent (TerritoireViewScreen)
@@ -23,15 +25,25 @@ This component has no state (besides for tags input leftover) and is only handle
 module.exports = React.createClass({
     displayName: 'DomainListItem',
     
-    shouldComponentUpdate: function(nextProps){
+    getInitialState: function(){
+        return {
+            rejectedResources: new ImmutableSet()
+        }
+    },
+    
+    shouldComponentUpdate: function(nextProps, nextState){
         var props = this.props;
+        var state = this.state;
         
         return props.expressionDomainAnnotations.emitter_type !== nextProps.expressionDomainAnnotations.emitter_type ||
-            props.expressionDomainAnnotations.media_type !== nextProps.expressionDomainAnnotations.media_type;
+            props.expressionDomainAnnotations.media_type !== nextProps.expressionDomainAnnotations.media_type || 
+            state.rejectedResources !== nextState.rejectedResources;
     },
     
     render: function () {
+        var self = this;
         var props = this.props;
+        var state = this.state;
 
         var annotate = props.annotate;
 
@@ -111,9 +123,12 @@ module.exports = React.createClass({
                 },
                 props.expressionDomainMetrics.urls.map(function(resource){
                     var url = resource.url;
+                    var id = resource.resource_id;
                     
                     return React.DOM.li(
-                        {},
+                        {
+                            className: state.rejectedResources.has(id) ? 'rejected' : ''
+                        },
                         React.DOM.a(
                             {  
                                 href: url,
@@ -121,7 +136,29 @@ module.exports = React.createClass({
                                 target: '_blank'
                             },
                             url
-                        )
+                        ),
+                        React.DOM.button({
+                            className: 'reject',
+                            onClick: function (){
+                                var rejected = state.rejectedResources;
+                                
+                                // if state.rejectedResources.has(resource.id) was false (approved === true), 
+                                // we want newApproved to be false (approved === false)
+                                var newApproved = rejected.has(id);
+                                
+                                props.approveResource(id, newApproved);
+                                
+                                self.setState(Object.assign(
+                                    {}, 
+                                    state,
+                                    {
+                                        rejectedResources: newApproved ?
+                                            rejected.delete(id) :
+                                            rejected.add(id)
+                                    }
+                                ))
+                            }
+                        }, React.DOM.i({className: 'fa fa-trash-o'}))
                     )
                     
                     

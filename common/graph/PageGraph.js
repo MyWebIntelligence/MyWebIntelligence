@@ -13,6 +13,9 @@ var pageNodeDesc = {
     "depth": {
         type: "integer"
     },
+    "resource_id": {
+        type: "string"
+    },
     "expressionId": {
         type: "string"
     },

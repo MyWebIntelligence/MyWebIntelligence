@@ -85,6 +85,8 @@ cd MyWebIntelligence
 
 ````sh
 npm run build-stable
+npm install
+npm run bundle
 npm run up-stable
 ````
 
@@ -99,6 +101,7 @@ docker exec mywistable_app_1 node tools/recreateSQLTables.js
 
 ````sh
 docker exec mywistable_app_1 node tools/cacheAlexaTop1M.js
+# docker exec mywiexperimental_app_1 node tools/cacheAlexaTop1M.js
 ````
 
 ## Licence

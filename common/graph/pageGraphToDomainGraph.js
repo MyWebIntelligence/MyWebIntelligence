@@ -96,9 +96,9 @@ module.exports = function pageGraphToDomainGraph(pageGraph, expressionDomainsByI
                     .filter(function(date){ return !!date })
                     .map(function(date){return moment(date)});
 
-                var urls = expressionNodes.map(function(n){
+                var urls = expressionNodes.map(function(n){                    
                     return {
-                        resource_id: n.id,
+                        resource_id: n.resource_id,
                         url: n.url
                     };
                 });

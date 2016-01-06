@@ -11,4 +11,13 @@ li.domain-list-item header select{
     font-size: 1em;
     outline: 1px solid lightgrey;
 }
-   
+
+li.domain-list-item ul.urls{
+    font-size: 0.8em;
+    white-space: nowrap;
+}
+
+li.domain-list-item ul.urls li{
+    overflow: hidden;
+}
+

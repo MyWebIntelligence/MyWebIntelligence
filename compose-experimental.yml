@@ -9,6 +9,8 @@ app:
    environment:
       - POSTGRES_PASSWORD=password
       - NODE_ENV=experimental
+   volumes: 
+      - .:/usr/mywi
 db:
    image: postgres:9.4
    environment:

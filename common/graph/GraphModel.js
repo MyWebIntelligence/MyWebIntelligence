@@ -123,8 +123,11 @@ function makeAttributes(desc, specific){
             // ignore otherwise
         }
         else{
-            var valueType = typeof specific[opt];
             var expectedType = desc[opt].type;
+            var value = specific[opt];
+            if(Object(value) === value && typeof value.toString === 'function' && expectedType === 'string')
+                value = String(value);
+            var valueType = typeof value;
             // TODO complete type matching
             
             if((specific[opt] === undefined || specific[opt] === null) && desc[opt].default !== undefined){
@@ -133,7 +136,7 @@ function makeAttributes(desc, specific){
             else{
                 if( !(valueType === 'number' && expectedType === 'integer') &&
                     !(valueType === 'number' && expectedType === 'float') &&
-                    (typeof specific[opt] !== desc[opt].type))
+                    (valueType !== expectedType))
                         throw new TypeError("Value for '"+opt+"' option should be a "+desc[opt].type+" and is a "+typeof specific[opt]+' ('+specific[opt]+')');
 
                 options[opt] = specific[opt];

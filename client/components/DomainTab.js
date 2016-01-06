@@ -15,6 +15,7 @@ interface DomainTabProps{
     expressionDomainsById: 
     domainGraph: 
     annotate: (delta): void
+    approveResource: (resourceId, newApproved)
 }
 
 */
@@ -88,7 +89,8 @@ module.exports = React.createClass({
                         expressionDomainMetrics: n,
                         annotate: function(delta){
                             props.annotate(edid, delta)
-                        }
+                        },
+                        approveResource: props.approveResource
                     })
                 })
             )

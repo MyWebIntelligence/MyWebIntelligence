@@ -60,7 +60,8 @@ module.exports = function abstractGraphToPageGraph(abGraph, expressionById, reso
                     url: res.url,
                     depth: expression.depth,
                     title: expression.title || '',
-                    expressionId: typeof expressionId === "string" ? expressionId : ''
+                    expressionId: typeof expressionId === "string" ? expressionId : '',
+                    resource_id: resourceId
                 }, 
                 resourceAnnotations,
                 {

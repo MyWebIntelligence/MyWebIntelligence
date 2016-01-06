@@ -467,6 +467,29 @@ module.exports = React.createClass({
                                     self.setState(Object.assign({}, state, {
                                         expressionDomainAnnotationsByEDId: state.expressionDomainAnnotationsByEDId // mutated
                                     }));
+                                },
+                                approveResource: function(resourceId, approved){
+                                    var deltaResourceAnnotations = {approved: approved}
+                                    
+                                    annotateResource(resourceId, territoire.id, deltaResourceAnnotations)
+                                    .catch(function(err){
+                                        console.error(
+                                            'resource annotation from domain update error', 
+                                            resourceId, territoire.id, approved, err
+                                        );
+                                    });
+                                    
+                                    var rejectedResourceIds = state.rejectedResourceIds;
+                                    if(approved !== undefined){
+                                        rejectedResourceIds = approved ?
+                                            rejectedResourceIds.delete(resourceId) :
+                                            rejectedResourceIds.add(resourceId);
+                                    }
+
+                                    self.setState(Object.assign({}, state, {
+                                        rejectedResourceIds: rejectedResourceIds
+                                    }));
+                                        
                                 }
                             }) : undefined
                     ),

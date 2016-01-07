@@ -11,6 +11,8 @@
 
 var csv = require('fast-csv');
 var moment = require('moment');
+var createNGraph = require('ngraph.graph');
+var pagerank = require('ngraph.pagerank');
 
 var DOM = require('./DOMBuilder.js');
 
@@ -234,7 +236,7 @@ function GraphModel(nodeAttributes, edgeAttributes, options){
     var lifetimeByEdge = new Map();
     var edges = new WeakMap(); // for efficient search by nodes
     var edgesList = []; // to return the list
-
+    
     return {
         addNode: function(name, optargs, lifetime){
             if(typeof name !== 'string')
@@ -299,9 +301,9 @@ function GraphModel(nodeAttributes, edgeAttributes, options){
                     throw new Error("There is no node named: "+node2);
             }
 
-            if(typeof node1 !== 'object')
+            if(Object(node1) !== node1)
                 throw new TypeError("First argument of addEdge should be a string or an object ("+typeof node1+")");
-            if(typeof node2 !== 'object')
+            if(Object(node2) !== node2)
                 throw new TypeError("SeallEdgescond argument of addEdge should be a string or an object ("+typeof node2+")");
 
             if(!(node1.name in nodeByName))
@@ -319,7 +321,7 @@ function GraphModel(nodeAttributes, edgeAttributes, options){
             // If edge is undirected or mutual, reorder nodes
             if(edgetype === 'undirected' || edgetype === 'mutual'){
                 if(node1.name > node2.name){
-                    var temp = node1; // ought to be a let
+                    var temp = node1;
                     node1 = node2;
                     node2 = temp;
                 }
@@ -415,6 +417,28 @@ function GraphModel(nodeAttributes, edgeAttributes, options){
         
         getLifetimeByEdge: function(e){
             return lifetimeByEdge.get(e);
+        },
+        
+        computePageRank: function(){
+            // convert to ngraph
+            var ngraph = createNGraph();
+            Object.keys(nodeByName).forEach(function(name){
+                ngraph.addNode(name);
+            })
+            edgesList.forEach(function(edge){
+                ngraph.addLink(edge.node1.name, edge.node2.name);
+            })
+            
+            // compute pagerank
+            var prs = pagerank(ngraph);
+            
+            var nodeToPageRank = new WeakMap();
+            Object.keys(prs).forEach(function(nodeName){
+                var value = prs[nodeName];
+                nodeToPageRank.set(nodeByName[nodeName], value);
+            });
+            
+            return nodeToPageRank;
         },
         
         makeDegreeWeakMap: function(){

@@ -194,7 +194,7 @@ module.exports = function pageGraphToDomainGraph(pageGraph, expressionDomainsByI
                     {start: domainData.min_publication_date} : 
                     undefined;
                 
-                var domainNode = domainGraph.addNode(expressionDomain.name, domainData, lifetime);
+                var domainNode = domainGraph.addNode(expressionDomainId, domainData, lifetime);
                 
                 pageNodes.forEach(function(pn){
                     pageNodeToDomainNode.set(pn, domainNode);

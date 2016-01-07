@@ -23,7 +23,7 @@ interface DomainTabProps{
 module.exports = React.createClass({
     displayName: "DomainTab",
     
-    _makeDomainGraphNodeList: function(domainGraph, degreeWeakMap){
+    _makeDomainGraphNodeList: function(domainGraph, pageRankMap){
         var self = this;
         
         return domainGraph.nodes.toJSON()
@@ -31,7 +31,7 @@ module.exports = React.createClass({
             return self.props.approvedExpressionDomainIds.has(n.expression_domain_id);
         })
         .sort(function(n1, n2){
-            var deltaDegree = degreeWeakMap.get(n2).degree - degreeWeakMap.get(n1).degree;
+            var deltaDegree = pageRankMap.get(n2) - pageRankMap.get(n1);
             
             // sort by degree then by social_impact if degrees are equal
             return deltaDegree !== 0 ?
@@ -46,15 +46,21 @@ module.exports = React.createClass({
             newProps.domainGraph.makeDegreeWeakMap() :
             this.state.graphDegreeWeakMap;
         
+        var pagerankByNode = newProps.domainGraph !== this.props.domainGraph ?
+            newProps.domainGraph.computePageRank() :
+            this.state.pagerankByNode;
+
+        
         this.setState({
             emitterTypes: new ImmutableSet( Object.keys(newProps.expressionDomainAnnotationsByEDId)
                 .map(function(edid){ return newProps.expressionDomainAnnotationsByEDId[edid].emitter_type; }) 
                 .filter(function(emitterType){ return !!emitterType; }) 
             ),
             domainGraphNodeList: newProps.domainGraph !== this.props.domainGraph ?
-                this._makeDomainGraphNodeList(newProps.domainGraph, graphDegreeWeakMap) :
+                this._makeDomainGraphNodeList(newProps.domainGraph, pagerankByNode) :
                 this.state.domainGraphNodeList,
-            graphDegreeWeakMap: graphDegreeWeakMap
+            graphDegreeWeakMap: graphDegreeWeakMap,
+            pagerankByNode: pagerankByNode
         })
     },
     
@@ -62,21 +68,27 @@ module.exports = React.createClass({
         var expressionDomainAnnotationsByEDId = this.props.expressionDomainAnnotationsByEDId;
         
         var graphDegreeWeakMap = this.props.domainGraph.makeDegreeWeakMap();
+        var pagerankByNode = this.props.domainGraph.computePageRank();
         
         return {
             emitterTypes: new ImmutableSet( Object.keys(expressionDomainAnnotationsByEDId)
                 .map(function(edid){ return expressionDomainAnnotationsByEDId[edid].emitter_type; }) 
                 .filter(function(emitterType){ return !!emitterType; }) 
             ),
-            domainGraphNodeList: this._makeDomainGraphNodeList(this.props.domainGraph, graphDegreeWeakMap),
-            graphDegreeWeakMap: graphDegreeWeakMap
+            domainGraphNodeList: this._makeDomainGraphNodeList(this.props.domainGraph, pagerankByNode),
+            graphDegreeWeakMap: graphDegreeWeakMap,
+            pagerankByNode: pagerankByNode
         }  
     },
     
     render: function() {
         var props = this.props;
         var state = this.state;
-                
+            
+        var consideredPageRanks = state.domainGraphNodeList.map(function(node){return state.pagerankByNode.get(node); })
+        var maxConsideredPageRank = Math.max.apply(null, consideredPageRanks);
+        var minConsideredPageRank = Math.min.apply(null, consideredPageRanks);
+        
         return React.DOM.div(
             {},
             React.DOM.datalist({id: "emitter-types"}, state.emitterTypes.toArray().map(function(t){
@@ -95,7 +107,7 @@ module.exports = React.createClass({
                     var edid = n.expression_domain_id;
                     var expressionDomain = props.expressionDomainsById[edid];
                     var expressionDomainAnnotations = props.expressionDomainAnnotationsByEDId[edid];
-
+                                        
                     return new DomainListItem({
                         key: edid,
                         expressionDomain: expressionDomain,
@@ -105,7 +117,11 @@ module.exports = React.createClass({
                             props.annotate(edid, delta)
                         },
                         approveResource: props.approveResource,
-                        degrees : state.graphDegreeWeakMap.get(n)
+                        degrees : state.graphDegreeWeakMap.get(n),
+                        pagerankIndex: Math.ceil( 
+                            100*(state.pagerankByNode.get(n) - minConsideredPageRank)/
+                            maxConsideredPageRank - minConsideredPageRank
+                        )
                     })
                 })
             )

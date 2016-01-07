@@ -74,16 +74,6 @@ var domainNodeDesc = {
         type: "float"
     },
     
-    "min_google_pagerank": {
-        type: "integer"
-    },
-    "max_google_pagerank": {
-        type: "integer"
-    },
-    "median_google_pagerank": {
-        // if array has an even length, average of the two middle value is performed. Can end up with a x.5
-        type: "float"
-    },
     "sum_likes": {
         type: "float"
     },

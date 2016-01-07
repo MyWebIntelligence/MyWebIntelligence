@@ -265,16 +265,7 @@ module.exports = React.createClass({
                     React.DOM.i({className: 'fa fa-linkedin-square'}),
                     ' ',
                     React.DOM.i({className: 'fa fa-share-square-o'})
-                ),
-                resourceAnnotations.google_pagerank !== undefined ? 
-                    React.DOM.span({title: 'Google PageRank'},
-                        resourceAnnotations.google_pagerank,
-                        ' ',
-                        React.DOM.i({className: 'fa fa-google'}),
-                        ' ',
-                        'PR'
-                    ) :
-                    undefined
+                )
             )
 
         );

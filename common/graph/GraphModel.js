@@ -416,6 +416,31 @@ function GraphModel(nodeAttributes, edgeAttributes, options){
         getLifetimeByEdge: function(e){
             return lifetimeByEdge.get(e);
         },
+        
+        makeDegreeWeakMap: function(){
+            var nodeToDegree = new WeakMap();
+            
+            Object.keys(nodeByName).forEach(function(name){
+                var node = nodeByName[name];
+                nodeToDegree.set(node, {
+                    inDegree: 0,
+                    outDegree: 0,
+                    get degree(){
+                        return this.inDegree + this.outDegree;
+                    }
+                });
+            });
+            
+            edgesList.forEach(function(edge){
+                var node1 = edge.node1;
+                var node2 = edge.node2;
+                
+                nodeToDegree.get(node1).outDegree++;
+                nodeToDegree.get(node2).inDegree++;
+            });
+            
+            return nodeToDegree;
+        },
 
         exportAsGEXF: function(){
             var PREAMBULE = '<?xml version="1.0" encoding="UTF-8"?>\n';

@@ -23,7 +23,7 @@ interface DomainTabProps{
 module.exports = React.createClass({
     displayName: "DomainTab",
     
-    _makeDomainGraphNodeList: function(domainGraph){
+    _makeDomainGraphNodeList: function(domainGraph, degreeWeakMap){
         var self = this;
         
         return domainGraph.nodes.toJSON()
@@ -31,31 +31,45 @@ module.exports = React.createClass({
             return self.props.approvedExpressionDomainIds.has(n.expression_domain_id);
         })
         .sort(function(n1, n2){
-            return n2.social_impact - n1.social_impact;
+            var deltaDegree = degreeWeakMap.get(n2).degree - degreeWeakMap.get(n1).degree;
+            
+            // sort by degree then by social_impact if degrees are equal
+            return deltaDegree !== 0 ?
+                deltaDegree :
+                n2.social_impact - n1.social_impact;
         })
     },
     
     componentWillReceiveProps: function(newProps){
+        
+        var graphDegreeWeakMap = newProps.domainGraph !== this.props.domainGraph ?
+            newProps.domainGraph.makeDegreeWeakMap() :
+            this.state.graphDegreeWeakMap;
+        
         this.setState({
             emitterTypes: new ImmutableSet( Object.keys(newProps.expressionDomainAnnotationsByEDId)
                 .map(function(edid){ return newProps.expressionDomainAnnotationsByEDId[edid].emitter_type; }) 
                 .filter(function(emitterType){ return !!emitterType; }) 
             ),
             domainGraphNodeList: newProps.domainGraph !== this.props.domainGraph ?
-                this._makeDomainGraphNodeList(newProps.domainGraph) :
-                this.state.domainGraphNodeList
+                this._makeDomainGraphNodeList(newProps.domainGraph, graphDegreeWeakMap) :
+                this.state.domainGraphNodeList,
+            graphDegreeWeakMap: graphDegreeWeakMap
         })
     },
     
     getInitialState: function(){
         var expressionDomainAnnotationsByEDId = this.props.expressionDomainAnnotationsByEDId;
         
+        var graphDegreeWeakMap = this.props.domainGraph.makeDegreeWeakMap();
+        
         return {
             emitterTypes: new ImmutableSet( Object.keys(expressionDomainAnnotationsByEDId)
                 .map(function(edid){ return expressionDomainAnnotationsByEDId[edid].emitter_type; }) 
                 .filter(function(emitterType){ return !!emitterType; }) 
             ),
-            domainGraphNodeList: this._makeDomainGraphNodeList(this.props.domainGraph)
+            domainGraphNodeList: this._makeDomainGraphNodeList(this.props.domainGraph, graphDegreeWeakMap),
+            graphDegreeWeakMap: graphDegreeWeakMap
         }  
     },
     
@@ -90,7 +104,8 @@ module.exports = React.createClass({
                         annotate: function(delta){
                             props.annotate(edid, delta)
                         },
-                        approveResource: props.approveResource
+                        approveResource: props.approveResource,
+                        degrees : state.graphDegreeWeakMap.get(n)
                     })
                 })
             )

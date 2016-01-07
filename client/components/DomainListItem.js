@@ -51,8 +51,7 @@ module.exports = React.createClass({
         var expressionDomainAnnotations = props.expressionDomainAnnotations;
                 
         var classes = ['territoire-list-item', 'domain-list-item'];
-        
-
+                
         return React.DOM.li(
             {
                 className: classes.join(' '),
@@ -90,11 +89,12 @@ module.exports = React.createClass({
                 }))
             ),
             
-            React.DOM.a({
+            React.DOM.a(
+                {
                     href: expressionDomain.main_url,
                     target: '_blank'
                 },
-                React.DOM.h3({}, expressionDomain.title + ' ' + '('+props.expressionDomainMetrics.nb_expressions+')'),
+                React.DOM.h3({}, expressionDomain.title || expressionDomain.name + ' ' + '('+props.expressionDomainMetrics.nb_expressions+')'),
                 React.DOM.h4({}, expressionDomain.main_url)
             ),
             React.DOM.div({
@@ -193,6 +193,17 @@ module.exports = React.createClass({
                     React.DOM.i({className: 'fa fa-plus'}),
                     ' ',
                     React.DOM.i({className: 'fa fa-share-square-o'})
+                ),
+                React.DOM.span({title: 'Degrees'},
+                    React.DOM.span({title: 'in degree'}, 
+                        props.degrees.inDegree,
+                        ' ⚞'
+                    ),
+                    React.DOM.i({className: 'fa fa-arrow-circle-o-right'}),
+                    React.DOM.span({title: 'out degree'},
+                        '⚟ ',
+                        props.degrees.outDegree
+                   )
                 )
                 
             )

@@ -49,7 +49,7 @@ module.exports = function pageGraphToDomainGraph(pageGraph, expressionDomainsByI
         
         expressionDomainIdToPageNode.forEach(function(pageNodes, expressionDomainId){
             var expressionDomain = expressionDomainsById[expressionDomainId];
-            
+
             // Currently, the graph is built unrelated to the territoire
             // this leads to resources being part of the graph while not being approved (because they were part 
             // of a previous territoire for instance. Noticed via depth===2 which is currently 
@@ -89,8 +89,8 @@ module.exports = function pageGraphToDomainGraph(pageGraph, expressionDomainsByI
                 var depth = expressionNodes.reduce(function(acc, node){
                     var d = node.depth;
                     return d < acc && d !== -1 ? d : acc;
-                }, +Infinity);
-
+                }, 1000000);
+                
                 var publicationDates = expressionNodes
                     .map(function(node){ return node.publication_date })
                     .filter(function(date){ return !!date })
@@ -187,10 +187,9 @@ module.exports = function pageGraphToDomainGraph(pageGraph, expressionDomainsByI
         
         expressionDomainIdToPageNode.forEach(function(pageNodes, expressionDomainId){
             var expressionDomain = expressionDomainsById[expressionDomainId];
+            var domainData = expressionDomainDataMap.get(expressionDomainId);
             
-            if(expressionDomain){
-                var domainData = expressionDomainDataMap.get(expressionDomainId);
-                
+            if(expressionDomain && domainData){
                 var lifetime = domainData.min_publication_date ? 
                     {start: domainData.min_publication_date} : 
                     undefined;

@@ -1,5 +1,7 @@
 "use strict";
 
+var moment = require('moment');
+
 var Territoires = require('./models/Territoires');
 var Queries = require('./models/Queries');
 var Oracles = require('./models/Oracles');
@@ -58,9 +60,12 @@ module.exports = function(territoireId){
                     var annotations = resourceAnnotations.find(function(rAnn){ return rAnn.resource_id === rid; })
                     var humanAnnotations = {
                         approved: annotations.approved,
-                        sentiment: annotations.sentiment,
-                        favorite: annotations.favorite,
-                        tags: annotations.tags
+                        sentiment: annotations.sentiment || undefined,
+                        favorite: annotations.favorite || undefined,
+                        tags: annotations.tags,
+                        publication_date: annotations.publication_date ?
+                            moment(annotations.publication_date).format('YYYY-MM-DD') : 
+                            undefined
                     };
 
                     if(Object.keys(humanAnnotations).every(function(k){

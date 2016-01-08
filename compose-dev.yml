@@ -1,6 +1,6 @@
 app:
    build: .
-   command: nodemon --watch server --watch database --watch postgresDB --watch crawl --watch automatedAnnotation --watch expressionDomain --watch client/index.html --watch oracles server/index.js
+   command: nodemon --watch server --watch database/* --watch crawl --watch automatedAnnotation --watch expressionDomain --watch client/index.html --watch oracles --watch compose-dev.yml server/index.js
    links:
       - db
       - elasticanalysis

@@ -421,15 +421,13 @@ app.get('/territoire/:id/expressions.csv', function(req, res){
 });
 
 
+
 /*
     Export a territoire.
     The main goal here is to provide a one-click solution to extract all human-created information.
     Human time is precious. If people worked on something, they shouldn't have to do it again.
     This returns everything that was created by people for the purpose of being able to recreate a territoire later.
-    Among other things, this also incidentally allows to export a territoire from one MyWI instance and import in another.
-    
-    
-    
+    Among other things, this also incidentally allows to export a territoire from one MyWI instance and import in another.    
 */
 app.get('/territoire/export/:id', function(req, res){
     var territoireId = req.params.id;

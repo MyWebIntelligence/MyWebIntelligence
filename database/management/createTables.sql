@@ -56,13 +56,11 @@ CREATE INDEX ON territoires ("user_id");
 CREATE TABLE IF NOT EXISTS oracles (
     id                      uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     name                    text NOT NULL,
-    oracle_node_module_name text NOT NULL,
+    oracle_node_module_name text UNIQUE NOT NULL,
     options                 jsonb,
     credentials_infos       jsonb      
 ) INHERITS(lifecycle);
 CREATE TRIGGER updated_at_oracles BEFORE UPDATE ON oracles FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
-
-CREATE INDEX ON oracles ("oracle_node_module_name");
 
 
 CREATE TABLE IF NOT EXISTS oracle_credentials (

@@ -85,6 +85,9 @@ module.exports = React.createClass({
                                     value.to = to;
                                 
                                 break;
+                            case 'number':
+                                value = Number(el.value);
+                                break;
                             default:
                                 // works for Array.isArray(type) (select/option)
                                 value = el.value;       

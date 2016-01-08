@@ -204,6 +204,10 @@ module.exports = React.createClass({
                         '⚟ ',
                         props.degrees.outDegree
                    )
+                ),
+                React.DOM.span({title: 'Local PageRank'},
+                    props.pagerankIndex,
+                    ' PR'
                 )
                 
             )

@@ -164,6 +164,7 @@ module.exports = React.createClass({
                         if(Array.isArray(opt.type)){ // enum
                             input = React.DOM.select({
                                 name: id,
+                                "data-oracle-option-id": id,
                                 defaultValue: defaultValue
                             }, opt.type.map(function(optOpt){
                                 return React.DOM.option({

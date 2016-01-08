@@ -384,7 +384,6 @@ app.get('/territoire/:id/expressions.csv', function(req, res){
                     publication_date: resourceAnnotations.publication_date ? 
                         moment(resourceAnnotations.publication_date).format('YYYY-MM-DD') : '',
                     content_length: (expression.main_text || '').length,
-                    google_pagerank: resourceAnnotations.google_pagerank,
                     facebook_share: resourceAnnotations.facebook_share,
                     facebook_like: resourceAnnotations.facebook_like,
                     linkedin_share: resourceAnnotations.linkedin_share,

@@ -5,7 +5,6 @@ require('../../ES-mess')
 var fbShare = require('../../crawl/automatedAnnotation/socialSignals/facebookShares');
 var fbLikes = require('../../crawl/automatedAnnotation/socialSignals/facebookLikes');
 var twShares = require('../../crawl/automatedAnnotation/socialSignals/twitterShares');
-var pr = require('../../crawl/automatedAnnotation/socialSignals/googlePageRank');
 var lkShares = require('../../crawl/automatedAnnotation/socialSignals/linkedinShares');
 
 var U = 'https://www.youtube.com/watch?v=KWZGAExj-es';

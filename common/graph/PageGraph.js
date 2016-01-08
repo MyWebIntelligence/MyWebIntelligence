@@ -30,10 +30,6 @@ var pageNodeDesc = {
         type: "integer",
         default: -1
     },
-    'google_pagerank': {
-        type: "integer",
-        default: -1
-    },
     'linkedin_share': {
         type: "integer",
         default: -1

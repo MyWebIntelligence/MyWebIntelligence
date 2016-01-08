@@ -35,9 +35,21 @@ module.exports = function(territoireData, user){
             Create the queries
         */
         var queriesReadyP = Promise._allResolved(queriesData.map(function(queryData){
-            queryData.territoire_id = territoireId;
-            return database.Queries.create(queryData)
-            .then(function(query){
+            return database.Oracles.findByOracleNodeModuleName(queryData.oracle_node_module_name)
+            .then(function(oracle){
+                if(!oracle)
+                    throw new Error('No oracle with oracle_node_module_name '+queryData.oracle_node_module_name);
+                
+                queryData.oracle_id = oracle.id;
+                delete queryData.oracle_node_module_name;
+                
+                queryData.territoire_id = territoireId;
+                
+                return queryData;
+            })
+            .then(database.Queries.create)
+            .then(function(queries){
+                var query = queries[0];
                 return onQueryCreated(query, user)
                 .then(function(){
                     return query;

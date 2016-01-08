@@ -68,7 +68,9 @@ module.exports = {
     },
     
     create: function(queryData){
-       if(!Array.isArray(queryData))
+        console.log('Queries.create', queryData);
+        
+        if(!Array.isArray(queryData))
             queryData = [queryData];
         
         return databaseP.then(function(db){

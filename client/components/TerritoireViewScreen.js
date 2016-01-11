@@ -4,12 +4,11 @@ var React = require('react');
 
 var ImmutableSet = require('immutable').Set;
 var moment = require('moment');
-var documentOffset = require('global-offset');
 
 var Tabs = React.createFactory(require('./external/Tabs.js'));
 var Header = React.createFactory(require('./Header'));
-var DomainTab = React.createFactory(require('./DomainTab'));
-var PageListItem = React.createFactory(require('./PageListItem'));
+var DomainsTab = React.createFactory(require('./DomainsTab'));
+var PagesTab = React.createFactory(require('./PagesTab'));
 
 var abstractGraphToPageGraph = require('../../common/graph/abstractGraphToPageGraph');
 var pageGraphToDomainGraph = require('../../common/graph/pageGraphToDomainGraph');
@@ -17,16 +16,10 @@ var makeWordGraph = require('../../common/graph/makeWordGraph');
 
 var serverAPI = require('../serverAPI');
 
-var makeResourceSocialImpactIndexMap = require('../../automatedAnnotation/makeResourceSocialImpactIndexMap');
-
 var annotateResource = serverAPI.annotateResource;
 var annotateExpressionDomain = serverAPI.annotateExpressionDomain;
 
-var DEFAULT_LIST_ITEM_HEIGHT = 20; // very small value by default so that worst case, more items are shown
-var DEFAULT_LIST_TOP_OFFSET = 0; // pretend it's at the top so worst case more items are shown
 
-var LIST_START_PADDING = 2;
-var LIST_END_PADDING = LIST_START_PADDING;
 
 
 /*
@@ -113,73 +106,9 @@ module.exports = React.createClass({
             }, 5*1000);
         }
     },
-    
-    _scheduledRender: undefined,
-    // scroll event happen too often, so they need to be throttled via rAF
-    _scheduleRender: function(){
-        var self = this;
-        
-        if(self._scheduledRender === undefined){
-            self._scheduledRender = requestAnimationFrame(function(){
-                self._scheduledRender = undefined;
-                self.setState(Object.assign({}, self.state, {
-                    pageY: self._pageY,
-                    windowHeight: self._windowHeight
-                }));
-            })
-        }
-    },
 
-    _pageY: undefined,
-    _windowHeight: (typeof window !== 'undefined' && window.innerHeight) || 1000,
-    _scrollListener: function() {        
-        this._pageY = window.pageYOffset;
-        this._scheduleRender();
-    },
-    _resizeListener: function() {
-        this._windowHeight = window.innerHeight;
-        this._scheduleRender();
-    },
-    
-    
-    // maybe schedule a refresh on mount and when receiving props
     componentDidMount: function(){
         this._scheduleRefreshIfNecessary();
-        
-        window.addEventListener('scroll', this._scrollListener);
-        window.addEventListener('resize', this._resizeListener);
-    },
-    
-    componentWillUnmount: function(){
-        clearTimeout(this._refreshTimeout);
-        this._refreshTimeout = undefined;
-        
-        cancelAnimationFrame(this._scheduledRender);
-        this._scheduledRender = undefined;
-        window.removeEventListener('scroll', this._scrollListener);
-        window.removeEventListener('resize', this._resizeListener);
-    },
-
-
-    
-    
-    // It is assumed all lis have the same height. The rest of the component will not work if that's not the case
-    // Make sure it is with all necessary measures in CSS and HTML
-    _listItemHeight: undefined,
-    _listTopOffset: undefined,
-    componentDidUpdate: function(){
-        this._scheduleRefreshIfNecessary();
-        
-        if(!this._listItemHeight){ // covers undefined, NaN and 0 
-            var thisElement = this.getDOMNode();
-            
-            var firstLi = thisElement.querySelector('main.territoire ul li');
-
-            if(firstLi){
-                this._listItemHeight = parseInt( window.getComputedStyle(firstLi).height );
-                this._listTopOffset = documentOffset(thisElement.querySelector('main.territoire ul')).top;
-            }
-        }
     },
     
     componentWillReceiveProps: function(nextProps) {
@@ -189,29 +118,15 @@ module.exports = React.createClass({
         var resourceAnnotationByResourceId = territoire.resourceAnnotationByResourceId || state.resourceAnnotationByResourceId;
         var expressionDomainAnnotationsByEDId = territoire.expressionDomainAnnotationsByEDId || state.expressionDomainAnnotationsByEDId;
         
-        var resourceSocialImpactIndexMap = state.resourceAnnotationByResourceId !== nextProps.territoire.resourceAnnotationByResourceId ?
-            makeResourceSocialImpactIndexMap(resourceAnnotationByResourceId) :
-            state.resourceSocialImpactIndexMap;
+
         
         var deltaState = {
             resourceAnnotationByResourceId: resourceAnnotationByResourceId,
             expressionDomainAnnotationsByEDId: expressionDomainAnnotationsByEDId,
-            resourceSocialImpactIndexMap: resourceSocialImpactIndexMap,
             territoireTags: state.resourceAnnotationByResourceId !== nextProps.territoire.resourceAnnotationByResourceId ?
                 computeTerritoireTags(resourceAnnotationByResourceId) :
                 state.territoireTags,
-            pageListItems: Object.keys(territoire.expressionById || {}).length >= 1 ? 
-                territoire.graph.nodes
-                    .filter(function(n){
-                        return n.expression_id && territoire.resourceAnnotationByResourceId[n.id];
-                    })
-                    .sort(function nodeCompare(n1, n2){
-                        var rId1 = n1.id;
-                        var rId2 = n2.id;
-
-                        return resourceSocialImpactIndexMap.get(rId2) - resourceSocialImpactIndexMap.get(rId1);
-                    }) 
-                : undefined,
+            
             territoireGraph: territoire && territoire.graph
         };
         
@@ -254,14 +169,7 @@ module.exports = React.createClass({
             territoireGraph: undefined,
             domainGraph: undefined,
             rejectedResourceIds : new ImmutableSet(),
-            approvedExpressionDomainIds: undefined,
-            resourceSocialImpactIndexMap: undefined,
-            
-            // largely inspired from http://jlongster.com/Removing-User-Interface-Complexity,-or-Why-React-is-Awesome#p78
-            // <3 @jlongster
-            pageY: 0,
-            windowHeight: (typeof window !== "undefined" && window.innerHeight) || 1000,
-            pageListItems: undefined
+            approvedExpressionDomainIds: undefined
         }
     },
     
@@ -271,15 +179,6 @@ module.exports = React.createClass({
         var props = this.props;
         var state = this.state;
         var territoire = props.territoire;
-        
-        var listItemHeight = this._listItemHeight || DEFAULT_LIST_ITEM_HEIGHT;
-        var listTopOffset = this._listTopOffset || DEFAULT_LIST_TOP_OFFSET;
-        
-        var startOffset = state.pageY - listTopOffset;
-        var listStartIndex = Math.max(0, Math.floor(startOffset/listItemHeight) - LIST_START_PADDING)
-        
-        var numberOfDisplayedItems = Math.ceil(state.windowHeight/listItemHeight);
-        var listEndIndex = listStartIndex + LIST_START_PADDING + numberOfDisplayedItems + LIST_END_PADDING;
         
         //throw 'Perf improvement idea: hook to tab events. Manage state here. Only generate the correct child.'
         
@@ -334,117 +233,81 @@ module.exports = React.createClass({
                             classPrefix: 'tabs-'
                         },
                         // Pages tab content
-                        state.pageListItems ? React.DOM.div(
-                            {
-                                className: 'page-list-container',
-                                style: {
-                                    height: state.pageListItems.length * listItemHeight + 'px'
-                                }
-                            },
-                            React.DOM.ul(
-                            {
-                                className: 'result-list',
-                                style: {
-                                    transform: 'translateY('+listStartIndex*listItemHeight+'px)'
-                                }
-                            }, 
-                            state.pageListItems
-                                .slice(listStartIndex, listEndIndex)
-                                .map(function(node){
-                                    var expressionId = node.expression_id;
-                                    var resourceId = node.id;
-                                    if(expressionId === null || expressionId === undefined)
-                                        return;
+                        
+            
+                        //state.pageListItems ?
+                            new PagesTab({
+                                expressionById: territoire.expressionById,
+                                expressionDomainsById: territoire.expressionDomainsById,
+                                resourceAnnotationByResourceId: territoire.resourceAnnotationByResourceId,
+                                pageGraph: territoire.graph,
+                                territoireId: territoire.id,
+                                rejectedResourceIds: state.rejectedResourceIds,
+                                annotate: function(resourceId, newAnnotations, approved){
+                                    newAnnotations = newAnnotations || {}
+                                    var resourceAnnotations = territoire.resourceAnnotationByResourceId[resourceId];
+                                    
+                                    var deltaResourceAnnotations;
 
-                                    var expression = territoire.expressionById[expressionId];
-                                    var expressionDomainId = state.resourceAnnotationByResourceId ?
-                                        state.resourceAnnotationByResourceId[resourceId].expression_domain_id :
-                                        undefined;
+                                    deltaResourceAnnotations = Object.assign(
+                                        {}, 
+                                        newAnnotations, 
+                                        {approved: approved}
+                                    );
 
-                                    var resourceAnnotations = state.resourceAnnotationByResourceId ?
-                                        state.resourceAnnotationByResourceId[resourceId] : 
-                                        {tags: new Set()};
+                                    // remove merged object
+                                    newAnnotations = undefined;
 
-                                    return new PageListItem({
-                                        key: resourceId,
-
-                                        resourceId: resourceId,
-
-                                        url: node.url,
-                                        title: expression.title,
-                                        excerpt: expression.excerpt,
-                                        rejected: state.rejectedResourceIds.has(resourceId),
-                                        socialImpactIndex: state.resourceSocialImpactIndexMap.get(resourceId),
-                                        
-                                        resourceAnnotations: resourceAnnotations,
-                                        expressionDomain : territoire.expressionDomainsById[expressionDomainId],
-
-                                        annotate: function(newAnnotations, approved){
-                                            newAnnotations = newAnnotations || {}
-
-                                            var deltaResourceAnnotations;
-
-                                            deltaResourceAnnotations = Object.assign(
-                                                {}, 
-                                                newAnnotations, 
-                                                {approved: approved}
+                                    // is it worth calling annotateResource?
+                                    if(Object.keys(deltaResourceAnnotations)
+                                       .some(function(k){ return deltaResourceAnnotations[k] !== undefined }) ||
+                                       approved !== undefined
+                                      ){
+                                        // TODO add a pending state or something
+                                        annotateResource(resourceId, territoire.id, deltaResourceAnnotations)
+                                        .catch(function(err){
+                                            console.error(
+                                                'resource annotation update error', 
+                                                resourceId, territoire.id, deltaResourceAnnotations, approved, err
                                             );
+                                        });
+                                    }
 
-                                            // remove merged object
-                                            newAnnotations = undefined;
+                                    // updating annotations locally (optimistically hoping being in sync with the server)
+                                    var territoireTags = state.territoireTags;
 
-                                            // is it worth calling annotateResource?
-                                            if(Object.keys(deltaResourceAnnotations)
-                                               .some(function(k){ return deltaResourceAnnotations[k] !== undefined }) ||
-                                               approved !== undefined
-                                              ){
-                                                // TODO add a pending state or something
-                                                annotateResource(resourceId, territoire.id, deltaResourceAnnotations)
-                                                .catch(function(err){
-                                                    console.error(
-                                                        'resource annotation update error', 
-                                                        resourceId, territoire.id, deltaResourceAnnotations, approved, err
-                                                    );
-                                                });
-                                            }
+                                    // add tags for autocomplete
+                                    // tags are only added, never removed for autocomplete purposes
+                                    if(deltaResourceAnnotations.tags){
+                                        deltaResourceAnnotations.tags.forEach(function(t){
+                                            territoireTags = territoireTags.add(t);
+                                        });
+                                    }
 
-                                            // updating annotations locally (optimistically hoping being in sync with the server)
-                                            var territoireTags = state.territoireTags;
+                                    state.resourceAnnotationByResourceId[resourceId] = Object.assign(
+                                        {},
+                                        resourceAnnotations,
+                                        deltaResourceAnnotations
+                                    );
 
-                                            // add tags for autocomplete
-                                            // tags are only added, never removed for autocomplete purposes
-                                            if(deltaResourceAnnotations.tags){
-                                                deltaResourceAnnotations.tags.forEach(function(t){
-                                                    territoireTags = territoireTags.add(t);
-                                                });
-                                            }
+                                    var rejectedResourceIds = state.rejectedResourceIds;
+                                    if(approved !== undefined){
+                                        rejectedResourceIds = approved ?
+                                            rejectedResourceIds.delete(resourceId) :
+                                            rejectedResourceIds.add(resourceId);
+                                    }
 
-                                            state.resourceAnnotationByResourceId[resourceId] = Object.assign(
-                                                {},
-                                                resourceAnnotations,
-                                                deltaResourceAnnotations
-                                            );
-
-                                            var rejectedResourceIds = state.rejectedResourceIds;
-                                            if(approved !== undefined){
-                                                rejectedResourceIds = approved ?
-                                                    rejectedResourceIds.delete(resourceId) :
-                                                    rejectedResourceIds.add(resourceId);
-                                            }
-
-                                            self.setState(Object.assign({}, state, {
-                                                resourceAnnotationByResourceId: state.resourceAnnotationByResourceId, // mutated
-                                                territoireTags: territoireTags,
-                                                rejectedResourceIds: rejectedResourceIds
-                                            }));
-                                        }
-                                    });
-                                })
-                            )
-                        ) : undefined,
+                                    self.setState(Object.assign({}, state, {
+                                        resourceAnnotationByResourceId: state.resourceAnnotationByResourceId, // mutated
+                                        territoireTags: territoireTags,
+                                        rejectedResourceIds: rejectedResourceIds
+                                    }));
+                                }
+                            })// : undefined
+                        ,
                         // Domains tab content
                         Object.keys(territoire.expressionById || {}).length >= 1 && state.domainGraph? 
-                            new DomainTab({
+                            new DomainsTab({
                                 approvedExpressionDomainIds: state.approvedExpressionDomainIds,
                                 expressionDomainAnnotationsByEDId: state.expressionDomainAnnotationsByEDId,
                                 expressionDomainsById: territoire.expressionDomainsById,

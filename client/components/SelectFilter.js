@@ -4,6 +4,7 @@ var React = require('react');
     
 /*
     interface SelectFilterProps{
+        label: string
         className: string,
         value: string,
         options: string[],

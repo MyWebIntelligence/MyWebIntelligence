@@ -2,6 +2,38 @@
     Annotations
 */
 
+
+.page-list-container .filters{
+}
+
+.page-list-container .filters .filter{
+    display: inline-block;
+}
+
+.page-list-container .filters .filter button{
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    color: black;
+    font-size: 1.5em;
+
+}
+
+.page-list-container .filters .filter.favorite button{
+    color: gold;
+}
+.page-list-container .filters .filter.favorite button::before{
+    content: '☆';
+}
+.page-list-container .filters .filter.active.favorite button::before{
+    content: '★';
+}
+
+.page-list-container .filters .filter.sentiment.active button{
+    color: red;
+}
+
+
 /* Annotators */
 li.page-list-item .annotators{
     position: absolute;

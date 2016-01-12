@@ -7,6 +7,8 @@ var documentOffset = require('global-offset');
 
 var PageListItem = React.createFactory(require('./PageListItem'));
 var SelectFilter = React.createFactory(require('./SelectFilter'));
+var BooleanFilter = React.createFactory(require('./BooleanFilter'));
+
 
 var makeResourceSocialImpactIndexMap = require('../../automatedAnnotation/makeResourceSocialImpactIndexMap');
 
@@ -32,6 +34,8 @@ throw 'TODO';
 
 var DEFAULT_MEDIA_TYPE = undefined;
 var DEFAULT_EMITTER_TYPE = undefined;
+var DEFAULT_FAVORITE_FILTER_VALUE = false;
+var DEFAULT_SENTIMENT_FILTER_VALUE = '';
 
 
 
@@ -48,8 +52,15 @@ module.exports = React.createClass({
                 .filter(function(n){ // user filter
                     var nodeFilterInfos = nodeToFilterInfos.get(n);
             
-                    return (!filterValues.get('media_type') || filterValues.get('media_type') === nodeFilterInfos.get('media_type')) &&
-                        (!filterValues.get('emitter_type') || filterValues.get('emitter_type') === nodeFilterInfos.get('emitter_type'));
+                    return (!filterValues.get('media_type') || 
+                            filterValues.get('media_type') === nodeFilterInfos.get('media_type')) &&
+                        (!filterValues.get('emitter_type') || 
+                         filterValues.get('emitter_type') === nodeFilterInfos.get('emitter_type')) &&
+                        (filterValues.get('favorite') === false || // keep all expressions if favorite filter is in false
+                         filterValues.get('favorite') === nodeFilterInfos.get('favorite')) &&
+                        (filterValues.get('sentiment') === '' || // keep all expressions if setiment filter is in ''
+                         filterValues.get('sentiment') === nodeFilterInfos.get('sentiment'));
+                        
                 })
                 .sort(function nodeCompare(n1, n2){
                     var rId1 = n1.id;
@@ -77,7 +88,9 @@ module.exports = React.createClass({
             
             wm.set(n, new ImmutableMap({
                 media_type: expressionDomainAnnotations && expressionDomainAnnotations['media_type'],
-                emitter_type: expressionDomainAnnotations && expressionDomainAnnotations['emitter_type']
+                emitter_type: expressionDomainAnnotations && expressionDomainAnnotations['emitter_type'],
+                favorite: resourceAnnotations.favorite,
+                sentiment: resourceAnnotations.sentiment
             }));
         })
         
@@ -97,7 +110,9 @@ module.exports = React.createClass({
         
         var defaultFilterValues = new ImmutableMap({
             'media_type': DEFAULT_MEDIA_TYPE,
-            'emitter_type': DEFAULT_EMITTER_TYPE
+            'emitter_type': DEFAULT_EMITTER_TYPE,
+            'favorite': DEFAULT_FAVORITE_FILTER_VALUE,
+            'sentiment': DEFAULT_SENTIMENT_FILTER_VALUE
         })
         
         return {
@@ -296,6 +311,37 @@ module.exports = React.createClass({
                                     state,
                                     {
                                         filterValues: state.filterValues.set('emitter_type', newValue)
+                                    }
+                                ))
+                            }
+                        }
+                    ),
+                    new BooleanFilter(
+                        {
+                            className: 'favorite',
+                            value: state.filterValues.get('favorite'),
+                            onChange: function(newValue){
+                                self.setState(Object.assign(
+                                    {},
+                                    state,
+                                    {
+                                        filterValues: state.filterValues.set('favorite', newValue)
+                                    }
+                                ))
+                            }
+                        }
+                    ),
+                    new BooleanFilter(
+                        {
+                            label: '☹',
+                            className: 'sentiment',
+                            value: state.filterValues.get('sentiment') === 'negative',
+                            onChange: function(newValue){
+                                self.setState(Object.assign(
+                                    {},
+                                    state,
+                                    {
+                                        filterValues: state.filterValues.set('sentiment', newValue ? 'negative' : '')
                                     }
                                 ))
                             }

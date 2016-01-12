@@ -1,29 +1,55 @@
 "use strict";
 
 var React = require('react');
+var ImmutableMap = require('immutable').Map;
+var ImmutableSet = require('immutable').Set;
 var documentOffset = require('global-offset');
 
 var PageListItem = React.createFactory(require('./PageListItem'));
+var SelectFilter = React.createFactory(require('./SelectFilter'));
 
 var makeResourceSocialImpactIndexMap = require('../../automatedAnnotation/makeResourceSocialImpactIndexMap');
-
 
 var DEFAULT_LIST_ITEM_HEIGHT = 20; // very small value by default so that worst case, more items are shown
 var DEFAULT_LIST_TOP_OFFSET = 0; // pretend it's at the top so worst case more items are shown
 
-var LIST_START_PADDING = 2;
+var LIST_START_PADDING = 5;
 var LIST_END_PADDING = LIST_START_PADDING;
+
+
+/*
+throw 'TODO';
+
+    Make a PageFilters component which has many filter children
+    Filters are generic (boolean, select, double-range)
+    
+    The PageFilters element generates a function which returns true/false for a given page (pageGraph node here)
+    Init filter values determine the initial filter.
+    Add cancel button whichmakes the filter return back to the default value
+    
+*/
+
+
+var DEFAULT_MEDIA_TYPE = undefined;
+var DEFAULT_EMITTER_TYPE = undefined;
+
 
 
 module.exports = React.createClass({
     displayName: 'PagesTab',
     
-    _makePageListItems: function(props, resourceSocialImpactIndexMap){   
+    _makePageListItems: function(props, resourceSocialImpactIndexMap, filterValues, nodeToFilterInfos){   
 
         return Object.keys(props.expressionById || {}).length >= 1 ? 
             props.pageGraph.nodes
-                .filter(function(n){
+                .filter(function(n){ // filter irrelevant elements
                     return n.expression_id && props.resourceAnnotationByResourceId[n.id];
+                })
+                .filter(function(n){ // user filter
+                    var nodeFilterInfos = nodeToFilterInfos.get(n);
+            
+                    return (!filterValues.get('media_type') || filterValues.get('media_type') === nodeFilterInfos.get('media_type')) &&
+                        (!filterValues.get('emitter_type') || filterValues.get('emitter_type') === nodeFilterInfos.get('emitter_type'));
                 })
                 .sort(function nodeCompare(n1, n2){
                     var rId1 = n1.id;
@@ -34,13 +60,52 @@ module.exports = React.createClass({
             : undefined
     },
     
+    _makeNodeToFilterInfos: function(nodes, resourceAnnotationByResourceId, expressionDomainAnnotationsByEDId){
+        var wm = new WeakMap();
+        
+        nodes.forEach(function(n){
+            var resourceId = n.id;
+            
+            var resourceAnnotations = resourceAnnotationByResourceId && resourceId ?
+                resourceAnnotationByResourceId[resourceId] : 
+                {};
+
+            var expressionDomainId = resourceAnnotations.expression_domain_id;
+            
+            var expressionDomainAnnotations = expressionDomainId ? 
+                expressionDomainAnnotationsByEDId[expressionDomainId] : undefined;
+            
+            wm.set(n, new ImmutableMap({
+                media_type: expressionDomainAnnotations && expressionDomainAnnotations['media_type'],
+                emitter_type: expressionDomainAnnotations && expressionDomainAnnotations['emitter_type']
+            }));
+        })
+        
+        return wm;
+    },
+    
     getInitialState: function(){
         var props = this.props;
         var resourceSocialImpactIndexMap = makeResourceSocialImpactIndexMap(props.resourceAnnotationByResourceId);
-            
+        
+        var nodeToFilterInfos = props.pageGraph ?
+            this._makeNodeToFilterInfos(
+                props.pageGraph.nodes,
+                props.resourceAnnotationByResourceId,
+                props.expressionDomainAnnotationsByEDId
+            ) : undefined;
+        
+        var defaultFilterValues = new ImmutableMap({
+            'media_type': DEFAULT_MEDIA_TYPE,
+            'emitter_type': DEFAULT_EMITTER_TYPE
+        })
+        
         return {
-            pageListItems: this._makePageListItems(props, resourceSocialImpactIndexMap),
             resourceSocialImpactIndexMap: resourceSocialImpactIndexMap,
+            
+            filterValues: defaultFilterValues,
+            nodeToFilterInfos: nodeToFilterInfos,
+            
             // largely inspired from http://jlongster.com/Removing-User-Interface-Complexity,-or-Why-React-is-Awesome#p78
             // <3 @jlongster
             pageY: 0,
@@ -49,12 +114,23 @@ module.exports = React.createClass({
     },
     
     componentWillReceiveProps: function(nextProps) {
+        var props = this.props;
         var state = this.state;
         var resourceSocialImpactIndexMap = makeResourceSocialImpactIndexMap(nextProps.resourceAnnotationByResourceId);
         
+        var nodeToFilterInfos = (props.pageGraph !== nextProps.pageGraph || 
+           props.resourceAnnotationByResourceId !== nextProps.resourceAnnotationByResourceId ||
+           props.expressionDomainAnnotationsByEDId !== nextProps.expressionDomainAnnotationsByEDId) ?
+            this._makeNodeToFilterInfos(
+                nextProps.pageGraph.nodes,
+                nextProps.resourceAnnotationByResourceId,
+                nextProps.expressionDomainAnnotationsByEDId
+            ) :
+            state.nodeToFilterInfos;
+        
         var deltaState = {
-            pageListItems: this._makePageListItems(nextProps, resourceSocialImpactIndexMap),
-            resourceSocialImpactIndexMap: resourceSocialImpactIndexMap
+            resourceSocialImpactIndexMap: resourceSocialImpactIndexMap,
+            nodeToFilterInfos: nodeToFilterInfos
         }
         
         this.setState(Object.assign({}, state, deltaState));
@@ -121,6 +197,7 @@ module.exports = React.createClass({
     },
     
     render: function(){
+        var self = this;
         var props = this.props;
         var state = this.state;
         
@@ -135,7 +212,41 @@ module.exports = React.createClass({
         
         var numberOfDisplayedItems = Math.ceil(state.windowHeight/listItemHeight);
         var listEndIndex = listStartIndex + LIST_START_PADDING + numberOfDisplayedItems + LIST_END_PADDING;
-                
+        
+        var pageListItems = this._makePageListItems(
+            props, 
+            state.resourceSocialImpactIndexMap, 
+            state.filterValues, 
+            state.nodeToFilterInfos
+        );
+
+        var possibleMediaTypes = new ImmutableSet(['']);
+        var possibleEmitterTypes = new ImmutableSet(['']);
+        if(props.pageGraph){
+            props.pageGraph.nodes.forEach(function(n){
+                var resourceId = n.id;
+                var resourceAnnotationByResourceId = props.resourceAnnotationByResourceId;
+                var expressionDomainAnnotationsByEDId = props.expressionDomainAnnotationsByEDId;
+
+                var resourceAnnotations = resourceAnnotationByResourceId && resourceId ?
+                    resourceAnnotationByResourceId[resourceId] : 
+                    {};
+
+                var expressionDomainId = resourceAnnotations.expression_domain_id;
+
+                var expressionDomainAnnotations = expressionDomainAnnotationsByEDId && expressionDomainId ? 
+                    expressionDomainAnnotationsByEDId[expressionDomainId] : undefined;
+
+                var mediaType = expressionDomainAnnotations && expressionDomainAnnotations['media_type'];
+                var emitterType = expressionDomainAnnotations && expressionDomainAnnotations['emitter_type'];
+
+                if(mediaType)
+                    possibleMediaTypes = possibleMediaTypes.add(mediaType);
+                if(emitterType)
+                    possibleEmitterTypes = possibleEmitterTypes.add(emitterType);
+            });
+        }
+        
         return React.DOM.div(
             {
                 className: 'page-list-container',
@@ -144,46 +255,88 @@ module.exports = React.createClass({
                 }
             },
             React.DOM.ul(
-            {
-                className: 'result-list',
-                style: {
-                    transform: 'translateY('+listStartIndex*listItemHeight+'px)'
-                }
-            }, 
-            state.pageListItems ? state.pageListItems
-                .slice(listStartIndex, listEndIndex)
-                .map(function(node){
-                    var expressionId = node.expression_id;
-                    var resourceId = node.id;
-                    if(expressionId === null || expressionId === undefined)
-                        return;
-
-                    var expression = expressionById[expressionId];
-                    var resourceAnnotations = props.resourceAnnotationByResourceId ?
-                        props.resourceAnnotationByResourceId[resourceId] : 
-                        {tags: new Set()};
-                    
-                    var expressionDomainId = resourceAnnotations.expression_domain_id;
-            
-                    return new PageListItem({
-                        key: resourceId,
-
-                        resourceId: resourceId,
-
-                        url: node.url,
-                        title: expression.title,
-                        excerpt: expression.excerpt,
-                        rejected: props.rejectedResourceIds.has(resourceId),
-                        socialImpactIndex: state.resourceSocialImpactIndexMap.get(resourceId),
-
-                        resourceAnnotations: resourceAnnotations,
-                        expressionDomain : expressionDomainsById[expressionDomainId],
-
-                        annotate: function(newAnnotations, approved){
-                            return props.annotate(resourceId, newAnnotations, approved)
+                {
+                    className: 'result-list',
+                    style: {
+                        transform: 'translateY('+listStartIndex*listItemHeight+'px)'
+                    }
+                },
+                React.DOM.div(
+                    {
+                        className: 'filters'
+                    },
+                    new SelectFilter(
+                        {
+                            label: 'Media type',
+                            className: 'media_type',
+                            value: state.filterValues.get('media_type'),
+                            options: possibleMediaTypes.toJS(),
+                            onChange: function(newValue){
+                                console.log("media_type", newValue)
+                                
+                                self.setState(Object.assign(
+                                    {},
+                                    state,
+                                    {
+                                        filterValues: state.filterValues.set('media_type', newValue)
+                                    }
+                                ))
+                            }
                         }
-                    });
-                }) : undefined
+                    ),
+                    new SelectFilter(
+                        {
+                            label: 'Emitter type',
+                            className: 'emitter_type',
+                            value: state.filterValues.get('emitter_type'),
+                            options: possibleEmitterTypes.toJS(),
+                            onChange: function(newValue){
+                                self.setState(Object.assign(
+                                    {},
+                                    state,
+                                    {
+                                        filterValues: state.filterValues.set('emitter_type', newValue)
+                                    }
+                                ))
+                            }
+                        }
+                    )
+                ),
+                
+                pageListItems && pageListItems
+                    .slice(listStartIndex, listEndIndex)
+                    .map(function(node){
+                        var expressionId = node.expression_id;
+                        var resourceId = node.id;
+                        if(expressionId === null || expressionId === undefined)
+                            return;
+
+                        var expression = expressionById[expressionId];
+                        var resourceAnnotations = props.resourceAnnotationByResourceId ?
+                            props.resourceAnnotationByResourceId[resourceId] : 
+                            {tags: new Set()};
+
+                        var expressionDomainId = resourceAnnotations.expression_domain_id;
+
+                        return new PageListItem({
+                            key: resourceId,
+
+                            resourceId: resourceId,
+
+                            url: node.url,
+                            title: expression.title,
+                            excerpt: expression.excerpt,
+                            rejected: props.rejectedResourceIds.has(resourceId),
+                            socialImpactIndex: state.resourceSocialImpactIndexMap.get(resourceId),
+
+                            resourceAnnotations: resourceAnnotations,
+                            expressionDomain : expressionDomainsById[expressionDomainId],
+
+                            annotate: function(newAnnotations, approved){
+                                return props.annotate(resourceId, newAnnotations, approved)
+                            }
+                        });
+                    })
             )
         )
     }

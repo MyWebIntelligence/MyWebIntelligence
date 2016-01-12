@@ -239,6 +239,7 @@ module.exports = React.createClass({
                             new PagesTab({
                                 expressionById: territoire.expressionById,
                                 expressionDomainsById: territoire.expressionDomainsById,
+                                expressionDomainAnnotationsByEDId: state.expressionDomainAnnotationsByEDId,
                                 resourceAnnotationByResourceId: territoire.resourceAnnotationByResourceId,
                                 pageGraph: territoire.graph,
                                 territoireId: territoire.id,

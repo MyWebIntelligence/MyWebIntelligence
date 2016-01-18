@@ -8,7 +8,7 @@ var documentOffset = require('global-offset');
 var PageListItem = React.createFactory(require('./PageListItem'));
 var SelectFilter = React.createFactory(require('./SelectFilter'));
 var BooleanFilter = React.createFactory(require('./BooleanFilter'));
-
+var DoubleRangeFilter = React.createFactory(require('./DoubleRangeFilter'));
 
 var makeResourceSocialImpactIndexMap = require('../../automatedAnnotation/makeResourceSocialImpactIndexMap');
 
@@ -282,7 +282,7 @@ module.exports = React.createClass({
                     },
                     new SelectFilter(
                         {
-                            label: 'Media type',
+                            label: 'Media',
                             className: 'media_type',
                             value: state.filterValues.get('media_type'),
                             options: possibleMediaTypes.toJS(),
@@ -301,7 +301,7 @@ module.exports = React.createClass({
                     ),
                     new SelectFilter(
                         {
-                            label: 'Emitter type',
+                            label: 'Emitter',
                             className: 'emitter_type',
                             value: state.filterValues.get('emitter_type'),
                             options: possibleEmitterTypes.toJS(),
@@ -316,6 +316,7 @@ module.exports = React.createClass({
                             }
                         }
                     ),
+                    new DoubleRangeFilter({}),
                     new BooleanFilter(
                         {
                             className: 'favorite',

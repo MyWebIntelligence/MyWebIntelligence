@@ -13,6 +13,8 @@ interface DeleteButtonProps{
 */
 
 module.exports = React.createClass({
+    displayName: "DeleteButton",
+    
     getInitialState: function(){
         return {pendingConfirmation: false};
     },

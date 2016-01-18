@@ -13,6 +13,7 @@ var React = require('react');
 */
 
 module.exports = React.createClass({
+    displayName: "SelectFilter",
     
     render: function(){
         var props = this.props;

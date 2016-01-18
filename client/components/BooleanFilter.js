@@ -13,6 +13,8 @@ var React = require('react');
 */
 
 module.exports = React.createClass({
+    displayName: "BooleanFilter",
+    
     render: function(){
         var props = this.props;
                 

@@ -4,6 +4,9 @@
 
 
 .page-list-container .filters{
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
 }
 
 .page-list-container .filters .filter{

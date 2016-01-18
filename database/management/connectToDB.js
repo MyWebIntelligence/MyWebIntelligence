@@ -6,11 +6,11 @@ var conStringByNODE_ENV = {
     // with docker-compose
     "development":  "postgres://postgres:password@db:5432/postgres", // default NODE_ENV value
     "experimental": "postgres://postgres:password@db:5432/postgres",
+    "production":   "postgres://postgres:password@db:5432/postgres",
     "test":         "postgres://postgres:password@db:5432/postgres",
     
     // without docker-compose (yet)
-    "dev-docker":   "postgres://postgres:password@mywi-dev-db:5432/postgres",
-    "stable":       "postgres://postgres:password@mywi-stable-db:5432/postgres"
+    "dev-docker":   "postgres://postgres:password@mywi-dev-db:5432/postgres"
 }
 
 var conString = conStringByNODE_ENV[process.env.NODE_ENV];

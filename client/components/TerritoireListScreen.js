@@ -3,6 +3,7 @@
 var React = require('react');
 
 var Header = React.createFactory(require('./Header'));
+var Navigation = React.createFactory(require('./Navigation'));
 var TerritoiresList = React.createFactory(require('./TerritoiresList'));
 
 /*
@@ -197,7 +198,7 @@ module.exports = React.createClass({
             }),
             
             React.DOM.section({id: 'sectionConnectContent'},
-                React.DOM.section({id: 'sectionNavigation'}),
+                new Navigation(),
                 React.DOM.section({id: 'sectionBody'})
             )
         

@@ -267,6 +267,17 @@ div, input, textarea, select{
 	z-index:15;
 }
 
+
+#sectionNavigation > * {
+    border-top:1px solid rgb(71,71,73);
+}
+
+#sectionNavigation > *:last-child{
+    border-bottom:1px solid rgb(71,71,73);
+}
+
+
+
 #sectionNavigationLogo {
 	text-align:right;
 }
@@ -277,11 +288,11 @@ div, input, textarea, select{
 }
 
 #sectionNavigationTerritory {
-	border-top:1px solid rgb(71,71,73);
 	text-align:right;
 	height:40px;
 	padding:5px;
 	cursor:pointer;
+    display: block; 
 }
 
 #sectionNavigationTerritory:hover{
@@ -315,7 +326,6 @@ div, input, textarea, select{
 }
 
 #sectionNavigationNewTerritory {
-	border-top:1px solid rgb(71,71,73);
 	text-align:right;
 	height:40px;
 	padding:5px;
@@ -348,9 +358,11 @@ div, input, textarea, select{
 	width:auto;
 }
 
+
+
 #sectionNavigationNetworks {
-	border-top:1px solid rgb(71,71,73);
-	border-bottom:1px solid rgb(71,71,73);
+	
+	
 	text-align:right;
 
 }
@@ -576,11 +588,9 @@ div, input, textarea, select{
 }
 
 #sectionBodyViewInfos {
-
 	border-top:1px solid rgb(71,71,73);
 	border-bottom:1px solid rgb(71,71,73);
 	padding:5px 0px;
-
 }
 
 #sectionBodyViewInfosLeft {

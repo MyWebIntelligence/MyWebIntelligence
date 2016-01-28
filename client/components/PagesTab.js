@@ -8,7 +8,7 @@ var documentOffset = require('global-offset');
 var PageListItem = React.createFactory(require('./PageListItem'));
 var SelectFilter = React.createFactory(require('./SelectFilter'));
 var BooleanFilter = React.createFactory(require('./BooleanFilter'));
-var DoubleRangeFilter = React.createFactory(require('./DoubleRangeFilter'));
+//var DoubleRangeFilter = React.createFactory(require('./DoubleRangeFilter'));
 
 var makeResourceSocialImpactIndexMap = require('../../automatedAnnotation/makeResourceSocialImpactIndexMap');
 
@@ -316,7 +316,6 @@ module.exports = React.createClass({
                             }
                         }
                     ),
-                    new DoubleRangeFilter({}),
                     new BooleanFilter(
                         {
                             className: 'favorite',

@@ -2,7 +2,7 @@
 
 var React = require('react');
 
-var Header = require('./Header');
+var Header = React.createFactory(require('./Header'));
 var TerritoiresList = React.createFactory(require('./TerritoiresList'));
 
 /*
@@ -16,6 +16,8 @@ interface TerritoiresListScreenProps{
 
 
 module.exports = React.createClass({
+    displayName: 'TerritoireListScreen',
+    
     getInitialState: function() {
         return {
             user: this.props.user
@@ -189,16 +191,16 @@ module.exports = React.createClass({
             })
         ];
         
-        
-        return React.DOM.div({className: "react-wrapper"}, [
-            
+        return React.DOM.section({id: "sectionConnect"},
             new Header({
-                user: state.user,
-                oracleHref: "/oracles"
+                user: state.user
             }),
             
-            React.DOM.main({className: 'territoire-list'}, mainChildren)
+            React.DOM.section({id: 'sectionConnectContent'},
+                React.DOM.section({id: 'sectionNavigation'}),
+                React.DOM.section({id: 'sectionBody'})
+            )
         
-        ]);
+        );
     }
 });

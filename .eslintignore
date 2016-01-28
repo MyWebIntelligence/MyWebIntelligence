@@ -1,5 +1,6 @@
 node_modules
 mockup
+client/js
 
 client/browserify-bundle.js
 test/**/*.js

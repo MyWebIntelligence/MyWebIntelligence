@@ -268,7 +268,7 @@ div, input, textarea, select{
 }
 
 
-#sectionNavigation > * {
+#sectionNavigation > *:nth-child(n+2) {
     border-top:1px solid rgb(71,71,73);
 }
 

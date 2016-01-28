@@ -3,8 +3,6 @@
 var React = require('react');
 
 var TerritoireListItem = React.createFactory(require('./TerritoireListItem'));
-var TerritoireForm = React.createFactory(require('./TerritoireForm'));
-
 
 /*
 
@@ -24,52 +22,13 @@ interface TerritoireListProps{
 */
 
 module.exports = React.createClass({
-    getInitialState: function(){
-        return { newTerritoireFormOpen: this.props.territoires.length === 0 };
-    },
+    displayName: 'TerritoiresList',
     
     render: function(){
         var props = this.props;
-        var state = this.state;
-        var self = this;
-
-        /*
-            <ul class="territoires">
-                <li>
-                    <a href="">
-                        <div class="name">fliquepluch</div>
-                        <div class="description">mjdfjezfjfz</div>
-                        <ul class="queries">
-                            <li>query1
-                            <li>query2
-                        </ul>
-                    </a>
-                    <button class="delete"></button>
-                <li>
-            </ul>
-        */
         
-        return React.DOM.ul({className: "territoires"}, [
-            React.DOM.li(
-                {
-                    className: state.newTerritoireFormOpen ? '' : 'add',
-                    key: '+'
-                }, 
-                state.newTerritoireFormOpen ?
-                    new TerritoireForm({
-                        initialCreation: true,
-                        onSubmit: function(territoireData){
-                            props.createTerritoire(territoireData);
-                            self.setState({ newTerritoireFormOpen: false });
-                        },
-                        oracles: props.oracles
-                    }) :
-                    React.DOM.button({
-                        onClick: function(){
-                            self.setState({ newTerritoireFormOpen: true });
-                        }
-                    }, '+')
-            )].concat(props.territoires.map(function(t){
+        return React.DOM.section({id: 'sectionBodyTerritories', className: 'sectionBody on'},
+            props.territoires.map(function(t){
                 return new TerritoireListItem({
                     key: t.id,
                     territoire: t,
@@ -80,7 +39,7 @@ module.exports = React.createClass({
                     removeQueryFromTerritoire: props.removeQueryFromTerritoire,
                     onQueryChange: props.onQueryChange
                 });
-            }))
+            })
         );
     }
 });

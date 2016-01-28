@@ -2,8 +2,8 @@
 
 var React = require('react');
 
-var QueryForm = React.createFactory(require('./QueryForm'));
-var TerritoireForm = React.createFactory(require('./TerritoireForm'));
+//var QueryForm = React.createFactory(require('./QueryForm'));
+//var TerritoireForm = React.createFactory(require('./TerritoireForm'));
 
 /*
 interface TerritoireListItemProps{
@@ -20,6 +20,8 @@ interface TerritoireListItemProps{
 */
 
 module.exports = React.createClass({
+    displayName: 'TerritoireListItem',
+    
     getInitialState: function(){
         var openQueryForms = new Set();
         var t = this.props.territoire;
@@ -37,12 +39,12 @@ module.exports = React.createClass({
     
     render: function(){
         var props = this.props;
-        var state = this.state;
-        var self = this;
+        //var state = this.state;
+        //var self = this;
         
-        var t = props.territoire;
+        var territoire = props.territoire;
     
-        var children;
+        /*var children;
         
         if(state.editMode){
             children = [ new TerritoireForm({
@@ -194,10 +196,38 @@ module.exports = React.createClass({
                     ])
                 ]))
             ]
-        }
+        }*/
         
         
         
-        return React.DOM.li({}, children);
+        return React.DOM.div({className: 'sectionBodyTerritories'},
+            React.DOM.div({className: 'sectionBodyTerritoriesLabel'},
+                React.DOM.div({className: 'sectionBodyTerritoriesLabelLogo'},
+                    React.DOM.img({src: 'images/oneTerritory.png'})             
+                ),
+                React.DOM.div({className: 'sectionBodyTerritoriesLabelTitle'}, territoire.name),
+                React.DOM.div({className: 'clear'})
+            ),
+            React.DOM.div({className: 'sectionBodyTerritoriesInfos'},
+                React.DOM.div({className: 'sectionBodyTerritoriesInfos2'}, 'X - Y - Z'),
+                React.DOM.div({className: 'sectionBodyTerritoriesInfos1'}, 'NaN'),
+                React.DOM.div({className: 'sectionBodyTerritoriesInfosLogo'},
+                    React.DOM.img({src: 'images/oneTerritoryCount.png'})             
+                ),
+                React.DOM.div({className: 'clear'})
+            ),
+            React.DOM.div({className: 'clear'}),
+            React.DOM.div({className:'sectionBodyTerritoriesButtons'},
+                React.DOM.div({className: 'sectionBodyTerritoriesButtonsButton sectionBodyTerritoriesButtonsButtonResult'}, 'Result'),
+                React.DOM.div({className: 'sectionBodyTerritoriesButtonsButton sectionBodyTerritoriesButtonsButtonQuery no'}, 'No query'),
+                React.DOM.div({className: 'sectionBodyTerritoriesButtonsButton sectionBodyTerritoriesButtonsButtonExport'}, 'Export'),
+                //React.DOM.div({className: 'sectionBodyTerritoriesButtonsButton sectionBodyTerritoriesButtonsButtonImport'}, 'Import'),
+                React.DOM.div({className: 'sectionBodyTerritoriesButtonsButton sectionBodyTerritoriesButtonsButtonDownload'},
+                    'Download'+' ',
+                    React.DOM.i({className: 'fa fa-caret-down'})
+                ),
+                React.DOM.div({className: 'clear'})
+            )
+        )
     }
 });

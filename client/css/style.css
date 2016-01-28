@@ -48,7 +48,6 @@ div, input, textarea, select{
 
 #sectionConnexionBoxContent {
 
-	display:inline-block;
 	width: 100%;
 	display: table-cell;
 	vertical-align: middle;

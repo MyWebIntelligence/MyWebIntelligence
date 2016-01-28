@@ -21,7 +21,7 @@ interface DomainTabProps{
 */
 
 module.exports = React.createClass({
-    displayName: "DomainTab",
+    displayName: "DomainsTab",
     
     _makeDomainGraphNodeList: function(domainGraph, pageRankMap){
         var self = this;

@@ -1,0 +1,44 @@
+.filter.double-range{
+    width: 8em;
+    position: relative;
+    
+    height: 100%;
+    vertical-align: bottom;
+}
+
+.filter.double-range hr{
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.filter.double-range hr.guide{
+    border-color: #BBB;
+}
+
+.filter.double-range hr.selected-portion{
+    border-color: aquamarine;
+    width: 50%;
+    left: 25%;
+}
+
+.filter.double-range .handle{
+    position: absolute;
+    height: 100%;
+    width: 1em;
+    transform: translateX(-50%);
+    background-color: transparent;
+    border: 1px solid black;
+    cursor: pointer;
+}
+
+.filter.double-range .handle.left{
+    left: 0;
+}
+
+.filter.double-range .handle.right{
+    left: 100%;
+}

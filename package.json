@@ -21,7 +21,7 @@
     "kill-stable": "docker-compose -f compose-stable.yml -p mywistable kill",
     "bundle": "jsx node_modules/react-tabs-component/ client/components/external/ Tabs && browserify client/index.js -o client/browserify-bundle.js --ignore request --ignore jsdom",
     "watch": "watchify client/index.js -o client/browserify-bundle.js -d -v --ignore request --ignore jsdom",
-    "lint": "eslint ./",
+    "lint": "clear; eslint ./",
     "build-test-crawl-docker-image": "docker build --tag=\"mywi/test-crawl\" --file=test/automated/crawl/Dockerfile .",
     "test-crawl": "docker run --add-host a.web:127.0.0.1 mywi/test-crawl /usr/bin/supervisord -c /usr/mywi/test/automated/crawl/supervisord.conf",
     "sql-generate": "docker exec mywi_app_1 ./node_modules/.bin/node-sql-generate --dsn postgres://postgres:password@db:5432/postgres > ./database/management/declarations.js",

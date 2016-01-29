@@ -1,8 +1,9 @@
 "use strict";
 
+var ImmutableSet = require('immutable').Set;
 var React = require('react');
 
-//var QueryForm = React.createFactory(require('./QueryForm'));
+var QueryForm = React.createFactory(require('./QueryForm'));
 //var TerritoireForm = React.createFactory(require('./TerritoireForm'));
 
 /*
@@ -23,24 +24,16 @@ module.exports = React.createClass({
     displayName: 'TerritoireListItem',
     
     getInitialState: function(){
-        var openQueryForms = new Set();
-        var t = this.props.territoire;
-        
-        // if territoire has no query, open the form to create one right away
-        if(t.queries.length === 0){ 
-            openQueryForms.add('+');
-        }
-        
         return {
-            openQueryForms: openQueryForms,
-            editMode: false
+            openQueryForms: new ImmutableSet(),
+            showQueries: false
         };
     },
     
     render: function(){
         var props = this.props;
-        //var state = this.state;
-        //var self = this;
+        var state = this.state;
+        var self = this;
         
         var territoire = props.territoire;
     
@@ -210,7 +203,7 @@ module.exports = React.createClass({
             ),
             React.DOM.div({className: 'sectionBodyTerritoriesInfos'},
                 React.DOM.div({className: 'sectionBodyTerritoriesInfos2'}, 'X - Y - Z'),
-                React.DOM.div({className: 'sectionBodyTerritoriesInfos1'}, 'NaN'),
+                React.DOM.div({className: 'sectionBodyTerritoriesInfos1'}, 'XX'),
                 React.DOM.div({className: 'sectionBodyTerritoriesInfosLogo'},
                     React.DOM.img({src: 'images/oneTerritoryCount.png'})             
                 ),
@@ -219,7 +212,23 @@ module.exports = React.createClass({
             React.DOM.div({className: 'clear'}),
             React.DOM.div({className:'sectionBodyTerritoriesButtons'},
                 React.DOM.div({className: 'sectionBodyTerritoriesButtonsButton sectionBodyTerritoriesButtonsButtonResult'}, 'Result'),
-                React.DOM.div({className: 'sectionBodyTerritoriesButtonsButton sectionBodyTerritoriesButtonsButtonQuery no'}, 'No query'),
+                React.DOM.div(
+                    {
+                        className: [
+                            'sectionBodyTerritoriesButtonsButton', 
+                            'sectionBodyTerritoriesButtonsButtonQuery',
+                            territoire.queries.length === 0 ? 'no' : ''
+                        ].join(' ').trim(),
+                        onClick: function(){
+                            self.setState(Object.assign(
+                                {},
+                                state,
+                                {
+                                    showQueries: !state.showQueries
+                                }
+                            ))
+                        }
+                    }, territoire.queries.length === 0 ? 'No query' : 'Queries'),
                 React.DOM.div({className: 'sectionBodyTerritoriesButtonsButton sectionBodyTerritoriesButtonsButtonExport'}, 'Export'),
                 //React.DOM.div({className: 'sectionBodyTerritoriesButtonsButton sectionBodyTerritoriesButtonsButtonImport'}, 'Import'),
                 React.DOM.div({className: 'sectionBodyTerritoriesButtonsButton sectionBodyTerritoriesButtonsButtonDownload'},
@@ -227,6 +236,72 @@ module.exports = React.createClass({
                     React.DOM.i({className: 'fa fa-caret-down'})
                 ),
                 React.DOM.div({className: 'clear'})
+            ),
+            React.DOM.div({className: 'sectionBodyTerritoriesQuerys', hidden: !state.showQueries},
+                React.DOM.div({className: 'sectionBodyTerritoriesQuerysNew'}, 'New query'),
+                territoire.queries.map(function(q){
+                    return React.DOM.div(
+                        {
+                            className: 'sectionBodyTerritoriesQuerysLine'
+                        },
+                        React.DOM.div(
+                            {
+                                className: 'sectionBodyTerritoriesQuerysLineTitle',
+                                onClick: function(){                                
+                                    var openQueryForms = state.openQueryForms;
+                                    var id = q.id;
+
+                                    self.setState(Object.assign(
+                                        {},
+                                        state,
+                                        {
+                                            openQueryForms : openQueryForms.has(id) ?
+                                                openQueryForms.delete(id) :
+                                                openQueryForms.add(id)
+                                        }
+
+                                    ))
+                                }
+                            },
+                            React.DOM.div({className: 'sectionBodyTerritoriesQuerysLineTitle'}, q.name),
+                            React.DOM.div({className: 'sectionBodyTerritoriesQuerysLineTitle'},
+                                React.DOM.img({src: 'images/territoryTitle.png'})             
+                            )          
+                        ),
+                        
+                        state.openQueryForms.has(q.id) ?
+                            new QueryForm({
+                                oracles: props.oracles,
+                                query: q,
+                                onSubmit: function(formData){
+                                    var keysWithChange = Object.keys(formData).filter(function(k){
+                                        return q[k] !== formData[k];
+                                    });
+
+                                    if(keysWithChange.length >= 1){
+                                        var deltaQuery = {id: q.id};
+
+                                        keysWithChange.forEach(function(k){
+                                            deltaQuery[k] = formData[k];
+                                        });
+
+                                        // new territoire is the current one mutated at the .queries array level
+                                        props.onQueryChange(deltaQuery, territoire);
+                                    }
+
+                                    // close the form UI in all cases
+                                    state.openQueryForms.delete(q.id);
+                                    self.setState({
+                                        openQueryForms: state.openQueryForms,
+                                        editMode: false
+                                    });
+                                },
+                                deleteQuery: function(query){
+                                    props.removeQueryFromTerritoire(query, territoire);
+                                }
+                            }) : undefined
+                    )}
+                )         
             )
         )
     }

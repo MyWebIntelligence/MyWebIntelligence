@@ -797,6 +797,10 @@ div, input, textarea, select{
 .territoryFormQueryLineInput > select > option {
 }
 
+.territoryFormQueryLineInput textarea{
+    width: 100%;
+}
+
 .territoryFormButton {
 
 	width:60px;
@@ -933,10 +937,6 @@ div, input, textarea, select{
 .fa-caret-bottom {
 }
 
-.sectionBodyTerritoriesQuerys {
-	display:none;
-}
-
 .sectionBodyTerritoriesQuerysNew {
 	font-weight:700;
 	text-transform: uppercase;
@@ -979,8 +979,7 @@ div, input, textarea, select{
 	margin-top:10px;
 }
 
-.sectionBodyTerritoriesQuerysLineForm {
-	display:none;
+.sectionBodyTerritoriesQuerysLineForm {	
 }
 
 #sectionBodyTerritoryLabel {

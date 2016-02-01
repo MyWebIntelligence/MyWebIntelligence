@@ -796,14 +796,21 @@ div, input, textarea, select{
 	margin-top:30px;
 	background-color:rgb(239,239,240);
 	color:rgb(71,71,73);
-	border-radius: 30px;
+	
 	text-align:center;
 	text-transform: uppercase;
 	padding:10px;
 	line-height:40px;
+    
+    font-family: Arial;
 	font-size:22px;
 	font-weight:500;
 	cursor:pointer;
+    
+    border-radius: 50%;
+    border: 0;
+    
+    display: block;
 
 }
 

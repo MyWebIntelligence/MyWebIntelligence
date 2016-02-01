@@ -81,9 +81,7 @@ page("/territoire/:id", function displayTerritoireViewScreen(context){
         return terr.id === territoireId;
     });
     // console.log('/territoire/:id', territoireId, data.user.territoires, t);
-    
-    var screenData = {};
-    
+        
     function refresh(){
         console.log('refresh');
         return serverAPI.getTerritoireViewData(t)
@@ -95,11 +93,11 @@ page("/territoire/:id", function displayTerritoireViewScreen(context){
     }
     
     function render(terrViewData){
-        screenData = Object.assign(
-            {refresh: refresh},
-            screenData,
-            {territoire: terrViewData}
-        );
+        var screenData = {
+            refresh: refresh,
+            territoire: terrViewData,
+            user: data.user
+        };
 
         React.render(new TerritoireViewScreen(screenData), document.body);
     }

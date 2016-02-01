@@ -211,7 +211,13 @@ module.exports = React.createClass({
             ),
             React.DOM.div({className: 'clear'}),
             React.DOM.div({className:'sectionBodyTerritoriesButtons'},
-                React.DOM.div({className: 'sectionBodyTerritoriesButtonsButton sectionBodyTerritoriesButtonsButtonResult'}, 'Result'),
+                React.DOM.a(
+                    {
+                        href: '/territoire/'+territoire.id,
+                        className: 'sectionBodyTerritoriesButtonsButton sectionBodyTerritoriesButtonsButtonResult'
+                    },
+                    'Result'
+                ),
                 React.DOM.div(
                     {
                         className: [

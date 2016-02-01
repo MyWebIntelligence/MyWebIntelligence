@@ -914,6 +914,8 @@ div, input, textarea, select{
 }
 
 .sectionBodyTerritoriesButtonsButtonResult {
+    color: black;
+    text-decoration: none;
 }
 
 .sectionBodyTerritoriesButtonsButtonQuery {

@@ -15,7 +15,7 @@ module.exports = React.createClass({
     render: function() {
         
         return React.DOM.div({id: 'sectionConnexionBoxContentBox'},
-            React.DOM.img({src: 'images/logo.png'}),
+            React.DOM.img({src: '/images/logo.png'}),
             React.DOM.div({id: 'sectionConnexionBoxContentBoxReseaux'},
                 /*React.DOM.div(
                     {

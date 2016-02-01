@@ -196,7 +196,7 @@ module.exports = React.createClass({
         return React.DOM.div({className: 'sectionBodyTerritories'},
             React.DOM.div({className: 'sectionBodyTerritoriesLabel'},
                 React.DOM.div({className: 'sectionBodyTerritoriesLabelLogo'},
-                    React.DOM.img({src: 'images/oneTerritory.png'})             
+                    React.DOM.img({src: '/images/oneTerritory.png'})             
                 ),
                 React.DOM.div({className: 'sectionBodyTerritoriesLabelTitle'}, territoire.name),
                 React.DOM.div({className: 'clear'})
@@ -205,7 +205,7 @@ module.exports = React.createClass({
                 React.DOM.div({className: 'sectionBodyTerritoriesInfos2'}, 'X - Y - Z'),
                 React.DOM.div({className: 'sectionBodyTerritoriesInfos1'}, 'XX'),
                 React.DOM.div({className: 'sectionBodyTerritoriesInfosLogo'},
-                    React.DOM.img({src: 'images/oneTerritoryCount.png'})             
+                    React.DOM.img({src: '/images/oneTerritoryCount.png'})             
                 ),
                 React.DOM.div({className: 'clear'})
             ),
@@ -265,7 +265,7 @@ module.exports = React.createClass({
                             },
                             React.DOM.div({className: 'sectionBodyTerritoriesQuerysLineTitle'}, q.name),
                             React.DOM.div({className: 'sectionBodyTerritoriesQuerysLineTitle'},
-                                React.DOM.img({src: 'images/territoryTitle.png'})             
+                                React.DOM.img({src: '/images/territoryTitle.png'})             
                             )          
                         ),
                         

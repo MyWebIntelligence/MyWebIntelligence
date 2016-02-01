@@ -18,7 +18,7 @@ module.exports = React.createClass({
         
         return React.DOM.section({id: 'sectionNavigation'},
             React.DOM.div({id: 'sectionNavigationLogo'},
-                React.DOM.img({src: 'images/logo.png'})
+                React.DOM.img({src: '/images/logo.png'})
             ),
             React.DOM.a(
                 {
@@ -26,7 +26,7 @@ module.exports = React.createClass({
                     className: props.activeScreen === 'territoire-list' ? 'on' : undefined
                 },
                 React.DOM.div({id: 'sectionNavigationTerritoryImg'},
-                    React.DOM.img({src: 'images/territory.png'})
+                    React.DOM.img({src: '/images/territory.png'})
                 ),
                 React.DOM.div({id: 'sectionNavigationTerritoryLabel'}, 'Territoires'),
                 React.DOM.div({className: 'clear'})
@@ -37,7 +37,7 @@ module.exports = React.createClass({
                     className: props.activeScreen === 'new-territoire' ? 'on' : undefined
                 }, 
                 React.DOM.div({id: 'sectionNavigationTerritoryImg'},
-                    React.DOM.img({src: 'images/newTerritory.png'})
+                    React.DOM.img({src: '/images/newTerritory.png'})
                 ),
                 React.DOM.div({id: 'sectionNavigationTerritoryLabel'}, 'Create a new territoire'),
                 React.DOM.div({className: 'clear'})

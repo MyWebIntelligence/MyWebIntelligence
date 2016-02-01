@@ -7,7 +7,8 @@ var moment = require('moment');
 var documentOffset = require('global-offset');
 
 var Header = React.createFactory(require('./Header'));
-var DomainTab = React.createFactory(require('./DomainTab'));
+var PagesTab = React.createFactory(require('./PagesTab'));
+var DomainsTab = React.createFactory(require('./DomainsTab'));
 var PageListItem = React.createFactory(require('./PageListItem'));
 
 var abstractGraphToPageGraph = require('../../common/graph/abstractGraphToPageGraph');
@@ -247,6 +248,7 @@ module.exports = React.createClass({
         var territoire = this.props.territoire;
                         
         return {
+            currentTab: 'pages', // | 'domains'
             territoireTags: computeTerritoireTags(territoire.resourceAnnotationByResourceId),
             resourceAnnotationByResourceId: territoire.resourceAnnotationByResourceId,
             expressionDomainAnnotationsByEDId: territoire.expressionDomainAnnotationsByEDId,
@@ -280,7 +282,7 @@ module.exports = React.createClass({
         var numberOfDisplayedItems = Math.ceil(state.windowHeight/listItemHeight);
         var listEndIndex = listStartIndex + LIST_START_PADDING + numberOfDisplayedItems + LIST_END_PADDING;
         
-        //throw 'Perf improvement idea: hook to tab events. Manage state here. Only generate the correct child.'
+        console.log('TerritoireViewScreenContent render', numberOfDisplayedItems);
         
         return React.DOM.section({id: 'sectionBodyTerritory', className: 'sectionBody on'},
                                  
@@ -300,8 +302,26 @@ module.exports = React.createClass({
                 React.DOM.div({className: 'clear'})
             ),
             React.DOM.div({id: 'sectionBodyTerritoryButtons'},
-                React.DOM.div({id: 'sectionBodyTerritoryButtonsButtonPages', className: 'sectionBodyTerritoryButtonsButton on'}, 'Pages'),
-                React.DOM.div({id: 'sectionBodyTerritoryButtonsButtonDomains', className: 'sectionBodyTerritoryButtonsButton'}, 'Domains'),
+                React.DOM.div(
+                    {
+                        id: 'sectionBodyTerritoryButtonsButtonPages', 
+                        className: [
+                            'sectionBodyTerritoryButtonsButton',
+                            state.currentTab === 'pages' ? 'on' : ''
+                        ].join(' ').trim()
+                    },
+                    'Pages'
+                ),
+                React.DOM.div(
+                    {
+                        id: 'sectionBodyTerritoryButtonsButtonDomains', 
+                        className: [
+                            'sectionBodyTerritoryButtonsButton',
+                            state.currentTab === 'domains' ? 'on': ''
+                        ].join(' ').trim()
+                    },
+                    'Domains'
+                ),
                 React.DOM.div(
                     {
                         id: 'sectionBodyTerritoryButtonsButtonDownload',
@@ -309,8 +329,79 @@ module.exports = React.createClass({
                     },
                     'Downloads',
                     React.DOM.i({className: 'fa fa-caret-down'})
-                )
-            )
+                ),
+                React.DOM.div({className: 'clear'})
+            ),
+            state.currentTab === 'pages' ?
+                new PagesTab({
+                    expressionById: territoire.expressionById,
+                    expressionDomainsById: territoire.expressionDomainsById,
+                    expressionDomainAnnotationsByEDId: state.expressionDomainAnnotationsByEDId,
+                    resourceAnnotationByResourceId: territoire.resourceAnnotationByResourceId,
+                    pageGraph: territoire.graph,
+                    territoireId: territoire.id,
+                    rejectedResourceIds: state.rejectedResourceIds,
+                    annotate: function(resourceId, newAnnotations, approved){
+                        newAnnotations = newAnnotations || {}
+                        var resourceAnnotations = territoire.resourceAnnotationByResourceId[resourceId];
+
+                        var deltaResourceAnnotations;
+
+                        deltaResourceAnnotations = Object.assign(
+                            {}, 
+                            newAnnotations, 
+                            {approved: approved}
+                        );
+
+                        // remove merged object
+                        newAnnotations = undefined;
+
+                        // is it worth calling annotateResource?
+                        if(Object.keys(deltaResourceAnnotations)
+                           .some(function(k){ return deltaResourceAnnotations[k] !== undefined }) ||
+                           approved !== undefined
+                          ){
+                            // TODO add a pending state or something
+                            annotateResource(resourceId, territoire.id, deltaResourceAnnotations)
+                            .catch(function(err){
+                                console.error(
+                                    'resource annotation update error', 
+                                    resourceId, territoire.id, deltaResourceAnnotations, approved, err
+                                );
+                            });
+                        }
+
+                        // updating annotations locally (optimistically hoping being in sync with the server)
+                        var territoireTags = state.territoireTags;
+
+                        // add tags for autocomplete
+                        // tags are only added, never removed for autocomplete purposes
+                        if(deltaResourceAnnotations.tags){
+                            deltaResourceAnnotations.tags.forEach(function(t){
+                                territoireTags = territoireTags.add(t);
+                            });
+                        }
+
+                        state.resourceAnnotationByResourceId[resourceId] = Object.assign(
+                            {},
+                            resourceAnnotations,
+                            deltaResourceAnnotations
+                        );
+
+                        var rejectedResourceIds = state.rejectedResourceIds;
+                        if(approved !== undefined){
+                            rejectedResourceIds = approved ?
+                                rejectedResourceIds.delete(resourceId) :
+                                rejectedResourceIds.add(resourceId);
+                        }
+
+                        self.setState(Object.assign({}, state, {
+                            resourceAnnotationByResourceId: state.resourceAnnotationByResourceId, // mutated
+                            territoireTags: territoireTags,
+                            rejectedResourceIds: rejectedResourceIds
+                        }));
+                    }
+                }) : undefined
                                  
                                  
             

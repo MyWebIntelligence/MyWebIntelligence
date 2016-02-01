@@ -19,18 +19,6 @@ var LIST_START_PADDING = 5;
 var LIST_END_PADDING = LIST_START_PADDING;
 
 
-/*
-throw 'TODO';
-
-    Make a PageFilters component which has many filter children
-    Filters are generic (boolean, select, double-range)
-    
-    The PageFilters element generates a function which returns true/false for a given page (pageGraph node here)
-    Init filter values determine the initial filter.
-    Add cancel button whichmakes the filter return back to the default value
-    
-*/
-
 
 var DEFAULT_MEDIA_TYPE = undefined;
 var DEFAULT_EMITTER_TYPE = undefined;
@@ -234,6 +222,8 @@ module.exports = React.createClass({
             state.filterValues, 
             state.nodeToFilterInfos
         );
+        
+        console.log('PagesTab', 'pageListItems', pageListItems)
 
         var possibleMediaTypes = new ImmutableSet(['']);
         var possibleEmitterTypes = new ImmutableSet(['']);
@@ -265,21 +255,12 @@ module.exports = React.createClass({
         return React.DOM.div(
             {
                 className: 'page-list-container',
-                style: {
+                /*style: {
                     height: state.pageListItems ? state.pageListItems.length * listItemHeight + 'px' : '100%'
-                }
+                }*/
             },
-            React.DOM.ul(
-                {
-                    className: 'result-list',
-                    style: {
-                        transform: 'translateY('+listStartIndex*listItemHeight+'px)'
-                    }
-                },
-                React.DOM.div(
-                    {
-                        className: 'filters'
-                    },
+            React.DOM.div({id: 'sectionBodyTerritoryFilters'},
+                React.DOM.div({id: 'sectionBodyTerritoryFiltersFilter01', className: 'sectionBodyTerritoryFiltersFilter'},
                     new SelectFilter(
                         {
                             label: 'Media',
@@ -298,7 +279,9 @@ module.exports = React.createClass({
                                 ))
                             }
                         }
-                    ),
+                    )
+                ),
+                React.DOM.div({id: 'sectionBodyTerritoryFiltersFilter02', className: 'sectionBodyTerritoryFiltersFilter'},
                     new SelectFilter(
                         {
                             label: 'Emitter',
@@ -315,7 +298,9 @@ module.exports = React.createClass({
                                 ))
                             }
                         }
-                    ),
+                    )
+                ),
+                React.DOM.div({id: 'sectionBodyTerritoryFiltersFilter03', className: 'sectionBodyTerritoryFiltersFilter'},
                     new BooleanFilter(
                         {
                             className: 'favorite',
@@ -330,7 +315,9 @@ module.exports = React.createClass({
                                 ))
                             }
                         }
-                    ),
+                    )
+                ),
+                React.DOM.div({id: 'sectionBodyTerritoryFiltersFilter04', className: 'sectionBodyTerritoryFiltersFilter'},
                     new BooleanFilter(
                         {
                             label: '☹',
@@ -348,7 +335,9 @@ module.exports = React.createClass({
                         }
                     )
                 ),
-                
+                React.DOM.div({className: 'clear'})
+            ),
+            React.DOM.div({id: 'sectionBodyTerritoryPages', className: 'sectionBodyTerritoryPage on'},
                 pageListItems && pageListItems
                     .slice(listStartIndex, listEndIndex)
                     .map(function(node){

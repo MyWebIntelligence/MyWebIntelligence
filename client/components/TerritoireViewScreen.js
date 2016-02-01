@@ -23,6 +23,8 @@ module.exports = React.createClass({
         var self = this;
         var props = this.props;
         
+        console.log('TerritoireViewScreen render');
+        
         return React.DOM.section({id: "sectionConnect"},
 
             new Header({

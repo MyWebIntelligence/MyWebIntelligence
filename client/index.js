@@ -10,7 +10,7 @@ var serverAPI = require('./serverAPI/index');
 
 var LoginScreen = React.createFactory(require('./components/LoginScreen'));
 var TerritoireListScreen = React.createFactory(require('./components/TerritoireListScreen'));
-var OraclesScreen = React.createFactory(require('./components/OraclesScreen'));
+var NewTerritoireScreen = React.createFactory(require('./components/NewTerritoireScreen'));
 var TerritoireViewScreen = React.createFactory(require('./components/TerritoireViewScreen'));
 
 /*
@@ -38,30 +38,6 @@ page("/", function(){
 });
 page("/index.html", "/");
 
-page("/oracles", function(){
-    var screenData = Object.assign(
-        {
-            onOracleCredentialsChange: function onOracleCredentialsChange(formData){
-                serverAPI.updateOracleCredentials(formData);
-            }
-        },
-        data
-    );
-
-    serverAPI.getCurrentUserOraclesCredentials().then(function(credentials){
-        var credentialsByOracleId = Object.create(null);
-        
-        credentials.forEach(function(c){
-            credentialsByOracleId[c.oracle_id] = c.credentials;
-        });
-        
-        screenData.oracleCredentials = credentialsByOracleId;
-        React.render(new OraclesScreen(screenData), document.body);
-    });
-
-    React.render(new OraclesScreen(screenData), document.body);
-});
-
 page("/territoires", function(){
     var screenData = Object.assign(
         {
@@ -72,6 +48,18 @@ page("/territoires", function(){
     console.log('/territoires screenData', screenData, data);
 
     React.render(new TerritoireListScreen(screenData), document.body);
+});
+
+page("/territoires/new", function(){
+    var screenData = Object.assign(
+        {
+            serverAPI : serverAPI
+        },
+        data
+    );
+    console.log('/territoires/new screenData', screenData, data); 
+
+    React.render(new NewTerritoireScreen(screenData), document.body);
 });
 
 

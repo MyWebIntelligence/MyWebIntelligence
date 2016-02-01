@@ -287,7 +287,8 @@ div, input, textarea, select{
 	width:auto;
 }
 
-#sectionNavigationTerritory {
+#sectionNavigation > *:nth-child(n+2) {
+    color: black;
 	text-align:right;
 	height:40px;
 	padding:5px;
@@ -295,15 +296,16 @@ div, input, textarea, select{
     display: block; 
 }
 
-#sectionNavigationTerritory:hover{
+#sectionNavigation > *:nth-child(n+2):hover{
 	background-color:rgb(239,239,240);
 }
 
-#sectionNavigationTerritory.on,#sectionNavigationTerritory.on:hover{
+#sectionNavigation > *:nth-child(n+2).on,
+#sectionNavigation > *:nth-child(n+2).on:hover{
 	background-color:rgb(223,229,229);
 }
 
-#sectionNavigationTerritory:hover{
+#sectionNavigation > *:nth-child(n+2):hover{
 	background-color:rgb(239,239,240);
 }
 
@@ -323,21 +325,6 @@ div, input, textarea, select{
 #sectionNavigationTerritoryImg img{
 	height:28px;
 	width:auto;
-}
-
-#sectionNavigationNewTerritory {
-	text-align:right;
-	height:40px;
-	padding:5px;
-	cursor:pointer;
-}
-
-#sectionNavigationNewTerritory.on,#sectionNavigationNewTerritory.on:hover{
-	background-color:rgb(223,229,229);
-}
-
-#sectionNavigationNewTerritory:hover{
-	background-color:rgb(239,239,240);
 }
 
 #sectionNavigationNewTerritoryLabel {

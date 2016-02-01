@@ -5,7 +5,7 @@ var React = require('react');
 /*
 
 interface NavigationProps{
-    activeScreen: string
+    activeScreen: 'territoire-list' | 'new-territoire'
 }
 
 */
@@ -14,20 +14,28 @@ module.exports = React.createClass({
     displayName: 'Navigation',
     
     render: function() {
-        //var props = this.props;
+        var props = this.props;
         
         return React.DOM.section({id: 'sectionNavigation'},
             React.DOM.div({id: 'sectionNavigationLogo'},
                 React.DOM.img({src: 'images/logo.png'})
             ),
-            React.DOM.a({id: 'sectionNavigationTerritory', className: 'on'},
+            React.DOM.a(
+                {
+                    href: '/territoires',
+                    className: props.activeScreen === 'territoire-list' ? 'on' : undefined
+                },
                 React.DOM.div({id: 'sectionNavigationTerritoryImg'},
                     React.DOM.img({src: 'images/territory.png'})
                 ),
                 React.DOM.div({id: 'sectionNavigationTerritoryLabel'}, 'Territoires'),
                 React.DOM.div({className: 'clear'})
             ),
-            React.DOM.div({id: 'sectionNavigationNewTerritory'},
+            React.DOM.a(
+                {
+                    href: '/territoires/new',
+                    className: props.activeScreen === 'new-territoire' ? 'on' : undefined
+                }, 
                 React.DOM.div({id: 'sectionNavigationTerritoryImg'},
                     React.DOM.img({src: 'images/newTerritory.png'})
                 ),

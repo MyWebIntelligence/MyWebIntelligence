@@ -56,6 +56,7 @@ var controller = {
 
 		});
 
+        /*
 		$('.sectionBodyTerritoriesButtonsButtonQuery').each(function(){
 
 			var _this = $(this);
@@ -70,7 +71,9 @@ var controller = {
 			}
 
 		});
+        */
 
+        /*
 		$('.sectionBodyTerritoriesQuerysLineTitle').each(function(){
 
 			var _this = $(this);
@@ -81,6 +84,7 @@ var controller = {
 			});	
 
 		});
+        */
 
 		$('#sectionBodyTerritoryButtonsButtonDomains').click(function(){
 

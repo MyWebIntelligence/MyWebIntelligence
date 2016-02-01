@@ -36,7 +36,7 @@ module.exports = React.createClass({
             }),
             
             React.DOM.section({id: 'sectionConnectContent'},
-                new Navigation(),
+                new Navigation({activeScreen: 'territoire-list'}),
                 React.DOM.section({id: 'sectionBody'},
                     new TerritoiresList({
                         territoires: state.user.territoires,

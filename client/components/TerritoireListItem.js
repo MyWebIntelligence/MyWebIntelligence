@@ -4,7 +4,8 @@ var ImmutableSet = require('immutable').Set;
 var React = require('react');
 
 var QueryForm = React.createFactory(require('./QueryForm'));
-//var TerritoireForm = React.createFactory(require('./TerritoireForm'));
+var DeleteButton = React.createFactory(require('./DeleteButton'));
+
 
 /*
 interface TerritoireListItemProps{
@@ -204,12 +205,19 @@ module.exports = React.createClass({
                 React.DOM.div({className: 'clear'})
             ),
             React.DOM.div({className: 'sectionBodyTerritoriesInfos'},
-                React.DOM.div({className: 'sectionBodyTerritoriesInfos2'}, 'X - Y - Z'),
-                React.DOM.div({className: 'sectionBodyTerritoriesInfos1'}, 'XX'),
                 React.DOM.div({className: 'sectionBodyTerritoriesInfosLogo'},
                     React.DOM.img({src: '/images/oneTerritoryCount.png'})             
                 ),
-                React.DOM.div({className: 'clear'})
+                React.DOM.div({style: {display: 'flex', flexDirection: 'column', justifyContent: 'center'}},
+                    React.DOM.div({className: 'sectionBodyTerritoriesInfos1'}, 'XX')
+                ),
+                React.DOM.div({className: 'sectionBodyTerritoriesInfos2'}, 'X - Y - Z'),
+                new DeleteButton({
+                    className: 'delete-territoire',
+                    onDelete: function(){
+                        props.deleteTerritoire(territoire);
+                    }
+                })
             ),
             React.DOM.div({className: 'clear'}),
             React.DOM.div({className:'sectionBodyTerritoriesButtons'},

@@ -852,36 +852,48 @@ div, input, textarea, select{
 }
 
 .sectionBodyTerritoriesInfos {
-	background-color:rgb(223,229,229);
-	float:right;
-	width:40%;
+	background-color: rgb(223,229,229);
+	display: flex;
+    justify-content: flex-end;
+    align-items: stretch;
+    
+	width: 40%;
+}
+
+.sectionBodyTerritoriesInfos > *{
+    margin: 0 0.3em;
+    
 }
 
 .sectionBodyTerritoriesInfosLogo {
-	float:right;
 	height:35px;
 }
 .sectionBodyTerritoriesInfos1 {
-	float:right;
 	background-color:rgb(71,71,73);
 	color:rgb(255,255,255);
 	border-radius:15px;
-	margin-top:8px;
-	height:20px;
+    height: 20px;
 	width:20px;
-	font-size:12px;
-	line-height:16px;
-	padding:2px;
+	line-height:20px;
 	text-align:center;
-	margin-left:10px;
 }
 .sectionBodyTerritoriesInfos2 {
-	float:right;
 	padding:5px;
 	line-height:25px;
 	font-size:14px;
 	font-weight:700;
-	margin-left:10px;
+}
+
+.sectionBodyTerritoriesInfos .delete{
+    width: 2em;
+}
+
+.sectionBodyTerritoriesInfos .delete-territoire{
+    display: block;
+    
+    background-color: transparent;
+    border: 0;
+    background-image: url('/images/closeTerritory.png');
 }
 
 

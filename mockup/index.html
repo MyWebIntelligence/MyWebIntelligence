@@ -1,0 +1,1267 @@
+<!DOCTYPE html>
+<html lang="fr">
+	<head>
+		<title>My web intelligence</title>
+
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<meta charset="utf-8">
+		<meta name="description" content=""/>
+		<meta name="keywords" content=""/>
+
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+		<link rel="stylesheet" type="text/css" href="css/font-awesome.min.css">
+		<link rel="stylesheet" type="text/css" href="css/style.css">
+		<script type="text/javascript" src="js/jquery.js"></script>
+		<script type="text/javascript" src="js/controller.js"></script>
+
+		<script type="text/javascript">
+
+			$(document).ready(function() {
+
+			  controller.init();
+
+			});
+
+		</script>
+
+	</head>
+	<body>
+
+		<section id="sectionConnexion">
+
+			<div id="sectionConnexionBox">
+
+				<div id="sectionConnexionBoxContent">
+
+					<div id="sectionConnexionBoxContentBox">
+
+						<img src="images/logo.png">
+
+						<div id="sectionConnexionBoxContentBoxReseaux">
+
+							<div id="sectionConnexionBoxContentBoxReseaux-facebook" class="sectionConnexionBoxContentBoxReseaux">
+
+								<i class='fa fa-facebook'></i>
+
+							</div>
+
+							<div id="sectionConnexionBoxContentBoxReseauxGooglePlus" class="sectionConnexionBoxContentBoxReseaux">
+
+								<i class='fa fa-google-plus'></i>
+
+							</div>
+
+							<div id="sectionConnexionBoxContentBoxReseauxTwitter" class="sectionConnexionBoxContentBoxReseaux">
+
+								<i class='fa fa-twitter'></i>
+
+							</div>
+
+						</div>
+
+						<form id="sectionConnexionBoxContentBoxForm">
+
+							<div id="sectionConnexionBoxContentBoxFormEmail" class="sectionConnexionBoxContentBoxForm">
+
+								<input type='text' placeholder="Login">
+
+							</div>
+
+							<div id="sectionConnexionBoxContentBoxFormMdp" class="sectionConnexionBoxContentBoxForm">
+
+								<input type='password' placeholder="Password">
+
+							</div>
+
+							<button id="sectionConnexionBoxContentBoxFormButton">Record</button>
+
+							<div id="sectionConnexionBoxContentBoxFormForgot">
+
+								<a>Forgot your password</a>
+
+							</div>
+
+						</form>
+
+					</div>
+
+				</div>
+
+			</div>
+
+		</section>
+
+		<section id="sectionConnect">
+
+			<section id="sectionConnectHeader">
+				
+				<div id="sectionConnectHeaderLogout"><i class="fa fa-power-off"></i></div>
+				
+				<div id="sectionConnectHeaderOracle">
+					<i class="fa fa-certificate"></i>
+					<div id="sectionConnectHeaderOracleBox">
+
+						<div id="sectionConnectHeaderOracleBoxLabel">Oracle</div>
+
+						<div id="sectionConnectHeaderOracleBoxGoogle" class="sectionConnectHeaderOracleBox">Google custom search engine</div>
+						<div id="sectionConnectHeaderOracleBoxFacebook" class="sectionConnectHeaderOracleBox disable">Facebook search engine</div>
+						<div id="sectionConnectHeaderOracleBoxBuzzSumo" class="sectionConnectHeaderOracleBox disable">Buzzsumo search engine</div>
+
+					</div>
+				</div>
+				
+				<div id="sectionConnectHeaderPseudo">Amar Lakel</div>
+
+			</section>
+
+			<section id="sectionConnectContent">
+
+				<section id="sectionNavigation">
+					
+					<div id="sectionNavigationLogo">
+						
+						<img src="images/logo.png">
+
+					</div>
+					
+					<div id="sectionNavigationTerritory">
+						
+						<div id="sectionNavigationTerritoryImg"><img src="images/territory.png"></div>
+						<div id="sectionNavigationTerritoryLabel">Territory</div>
+						<div class="clear"></div>
+
+					</div>
+					
+					<div id="sectionNavigationNewTerritory">
+						
+						<div id="sectionNavigationNewTerritoryImg"><img src="images/newTerritory.png"></div>
+						<div id="sectionNavigationNewTerritoryLabel">Create a new territory</div>
+						<div class="clear"></div>
+
+					</div>
+					
+					<div id="sectionNavigationNetworks">
+						
+						<div id="sectionNavigationNetworksTwitter" class="sectionNavigationNetworks"><i class="fa fa-twitter"></i></div>
+						<div id="sectionNavigationNetworksGooglePlus" class="sectionNavigationNetworks on"><i class="fa fa-google-plus"></i></div>
+						<div id="sectionNavigationNetworksFacebook" class="sectionNavigationNetworks"><i class="fa fa-facebook"></i></div>
+						<div id="sectionNavigationNetworksLabel">Connect</div> 
+						<div class="clear"></div>
+
+					</div>
+
+				</section>
+
+				<section id="sectionBody">
+
+					<form id="sectionBodyCreateTerritory" class='sectionBody'>
+
+						<div class="territoryFormLine">
+							<div class="territoryFormLineLabel">Titre *</div>
+							<div class="territoryFormLineInput"><input type='text'></div>
+						</div>
+
+						<div class="territoryFormLine">
+							<div class="territoryFormLineLabel">Description *</div>
+							<div class="territoryFormLineInput"><textarea></textarea></div>
+						</div>
+
+						<div class="territoryFormQuery">
+
+							<div class="territoryFormQueryTitre">
+								Query settings
+							</div>
+
+							<div class="territoryFormQueryLine">
+								<div class="territoryFormQueryLineLabel">Name</div>
+								<div class="territoryFormQueryLineInput"><input type='text'></div>
+							</div>
+
+							<div class="territoryFormQueryLine">
+								<div class="territoryFormQueryLineLabel">Query string</div>
+								<div class="territoryFormQueryLineInput"><input type='text'></div>
+							</div>
+
+							<div class="territoryFormQueryLine">
+								<div class="territoryFormQueryLineLabel">Oracle</div>
+								<div class="territoryFormQueryLineInput"><input type='text'></div>
+							</div>
+
+							<div class="territoryFormQueryTitre">
+								Oracle options
+							</div>
+
+							<div class="territoryFormQueryLine">
+								<div class="territoryFormQueryLineLabel">Add 24-Month History</div>
+								<div class="territoryFormQueryLineInput"><input type='checkbox'></div>
+							</div>
+
+							<div class="territoryFormQueryLine">
+								<div class="territoryFormQueryLineLabel">Language</div>
+								<div class="territoryFormQueryLineInput"><select><option value="">Language</option></select></div>
+							</div>
+
+						</div>
+
+						<div class="territoryFormButton">
+
+							Ok
+
+						</div>
+
+					</form>
+
+					<section id="sectionBodyTerritories" class='sectionBody'>
+
+						<div class="sectionBodyTerritories">
+
+							<div class="sectionBodyTerritoriesLabel">
+
+								<div class="sectionBodyTerritoriesLabelLogo">
+
+									<img src="images/oneTerritory.png">
+
+								</div>
+
+								<div class="sectionBodyTerritoriesLabelTitle">
+
+									Vin
+
+								</div>
+
+								<div class="clear"></div>
+
+							</div>
+
+							<div class="sectionBodyTerritoriesInfos">
+
+								<div class="sectionBodyTerritoriesInfos2">2133-2461-374+</div>
+
+								<div class="sectionBodyTerritoriesInfos1">29</div>
+
+								<div class="sectionBodyTerritoriesInfosLogo">
+								
+									<img src="images/oneTerritoryCount.png">
+
+								</div>
+
+								<div class="clear"></div>
+
+							</div>
+
+							<div class='clear'></div>
+
+							<div class="sectionBodyTerritoriesButtons">
+
+								<div class="sectionBodyTerritoriesButtonsButton sectionBodyTerritoriesButtonsButtonResult">
+
+									Result
+
+								</div>
+
+								<div class="sectionBodyTerritoriesButtonsButton sectionBodyTerritoriesButtonsButtonQuery no">
+
+									No query
+
+								</div>
+
+								<div class="sectionBodyTerritoriesButtonsButton sectionBodyTerritoriesButtonsButtonExport">
+
+									Export
+
+								</div>
+
+								<div class="sectionBodyTerritoriesButtonsButton sectionBodyTerritoriesButtonsButtonImport">
+
+									Import
+
+								</div>
+
+								<div class="sectionBodyTerritoriesButtonsButton sectionBodyTerritoriesButtonsButtonDownload">
+
+									Download <i class="fa fa-caret-down"></i>
+
+								</div>
+
+								<div class='clear'></div>
+
+							</div>
+
+							<div class="sectionBodyTerritoriesQuerys">
+
+								<div class="sectionBodyTerritoriesQuerysNew">
+
+									New query
+
+								</div>
+
+							</div>
+
+						</div>
+
+						<div class="sectionBodyTerritories">
+
+							<div class="sectionBodyTerritoriesLabel">
+
+								<div class="sectionBodyTerritoriesLabelLogo">
+
+									<img src="images/oneTerritory.png">
+
+								</div>
+
+								<div class="sectionBodyTerritoriesLabelTitle">
+
+									Raisin
+
+								</div>
+
+							</div>
+
+							<div class="sectionBodyTerritoriesInfos">
+
+								<div class="sectionBodyTerritoriesInfos2">2133-2461-374+</div>
+
+								<div class="sectionBodyTerritoriesInfos1">29</div>
+
+								<div class="sectionBodyTerritoriesInfosLogo">
+								
+									<img src="images/oneTerritoryCount.png">
+
+								</div>
+
+							</div>
+
+							<div class="clear"></div>
+
+							<div class="sectionBodyTerritoriesButtons">
+
+								<div class="sectionBodyTerritoriesButtonsButton sectionBodyTerritoriesButtonsButtonResult">
+
+									Result
+
+								</div>
+
+								<div class="sectionBodyTerritoriesButtonsButton sectionBodyTerritoriesButtonsButtonQuery">
+
+									Query list
+
+								</div>
+
+								<div class="sectionBodyTerritoriesButtonsButton sectionBodyTerritoriesButtonsButtonExport">
+
+									Export
+
+								</div>
+
+								<div class="sectionBodyTerritoriesButtonsButton sectionBodyTerritoriesButtonsButtonImport">
+
+									Import
+
+								</div>
+
+								<div class="sectionBodyTerritoriesButtonsButton sectionBodyTerritoriesButtonsButtonDownload">
+
+									Download <i class="fa fa-caret-down"></i>
+
+								</div>
+
+								<div class="clear"></div>
+
+							</div>
+
+							<div class="sectionBodyTerritoriesQuerys">
+
+								<div class="sectionBodyTerritoriesQuerysNew">
+
+									New query
+
+								</div>
+
+								<div class="sectionBodyTerritoriesQuerysLine">
+
+									<div class="sectionBodyTerritoriesQuerysLineTitle">
+										<div class="sectionBodyTerritoriesQuerysLineTitle">
+											Margaux
+										</div>
+										<div class="sectionBodyTerritoriesQuerysLineTitle">
+											<img src="images/territoryTitle.png">
+										</div>
+									</div>
+
+									<form class="sectionBodyTerritoriesQuerysLineForm">
+									
+										<div class="sectionBodyTerritoriesQuerysLineSubTitle">
+											Château Brane Cantenac
+										</div>	
+
+										<div class="territoryFormQuery">
+
+											<div class="territoryFormQueryTitre">
+												Query settings
+											</div>
+
+											<div class="territoryFormQueryLine">
+												<div class="territoryFormQueryLineLabel">Name</div>
+												<div class="territoryFormQueryLineInput"><input type='text' value="grand cru"></div>
+											</div>
+
+											<div class="territoryFormQueryLine">
+												<div class="territoryFormQueryLineLabel">Query string</div>
+												<div class="territoryFormQueryLineInput"><input type='text' value='liste des grands crus'></div>
+											</div>
+
+											<div class="territoryFormQueryLine">
+												<div class="territoryFormQueryLineLabel">Oracle</div>
+												<div class="territoryFormQueryLineInput"><input type='text' value="url liste"></div>
+											</div>
+
+											<div class="territoryFormQueryTitre">
+												Oracle options
+											</div>
+
+											<div class="territoryFormQueryLine">
+												<div class="territoryFormQueryLineLabel">Add 24-Month History</div>
+												<div class="territoryFormQueryLineInput"><input type='checkbox' checked></div>
+											</div>
+
+											<div class="territoryFormQueryLine">
+												<div class="territoryFormQueryLineLabel">Language</div>
+												<div class="territoryFormQueryLineInput"><select><option value="">Language</option><option value="fr" selected>Français</option></select></div>
+											</div>
+
+										</div>
+
+										<div class="territoryFormButton">
+
+											Ok
+
+										</div>
+
+									</form>
+
+								</div>
+
+								<div class="sectionBodyTerritoriesQuerysLine">
+
+									<div class="sectionBodyTerritoriesQuerysLineTitle">
+										<div class="sectionBodyTerritoriesQuerysLineTitle">
+											Saint Julien
+										</div>
+										<div class="sectionBodyTerritoriesQuerysLineTitle">
+											<img src="images/territoryTitle.png">
+										</div>
+									</div>
+
+									<form class="sectionBodyTerritoriesQuerysLineForm">
+
+										<div class="sectionBodyTerritoriesQuerysLineSubTitle">
+											Château Léoville Poyferré 
+										</div>	
+
+										<div class="territoryFormQuery">
+
+											<div class="territoryFormQueryTitre">
+												Query settings
+											</div>
+
+											<div class="territoryFormQueryLine">
+												<div class="territoryFormQueryLineLabel">Name</div>
+												<div class="territoryFormQueryLineInput"><input type='text' value="grand cru"></div>
+											</div>
+
+											<div class="territoryFormQueryLine">
+												<div class="territoryFormQueryLineLabel">Query string</div>
+												<div class="territoryFormQueryLineInput"><input type='text' value='liste des grands crus'></div>
+											</div>
+
+											<div class="territoryFormQueryLine">
+												<div class="territoryFormQueryLineLabel">Oracle</div>
+												<div class="territoryFormQueryLineInput"><input type='text' value="url liste"></div>
+											</div>
+
+											<div class="territoryFormQueryTitre">
+												Oracle options
+											</div>
+
+											<div class="territoryFormQueryLine">
+												<div class="territoryFormQueryLineLabel">Add 24-Month History</div>
+												<div class="territoryFormQueryLineInput"><input type='checkbox' checked></div>
+											</div>
+
+											<div class="territoryFormQueryLine">
+												<div class="territoryFormQueryLineLabel">Language</div>
+												<div class="territoryFormQueryLineInput"><select><option value="">Language</option><option value="fr" selected>Français</option></select></div>
+											</div>
+
+										</div>
+
+										<div class="territoryFormButton">
+
+											Ok
+
+										</div>
+
+									</form>
+
+								</div>
+
+							</div>
+
+						</div>
+
+					</section>
+
+					<section id="sectionBodyTerritory" class='sectionBody'>
+
+						<div id="sectionBodyTerritoryLabel">
+
+							<div id="sectionBodyTerritoryLabelLogo">
+
+								<img src="images/oneTerritory.png">
+
+							</div>
+
+							<div id="sectionBodyTerritoryLabelTitle">
+
+								Vin
+
+							</div>
+
+							<div class="clear"></div>
+
+						</div>
+
+						<div id="sectionBodyTerritoryInfos">
+
+							<div id="sectionBodyTerritoryInfos2">2133-2461-374+</div>
+
+							<div id="sectionBodyTerritoryInfos1">29</div>
+
+							<div id="sectionBodyTerritoryInfosLogo">
+							
+								<img src="images/oneTerritoryCount.png">
+
+							</div>
+
+							<div class="clear"></div>
+
+						</div>
+
+						<div id="sectionBodyTerritoryButtons">
+
+							<div id="sectionBodyTerritoryButtonsButtonPages" class="sectionBodyTerritoryButtonsButton">
+
+								Pages
+
+							</div>
+
+							<div id="sectionBodyTerritoryButtonsButtonDomains" class="sectionBodyTerritoryButtonsButton">
+
+								Domains
+
+							</div>
+
+							<div id="sectionBodyTerritoryButtonsButtonCartes" class="sectionBodyTerritoryButtonsButton">
+
+								Cartes
+
+							</div>
+
+							<div id="sectionBodyTerritoryButtonsButtonDashboard" class="sectionBodyTerritoryButtonsButton">
+
+								Dashboard
+
+							</div>
+
+							<div id="sectionBodyTerritoryButtonsButtonDownload" class="sectionBodyTerritoryButtonsButton">
+
+								Download <i class="fa fa-caret-down"></i>
+
+							</div>
+
+							<div class="clear"></div>
+
+						</div>
+
+						<div id="sectionBodyTerritoryFilters">
+
+							<div id="sectionBodyTerritoryFiltersFilter01" class='sectionBodyTerritoryFiltersFilter'>
+
+								Filter 01
+
+							</div>
+
+							<div id="sectionBodyTerritoryFiltersFilter02" class='sectionBodyTerritoryFiltersFilter'>
+
+								Filter 02
+
+							</div>
+
+							<div id="sectionBodyTerritoryFiltersFilter03" class='sectionBodyTerritoryFiltersFilter'>
+
+								Filter 03
+
+							</div>
+
+							<div id="sectionBodyTerritoryFiltersFilter04" class='sectionBodyTerritoryFiltersFilter'>
+
+								Filter 04
+
+							</div>
+
+							<div id="sectionBodyTerritoryFiltersFilter05" class='sectionBodyTerritoryFiltersFilter'>
+
+								Filter 05
+
+							</div>
+
+							<div class="clear"></div>
+
+						</div>
+
+						<div id="sectionBodyTerritoryPages" class="sectionBodyTerritoryPage">
+
+							<div class="sectionBodyTerritoryPagesLine">
+
+								<div class="sectionBodyTerritoryPagesLineHeader">
+
+									<div class="sectionBodyTerritoryPagesLineHeaderLeft">
+
+										<div class="sectionBodyTerritoryPagesLineHeaderLeftShare">
+											<i class="fa fa-share-alt"></i> 22125
+										</div>
+
+										<div class="sectionBodyTerritoryPagesLineHeaderLeftFacebookLike">
+											<i class="fa fa-facebook"></i> <i class="fa fa-thumbs-o-up"></i> 3215
+										</div>
+
+										<div class="sectionBodyTerritoryPagesLineHeaderLeftFacebookShare">
+											<i class="fa fa-facebook"></i> <i class="fa fa-share"></i> 256
+										</div>
+
+										<div class="sectionBodyTerritoryPagesLineHeaderLeftLinkDin">
+											<i class="fa fa-linkedin"></i> 156
+										</div>
+
+										<div class="clear"></div>
+
+									</div>
+
+									<div class="sectionBodyTerritoryPagesLineHeaderRight">
+
+										<div class="sectionBodyTerritoryPagesLineHeaderRightDate">
+											<input type='text'> <i class="fa fa-clock-o"></i>
+										</div>
+
+										<div class="sectionBodyTerritoryPagesLineHeaderRightStar">
+											<i class="fa fa-star"></i>
+										</div>
+
+										<div class="sectionBodyTerritoryPagesLineHeaderRightFrown">
+											<i class="fa fa-frown-o"></i>
+										</div>
+
+										<div class="sectionBodyTerritoryPagesLineHeaderRightTrash">
+											<i class="fa fa-trash"></i>
+										</div>
+
+										<div class="clear"></div>
+
+									</div>
+
+									<div class="clear"></div>
+
+								</div>
+
+								<div class="sectionBodyTerritoryPagesLineUrl">
+									www.monsite.fr
+								</div>
+
+								<div class="sectionBodyTerritoryPagesLineTitle">
+									COP21 | Bordeaux métropole
+								</div>
+
+								<div class="sectionBodyTerritoryPagesLineFullUrl">
+									www.bordeaux-mertropole.fr/cop21
+								</div>
+
+								<div class="sectionBodyTerritoryPagesLineDescription">
+									Ce sommet international se tient au Parc des expositions de Paris-Le Bourget et réunit 195 pays. La conférence qui devait se terminer le 11 décembre 2015, 
+								</div>
+
+								<div class="sectionBodyTerritoryPagesLineTags">
+
+									<div class="sectionBodyTerritoryPagesLineTagsTag">Climat <i class="fa fa-times"></i></div>
+									<div class="sectionBodyTerritoryPagesLineTagsTag">Climat <i class="fa fa-times"></i></div>
+									<div class="sectionBodyTerritoryPagesLineTagsTag">Climat <i class="fa fa-times"></i></div>
+									<div class="sectionBodyTerritoryPagesLineTagsTag">Climat <i class="fa fa-times"></i></div>
+
+								</div>
+
+								<div class="sectionBodyTerritoryPagesLineAddTag">
+									
+									<input type='text'>
+
+								</div>
+
+							</div>
+
+
+							<div class="sectionBodyTerritoryPagesLine">
+
+								<div class="sectionBodyTerritoryPagesLineHeader">
+
+									<div class="sectionBodyTerritoryPagesLineHeaderLeft">
+
+										<div class="sectionBodyTerritoryPagesLineHeaderLeftShare">
+											<i class="fa fa-share-alt"></i> 22125
+										</div>
+
+										<div class="sectionBodyTerritoryPagesLineHeaderLeftFacebookLike">
+											<i class="fa fa-facebook"></i> <i class="fa fa-thumbs-o-up"></i> 3215
+										</div>
+
+										<div class="sectionBodyTerritoryPagesLineHeaderLeftFacebookShare">
+											<i class="fa fa-facebook"></i> <i class="fa fa-share"></i> 256
+										</div>
+
+										<div class="sectionBodyTerritoryPagesLineHeaderLeftLinkDin">
+											<i class="fa fa-linkedin"></i> 156
+										</div>
+
+										<div class="clear"></div>
+
+									</div>
+
+									<div class="sectionBodyTerritoryPagesLineHeaderRight">
+
+										<div class="sectionBodyTerritoryPagesLineHeaderRightDate">
+											<input type='text'> <i class="fa fa-clock-o"></i>
+										</div>
+
+										<div class="sectionBodyTerritoryPagesLineHeaderRightStar">
+											<i class="fa fa-star"></i>
+										</div>
+
+										<div class="sectionBodyTerritoryPagesLineHeaderRightFrown">
+											<i class="fa fa-frown-o"></i>
+										</div>
+
+										<div class="sectionBodyTerritoryPagesLineHeaderRightTrash">
+											<i class="fa fa-trash"></i>
+										</div>
+
+										<div class="clear"></div>
+
+									</div>
+
+									<div class="clear"></div>
+
+								</div>
+
+								<div class="sectionBodyTerritoryPagesLineUrl">
+									www.monsite.fr
+								</div>
+
+								<div class="sectionBodyTerritoryPagesLineTitle">
+									COP21 | Bordeaux métropole
+								</div>
+
+								<div class="sectionBodyTerritoryPagesLineFullUrl">
+									www.bordeaux-mertropole.fr/cop21
+								</div>
+
+								<div class="sectionBodyTerritoryPagesLineDescription">
+									Ce sommet international se tient au Parc des expositions de Paris-Le Bourget et réunit 195 pays. La conférence qui devait se terminer le 11 décembre 2015, 
+								</div>
+
+								<div class="sectionBodyTerritoryPagesLineTags">
+
+									<div class="sectionBodyTerritoryPagesLineTagsTag">Climat <i class="fa fa-times"></i></div>
+									<div class="sectionBodyTerritoryPagesLineTagsTag">Climat <i class="fa fa-times"></i></div>
+									<div class="sectionBodyTerritoryPagesLineTagsTag">Climat <i class="fa fa-times"></i></div>
+									<div class="sectionBodyTerritoryPagesLineTagsTag">Climat <i class="fa fa-times"></i></div>
+
+								</div>
+
+								<div class="sectionBodyTerritoryPagesLineAddTag">
+									
+									<input type='text'>
+
+								</div>
+
+							</div>
+
+
+							<div class="sectionBodyTerritoryPagesLine">
+
+								<div class="sectionBodyTerritoryPagesLineHeader">
+
+									<div class="sectionBodyTerritoryPagesLineHeaderLeft">
+
+										<div class="sectionBodyTerritoryPagesLineHeaderLeftShare">
+											<i class="fa fa-share-alt"></i> 22125
+										</div>
+
+										<div class="sectionBodyTerritoryPagesLineHeaderLeftFacebookLike">
+											<i class="fa fa-facebook"></i> <i class="fa fa-thumbs-o-up"></i> 3215
+										</div>
+
+										<div class="sectionBodyTerritoryPagesLineHeaderLeftFacebookShare">
+											<i class="fa fa-facebook"></i> <i class="fa fa-share"></i> 256
+										</div>
+
+										<div class="sectionBodyTerritoryPagesLineHeaderLeftLinkDin">
+											<i class="fa fa-linkedin"></i> 156
+										</div>
+
+										<div class="clear"></div>
+
+									</div>
+
+									<div class="sectionBodyTerritoryPagesLineHeaderRight">
+
+										<div class="sectionBodyTerritoryPagesLineHeaderRightDate">
+											<input type='text'> <i class="fa fa-clock-o"></i>
+										</div>
+
+										<div class="sectionBodyTerritoryPagesLineHeaderRightStar">
+											<i class="fa fa-star"></i>
+										</div>
+
+										<div class="sectionBodyTerritoryPagesLineHeaderRightFrown">
+											<i class="fa fa-frown-o"></i>
+										</div>
+
+										<div class="sectionBodyTerritoryPagesLineHeaderRightTrash">
+											<i class="fa fa-trash"></i>
+										</div>
+
+										<div class="clear"></div>
+
+									</div>
+
+									<div class="clear"></div>
+
+								</div>
+
+								<div class="sectionBodyTerritoryPagesLineUrl">
+									www.monsite.fr
+								</div>
+
+								<div class="sectionBodyTerritoryPagesLineTitle">
+									COP21 | Bordeaux métropole
+								</div>
+
+								<div class="sectionBodyTerritoryPagesLineFullUrl">
+									www.bordeaux-mertropole.fr/cop21
+								</div>
+
+								<div class="sectionBodyTerritoryPagesLineDescription">
+									Ce sommet international se tient au Parc des expositions de Paris-Le Bourget et réunit 195 pays. La conférence qui devait se terminer le 11 décembre 2015, 
+								</div>
+
+								<div class="sectionBodyTerritoryPagesLineTags">
+
+									<div class="sectionBodyTerritoryPagesLineTagsTag">Climat <i class="fa fa-times"></i></div>
+									<div class="sectionBodyTerritoryPagesLineTagsTag">Climat <i class="fa fa-times"></i></div>
+									<div class="sectionBodyTerritoryPagesLineTagsTag">Climat <i class="fa fa-times"></i></div>
+									<div class="sectionBodyTerritoryPagesLineTagsTag">Climat <i class="fa fa-times"></i></div>
+
+								</div>
+
+								<div class="sectionBodyTerritoryPagesLineAddTag">
+									
+									<input type='text'>
+
+								</div>
+
+							</div>
+
+						</div>
+
+						<div id="sectionBodyTerritoryDomains" class="sectionBodyTerritoryPage">
+
+							<div class="sectionBodyTerritoryDomainsLine">
+
+								<div class="sectionBodyTerritoryDomainsLineHeader">
+
+									<div class="sectionBodyTerritoryDomainsLineHeaderUsers">
+										<i class="fa fa-users"></i> 75
+									</div>
+
+									<div class="sectionBodyTerritoryDomainsLineHeaderShare">
+										<i class="fa fa-share-alt"></i> 21125
+									</div>
+
+									<div class="sectionBodyTerritoryDomainsLineHeaderSumShare">
+										<i class="fa fa-share"></i> 3215
+									</div>
+
+									<div class="sectionBodyTerritoryDomainsLineHeaderSumLike">
+										<i class="fa fa-thumbs-o-up"></i> 256
+									</div>
+
+									<div class="sectionBodyTerritoryDomainsLineHeaderViews">
+										78 <i class="fa fa-wifi fa-rotate-270"></i><i class="fa fa-circle"></i> 85
+									</div>
+
+									<div class="sectionBodyTerritoryDomainsLineHeaderPR">
+										78 PR
+									</div>
+
+									<div class="clear"></div>
+
+								</div>
+
+								<div class="sectionBodyTerritoryDomainsLineInputs">
+
+									<select class="sectionBodyTerritoryDomainsLineInputsEmeteurs">
+										<option>type d'éméteur</option>
+									</select>
+
+									<select class="sectionBodyTerritoryDomainsLineInputsMedias">
+										<option>type média</option>
+									</select>
+
+									<div class="clear"></div>
+
+								</div>
+
+								<div class="sectionBodyTerritoryDomainsLineTitle">
+									
+									COP21 | Bordeaux Métrople
+
+								</div>
+
+								<div class="sectionBodyTerritoryDomainsLineUrl">
+
+									wwww.bordeaux-metropole.fr/COP21
+	
+								</div>
+
+								<div class="sectionBodyTerritoryDomainsLineDescription">
+										bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla 
+								</div>
+
+								<div class="sectionBodyTerritoryDomainsLineTags">
+
+									<div class="sectionBodyTerritoryDomainsLineTagsTag">Climat <i class="fa fa-times"></i></div>
+									<div class="sectionBodyTerritoryDomainsLineTagsTag">Climat <i class="fa fa-times"></i></div>
+									<div class="sectionBodyTerritoryDomainsLineTagsTag">Climat <i class="fa fa-times"></i></div>
+									<div class="sectionBodyTerritoryDomainsLineTagsTag">Climat <i class="fa fa-times"></i></div>
+
+								</div>
+
+								<div class="sectionBodyTerritoryDomainsLineAddTag">
+									
+									<input type='text'>
+
+								</div>
+
+								<div class="sectionBodyTerritoryDomainsLineUrls">
+
+									<div class="sectionBodyTerritoryDomainsLineUrlsUrl">
+
+										<i class="fa fa-trash"></i> Liste des url de page du domaine
+
+									</div>
+
+									<div class="sectionBodyTerritoryDomainsLineUrlsUrl">
+
+										<i class="fa fa-trash"></i> wwww.bordeaux-metropole.fr/COP21
+
+									</div>
+
+								</div>
+
+							</div>
+
+							<div class="sectionBodyTerritoryDomainsLine">
+
+								<div class="sectionBodyTerritoryDomainsLineHeader">
+
+									<div class="sectionBodyTerritoryDomainsLineHeaderUsers">
+										<i class="fa fa-users"></i> 75
+									</div>
+
+									<div class="sectionBodyTerritoryDomainsLineHeaderShare">
+										<i class="fa fa-share-alt"></i> 21125
+									</div>
+
+									<div class="sectionBodyTerritoryDomainsLineHeaderSumShare">
+										<i class="fa fa-share"></i> 3215
+									</div>
+
+									<div class="sectionBodyTerritoryDomainsLineHeaderSumLike">
+										<i class="fa fa-thumbs-o-up"></i> 256
+									</div>
+
+									<div class="sectionBodyTerritoryDomainsLineHeaderViews">
+										78 <i class="fa fa-wifi fa-rotate-270"></i><i class="fa fa-circle"></i> 85
+									</div>
+
+									<div class="sectionBodyTerritoryDomainsLineHeaderPR">
+										78 PR
+									</div>
+
+									<div class="clear"></div>
+
+								</div>
+
+								<div class="sectionBodyTerritoryDomainsLineInputs">
+
+									<select class="sectionBodyTerritoryDomainsLineInputsEmeteurs">
+										<option>type d'éméteur</option>
+									</select>
+
+									<select class="sectionBodyTerritoryDomainsLineInputsMedias">
+										<option>type média</option>
+									</select>
+
+									<div class="clear"></div>
+
+								</div>
+
+								<div class="sectionBodyTerritoryDomainsLineTitle">
+									
+									COP21 | Bordeaux Métrople
+
+								</div>
+
+								<div class="sectionBodyTerritoryDomainsLineUrl">
+
+									wwww.bordeaux-metropole.fr/COP21
+	
+								</div>
+
+								<div class="sectionBodyTerritoryDomainsLineDescription">
+										bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla 
+								</div>
+
+								<div class="sectionBodyTerritoryDomainsLineTags">
+
+									<div class="sectionBodyTerritoryDomainsLineTagsTag">Climat <i class="fa fa-times"></i></div>
+									<div class="sectionBodyTerritoryDomainsLineTagsTag">Climat <i class="fa fa-times"></i></div>
+									<div class="sectionBodyTerritoryDomainsLineTagsTag">Climat <i class="fa fa-times"></i></div>
+									<div class="sectionBodyTerritoryDomainsLineTagsTag">Climat <i class="fa fa-times"></i></div>
+
+								</div>
+
+								<div class="sectionBodyTerritoryDomainsLineAddTag">
+									
+									<input type='text'>
+
+								</div>
+
+								<div class="sectionBodyTerritoryDomainsLineUrls">
+
+									<div class="sectionBodyTerritoryDomainsLineUrlsUrl">
+
+										<i class="fa fa-trash"></i> Liste des url de page du domaine
+
+									</div>
+
+									<div class="sectionBodyTerritoryDomainsLineUrlsUrl">
+
+										<i class="fa fa-trash"></i> wwww.bordeaux-metropole.fr/COP21
+
+									</div>
+
+								</div>
+
+							</div>
+
+							<div class="sectionBodyTerritoryDomainsLine">
+
+								<div class="sectionBodyTerritoryDomainsLineHeader">
+
+									<div class="sectionBodyTerritoryDomainsLineHeaderUsers">
+										<i class="fa fa-users"></i> 75
+									</div>
+
+									<div class="sectionBodyTerritoryDomainsLineHeaderShare">
+										<i class="fa fa-share-alt"></i> 21125
+									</div>
+
+									<div class="sectionBodyTerritoryDomainsLineHeaderSumShare">
+										<i class="fa fa-share"></i> 3215
+									</div>
+
+									<div class="sectionBodyTerritoryDomainsLineHeaderSumLike">
+										<i class="fa fa-thumbs-o-up"></i> 256
+									</div>
+
+									<div class="sectionBodyTerritoryDomainsLineHeaderViews">
+										78 <i class="fa fa-wifi fa-rotate-270"></i><i class="fa fa-circle"></i> 85
+									</div>
+
+									<div class="sectionBodyTerritoryDomainsLineHeaderPR">
+										78 PR
+									</div>
+
+									<div class="clear"></div>
+
+								</div>
+
+								<div class="sectionBodyTerritoryDomainsLineInputs">
+
+									<select class="sectionBodyTerritoryDomainsLineInputsEmeteurs">
+										<option>type d'éméteur</option>
+									</select>
+
+									<select class="sectionBodyTerritoryDomainsLineInputsMedias">
+										<option>type média</option>
+									</select>
+
+									<div class="clear"></div>
+
+								</div>
+
+								<div class="sectionBodyTerritoryDomainsLineTitle">
+									
+									COP21 | Bordeaux Métrople
+
+								</div>
+
+								<div class="sectionBodyTerritoryDomainsLineUrl">
+
+									wwww.bordeaux-metropole.fr/COP21
+	
+								</div>
+
+								<div class="sectionBodyTerritoryDomainsLineDescription">
+										bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla 
+								</div>
+
+								<div class="sectionBodyTerritoryDomainsLineTags">
+
+									<div class="sectionBodyTerritoryDomainsLineTagsTag">Climat <i class="fa fa-times"></i></div>
+									<div class="sectionBodyTerritoryDomainsLineTagsTag">Climat <i class="fa fa-times"></i></div>
+									<div class="sectionBodyTerritoryDomainsLineTagsTag">Climat <i class="fa fa-times"></i></div>
+									<div class="sectionBodyTerritoryDomainsLineTagsTag">Climat <i class="fa fa-times"></i></div>
+
+								</div>
+
+								<div class="sectionBodyTerritoryDomainsLineAddTag">
+									
+									<input type='text'>
+
+								</div>
+
+								<div class="sectionBodyTerritoryDomainsLineUrls">
+
+									<div class="sectionBodyTerritoryDomainsLineUrlsUrl">
+
+										<i class="fa fa-trash"></i> Liste des url de page du domaine
+
+									</div>
+
+									<div class="sectionBodyTerritoryDomainsLineUrlsUrl">
+
+										<i class="fa fa-trash"></i> wwww.bordeaux-metropole.fr/COP21
+
+									</div>
+
+								</div>
+
+							</div>
+
+						</div>
+
+					</section>
+
+				</section>
+
+				<section id="sectionBodyView">
+
+					<section id="sectionBodyViewBox">
+					
+						<div id="sectionBodyViewClose">Close</div>
+						
+						<div id="sectionBodyViewLeft"><i class='fa fa-caret-left'></i></div>
+						
+						<div id="sectionBodyViewRight"><i class='fa fa-caret-right'></i></div>
+
+						<div id="sectionBodyViewUrl">www.monsite.fr</div>
+
+						<div id="sectionBodyViewTitle">COP21 | Bordeaux métropole</div>
+
+						<div id="sectionBodyViewFullUrl">www.monsite.fr</div>
+
+						<div id="sectionBodyViewInfos">
+							
+							<div id="sectionBodyViewInfosLeft">
+
+								<div id="sectionBodyViewInfosLeftShare">
+									<i class="fa fa-share-alt"></i> 22125
+								</div>
+
+								<div id="sectionBodyViewInfosLeftFacebookLike">
+									<i class="fa fa-facebook"></i> <i class="fa fa-thumbs-o-up"></i> 3215
+								</div>
+
+								<div id="sectionBodyViewInfosLeftFacebookShare">
+									<i class="fa fa-facebook"></i> <i class="fa fa-share"></i> 256
+								</div>
+
+								<div id="sectionBodyViewInfosLeftLinkDin">
+									<i class="fa fa-linkedin"></i> 156
+								</div>
+
+							</div>
+
+							<div id="sectionBodyViewInfosRight">
+
+								<div id="sectionBodyViewInfosRightDate">
+									<input type='text'> <i class="fa fa-clock-o"></i>
+								</div>
+
+								<div id="sectionBodyViewInfosRightStar">
+									<i class="fa fa-star"></i>
+								</div>
+
+								<div id="sectionBodyViewInfosRightFrown">
+									<i class="fa fa-frown-o"></i>
+								</div>
+
+								<div id="sectionBodyViewInfosRightTrash">
+									<i class="fa fa-trash"></i>
+								</div>
+
+							</div>
+
+							<div class="clear"></div>
+
+						</div>
+
+						<div id="sectionBodyViewTags">
+
+							<div class="sectionBodyViewTagsTag">Climat <i class="fa fa-times"></i></div>
+							<div class="sectionBodyViewTagsTag">Climat <i class="fa fa-times"></i></div>
+							<div class="sectionBodyViewTagsTag">Climat <i class="fa fa-times"></i></div>
+							<div class="sectionBodyViewTagsTag">Climat <i class="fa fa-times"></i></div>
+
+						</div>
+
+						<div id="sectionBodyViewAddTag">
+							
+							<input type='text'>
+
+						</div>
+
+						<div id="sectionBodyViewContent">
+
+						</div>
+
+					</section>
+
+				</section>
+
+			</section>
+
+		</section>
+
+	</body>
+</html>

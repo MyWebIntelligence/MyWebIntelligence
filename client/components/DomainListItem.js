@@ -49,16 +49,48 @@ module.exports = React.createClass({
 
         var expressionDomain = props.expressionDomain;
         var expressionDomainAnnotations = props.expressionDomainAnnotations;
-                
-        var classes = ['territoire-list-item', 'domain-list-item'];
-                
-        return React.DOM.li(
+                                
+        return React.DOM.div(
             {
-                className: classes.join(' '),
+                className: 'sectionBodyTerritoryDomainsLine',
                 "data-expression-domain-id": expressionDomain.id
             },
-            React.DOM.header(
-                {},
+            React.DOM.div(
+                {
+                    className: 'sectionBodyTerritoryDomainsLineHeader'
+                },
+                React.DOM.div({className: 'sectionBodyTerritoryDomainsLineHeaderUsers'},
+                    React.DOM.i({className: 'fa fa-users'}),
+                    ' ',
+                    props.expressionDomainMetrics.estimated_potential_audience
+                ),
+                React.DOM.div({title: 'Social Impact', className: 'sectionBodyTerritoryDomainsLineHeaderShare'},
+                    props.expressionDomainMetrics.social_impact_index,
+                    ' ',
+                    React.DOM.i({className: 'fa fa-share-alt'})
+                ),
+                React.DOM.div({title: 'Sum shares', className: 'sectionBodyTerritoryDomainsLineHeaderSumShare'},
+                    props.expressionDomainMetrics.sum_shares,
+                    ' ',
+                    React.DOM.i({className: 'fa fa-share'})
+                ),
+                React.DOM.div({title: 'Sum likes', className: 'sectionBodyTerritoryDomainsLineHeaderSumLike'},
+                    props.expressionDomainMetrics.sum_likes,
+                    ' ',
+                    React.DOM.i({className: 'fa fa-thumbs-o-up'})
+                ),
+                React.DOM.div({title: 'Degrees', className: 'sectionBodyTerritoryDomainsLineHeaderViews'},
+                    props.degrees.inDegree,
+                    React.DOM.i({className: 'fa fa-wifi fa-rotate-270'}),
+                    React.DOM.i({className: 'fa fa-circle'}),
+                    props.degrees.outDegree
+                ),
+                React.DOM.div({title: 'Local PageRank', className: 'sectionBodyTerritoryDomainsLineHeaderPR'},
+                    props.pagerankIndex+' PR'
+                ),
+                React.DOM.div({className: 'clear'})
+            ),
+            React.DOM.div({className: 'sectionBodyTerritoryDomainsLineInputs'},
                 React.DOM.input({
                     placeholder: "Emitter type",
                     type: 'text',
@@ -86,20 +118,89 @@ module.exports = React.createClass({
                     return React.DOM.option({
                         value: type
                     }, type)
-                }))
+                })),
+                React.DOM.div({className: 'clear'})
             ),
-            
             React.DOM.a(
                 {
+                    className: 'sectionBodyTerritoryDomainsLineTitle', 
                     href: expressionDomain.main_url,
                     target: '_blank'
                 },
-                React.DOM.h3({}, expressionDomain.title || expressionDomain.name + ' ' + '('+props.expressionDomainMetrics.nb_expressions+')'),
-                React.DOM.h4({}, expressionDomain.main_url)
+                expressionDomain.title || expressionDomain.name
+            ),
+            React.DOM.a(
+                {
+                    className: 'sectionBodyTerritoryDomainsLineUrl', 
+                    href: expressionDomain.main_url,
+                    target: '_blank'
+                },
+                expressionDomain.main_url
             ),
             React.DOM.div({
-                className: 'excerpt'
+                className: 'sectionBodyTerritoryDomainsLineDescription'
             }, expressionDomain.description),
+            React.DOM.div({className: 'sectionBodyTerritoryDomainsLineTags'},
+                (new Set(expressionDomain.keywords)).toJSON().map(function(tag) {
+                    return React.DOM.div(
+                        {
+                            className: 'sectionBodyTerritoryDomainsLineTagsTag',
+                            key: tag
+                        },
+                        tag
+                    )
+                })             
+            ),
+            React.DOM.div({className: 'sectionBodyTerritoryDomainsLineUrls'},
+                props.expressionDomainMetrics.urls.map(function(resource){
+                    var url = resource.url;
+                    var id = resource.resource_id;
+                    
+                    return React.DOM.div(
+                        {
+                            className: [
+                                'sectionBodyTerritoryDomainsLineUrlsUrl',
+                                state.rejectedResources.has(id) ? 'rejected' : ''
+                            ].join(' ').trim()
+                        },
+                        React.DOM.button({
+                            className: 'reject',
+                            onClick: function (){
+                                var rejected = state.rejectedResources;
+                                
+                                // if state.rejectedResources.has(resource.id) was false (approved === true), 
+                                // we want newApproved to be false (approved === false)
+                                var newApproved = rejected.has(id);
+                                
+                                props.approveResource(id, newApproved);
+                                
+                                self.setState(Object.assign(
+                                    {}, 
+                                    state,
+                                    {
+                                        rejectedResources: newApproved ?
+                                            rejected.delete(id) :
+                                            rejected.add(id)
+                                    }
+                                ))
+                            }
+                        }, React.DOM.i({className: 'fa fa-trash'})),
+                        ' ',
+                        React.DOM.a(
+                            {  
+                                href: url,
+                                title: url,
+                                target: '_blank'
+                            },
+                            url
+                        )
+                        
+                    )
+                })
+            )
+            
+            /*
+               
 
             // tags
             React.DOM.div(
@@ -165,53 +266,7 @@ module.exports = React.createClass({
                 })
             ),
              
-            // automated annotations
-            React.DOM.div(
-                {
-                    className: 'metrics'
-                },
-                React.DOM.span({title: 'Potential audience'},
-                    props.expressionDomainMetrics.estimated_potential_audience,
-                    ' ',
-                    React.DOM.i({className: 'fa fa-users'})
-                ),
-                React.DOM.span({title: 'Social Impact'},
-                    props.expressionDomainMetrics.social_impact_index,
-                    ' ',
-                    React.DOM.i({className: 'fa fa-share-alt'})
-                ),
-                React.DOM.span({title: 'Sum likes'},
-                    props.expressionDomainMetrics.sum_likes,
-                    ' ',
-                    React.DOM.i({className: 'fa fa-plus'}),
-                    ' ',
-                    React.DOM.i({className: 'fa fa-thumbs-o-up'})
-                ),
-                React.DOM.span({title: 'Sum shares'},
-                    props.expressionDomainMetrics.sum_shares,
-                    ' ',
-                    React.DOM.i({className: 'fa fa-plus'}),
-                    ' ',
-                    React.DOM.i({className: 'fa fa-share-square-o'})
-                ),
-                React.DOM.span({title: 'Degrees'},
-                    React.DOM.span({title: 'in degree'}, 
-                        props.degrees.inDegree,
-                        ' ⚞'
-                    ),
-                    React.DOM.i({className: 'fa fa-arrow-circle-o-right'}),
-                    React.DOM.span({title: 'out degree'},
-                        '⚟ ',
-                        props.degrees.outDegree
-                   )
-                ),
-                React.DOM.span({title: 'Local PageRank'},
-                    props.pagerankIndex,
-                    ' PR'
-                )
-                
-            )
-
+            */
         );
     }
 });

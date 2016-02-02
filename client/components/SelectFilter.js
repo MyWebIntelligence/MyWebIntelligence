@@ -34,7 +34,7 @@ module.exports = React.createClass({
                         }
                     },
                     props.options.map(function(opt){
-                        return React.DOM.option({value: opt}, opt)
+                        return React.DOM.option({value: opt, key: opt}, opt)
                     })
                 )
             )

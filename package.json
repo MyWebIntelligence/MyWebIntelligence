@@ -13,6 +13,7 @@
     "start-test": "docker run -p=6666:3333 -e \"NODE_ENV=test\" --link mywi-test-db:mywi-test-db mywi/test node server/index.js",
     "build-dev": "docker-compose -p mywi -f compose-dev.yml build",
     "up-dev": "docker-compose -p mywi -f compose-dev.yml up --force-recreate",
+    "kill-dev": "docker-compose -p mywi -f compose-dev.yml kill",
     "build-experimental": "docker-compose -f compose-experimental.yml build",
     "up-experimental": "docker-compose -f compose-experimental.yml -p mywiexperimental up --force-recreate -d",
     "kill-experimental": "docker-compose -f compose-experimental.yml -p mywiexperimental kill",

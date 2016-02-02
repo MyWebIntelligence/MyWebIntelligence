@@ -37,6 +37,8 @@ module.exports = React.createClass({
         
         var territoire = props.territoire;
     
+        console.log('TerritoireListItem', territoire);
+        
         /*var children;
         
         if(state.editMode){

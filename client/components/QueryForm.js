@@ -64,7 +64,8 @@ module.exports = React.createClass({
                         ref: "form-q",
                         name: 'q',
                         required: true,
-                        type: 'text'
+                        type: 'text',
+                        defaultValue: query.q
                     })
                 )
             ),

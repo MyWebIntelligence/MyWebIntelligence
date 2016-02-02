@@ -3,17 +3,15 @@
 var React = require('react');
 
 var ImmutableSet = require('immutable').Set;
-var moment = require('moment');
+//var moment = require('moment');
 var documentOffset = require('global-offset');
 
-var Header = React.createFactory(require('./Header'));
 var PagesTab = React.createFactory(require('./PagesTab'));
 var DomainsTab = React.createFactory(require('./DomainsTab'));
-var PageListItem = React.createFactory(require('./PageListItem'));
-
+    
 var abstractGraphToPageGraph = require('../../common/graph/abstractGraphToPageGraph');
 var pageGraphToDomainGraph = require('../../common/graph/pageGraphToDomainGraph');
-var makeWordGraph = require('../../common/graph/makeWordGraph');
+//var makeWordGraph = require('../../common/graph/makeWordGraph');
 
 var serverAPI = require('../serverAPI');
 
@@ -22,12 +20,12 @@ var makeResourceSocialImpactIndexMap = require('../../automatedAnnotation/makeRe
 var annotateResource = serverAPI.annotateResource;
 var annotateExpressionDomain = serverAPI.annotateExpressionDomain;
 
-var DEFAULT_LIST_ITEM_HEIGHT = 20; // very small value by default so that worst case, more items are shown
+/*var DEFAULT_LIST_ITEM_HEIGHT = 20; // very small value by default so that worst case, more items are shown
 var DEFAULT_LIST_TOP_OFFSET = 0; // pretend it's at the top so worst case more items are shown
 
 var LIST_START_PADDING = 2;
 var LIST_END_PADDING = LIST_START_PADDING;
-
+*/
 
 /*
 
@@ -42,7 +40,7 @@ interface TerritoireViewScreenProps{
 
 
 
-function generateExpressionGEXF(abstractGraph, expressionById, resourceAnnotationByResourceId, expressionDomainAnnotationsByEDId){
+/*function generateExpressionGEXF(abstractGraph, expressionById, resourceAnnotationByResourceId, expressionDomainAnnotationsByEDId){
     var pageGraph = abstractGraphToPageGraph(abstractGraph, expressionById, resourceAnnotationByResourceId, expressionDomainAnnotationsByEDId);
     
     return pageGraph.exportAsGEXF();
@@ -72,7 +70,7 @@ function triggerDownload(content, name, type){
     document.body.appendChild(a)
     a.click();
     document.body.removeChild(a);
-}
+}*/
 
 
 function computeTerritoireTags(annotationByResourceId){
@@ -273,17 +271,15 @@ module.exports = React.createClass({
         var state = this.state;
         var territoire = props.territoire;
         
-        var listItemHeight = this._listItemHeight || DEFAULT_LIST_ITEM_HEIGHT;
+        /*var listItemHeight = this._listItemHeight || DEFAULT_LIST_ITEM_HEIGHT;
         var listTopOffset = this._listTopOffset || DEFAULT_LIST_TOP_OFFSET;
         
         var startOffset = state.pageY - listTopOffset;
         var listStartIndex = Math.max(0, Math.floor(startOffset/listItemHeight) - LIST_START_PADDING)
         
         var numberOfDisplayedItems = Math.ceil(state.windowHeight/listItemHeight);
-        var listEndIndex = listStartIndex + LIST_START_PADDING + numberOfDisplayedItems + LIST_END_PADDING;
-        
-        console.log('TerritoireViewScreenContent render', numberOfDisplayedItems);
-        
+        var listEndIndex = listStartIndex + LIST_START_PADDING + numberOfDisplayedItems + LIST_END_PADDING;*/
+                
         return React.DOM.section({id: 'sectionBodyTerritory', className: 'sectionBody on'},
                                  
             React.DOM.div({className: 'sectionBodyTerritoriesLabel'},
@@ -302,23 +298,35 @@ module.exports = React.createClass({
                 React.DOM.div({className: 'clear'})
             ),
             React.DOM.div({id: 'sectionBodyTerritoryButtons'},
-                React.DOM.div(
+                React.DOM.button(
                     {
                         id: 'sectionBodyTerritoryButtonsButtonPages', 
                         className: [
                             'sectionBodyTerritoryButtonsButton',
                             state.currentTab === 'pages' ? 'on' : ''
-                        ].join(' ').trim()
+                        ].join(' ').trim(),
+                        onClick: function(){
+                            self.setState(Object.assign(
+                                state,
+                                {currentTab: 'pages'}
+                            ))
+                        }
                     },
                     'Pages'
                 ),
-                React.DOM.div(
+                React.DOM.button(
                     {
                         id: 'sectionBodyTerritoryButtonsButtonDomains', 
                         className: [
                             'sectionBodyTerritoryButtonsButton',
                             state.currentTab === 'domains' ? 'on': ''
-                        ].join(' ').trim()
+                        ].join(' ').trim(),
+                        onClick: function(){
+                            self.setState(Object.assign(
+                                state,
+                                {currentTab: 'domains'}
+                            ))
+                        }
                     },
                     'Domains'
                 ),
@@ -401,7 +409,58 @@ module.exports = React.createClass({
                             rejectedResourceIds: rejectedResourceIds
                         }));
                     }
-                }) : undefined
+                }) :
+                (state.currentTab === 'domains' && Object.keys(territoire.expressionById || {}).length >= 1 && state.domainGraph ? 
+                    new DomainsTab({
+                        approvedExpressionDomainIds: state.approvedExpressionDomainIds,
+                        expressionDomainAnnotationsByEDId: state.expressionDomainAnnotationsByEDId,
+                        expressionDomainsById: territoire.expressionDomainsById,
+                        domainGraph: state.domainGraph,
+                        annotate: function(expressionDomainId, delta){
+                            annotateExpressionDomain(expressionDomainId, territoire.id, delta)
+                            .catch(function(err){
+                                console.error(
+                                    'expression domain annotation update error', 
+                                    expressionDomainId, territoire.id, delta, err
+                                );
+                            });
+
+                            state.expressionDomainAnnotationsByEDId[expressionDomainId] = Object.assign(
+                                {},
+                                state.expressionDomainAnnotationsByEDId[expressionDomainId],
+                                delta
+                            );
+
+                            self.setState(Object.assign({}, state, {
+                                expressionDomainAnnotationsByEDId: state.expressionDomainAnnotationsByEDId // mutated
+                            }));
+                        },
+                        approveResource: function(resourceId, approved){
+                            var deltaResourceAnnotations = {approved: approved}
+
+                            annotateResource(resourceId, territoire.id, deltaResourceAnnotations)
+                            .catch(function(err){
+                                console.error(
+                                    'resource annotation from domain update error', 
+                                    resourceId, territoire.id, approved, err
+                                );
+                            });
+
+                            var rejectedResourceIds = state.rejectedResourceIds;
+                            if(approved !== undefined){
+                                rejectedResourceIds = approved ?
+                                    rejectedResourceIds.delete(resourceId) :
+                                    rejectedResourceIds.add(resourceId);
+                            }
+
+                            self.setState(Object.assign({}, state, {
+                                rejectedResourceIds: rejectedResourceIds
+                            }));
+
+                        }
+                    }) :
+                    undefined
+                )
                                  
                                  
             

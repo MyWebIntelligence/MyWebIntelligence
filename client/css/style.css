@@ -698,7 +698,7 @@ div, input, textarea, select{
 
 .sectionBody{
 	display:none;
-	width:600px;
+	max-width:600px;
 }
 .sectionBody.on{
 	display:block;
@@ -1044,10 +1044,15 @@ background-color:rgb(223,229,229);
 	width:20%;
 	float:left;
 	text-align:center;
-	border-left:1px solid rgb(71,71,73);
+	border: 0;
+    border-left:1px solid rgb(71,71,73);
 	text-transform:uppercase;
 	padding:5px 0px;
 	cursor:pointer;
+    
+    font-size: 1em;
+    font-family: Arial;
+    color: black;
 }
 
 .sectionBodyTerritoryButtonsButton.no,.sectionBodyTerritoryButtonsButton.no:hover {
@@ -1381,12 +1386,17 @@ background-color:rgb(223,229,229);
 	color:rgb(0,0,0);
 	font-weight:700;
 	text-transform:uppercase;
+    display: block;
+    text-decoration: none;
 }
 
 .sectionBodyTerritoryDomainsLineUrl {
 	padding:0px 10px;
 	color:rgb(118,155,206);
 	text-transform:uppercase;
+    
+    display: block;
+    text-decoration: none;
 }
 
 .sectionBodyTerritoryDomainsLineDescription {
@@ -1423,4 +1433,25 @@ background-color:rgb(223,229,229);
 }
 
 .sectionBodyTerritoryDomainsLineUrlsUrl {
+    white-space: nowrap;
+
+    overflow: hidden;             
+    text-overflow: ellipsis;
 }
+
+.sectionBodyTerritoryDomainsLineUrlsUrl button{
+    font-family: Arial;
+    font-size: 1em;
+    padding: 0;
+    margin: 0;
+    border: 0;
+    background-color: transparent;  
+}
+
+.sectionBodyTerritoryDomainsLineUrlsUrl a{
+    color: black;
+    text-decoration: none;
+    margin: 0;
+
+}
+

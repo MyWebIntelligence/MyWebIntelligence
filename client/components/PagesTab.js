@@ -254,8 +254,8 @@ module.exports = React.createClass({
         
         return React.DOM.div(
             {
-                className: 'page-list-container',
-                /*style: {
+                className: 'page-list-container'/*,
+                style: {
                     height: state.pageListItems ? state.pageListItems.length * listItemHeight + 'px' : '100%'
                 }*/
             },

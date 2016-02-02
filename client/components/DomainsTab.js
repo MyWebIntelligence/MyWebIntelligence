@@ -4,7 +4,7 @@ var React = require('react');
 
 var ImmutableSet = require('immutable').Set;
 
-var DomainListItem = require('./DomainListItem');
+var DomainListItem = React.createFactory(require('./DomainListItem'));
 
 
 /*
@@ -90,7 +90,9 @@ module.exports = React.createClass({
         var minConsideredPageRank = Math.min.apply(null, consideredPageRanks);
         
         return React.DOM.div(
-            {},
+            {
+                className: 'domain-list-container'
+            },
             React.DOM.datalist({id: "emitter-types"}, state.emitterTypes.toArray().map(function(t){
                 return React.DOM.option({ 
                     key: t,
@@ -98,9 +100,14 @@ module.exports = React.createClass({
                     label: t
                 });
             })),
-            React.DOM.ul(
+            /*React.DOM.div({id: 'sectionBodyTerritoryFilters'},
+                React.DOM.div({className: 'clear'})
+            ),*/
+            
+            React.DOM.div(
                 {
-                    className: 'domains'
+                    id: 'sectionBodyTerritoryDomains',
+                    className: 'sectionBodyTerritoryPage on'
                 },
                 state.domainGraphNodeList
                 .map(function(n){

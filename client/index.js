@@ -51,12 +51,35 @@ page("/territoires", function(){
 });
 
 page("/territoires/new", function(){
-    var screenData = Object.assign(
-        {
-            serverAPI : serverAPI
+    var screenData = {
+        createTerritoire: function(territoireData){
+            var temporaryTerritoire = Object.assign({queries: []}, territoireData);
+
+            // add at the beginning of the array so it appears first
+            data.user.territoires.unshift(temporaryTerritoire);
+
+            // render new territoire list right now
+            page('/territoires');
+            
+            return serverAPI.createTerritoire(territoireData).then(function(serverTerritoire){
+                var index = data.user.territoires.findIndex(function(t){
+                    return t === temporaryTerritoire;
+                });
+
+                serverTerritoire.queries = serverTerritoire.queries || [];
+                data.user.territoires[index] = serverTerritoire;
+
+                // some element of the state.user.territoires array was mutated
+                page('/territoires');
+
+            }).catch(function(err){
+                console.error('Territoire creation error', err);
+            });
         },
-        data
-    );
+        user: data.user,
+        oracles: data.oracles
+    };
+    
     console.log('/territoires/new screenData', screenData, data); 
 
     React.render(new NewTerritoireScreen(screenData), document.body);

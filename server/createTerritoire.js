@@ -35,10 +35,12 @@ module.exports = function(territoireData, user){
             Create the queries
         */
         var queriesReadyP = Promise._allResolved(queriesData.map(function(queryData){
-            return database.Oracles.findByOracleNodeModuleName(queryData.oracle_node_module_name)
+            return (queryData.oracle_id ? 
+                database.Oracles.findById(queryData.oracle_id) : // creation from UI
+                database.Oracles.findByOracleNodeModuleName(queryData.oracle_node_module_name)) // creation from import
             .then(function(oracle){
                 if(!oracle)
-                    throw new Error('No oracle with oracle_node_module_name '+queryData.oracle_node_module_name);
+                    throw new Error('No oracle found '+ queryData.oracle_id+ ' ' +queryData.oracle_node_module_name);
                 
                 queryData.oracle_id = oracle.id;
                 delete queryData.oracle_node_module_name;

@@ -4,7 +4,8 @@ var ImmutableSet = require('immutable').Set;
 var React = require('react');
 
 var QueryForm = React.createFactory(require('./QueryForm'));
-//var TerritoireForm = React.createFactory(require('./TerritoireForm'));
+var DeleteButton = React.createFactory(require('./DeleteButton'));
+
 
 /*
 interface TerritoireListItemProps{
@@ -25,8 +26,9 @@ module.exports = React.createClass({
     
     getInitialState: function(){
         return {
-            openQueryForms: new ImmutableSet(),
-            showQueries: false
+            openQueries: new ImmutableSet(),
+            showQueries: false,
+            newQueryFormOpen: false
         };
     },
     
@@ -37,6 +39,8 @@ module.exports = React.createClass({
         
         var territoire = props.territoire;
     
+        // console.log('TerritoireListItem', territoire);
+        
         /*var children;
         
         if(state.editMode){
@@ -191,8 +195,6 @@ module.exports = React.createClass({
             ]
         }*/
         
-        
-        
         return React.DOM.div({className: 'sectionBodyTerritories'},
             React.DOM.div({className: 'sectionBodyTerritoriesLabel'},
                 React.DOM.div({className: 'sectionBodyTerritoriesLabelLogo'},
@@ -202,12 +204,19 @@ module.exports = React.createClass({
                 React.DOM.div({className: 'clear'})
             ),
             React.DOM.div({className: 'sectionBodyTerritoriesInfos'},
-                React.DOM.div({className: 'sectionBodyTerritoriesInfos2'}, 'X - Y - Z'),
-                React.DOM.div({className: 'sectionBodyTerritoriesInfos1'}, 'XX'),
                 React.DOM.div({className: 'sectionBodyTerritoriesInfosLogo'},
                     React.DOM.img({src: '/images/oneTerritoryCount.png'})             
                 ),
-                React.DOM.div({className: 'clear'})
+                React.DOM.div({style: {display: 'flex', flexDirection: 'column', justifyContent: 'center'}},
+                    React.DOM.div({className: 'sectionBodyTerritoriesInfos1'}, 'XX')
+                ),
+                React.DOM.div({className: 'sectionBodyTerritoriesInfos2'}, 'X - Y - Z'),
+                new DeleteButton({
+                    className: 'delete-territoire',
+                    onDelete: function(){
+                        props.deleteTerritoire(territoire);
+                    }
+                })
             ),
             React.DOM.div({className: 'clear'}),
             React.DOM.div({className:'sectionBodyTerritoriesButtons'},
@@ -229,9 +238,7 @@ module.exports = React.createClass({
                             self.setState(Object.assign(
                                 {},
                                 state,
-                                {
-                                    showQueries: !state.showQueries
-                                }
+                                { showQueries: !state.showQueries }
                             ))
                         }
                     }, territoire.queries.length === 0 ? 'No query' : 'Queries'),
@@ -244,26 +251,52 @@ module.exports = React.createClass({
                 React.DOM.div({className: 'clear'})
             ),
             React.DOM.div({className: 'sectionBodyTerritoriesQuerys', hidden: !state.showQueries},
-                React.DOM.div({className: 'sectionBodyTerritoriesQuerysNew'}, 'New query'),
+                React.DOM.button(
+                    {
+                        className: 'sectionBodyTerritoriesQuerysNew',
+                        onClick: function(){
+                            self.setState(Object.assign(
+                                {},
+                                state,
+                                { newQueryFormOpen: !state.newQueryFormOpen }
+                            )); 
+                        }
+                    },
+                    'New query'
+                ),
+                state.newQueryFormOpen ?
+                    new QueryForm(
+                        {
+                            oracles: props.oracles, 
+                            onSubmit: function(queryData){
+                                props.createQueryInTerritoire(queryData, territoire);
+                                self.setState(Object.assign(
+                                    {},
+                                    state,
+                                    { newQueryFormOpen: false }
+                                )); 
+                            }
+                        }
+                    ) : undefined,
                 territoire.queries.map(function(q){
                     return React.DOM.div(
                         {
                             className: 'sectionBodyTerritoriesQuerysLine'
                         },
-                        React.DOM.div(
+                        React.DOM.header(
                             {
                                 className: 'sectionBodyTerritoriesQuerysLineTitle',
                                 onClick: function(){                                
-                                    var openQueryForms = state.openQueryForms;
+                                    var openQueries = state.openQueries;
                                     var id = q.id;
 
                                     self.setState(Object.assign(
                                         {},
                                         state,
                                         {
-                                            openQueryForms : openQueryForms.has(id) ?
-                                                openQueryForms.delete(id) :
-                                                openQueryForms.add(id)
+                                            openQueries : openQueries.has(id) ?
+                                                openQueries.delete(id) :
+                                                openQueries.add(id)
                                         }
 
                                     ))
@@ -272,10 +305,16 @@ module.exports = React.createClass({
                             React.DOM.div({className: 'sectionBodyTerritoriesQuerysLineTitle'}, q.name),
                             React.DOM.div({className: 'sectionBodyTerritoriesQuerysLineTitle'},
                                 React.DOM.img({src: '/images/territoryTitle.png'})             
-                            )          
+                            ),
+                            new DeleteButton({
+                                className: 'delete-query',
+                                onDelete: function(){
+                                    props.removeQueryFromTerritoire(q, territoire);
+                                }
+                            })
                         ),
                         
-                        state.openQueryForms.has(q.id) ?
+                        state.openQueries.has(q.id) ?
                             new QueryForm({
                                 oracles: props.oracles,
                                 query: q,
@@ -296,9 +335,9 @@ module.exports = React.createClass({
                                     }
 
                                     // close the form UI in all cases
-                                    state.openQueryForms.delete(q.id);
+                                    state.openQueries.delete(q.id);
                                     self.setState({
-                                        openQueryForms: state.openQueryForms,
+                                        openQueries: state.openQueries,
                                         editMode: false
                                     });
                                 },

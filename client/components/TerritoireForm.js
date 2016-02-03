@@ -3,8 +3,7 @@
 var React = require('react');
 
 var QueryForm = React.createFactory(require('./QueryForm'));
-
-
+var getQueryFormData = require('../getQueryFormData');
 
 /*function findValidationErrors(fileString, oracles){
     console.log('findValidationErrors', oracles);
@@ -94,13 +93,15 @@ module.exports = React.createClass({
 
                     var formElement = e.target;
 
-                    var formData = Object.create(null);
-                    formData.name = formElement.querySelector('input[name="name"]').value;
-                    formData.description = formElement.querySelector('textarea[name="description"]').value;
+                    var territoireData = Object.create(null);
+                    territoireData.name = formElement.querySelector('input[name="name"]').value;
+                    territoireData.description = formElement.querySelector('textarea[name="description"]').value;
 
-                    console.log('formData', formData);
+                    var queryData = getQueryFormData(formElement, props.oracles);
+                    
+                    territoireData.queries = [queryData];
 
-                    props.onSubmit(formData);
+                    props.onSubmit(territoireData);
                 }
             },
             React.DOM.div({className: 'territoryFormLine'}, 
@@ -131,7 +132,6 @@ module.exports = React.createClass({
             ),
             new QueryForm({
                 oracles: props.oracles
-                
             }),
             
             React.DOM.button({

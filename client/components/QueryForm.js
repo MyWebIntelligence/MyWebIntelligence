@@ -3,9 +3,8 @@
 var React = require('react');
 var moment = require('moment');
 
-//var cleanupURLs = require('../../common/cleanupURLs');
+var getQueryFormData = require('../getQueryFormData');
 
-//var DeleteButton = React.createFactory(require('./DeleteButton'));
 
 /*
 
@@ -16,6 +15,8 @@ interface QueryFormProps{
 }
 
 */
+
+
 
 module.exports = React.createClass({
     displayName: 'QueryForm',
@@ -64,7 +65,8 @@ module.exports = React.createClass({
                         ref: "form-q",
                         name: 'q',
                         required: true,
-                        type: 'text'
+                        type: 'text',
+                        defaultValue: query.q
                     })
                 )
             ),
@@ -384,10 +386,18 @@ module.exports = React.createClass({
             }
         }) : undefined*/
         
-        return query && query.name ?
-            React.DOM.form({className: "sectionBodyTerritoriesQuerysLineForm"}, 
+        return typeof props.onSubmit === 'function' ?
+            React.DOM.form(
+                {
+                    className: "sectionBodyTerritoriesQuerysLineForm",
+                    onSubmit: function(e){
+                        e.preventDefault();
+                        props.onSubmit(getQueryFormData(e.target, props.oracles))
+                    }
+                }, 
                 React.DOM.div({className: 'sectionBodyTerritoriesQuerysLineSubTitle'}, query.name),
-                territoireFormQuery
+                territoireFormQuery,
+                React.DOM.button({type: 'submit', className: 'territoryFormButton'}, 'Ok')
             ) :
             territoireFormQuery
     }

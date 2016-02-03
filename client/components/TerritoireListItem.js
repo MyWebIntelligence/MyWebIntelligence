@@ -283,7 +283,7 @@ module.exports = React.createClass({
                         {
                             className: 'sectionBodyTerritoriesQuerysLine'
                         },
-                        React.DOM.div(
+                        React.DOM.header(
                             {
                                 className: 'sectionBodyTerritoriesQuerysLineTitle',
                                 onClick: function(){                                
@@ -305,7 +305,13 @@ module.exports = React.createClass({
                             React.DOM.div({className: 'sectionBodyTerritoriesQuerysLineTitle'}, q.name),
                             React.DOM.div({className: 'sectionBodyTerritoriesQuerysLineTitle'},
                                 React.DOM.img({src: '/images/territoryTitle.png'})             
-                            )          
+                            ),
+                            new DeleteButton({
+                                className: 'delete-query',
+                                onDelete: function(){
+                                    props.removeQueryFromTerritoire(q, territoire);
+                                }
+                            })
                         ),
                         
                         state.openQueries.has(q.id) ?

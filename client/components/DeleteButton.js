@@ -65,7 +65,10 @@ module.exports = React.createClass({
         
         return React.DOM.div({
             className: ["delete", props.className].join(' ').trim(),
-            title: "delete"
+            title: "delete",
+            onClick: function(e){
+                e.stopPropagation();
+            }
         }, children);
     }
 });

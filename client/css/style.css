@@ -925,22 +925,11 @@ div, input, textarea, select{
 	border-left:none;
 }
 
-.sectionBodyTerritoriesButtonsButtonResult {
+a.sectionBodyTerritoriesButtonsButton{
     color: black;
     text-decoration: none;
 }
 
-.sectionBodyTerritoriesButtonsButtonQuery {
-}
-
-.sectionBodyTerritoriesButtonsButtonExport {
-}
-
-.sectionBodyTerritoriesButtonsButtonImport {
-}
-
-.sectionBodyTerritoriesButtonsButtonDownload {
-}
 
 .fa-caret-bottom {
 }
@@ -1079,8 +1068,9 @@ background-color:rgb(223,229,229);
 	background-color:rgb(239,239,240);
 }
 
+
 .sectionBodyTerritoryButtonsButton {
-	width:20%;
+	width:33%;
 	float:left;
 	text-align:center;
 	border: 0;
@@ -1092,6 +1082,7 @@ background-color:rgb(223,229,229);
     font-size: 1em;
     font-family: Arial;
     color: black;
+    background-color: transparent;
 }
 
 .sectionBodyTerritoryButtonsButton.no,.sectionBodyTerritoryButtonsButton.no:hover {
@@ -1116,34 +1107,70 @@ background-color:rgb(223,229,229);
 	border-left:none;
 }
 
-#sectionBodyTerritoryButtonsButtonPages {
+
+#sectionBodyTerritoryButtonsButtonDownload{
+    position: relative;
 }
 
-#sectionBodyTerritoryButtonsButtonDomains {
+#sectionBodyTerritoryButtonsButtonDownload .all-exports{
+    position: absolute;
+    top: 100%;
+    left: -1px;
+    background-color: rgb(239,239,240);
+    text-align: left;
+    border-left: 1px solid black;
+    z-index: 1;
 }
 
-#sectionBodyTerritoryButtonsButtonCartes {
+#sectionBodyTerritoryButtonsButtonDownload .all-exports a{
+    color: black;
+    text-decoration: none;
+    padding: 0.5em 0 0.5em 0.5em;
+    display: block;
+    cursor: pointer;
 }
 
-#sectionBodyTerritoryButtonsButtonDashboard {
+#sectionBodyTerritoryButtonsButtonDownload .all-exports a:not(:last-child){
+    border-bottom: 1px solid black;
 }
 
-#sectionBodyTerritoryButtonsButtonDownload {
-}
 
 #sectionBodyTerritoryFilters {
-	margin-top:5px;
+    margin-top: 1em; 
+    width: 100%;
+    
+    background-color: hsl(240, 3%, 97%);
+    
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+}
+
+#sectionBodyTerritoryFilters > .fa:first-child{
+    padding: 0 0.2em;
+    font-size: 2em;
 }
 
 .sectionBodyTerritoryFiltersFilter {
-	width:20%;
-	float:left;
+    flex: 1;
+    
 	text-align:center;
-	border-left:1px solid rgb(71,71,73);
-	text-transform:uppercase;
-	padding:5px 0px;
 	cursor:pointer;
-    background-color:rgb(239,239,240);
+    
+    border: 0;
+    background-color: transparent;
+}
+
+.sectionBodyTerritoryFiltersFilter * {
+    cursor: pointer;
+}
+
+.sectionBodyTerritoryFiltersFilter select,
+.sectionBodyTerritoryFiltersFilter button
+{
+    width: 100%;
+    border: 0;
+    background-color: transparent;
 }
 
 .sectionBodyTerritoryFiltersFilter.no,.sectionBodyTerritoryFiltersFilter.no:hover {
@@ -1190,6 +1217,10 @@ background-color:rgb(223,229,229);
 	padding:20px;
 }
 
+.sectionBodyTerritoryPagesLine.rejected {
+	opacity: 0.4;
+}
+
 .sectionBodyTerritoryPagesLine:nth-child(2n) {
 	background-color:rgb(239,239,240);
 }
@@ -1229,9 +1260,23 @@ background-color:rgb(223,229,229);
 
 .sectionBodyTerritoryPagesLineHeaderRight {
 	float:left;
-	width:50%;
+    width:50%;
 	text-align:right;
+    
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
 }
+
+.sectionBodyTerritoryPagesLineHeaderRight > *{
+    padding: 0;
+    flex: 1;
+}
+
+.sectionBodyTerritoryPagesLineHeaderRight *:hover{
+    color:rgb(118,155,206);
+}
+
 
 .sectionBodyTerritoryPagesLineHeaderRight button{
     background-color: transparent;
@@ -1240,55 +1285,41 @@ background-color:rgb(223,229,229);
     border-right: 0;
 }
 
-
 .sectionBodyTerritoryPagesLineHeaderRightDate {
-	display:inline-block;
+    white-space: nowrap;
+    flex: 6;
 }
 
 .sectionBodyTerritoryPagesLineHeaderRightDate > input {
 	background-color:transparent;
-	width:100px;
-	border:none;
-	text-align:right;
-	padding-left:5px;
-	padding-right:5px;
+	border: 0;
+    text-align: right;
+    max-width: 80%;
+}
+.sectionBodyTerritoryPagesLineHeaderRightDate > a {
+	margin: 0 0.5em;
 }
 
 .sectionBodyTerritoryPagesLineHeaderRightStar {
-	display:inline-block;
-	padding-left:10px;
-	margin-left:10px;
 	border-left:1px solid rgb(71,71,73);
 	cursor:pointer;
-}
-
-.sectionBodyTerritoryPagesLineHeaderRightStar:hover {
-	color:rgb(118,155,206);
 }
 
 .sectionBodyTerritoryPagesLineHeaderRightFrown {
-	display:inline-block;
-	padding-left:10px;
-	margin-left:10px;
 	border-left:1px solid rgb(71,71,73);
 	cursor:pointer;
 }
 
-.sectionBodyTerritoryPagesLineHeaderRightFrown:hover {
-	color:rgb(118,155,206);
+.sectionBodyTerritoryPagesLineHeaderRightFrown.negative.active {
+	color: red;
 }
+
 
 .sectionBodyTerritoryPagesLineHeaderRightTrash {
-	display:inline-block;
-	padding-left:10px;
-	margin-left:10px;
 	border-left:1px solid rgb(71,71,73);
 	cursor:pointer;
 }
 
-.sectionBodyTerritoryPagesLineHeaderRightTrash:hover {
-	color:rgb(118,155,206);
-}
 
 .sectionBodyTerritoryPagesLineUrl {
 	color:rgb(223,229,229);
@@ -1330,12 +1361,13 @@ background-color:rgb(223,229,229);
 	padding:3px 6px;
 }
 
-.sectionBodyTerritoryPagesLineTagsTag button{
+.sectionBodyTerritoryPagesLineTagsTag button.delete{
     border: 0;
     padding: 0;
     background-color: transparent;
     font-size: 1em;
     color: black;
+    cursor: pointer;
 }
 
 .sectionBodyTerritoryPagesLineAddTag {
@@ -1477,14 +1509,18 @@ background-color:rgb(223,229,229);
     overflow: hidden;             
     text-overflow: ellipsis;
 }
+.sectionBodyTerritoryDomainsLineUrlsUrl.rejected{
+    text-decoration: line-through;
+    opacity: 0.4;
+}
 
-.sectionBodyTerritoryDomainsLineUrlsUrl button{
-    font-family: Arial;
+.sectionBodyTerritoryDomainsLineUrlsUrl button.reject{
     font-size: 1em;
     padding: 0;
     margin: 0;
     border: 0;
-    background-color: transparent;  
+    background-color: transparent;
+    cursor: pointer;
 }
 
 .sectionBodyTerritoryDomainsLineUrlsUrl a{

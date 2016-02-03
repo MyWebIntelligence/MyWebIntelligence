@@ -948,14 +948,19 @@ div, input, textarea, select{
 .sectionBodyTerritoriesQuerysNew {
 	font-weight:700;
 	text-transform: uppercase;
-	font-size:14px;
+	font-size:1em;
 	line-height:20px;
+    color:rgb(255,255,255);
+	text-align:center;
+    font-family: Arial;
+    
+    border: 0;
 	padding:10px;
 	height:40px;
 	width:100%;
 	background-color:rgb(71,71,73);
-	color:rgb(255,255,255);
-	text-align:center;
+	
+    cursor: pointer;
 }
 
 .sectionBodyTerritoriesQuerysLine {

@@ -1,8 +1,7 @@
 "use strict";
 
 var React = require('react');
-var ImmutableMap = require('immutable').Map;
-var ImmutableSet = require('immutable').Set;
+var ImmutableMap = require('immutable').OrderedMap;
 var documentOffset = require('global-offset');
 
 var PageListItem = React.createFactory(require('./PageListItem'));
@@ -18,13 +17,12 @@ var DEFAULT_LIST_TOP_OFFSET = 0; // pretend it's at the top so worst case more i
 var LIST_START_PADDING = 5;
 var LIST_END_PADDING = LIST_START_PADDING;
 
-
-
 var DEFAULT_MEDIA_TYPE = undefined;
 var DEFAULT_EMITTER_TYPE = undefined;
 var DEFAULT_FAVORITE_FILTER_VALUE = false;
 var DEFAULT_SENTIMENT_FILTER_VALUE = '';
 
+var NO_FILTER = '';
 
 
 module.exports = React.createClass({
@@ -225,8 +223,8 @@ module.exports = React.createClass({
         
         console.log('PagesTab', 'pageListItems', pageListItems)
 
-        var possibleMediaTypes = new ImmutableSet(['']);
-        var possibleEmitterTypes = new ImmutableSet(['']);
+        var possibleMediaTypes = new ImmutableMap({'(Media type)': NO_FILTER});
+        var possibleEmitterTypes = new ImmutableMap({'(Emitter type)': NO_FILTER});
         if(props.pageGraph){
             props.pageGraph.nodes.forEach(function(n){
                 var resourceId = n.id;
@@ -246,11 +244,13 @@ module.exports = React.createClass({
                 var emitterType = expressionDomainAnnotations && expressionDomainAnnotations['emitter_type'];
 
                 if(mediaType)
-                    possibleMediaTypes = possibleMediaTypes.add(mediaType);
+                    possibleMediaTypes = possibleMediaTypes.set(mediaType, mediaType);
                 if(emitterType)
-                    possibleEmitterTypes = possibleEmitterTypes.add(emitterType);
+                    possibleEmitterTypes = possibleEmitterTypes.set(emitterType, emitterType);
             });
         }
+        
+        
         
         return React.DOM.div(
             {
@@ -260,12 +260,12 @@ module.exports = React.createClass({
                 }*/
             },
             React.DOM.div({id: 'sectionBodyTerritoryFilters'},
+                React.DOM.i({className: 'fa fa-filter', title: 'filters'}),
                 React.DOM.div({id: 'sectionBodyTerritoryFiltersFilter01', className: 'sectionBodyTerritoryFiltersFilter'},
                     new SelectFilter(
                         {
-                            label: 'Media',
                             className: 'media_type',
-                            value: state.filterValues.get('media_type'),
+                            value: state.filterValues.get('media_type') || NO_FILTER,
                             options: possibleMediaTypes.toJS(),
                             onChange: function(newValue){
                                 console.log("media_type", newValue)
@@ -284,7 +284,6 @@ module.exports = React.createClass({
                 React.DOM.div({id: 'sectionBodyTerritoryFiltersFilter02', className: 'sectionBodyTerritoryFiltersFilter'},
                     new SelectFilter(
                         {
-                            label: 'Emitter',
                             className: 'emitter_type',
                             value: state.filterValues.get('emitter_type'),
                             options: possibleEmitterTypes.toJS(),
@@ -314,13 +313,13 @@ module.exports = React.createClass({
                                     }
                                 ))
                             }
-                        }
+                        },
+                        React.DOM.i({className: 'fa fa-star'})
                     )
                 ),
                 React.DOM.div({id: 'sectionBodyTerritoryFiltersFilter04', className: 'sectionBodyTerritoryFiltersFilter'},
                     new BooleanFilter(
                         {
-                            label: '☹',
                             className: 'sentiment',
                             value: state.filterValues.get('sentiment') === 'negative',
                             onChange: function(newValue){
@@ -332,7 +331,8 @@ module.exports = React.createClass({
                                     }
                                 ))
                             }
-                        }
+                        },
+                        '☹'
                     )
                 ),
                 React.DOM.div({className: 'clear'})

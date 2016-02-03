@@ -281,6 +281,15 @@ module.exports = React.createClass({
         var listEndIndex = listStartIndex + LIST_START_PADDING + numberOfDisplayedItems + LIST_END_PADDING;*/
                 
         return React.DOM.section({id: 'sectionBodyTerritory', className: 'sectionBody on'},
+            React.DOM.datalist({id: "tags"}, state.territoireTags.toArray().map(function(t){
+                return React.DOM.option({ 
+                    key: t, 
+                    // adding ; so that clicking on an auto-complete value does autocomplete 
+                    // without the user having to hit ';' themself
+                    value: t+';', 
+                    label: t
+                });
+            })),
                                  
             React.DOM.div({className: 'sectionBodyTerritoriesLabel'},
                 React.DOM.div({className: 'sectionBodyTerritoriesLabelLogo'},
@@ -290,12 +299,13 @@ module.exports = React.createClass({
                 React.DOM.div({className: 'clear'})
             ),
             React.DOM.div({className: 'sectionBodyTerritoriesInfos'},
-                React.DOM.div({className: 'sectionBodyTerritoriesInfos2'}, 'X - Y - Z'),
-                React.DOM.div({className: 'sectionBodyTerritoriesInfos1'}, 'XX'),
                 React.DOM.div({className: 'sectionBodyTerritoriesInfosLogo'},
                     React.DOM.img({src: '/images/oneTerritoryCount.png'})             
                 ),
-                React.DOM.div({className: 'clear'})
+                React.DOM.div({style: {display: 'flex', flexDirection: 'column', justifyContent: 'center'}},
+                    React.DOM.div({className: 'sectionBodyTerritoriesInfos1'}, 'XX')
+                ),
+                React.DOM.div({className: 'sectionBodyTerritoriesInfos2'}, 'X - Y - Z')
             ),
             React.DOM.div({id: 'sectionBodyTerritoryButtons'},
                 React.DOM.button(

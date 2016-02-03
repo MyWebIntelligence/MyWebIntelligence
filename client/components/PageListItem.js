@@ -58,16 +58,14 @@ module.exports = React.createClass({
 
         var resourceAnnotations = props.resourceAnnotations;
         var expressionDomain = props.expressionDomain;
-        
-        console.log('PageListItem', resourceId, resourceAnnotations);
-        
+                
         var classes = ['sectionBodyTerritoryPagesLine'];
         
         if (props.rejected) {
             classes.push('rejected');
         }
         
-        return React.DOM.div({className: classes.join(' ')},
+        return React.DOM.div({className: classes.join(' '), 'data-resource-id': resourceId},
             React.DOM.div({className: 'sectionBodyTerritoryPagesLineHeader'},
                 React.DOM.div({className: 'sectionBodyTerritoryPagesLineHeaderLeft'},
                     React.DOM.div({className: 'sectionBodyTerritoryPagesLineHeaderLeftShare'},
@@ -126,7 +124,10 @@ module.exports = React.createClass({
                                   
                     // Favorite
                     React.DOM.button({
-                        className: ['sectionBodyTerritoryPagesLineHeaderRightStar', (resourceAnnotations.favorite ? 'active' : '')].join(' '),
+                        className: [
+                            'sectionBodyTerritoryPagesLineHeaderRightStar',
+                            resourceAnnotations.favorite ? 'active' : ''
+                        ].join(' '),
                         onClick: function () {
                             var newFavorite = !resourceAnnotations.favorite;
 
@@ -140,7 +141,11 @@ module.exports = React.createClass({
                                   
                     // Sentiment
                     React.DOM.button({
-                        className: ['sectionBodyTerritoryPagesLineHeaderRightFrown', 'negative', (resourceAnnotations.sentiment === 'negative' ? 'active' : '')].join(' '),
+                        className: [
+                            'sectionBodyTerritoryPagesLineHeaderRightFrown',
+                            'negative',
+                            (resourceAnnotations.sentiment === 'negative' ? 'active' : '')
+                        ].join(' '),
                         onClick: function () {
                             // empty string means "no sentiment annotation"
                             var newSentiment = resourceAnnotations.sentiment === 'negative' ? '' : 'negative';
@@ -162,9 +167,7 @@ module.exports = React.createClass({
 
                             annotate(undefined, newApproved);
                         }
-                    }, React.DOM.i({className: 'fa fa-trash'})),
-                    
-                    React.DOM.div({className: 'clear'})
+                    }, React.DOM.i({className: 'fa fa-trash'}))
                 ),
                 React.DOM.div({className: 'clear'})
             ),
@@ -197,6 +200,7 @@ module.exports = React.createClass({
                         },
                         tag,
                         React.DOM.button({
+                            className: 'delete',
                             onClick: function () {
                                 var newTags = new Set(resourceAnnotations.tags);
                                 newTags.delete(tag);

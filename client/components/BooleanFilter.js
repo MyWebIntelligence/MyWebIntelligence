@@ -17,7 +17,7 @@ module.exports = React.createClass({
     
     render: function(){
         var props = this.props;
-                
+                        
         return React.DOM.div(
             {
                 className: [
@@ -32,7 +32,7 @@ module.exports = React.createClass({
                     onClick: function(){
                         props.onChange(!props.value);
                     }
-                }, props.label)
+                }, props.children)
             )
         )
     }

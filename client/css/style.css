@@ -1506,14 +1506,18 @@ background-color:rgb(223,229,229);
     overflow: hidden;             
     text-overflow: ellipsis;
 }
+.sectionBodyTerritoryDomainsLineUrlsUrl.rejected{
+    text-decoration: line-through;
+    opacity: 0.4;
+}
 
-.sectionBodyTerritoryDomainsLineUrlsUrl button{
-    font-family: Arial;
+.sectionBodyTerritoryDomainsLineUrlsUrl button.reject{
     font-size: 1em;
     padding: 0;
     margin: 0;
     border: 0;
-    background-color: transparent;  
+    background-color: transparent;
+    cursor: pointer;
 }
 
 .sectionBodyTerritoryDomainsLineUrlsUrl a{

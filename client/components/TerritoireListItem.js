@@ -242,11 +242,12 @@ module.exports = React.createClass({
                             ))
                         }
                     }, territoire.queries.length === 0 ? 'No query' : 'Queries'),
-                React.DOM.div({className: 'sectionBodyTerritoriesButtonsButton sectionBodyTerritoriesButtonsButtonExport'}, 'Export'),
-                //React.DOM.div({className: 'sectionBodyTerritoriesButtonsButton sectionBodyTerritoriesButtonsButtonImport'}, 'Import'),
-                React.DOM.div({className: 'sectionBodyTerritoriesButtonsButton sectionBodyTerritoriesButtonsButtonDownload'},
-                    'Download'+' ',
-                    React.DOM.i({className: 'fa fa-caret-down'})
+                React.DOM.a(
+                    {
+                        href: "/territoire/export/"+territoire.id,
+                        className: 'sectionBodyTerritoriesButtonsButton sectionBodyTerritoriesButtonsButtonExport'
+                    },
+                    'Export'
                 ),
                 React.DOM.div({className: 'clear'})
             ),

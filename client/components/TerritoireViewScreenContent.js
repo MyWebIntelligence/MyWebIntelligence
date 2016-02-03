@@ -11,7 +11,7 @@ var DomainsTab = React.createFactory(require('./DomainsTab'));
     
 var abstractGraphToPageGraph = require('../../common/graph/abstractGraphToPageGraph');
 var pageGraphToDomainGraph = require('../../common/graph/pageGraphToDomainGraph');
-//var makeWordGraph = require('../../common/graph/makeWordGraph');
+var makeWordGraph = require('../../common/graph/makeWordGraph');
 
 var serverAPI = require('../serverAPI');
 
@@ -20,12 +20,12 @@ var makeResourceSocialImpactIndexMap = require('../../automatedAnnotation/makeRe
 var annotateResource = serverAPI.annotateResource;
 var annotateExpressionDomain = serverAPI.annotateExpressionDomain;
 
-/*var DEFAULT_LIST_ITEM_HEIGHT = 20; // very small value by default so that worst case, more items are shown
-var DEFAULT_LIST_TOP_OFFSET = 0; // pretend it's at the top so worst case more items are shown
+//var DEFAULT_LIST_ITEM_HEIGHT = 20; // very small value by default so that worst case, more items are shown
+//var DEFAULT_LIST_TOP_OFFSET = 0; // pretend it's at the top so worst case more items are shown
 
-var LIST_START_PADDING = 2;
-var LIST_END_PADDING = LIST_START_PADDING;
-*/
+//var LIST_START_PADDING = 2;
+//var LIST_END_PADDING = LIST_START_PADDING;
+
 
 /*
 
@@ -40,7 +40,7 @@ interface TerritoireViewScreenProps{
 
 
 
-/*function generateExpressionGEXF(abstractGraph, expressionById, resourceAnnotationByResourceId, expressionDomainAnnotationsByEDId){
+function generateExpressionGEXF(abstractGraph, expressionById, resourceAnnotationByResourceId, expressionDomainAnnotationsByEDId){
     var pageGraph = abstractGraphToPageGraph(abstractGraph, expressionById, resourceAnnotationByResourceId, expressionDomainAnnotationsByEDId);
     
     return pageGraph.exportAsGEXF();
@@ -70,7 +70,7 @@ function triggerDownload(content, name, type){
     document.body.appendChild(a)
     a.click();
     document.body.removeChild(a);
-}*/
+}
 
 
 function computeTerritoireTags(annotationByResourceId){
@@ -247,6 +247,8 @@ module.exports = React.createClass({
                         
         return {
             currentTab: 'pages', // | 'domains'
+            downloadMenuOpen: false,
+            
             territoireTags: computeTerritoireTags(territoire.resourceAnnotationByResourceId),
             resourceAnnotationByResourceId: territoire.resourceAnnotationByResourceId,
             expressionDomainAnnotationsByEDId: territoire.expressionDomainAnnotationsByEDId,
@@ -318,7 +320,7 @@ module.exports = React.createClass({
                         onClick: function(){
                             self.setState(Object.assign(
                                 state,
-                                {currentTab: 'pages'}
+                                {currentTab: 'pages', downloadMenuOpen: false}
                             ))
                         }
                     },
@@ -334,7 +336,7 @@ module.exports = React.createClass({
                         onClick: function(){
                             self.setState(Object.assign(
                                 state,
-                                {currentTab: 'domains'}
+                                {currentTab: 'domains', downloadMenuOpen: false}
                             ))
                         }
                     },
@@ -343,10 +345,91 @@ module.exports = React.createClass({
                 React.DOM.div(
                     {
                         id: 'sectionBodyTerritoryButtonsButtonDownload',
-                        className: 'sectionBodyTerritoryButtonsButton'
+                        className: 'sectionBodyTerritoryButtonsButton',
+                        onClick: function(){
+                            self.setState(Object.assign(
+                                {},
+                                state,
+                                {downloadMenuOpen: !state.downloadMenuOpen}
+                            ))
+                        }
                     },
                     'Downloads',
-                    React.DOM.i({className: 'fa fa-caret-down'})
+                    ' ',
+                    React.DOM.i({className: 'fa fa-caret-down'}),
+                    state.downloadMenuOpen ? React.DOM.div(
+                        {
+                            className: 'all-exports'
+                        },
+                        React.DOM.a({
+                            href: "/territoire/"+territoire.id+"/expressions.csv",
+                            download: true
+                        }, 'Pages list (CSV)'),
+                        React.DOM.a({
+                            href: "/territoire/"+territoire.id+"/expressions.csv?main_text=true",
+                            download: true
+                        }, 'Pages list with main text (CSV)'),
+                        React.DOM.a({
+                            href: "/territoire/"+territoire.id+"/expressions.gexf",
+                            download: territoire.name+'-pages.gexf',
+                            onClick: function(e){
+                                e.preventDefault();
+
+                                //console.log('before dl', territoire.resourceAnnotationByResourceId, territoire);
+
+                                triggerDownload(
+                                    generateExpressionGEXF(
+                                        territoire.graph, 
+                                        territoire.expressionById, 
+                                        territoire.resourceAnnotationByResourceId,
+                                        state.expressionDomainAnnotationsByEDId
+                                    ),
+                                    territoire.name+'-pages.gexf',
+                                    "application/gexf+xml"
+                                );
+                            }
+                        }, 'Pages Graph (GEXF)'),
+                        React.DOM.a({
+                            href: "/territoire/"+territoire.id+"/domains.gexf",
+                            download: territoire.name+'-domains.gexf',
+                            onClick: function(e){
+                                e.preventDefault();
+
+                                var domainsGEXF = generateDomainGEXF(
+                                    territoire.graph, 
+                                    territoire.expressionById, 
+                                    state.resourceAnnotationByResourceId, 
+                                    state.expressionDomainAnnotationsByEDId,
+                                    territoire.expressionDomainsById
+                                )
+
+                                triggerDownload(
+                                    domainsGEXF,
+                                    territoire.name+'-domains.gexf',
+                                    "application/gexf+xml"
+                                );
+                            }
+                        }, 'Domains Graph (GEXF)'),
+                        React.DOM.a({
+                            href: "/territoire/"+territoire.id+"/cognitive-map.gexf",
+                            download: territoire.name+'-cognitive-map.gexf',
+                            onClick: function(e){
+                                e.preventDefault();
+
+                                var cognitiveMapGraph = makeWordGraph(
+                                    territoire.graph.nodes,
+                                    territoire.expressionById,
+                                    state.resourceAnnotationByResourceId
+                                );
+
+                                triggerDownload(
+                                    cognitiveMapGraph.exportAsGEXF(),
+                                    territoire.name+'-cognitive-map.gexf',
+                                    "application/gexf+xml"
+                                );
+                            }
+                        }, 'Cognitive Map (GEXF)')
+                    ) : undefined
                 ),
                 React.DOM.div({className: 'clear'})
             ),
@@ -680,74 +763,7 @@ module.exports = React.createClass({
                     ),
                     
                     React.DOM.div({className: 'exports'},
-                        React.DOM.a({
-                            href: "/territoire/"+territoire.id+"/expressions.csv",
-                            download: true
-                        }, 'Download Page CSV'),
-                        React.DOM.a({
-                            href: "/territoire/"+territoire.id+"/expressions.csv?main_text=true",
-                            download: true
-                        }, 'Download Page CSV with main text'),
-                        React.DOM.a({
-                            href: "/territoire/"+territoire.id+"/expressions.gexf",
-                            download: territoire.name+'-pages.gexf',
-                            onClick: function(e){
-                                e.preventDefault();
-                                
-                                //console.log('before dl', territoire.resourceAnnotationByResourceId, territoire);
-                                
-                                triggerDownload(
-                                    generateExpressionGEXF(
-                                        territoire.graph, 
-                                        territoire.expressionById, 
-                                        territoire.resourceAnnotationByResourceId,
-                                        state.expressionDomainAnnotationsByEDId
-                                    ),
-                                    territoire.name+'-pages.gexf',
-                                    "application/gexf+xml"
-                                );
-                            }
-                        }, 'Download Pages GEXF'),
-                        React.DOM.a({
-                            href: "/territoire/"+territoire.id+"/domains.gexf",
-                            download: territoire.name+'-domains.gexf',
-                            onClick: function(e){
-                                e.preventDefault();
-                                
-                                var domainsGEXF = generateDomainGEXF(
-                                    territoire.graph, 
-                                    territoire.expressionById, 
-                                    state.resourceAnnotationByResourceId, 
-                                    state.expressionDomainAnnotationsByEDId,
-                                    territoire.expressionDomainsById
-                                )
-                                    
-                                triggerDownload(
-                                    domainsGEXF,
-                                    territoire.name+'-domains.gexf',
-                                    "application/gexf+xml"
-                                );
-                            }
-                        }, 'Download Domains GEXF'),
-                        React.DOM.a({
-                            href: "/territoire/"+territoire.id+"/cognitive-map.gexf",
-                            download: territoire.name+'-cognitive-map.gexf',
-                            onClick: function(e){
-                                e.preventDefault();
-                                
-                                var cognitiveMapGraph = makeWordGraph(
-                                    territoire.graph.nodes,
-                                    territoire.expressionById,
-                                    state.resourceAnnotationByResourceId
-                                );
-                                    
-                                triggerDownload(
-                                    cognitiveMapGraph.exportAsGEXF(),
-                                    territoire.name+'-cognitive-map.gexf',
-                                    "application/gexf+xml"
-                                );
-                            }
-                        }, 'Download Cognitive Map GEXF')
+                        
                     )
                 
                 )

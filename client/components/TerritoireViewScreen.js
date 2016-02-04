@@ -25,7 +25,8 @@ module.exports = React.createClass({
         return React.DOM.section({id: "sectionConnect"},
 
             new Header({
-                user: props.user
+                user: props.user,
+                oracles: props.oracles
             }),
             
             React.DOM.section({id: 'sectionConnectContent'},

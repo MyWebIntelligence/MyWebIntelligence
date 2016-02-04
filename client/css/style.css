@@ -171,33 +171,30 @@ div, input, textarea, select{
 }
 
 #sectionConnectHeader {
-	position:fixed;
-	top:0px; left:0px; right:0px;
-	height:30px;
+	height: 3em;
 	background-color:rgb(71,71,73);
 	color:rgb(255,255,255);
 	text-align:right;
-	z-index:75;
+    
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
 }
 
 #sectionConnectHeaderPseudo {
-	float:right;
-	height:30px;
-	line-height:30px;
 	padding:0px 10px;
 }
 
 #sectionConnectHeaderOracle {
-	float:right;
-	height:30px;
-	line-height:30px;
 	padding:0px 10px;
 }
 
+#sectionConnectHeaderOracle:hover{
+    align-self: flex-start;
+}
+
 #sectionConnectHeaderLogout {
-	float:right;
-	height:30px;
-	line-height:30px;
 	padding:0px 10px;
 }
 
@@ -207,14 +204,14 @@ div, input, textarea, select{
 	background-color:rgb(255,255,255);
 	color:rgb(71,71,73);
 	text-transform:uppercase;
-	text-align: left;
 
+    margin-right: 1em;
 }
 
 #sectionConnectHeaderOracleBoxLabel{
-
-	padding:10px;
-	padding-top:15px;
+    padding: 1em 0;
+    line-height: 1em;
+    text-align: center;
 
 }
 
@@ -222,10 +219,16 @@ div, input, textarea, select{
 
 	background-color: rgb(71,71,73);
 	color:rgb(255,255,255);
-	padding:0px 10px;
+	
 	cursor:pointer;
-	margin-top:4px;
+    padding: 1em;
+    z-index: 1;
+}
 
+
+#sectionConnectHeaderOracleBoxGoogle form{
+    display: flex;
+    flex-direction: column;
 }
 
 .sectionConnectHeaderOracleBox.disable{
@@ -246,16 +249,17 @@ div, input, textarea, select{
 
 }
 
-#sectionConnectHeaderOracle:hover #sectionConnectHeaderOracleBox{
-	
-	display:inline-block;
-
+#sectionConnectHeaderOracle:hover #sectionConnectHeaderOracleBox,
+#sectionConnectHeaderOracleBox:hover{
+	display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
 }
 
 #sectionConnectContent {
 	position:absolute;
-	top:30px; left:0px; right:0px; bottom:0px;
-	z-index:25;
+	top: 3em;
+    left:0px; right:0px; bottom:0px;
 }
 
 #sectionNavigation {
@@ -464,7 +468,6 @@ div, input, textarea, select{
 	margin-left:-150px;
 	overflow:hidden;
 	overflow-y:scroll;
-	z-index:10;
 }
 
 #sectionBodyCreateTerritory {

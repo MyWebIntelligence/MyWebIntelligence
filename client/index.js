@@ -27,12 +27,7 @@ var data;
     popstate: true
 })*/
 page("/", function(){
-    var screenData = Object.assign(
-        {
-            oracleHref: '/oracles'
-        },
-        data
-    );
+    var screenData = data;
             
     React.render(new LoginScreen(screenData), document.body);
 });

@@ -114,7 +114,8 @@ page("/territoire/:id", function displayTerritoireViewScreen(context){
         var screenData = {
             refresh: refresh,
             territoire: terrViewData,
-            user: data.user
+            user: data.user,
+            oracles: data.oracles
         };
 
         React.render(new TerritoireViewScreen(screenData), document.body);

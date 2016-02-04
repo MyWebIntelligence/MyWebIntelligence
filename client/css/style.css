@@ -165,9 +165,6 @@ div, input, textarea, select{
 }
 
 #sectionConnect {
-	position:absolute;
-	top:0px; left:0px; right:0px; bottom:0px;
-	z-index:50;
 }
 
 #sectionConnectHeader {
@@ -257,18 +254,17 @@ div, input, textarea, select{
 }
 
 #sectionConnectContent {
-	position:absolute;
-	top: 3em;
-    left:0px; right:0px; bottom:0px;
+    display: flex;
+    flex-direction: row;
+}
+#sectionConnectContent > *{
+    flex: 1;
 }
 
 #sectionNavigation {
-	position:absolute;
-	left:0px; top:0px; right:50%; bottom:0px;
-	margin-right:150px;
-	border-right:20px solid rgb(223,229,229);
+    flex: 1;
+    border-right:20px solid rgb(223,229,229);
 	text-transform:uppercase;
-	z-index:15;
 }
 
 
@@ -462,12 +458,7 @@ div, input, textarea, select{
 }
 
 #sectionBody {
-	position:absolute;
-	top:0px; left:50%; bottom:0px;
-	right:0px;
-	margin-left:-150px;
-	overflow:hidden;
-	overflow-y:scroll;
+    flex: 2;
 }
 
 #sectionBodyCreateTerritory {
@@ -485,9 +476,6 @@ div, input, textarea, select{
     justify-content: space-between;
 }
 
-#sectionBodyTerritory header > *{
-    flex: 1;
-}
 
 #sectionBodyView {
 
@@ -1238,16 +1226,28 @@ background-color:rgb(223,229,229);
 }
 
 .sectionBodyTerritoryPagesLine {
-	padding:20px;
+	padding: 1.5em;
+    height: 20em;
+    
+    overflow: hidden;
+}
+.sectionBodyTerritoryPagesLine:nth-child(2n) {
+	background-color:rgb(239,239,240);
+}
+
+.sectionBodyTerritoryPagesLine:hover {
+	overflow: visible;
+    z-index: 1;
+    background-color:rgb(223,229,229);
+    height: auto;
+    min-height: 20em;
 }
 
 .sectionBodyTerritoryPagesLine.rejected {
 	opacity: 0.4;
 }
 
-.sectionBodyTerritoryPagesLine:nth-child(2n) {
-	background-color:rgb(239,239,240);
-}
+
 
 .sectionBodyTerritoryPagesLineHeader {
 }

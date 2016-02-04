@@ -22,7 +22,7 @@ module.exports = function (client) {
                     index: name
                 }, function (err, res) {
                     if (err) {
-                        console.log('deleteIndex err', err)
+                        //console.log('deleteIndex err', err)
                         if (err.status === '404') {
                             // index does not exist. Whatev's, just means another one can be created with this name
                             resolve();

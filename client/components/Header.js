@@ -59,9 +59,7 @@ module.exports = React.createClass({
         var o = props.oracles.find(function(or){
             return or.oracle_node_module_name === 'GCSE';
         });
-        
-        console.log('serverCredentialsP', state.serverCredentialsP)
-        
+                
         return React.DOM.section({id: 'sectionConnectHeader'},
             React.DOM.div({id: 'sectionConnectHeaderPseudo'},
                 props.user.name

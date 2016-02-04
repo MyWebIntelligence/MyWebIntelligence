@@ -476,6 +476,16 @@ div, input, textarea, select{
 #sectionBodyTerritory {
 }
 
+#sectionBodyTerritory header{
+    background-color:rgb(223,229,229);
+    display: flex;
+    justify-content: space-between;
+}
+
+#sectionBodyTerritory header > *{
+    flex: 1;
+}
+
 #sectionBodyView {
 
 	background-color:rgba(255,255,255,.9);
@@ -822,33 +832,46 @@ div, input, textarea, select{
 	margin-bottom:40px;
 }
 
+.sectionBodyTerritories header{
+    background-color:rgb(223,229,229);
+}
+.sectionBodyTerritories header .top-line{
+
+    display: flex;
+    justify-content: space-between;
+}
+
+.sectionBodyTerritories header .top-line > *{
+    flex: 1;
+}
+
+.sectionBodyTerritories header p.description{
+    color: grey;
+    padding: 1em;
+    margin: 0;
+}
+
 .sectionBodyTerritories:last-child{
 	margin-bottom:0px;
 }
 
 .sectionBodyTerritoriesLabel {
-	background-color:rgb(223,229,229);
-	float:left;
-	width:60%;
 	font-weight:700;
 	height:35px;
+    display: flex;
 }
 
 .sectionBodyTerritoriesLabelTitle {
-	float:left;
 	height:35px;
-	padding:5px;
+	padding: 5px 0;
 	line-height:25px;
 	font-size:20px;
 	font-weight:700;
-	margin-left:10px;
+    margin-left: 1em;
 }
 
 .sectionBodyTerritoriesLabelLogo {
-
-	float:left;
 	height:35px;
-
 }
 
 .sectionBodyTerritoriesInfos {
@@ -856,8 +879,6 @@ div, input, textarea, select{
 	display: flex;
     justify-content: flex-end;
     align-items: stretch;
-    
-	width: 40%;
 }
 
 .sectionBodyTerritoriesInfos > *{

@@ -196,29 +196,28 @@ module.exports = React.createClass({
         }*/
         
         return React.DOM.div({className: 'sectionBodyTerritories'},
-            React.DOM.div({className: 'sectionBodyTerritoriesLabel'},
-                React.DOM.div({className: 'sectionBodyTerritoriesLabelLogo'},
-                    React.DOM.img({src: '/images/oneTerritory.png'})             
+            React.DOM.header({},
+                React.DOM.div({className: 'top-line'},
+                    React.DOM.div({className: 'sectionBodyTerritoriesLabel'},
+                        React.DOM.div({className: 'sectionBodyTerritoriesLabelLogo'},
+                            React.DOM.img({src: '/images/oneTerritory.png'})             
+                        ),
+                        React.DOM.div({className: 'sectionBodyTerritoriesLabelTitle'}, territoire.name)
+                    ),
+                    React.DOM.div({className: 'sectionBodyTerritoriesInfos'},
+                        /*React.DOM.div({className: 'sectionBodyTerritoriesInfosLogo'},
+                            React.DOM.img({src: '/images/oneTerritoryCount.png'})             
+                        ),*/
+                        new DeleteButton({
+                            className: 'delete-territoire',
+                            onDelete: function(){
+                                props.deleteTerritoire(territoire);
+                            }
+                        })
+                    )
                 ),
-                React.DOM.div({className: 'sectionBodyTerritoriesLabelTitle'}, territoire.name),
-                React.DOM.div({className: 'clear'})
+                territoire.description ? React.DOM.p({className: 'description'}, territoire.description): undefined              
             ),
-            React.DOM.div({className: 'sectionBodyTerritoriesInfos'},
-                React.DOM.div({className: 'sectionBodyTerritoriesInfosLogo'},
-                    React.DOM.img({src: '/images/oneTerritoryCount.png'})             
-                ),
-                React.DOM.div({style: {display: 'flex', flexDirection: 'column', justifyContent: 'center'}},
-                    React.DOM.div({className: 'sectionBodyTerritoriesInfos1'}, 'XX')
-                ),
-                React.DOM.div({className: 'sectionBodyTerritoriesInfos2'}, 'X - Y - Z'),
-                new DeleteButton({
-                    className: 'delete-territoire',
-                    onDelete: function(){
-                        props.deleteTerritoire(territoire);
-                    }
-                })
-            ),
-            React.DOM.div({className: 'clear'}),
             React.DOM.div({className:'sectionBodyTerritoriesButtons'},
                 React.DOM.a(
                     {

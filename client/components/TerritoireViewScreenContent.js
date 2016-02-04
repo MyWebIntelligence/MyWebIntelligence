@@ -292,22 +292,28 @@ module.exports = React.createClass({
                     label: t
                 });
             })),
-                                 
-            React.DOM.div({className: 'sectionBodyTerritoriesLabel'},
-                React.DOM.div({className: 'sectionBodyTerritoriesLabelLogo'},
-                    React.DOM.img({src: '/images/oneTerritory.png'})             
+            React.DOM.header({},                
+                React.DOM.div({className: 'sectionBodyTerritoriesLabel'},
+                    React.DOM.div({className: 'sectionBodyTerritoriesLabelLogo'},
+                        React.DOM.img({src: '/images/oneTerritory.png'})             
+                    ),
+                    React.DOM.div({className: 'sectionBodyTerritoriesLabelTitle'}, territoire.name)
                 ),
-                React.DOM.div({className: 'sectionBodyTerritoriesLabelTitle'}, territoire.name),
-                React.DOM.div({className: 'clear'})
-            ),
-            React.DOM.div({className: 'sectionBodyTerritoriesInfos'},
-                React.DOM.div({className: 'sectionBodyTerritoriesInfosLogo'},
-                    React.DOM.img({src: '/images/oneTerritoryCount.png'})             
-                ),
-                React.DOM.div({style: {display: 'flex', flexDirection: 'column', justifyContent: 'center'}},
-                    React.DOM.div({className: 'sectionBodyTerritoriesInfos1'}, 'XX')
-                ),
-                React.DOM.div({className: 'sectionBodyTerritoriesInfos2'}, 'X - Y - Z')
+                React.DOM.div({className: 'sectionBodyTerritoriesInfos'},
+                    React.DOM.div({className: 'sectionBodyTerritoriesInfosLogo'},
+                        React.DOM.img({src: '/images/oneTerritoryCount.png'})             
+                    ),
+                    /*React.DOM.div({style: {display: 'flex', flexDirection: 'column', justifyContent: 'center'}},
+                        React.DOM.div({className: 'sectionBodyTerritoriesInfos1'}, 'XX')
+                    ),*/
+                    territoire.progressIndicators ? React.DOM.div({className: 'sectionBodyTerritoriesInfos2'},
+                        React.DOM.span({title: "Query oracle results"}, territoire.progressIndicators.queriesResultsCount),
+                        '-',
+                        React.DOM.span({title: "Crawl todo"}, territoire.progressIndicators.territoireTaskCount),
+                        '-',
+                        React.DOM.span({title: "Expressions"}, Object.keys(territoire.expressionById || {}).length)
+                    ) : undefined
+                )              
             ),
             React.DOM.div({id: 'sectionBodyTerritoryButtons'},
                 React.DOM.button(
@@ -430,8 +436,7 @@ module.exports = React.createClass({
                             }
                         }, 'Cognitive Map (GEXF)')
                     ) : undefined
-                ),
-                React.DOM.div({className: 'clear'})
+                )
             ),
             state.currentTab === 'pages' ?
                 new PagesTab({

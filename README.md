@@ -62,6 +62,7 @@ cd MyWebIntelligence
     * Create OAuth2 credentials
     * `cp config/google-credentials.sample.json config/google-credentials.json`
     * Fill in credentials in `config/google-credentials.json`
+        * Set `"CALLBACK_URL"` to `http://yourdomain.com:3333/auth/google/callback`
 
 * **(Optional) Create a [Readability account](https://www.readability.com/login/?next=/settings/account)**
     * [Create API keys](https://www.readability.com/settings/account) (need to verify email for that)

@@ -49,8 +49,8 @@ git clone https://github.com/MyWebIntelligence/MyWebIntelligence.git
 cd MyWebIntelligence
 ````
 
-* **Install** [Node.js](https://nodejs.org)
-  * [For Ubuntu via apt](https://nodejs.org/en/download/package-manager/#debian-and-ubuntu-based-linux-distributions)
+* **Install** [Node.js](https://nodejs.org) 0.10
+  * For Ubuntu [see instructions](https://github.com/nodesource/distributions#installation-instructions)
 
 * **To get Google login**
     * Create a Google project in the [Google Console](https://console.developers.google.com)

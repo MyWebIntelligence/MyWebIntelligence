@@ -257,9 +257,6 @@ div, input, textarea, select{
     display: flex;
     flex-direction: row;
 }
-#sectionConnectContent > *{
-    flex: 1;
-}
 
 #sectionNavigation {
     flex: 1;
@@ -699,7 +696,7 @@ div, input, textarea, select{
 
 .sectionBody{
 	display:none;
-	max-width:600px;
+	max-width: 50em;
 }
 .sectionBody.on{
 	display:block;

@@ -167,7 +167,7 @@ module.exports = React.createClass({
                     }
                 }
 
-                return React.DOM.div({className: 'territoryFormQueryLine'}, 
+                return React.DOM.div({className: 'territoryFormQueryLine', key: id}, 
                     React.DOM.div({className: 'territoryFormQueryLineLabel'}, opt.name),
                     React.DOM.div({className: 'territoryFormQueryLineInput'}, input)
                 );

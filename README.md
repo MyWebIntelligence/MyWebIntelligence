@@ -47,7 +47,7 @@ npm run watch
 * **Install** [Docker compose](https://docs.docker.com/compose/install/)
 
 * **Install** [Node.js](https://nodejs.org) 0.10
-  * For Ubuntu [see instructions](https://github.com/nodesource/distributions#installation-instructions)
+   * For Ubuntu [see instructions](https://github.com/nodesource/distributions#installation-instructions)
 
 
 ````sh

@@ -63,6 +63,7 @@ npm run watch
 
 * **Install** [Docker](https://docs.docker.com/installation/#installation)
    * On Ubuntu, there is an [apt repository](https://docs.docker.com/engine/installation/ubuntulinux/)
+      * (for steps 5 to 7, do `echo "deb https://apt.dockerproject.org/repo ubuntu-trusty main" > /etc/apt/sources.list.d/docker.list`)  
 
 ````sh
 git clone https://github.com/MyWebIntelligence/MyWebIntelligence.git

@@ -75,7 +75,7 @@ cd MyWebIntelligence
     * Activate Google+ API for your project
     * Create OAuth2 credentials
     * `cp config/google-credentials.sample.json config/google-credentials.json`
-    * Fill in credentials in `crawl/google-credentials.json`
+    * Fill in credentials in `config/google-credentials.json`
 
 * **(Optional) Create a [Readability account](https://www.readability.com/login/?next=/settings/account)**
     * [Create API keys](https://www.readability.com/settings/account) (need to verify email for that)

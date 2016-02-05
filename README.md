@@ -84,6 +84,7 @@ npm run up-stable # starts the application or restart it if it's already up
 ````sh
 docker exec mywistable_app_1 node tools/recreateSQLTables.js
 # docker exec mywiexperimental_app_1 node tools/recreateSQLTables.js
+npm run up-stable
 ````
 
 * **(Optional) Make a copy of Alexa's top 1M**

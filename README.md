@@ -74,7 +74,7 @@ cd MyWebIntelligence
 npm run build-stable
 npm install
 npm run bundle
-npm run up-stable
+npm run up-stable # starts the application or restart it if it's already up
 ````
 
 * **Initialize the database**

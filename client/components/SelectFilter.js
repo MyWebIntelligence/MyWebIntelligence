@@ -24,7 +24,7 @@ module.exports = React.createClass({
             },
             React.DOM.label(
                 {},
-                props.label,
+                props.label ? props.label : undefined,
                 React.DOM.select(
                     {
                         onChange: function(e){
@@ -33,8 +33,10 @@ module.exports = React.createClass({
                             props.onChange(value);
                         }
                     },
-                    props.options.map(function(opt){
-                        return React.DOM.option({value: opt}, opt)
+                    Object.keys(props.options).map(function(key){
+                        var value = props.options[key];
+                        
+                        return React.DOM.option({value: value, key: value}, key)
                     })
                 )
             )

@@ -52,7 +52,6 @@ module.exports = function(resource, territoireId, depth){
                             var expression = expressions[0];
                             return database.Resources.associateWithExpression(resourceId, expression.id)
                             .then(function(){
-                                console.log('expression.publication_date', expression.publication_date)
                                 if(expression.publication_date){
                                     // create default annotation value
                                     return database.ResourceAnnotations.update(

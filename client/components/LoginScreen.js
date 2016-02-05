@@ -2,7 +2,6 @@
 
 var React = require('react');
 
-var Header = require('./Header');
 var LoginBox = React.createFactory(require('./LoginBox'));
 
 /*
@@ -15,6 +14,8 @@ interface LoginScreenProps{
 
 
 module.exports = React.createClass({
+    displayName: 'LoginScreen',
+    
     getInitialState: function() {
         return {};
     },
@@ -22,15 +23,16 @@ module.exports = React.createClass({
     render: function() {
         var props = this.props;
         
-        return React.DOM.div({className: "react-wrapper"}, [
-            new Header(),
-            
-            React.DOM.main({className: "login"}, new LoginBox({
-                onLogin: function(){
-                    props.moveToTerritoiresScreen();
-                }
-            }))
-        
-        ]);
+        return React.DOM.section({id: 'sectionConnexion'},
+            React.DOM.div({id: 'sectionConnexionBox'},
+                React.DOM.div({id: 'sectionConnexionBoxContent'},
+                    new LoginBox({
+                        onLogin: function(){
+                            props.moveToTerritoiresScreen();
+                        }
+                    })      
+                )
+            )
+        )
     }
 });

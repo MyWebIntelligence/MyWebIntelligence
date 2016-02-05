@@ -2,11 +2,10 @@
 
 var React = require('react');
 
-var DeleteButton = React.createFactory(require('./DeleteButton'));
+var QueryForm = React.createFactory(require('./QueryForm'));
+var getQueryFormData = require('../getQueryFormData');
 
-
-
-function findValidationErrors(fileString, oracles){
+/*function findValidationErrors(fileString, oracles){
     console.log('findValidationErrors', oracles);
     
     var territoireData;
@@ -53,7 +52,7 @@ function findValidationErrors(fileString, oracles){
         errors : errors.length >= 1 ? errors : undefined,
         warnings : warnings.length >= 1 ? warnings : undefined
     }; 
-}
+}*/
 
 /*
 
@@ -80,31 +79,34 @@ module.exports = React.createClass({
     },
     
     render: function(){
-        var self = this;
+        //var self = this;
         var props = this.props;
         
         var territoire = props.territoire || {};
         
-        return React.DOM.div({className: 'TerritoireForm-react-component'},
-            React.DOM.form(
-                {
-                    className: "table-layout manual",
-                    onSubmit: function(e){
-                        e.preventDefault();
+        return React.DOM.form(
+            {
+                id: 'sectionBodyCreateTerritory',
+                className: 'sectionBody on',
+                onSubmit: function(e){
+                    e.preventDefault();
 
-                        var formElement = e.target;
+                    var formElement = e.target;
 
-                        var formData = Object.create(null);
-                        formData.name = formElement.querySelector('input[name="name"]').value;
-                        formData.description = formElement.querySelector('textarea[name="description"]').value;
+                    var territoireData = Object.create(null);
+                    territoireData.name = formElement.querySelector('input[name="name"]').value;
+                    territoireData.description = formElement.querySelector('textarea[name="description"]').value;
 
-                        console.log('formData', formData);
+                    var queryData = getQueryFormData(formElement, props.oracles);
+                    
+                    territoireData.queries = [queryData];
 
-                        props.onSubmit(formData);
-                    }
-                },
-                React.DOM.label({}, 
-                    React.DOM.span({}, 'Name'),
+                    props.onSubmit(territoireData);
+                }
+            },
+            React.DOM.div({className: 'territoryFormLine'}, 
+                React.DOM.div({className: 'territoryFormLineLabel'}, 'Titre'),
+                React.DOM.div({className: 'territoryFormLineInput'},
                     React.DOM.input({
                         name: 'name',
                         type: 'text',
@@ -116,87 +118,27 @@ module.exports = React.createClass({
                         //pattern: '\s*(\S+\s*)+', 
                         defaultValue: territoire.name
                     })
-                ),
-                React.DOM.label({}, 
-                    React.DOM.span({}, 'Description'),
+                )
+            ),
+            React.DOM.div({className: 'territoryFormLine'}, 
+                React.DOM.div({className: 'territoryFormLineLabel'}, 'Description'),
+                React.DOM.div({className: 'territoryFormLineInput'},
                     React.DOM.textarea({
                         name: 'description',
-                        rows: "5",
+                        rows: '5',
                         defaultValue: territoire.description
                     })
-                ),
-                React.DOM.button({
-                    type: "submit"
-                }, "ok")
+                )
             ),
-            props.initialCreation ? React.DOM.form(
-                {
-                    className: "import",
-                    onSubmit: function(e){
-                        e.preventDefault();
-
-                        console.log('self.state.territoireImportFileData', self.state)
-                        
-                        if(self.state.territoireImportFileData)
-                            props.onSubmit(self.state.territoireImportFileData);
-                        else
-                            console.error('self.state.territoireImportFileData', self.state.territoireImportFileData)
-                    }
-                },
-                React.DOM.label({}, 
-                    React.DOM.span({}, 'Import territoire file'),
-                    React.DOM.input({
-                        name: 'name',
-                        type: 'file',
-                        required: true,
-                        onChange: function(e){
-                            var file = e.target.files[0];
-                            var reader = new FileReader();
-
-                            reader.onload = function(ev) {
-                                var fileContent = ev.target.result;
-
-                                var res = findValidationErrors(fileContent, props.oracles);
-                                var territoireData = res.territoireData;
-                                var errors = res.errors;
-                                var warnings = res.warnings;
-
-                                if(Array.isArray(errors)){
-                                    errors.forEach(function(err){
-                                        console.error('File import validation error for file', file.name, err);
-                                    })
-                                }
-                                if(Array.isArray(warnings)){
-                                    warnings.forEach(function(w){
-                                        console.warn('File import validation warning for file', file.name, w);
-                                    })
-                                }
-
-                                console.log('territoireImportFileData', res);
-                                
-                                self.setState({
-                                    territoireImportFileData: !errors || errors.length === 0 ?
-                                        territoireData :
-                                        undefined
-                                });
-                            };
-
-                            reader.readAsText(file);
-                        }
-                    })
-                ),
-                React.DOM.button({
-                    type: "submit"
-                }, "ok")
-            ) : undefined,
-            props.territoire ? new DeleteButton({
-                onDelete: function(){
-                    props.deleteTerritoire(props.territoire);
-                }
-            }) : undefined
+            new QueryForm({
+                oracles: props.oracles
+            }),
+            
+            React.DOM.button({
+                className: 'territoryFormButton',
+                type: 'submit'
+            }, "ok")
         )
-        
-        
         
     }
 });

@@ -29,7 +29,7 @@ var simplifyExpression = require('./simplifyExpression');
 var makeResourceSocialImpactIndexMap = require('../automatedAnnotation/makeResourceSocialImpactIndexMap');
 
 var TerritoireListScreen = React.createFactory(require('../client/components/TerritoireListScreen'));
-var OraclesScreen = React.createFactory(require('../client/components/OraclesScreen'));
+var NewTerritoireScreen = React.createFactory(require('../client/components/NewTerritoireScreen'));
 var TerritoireViewScreen = React.createFactory(require('../client/components/TerritoireViewScreen'));
 
 // start tasks processors
@@ -177,7 +177,7 @@ app.get('/territoires', function(req, res){
 });
 
 
-app.get('/oracles', function(req, res){
+app.get('/territoires/new', function(req, res){
     var user = serializedUsers.get(req.session.passport.user);
     if(!user || !user.id){
         res.redirect('/');
@@ -192,12 +192,12 @@ app.get('/oracles', function(req, res){
             
             var initData = result[1];
 
-            renderDocumentWithData(doc, initData, OraclesScreen);
+            renderDocumentWithData(doc, initData, NewTerritoireScreen);
 
             res.send( serializeDocumentToHTML(doc) );
             dispose();
         })
-        .catch(function(err){ console.error('/oracles', err); });
+        .catch(function(err){ console.error('/territoires/new', err); });
     }
 });
 

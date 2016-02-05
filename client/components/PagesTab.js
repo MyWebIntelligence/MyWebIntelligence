@@ -1,8 +1,7 @@
 "use strict";
 
 var React = require('react');
-var ImmutableMap = require('immutable').Map;
-var ImmutableSet = require('immutable').Set;
+var ImmutableMap = require('immutable').OrderedMap;
 var documentOffset = require('global-offset');
 
 var PageListItem = React.createFactory(require('./PageListItem'));
@@ -18,25 +17,12 @@ var DEFAULT_LIST_TOP_OFFSET = 0; // pretend it's at the top so worst case more i
 var LIST_START_PADDING = 5;
 var LIST_END_PADDING = LIST_START_PADDING;
 
-
-/*
-throw 'TODO';
-
-    Make a PageFilters component which has many filter children
-    Filters are generic (boolean, select, double-range)
-    
-    The PageFilters element generates a function which returns true/false for a given page (pageGraph node here)
-    Init filter values determine the initial filter.
-    Add cancel button whichmakes the filter return back to the default value
-    
-*/
-
-
 var DEFAULT_MEDIA_TYPE = undefined;
 var DEFAULT_EMITTER_TYPE = undefined;
 var DEFAULT_FAVORITE_FILTER_VALUE = false;
 var DEFAULT_SENTIMENT_FILTER_VALUE = '';
 
+var NO_FILTER = '';
 
 
 module.exports = React.createClass({
@@ -78,9 +64,9 @@ module.exports = React.createClass({
             var resourceId = n.id;
             
             var resourceAnnotations = resourceAnnotationByResourceId && resourceId ?
-                resourceAnnotationByResourceId[resourceId] : 
+                resourceAnnotationByResourceId[resourceId] || {} : 
                 {};
-
+            
             var expressionDomainId = resourceAnnotations.expression_domain_id;
             
             var expressionDomainAnnotations = expressionDomainId ? 
@@ -131,7 +117,9 @@ module.exports = React.createClass({
     componentWillReceiveProps: function(nextProps) {
         var props = this.props;
         var state = this.state;
-        var resourceSocialImpactIndexMap = makeResourceSocialImpactIndexMap(nextProps.resourceAnnotationByResourceId);
+        var resourceSocialImpactIndexMap = nextProps !== props ?
+            makeResourceSocialImpactIndexMap(nextProps.resourceAnnotationByResourceId) :
+            state.resourceSocialImpactIndexMap;
         
         var nodeToFilterInfos = (props.pageGraph !== nextProps.pageGraph || 
            props.resourceAnnotationByResourceId !== nextProps.resourceAnnotationByResourceId ||
@@ -159,11 +147,11 @@ module.exports = React.createClass({
         if(!this._listItemHeight){ // covers undefined, NaN and 0 
             var thisElement = this.getDOMNode();
             
-            var firstLi = thisElement.querySelector('main.territoire ul li');
+            var firstLi = thisElement.querySelector('#sectionBodyTerritoryPages > *:first-child');
 
             if(firstLi){
                 this._listItemHeight = parseInt( window.getComputedStyle(firstLi).height );
-                this._listTopOffset = documentOffset(thisElement.querySelector('main.territoire ul')).top;
+                this._listTopOffset = documentOffset(thisElement.querySelector('#sectionBodyTerritoryPages')).top;
             }
         }
     },
@@ -221,12 +209,16 @@ module.exports = React.createClass({
         
         var listItemHeight = this._listItemHeight || DEFAULT_LIST_ITEM_HEIGHT;
         var listTopOffset = this._listTopOffset || DEFAULT_LIST_TOP_OFFSET;
-        
+                
         var startOffset = state.pageY - listTopOffset;
         var listStartIndex = Math.max(0, Math.floor(startOffset/listItemHeight) - LIST_START_PADDING)
+        if(listStartIndex % 2 === 1) // CSS styles based on even-ness. Add an element if necessary
+            listStartIndex++;
         
         var numberOfDisplayedItems = Math.ceil(state.windowHeight/listItemHeight);
         var listEndIndex = listStartIndex + LIST_START_PADDING + numberOfDisplayedItems + LIST_END_PADDING;
+        
+        console.log('sizes', state.windowHeight, listItemHeight, listStartIndex)
         
         var pageListItems = this._makePageListItems(
             props, 
@@ -234,9 +226,11 @@ module.exports = React.createClass({
             state.filterValues, 
             state.nodeToFilterInfos
         );
+        
+        console.log('PagesTab', 'pageListItems', pageListItems && pageListItems.length)
 
-        var possibleMediaTypes = new ImmutableSet(['']);
-        var possibleEmitterTypes = new ImmutableSet(['']);
+        var possibleMediaTypes = new ImmutableMap({' -- Media type -- ': NO_FILTER});
+        var possibleEmitterTypes = new ImmutableMap({' -- Emitter type -- ': NO_FILTER});
         if(props.pageGraph){
             props.pageGraph.nodes.forEach(function(n){
                 var resourceId = n.id;
@@ -244,7 +238,7 @@ module.exports = React.createClass({
                 var expressionDomainAnnotationsByEDId = props.expressionDomainAnnotationsByEDId;
 
                 var resourceAnnotations = resourceAnnotationByResourceId && resourceId ?
-                    resourceAnnotationByResourceId[resourceId] : 
+                    resourceAnnotationByResourceId[resourceId] || {} : 
                     {};
 
                 var expressionDomainId = resourceAnnotations.expression_domain_id;
@@ -256,35 +250,28 @@ module.exports = React.createClass({
                 var emitterType = expressionDomainAnnotations && expressionDomainAnnotations['emitter_type'];
 
                 if(mediaType)
-                    possibleMediaTypes = possibleMediaTypes.add(mediaType);
+                    possibleMediaTypes = possibleMediaTypes.set(mediaType, mediaType);
                 if(emitterType)
-                    possibleEmitterTypes = possibleEmitterTypes.add(emitterType);
+                    possibleEmitterTypes = possibleEmitterTypes.set(emitterType, emitterType);
             });
         }
+        
+        
         
         return React.DOM.div(
             {
                 className: 'page-list-container',
                 style: {
-                    height: state.pageListItems ? state.pageListItems.length * listItemHeight + 'px' : '100%'
+                    height: pageListItems ? pageListItems.length * listItemHeight + 'px' : '100%'
                 }
             },
-            React.DOM.ul(
-                {
-                    className: 'result-list',
-                    style: {
-                        transform: 'translateY('+listStartIndex*listItemHeight+'px)'
-                    }
-                },
-                React.DOM.div(
-                    {
-                        className: 'filters'
-                    },
+            React.DOM.div({id: 'sectionBodyTerritoryFilters'},
+                React.DOM.i({className: 'fa fa-filter', title: 'filters'}),
+                React.DOM.div({id: 'sectionBodyTerritoryFiltersFilter01', className: 'sectionBodyTerritoryFiltersFilter'},
                     new SelectFilter(
                         {
-                            label: 'Media',
                             className: 'media_type',
-                            value: state.filterValues.get('media_type'),
+                            value: state.filterValues.get('media_type') || NO_FILTER,
                             options: possibleMediaTypes.toJS(),
                             onChange: function(newValue){
                                 console.log("media_type", newValue)
@@ -298,10 +285,11 @@ module.exports = React.createClass({
                                 ))
                             }
                         }
-                    ),
+                    )
+                ),
+                React.DOM.div({id: 'sectionBodyTerritoryFiltersFilter02', className: 'sectionBodyTerritoryFiltersFilter'},
                     new SelectFilter(
                         {
-                            label: 'Emitter',
                             className: 'emitter_type',
                             value: state.filterValues.get('emitter_type'),
                             options: possibleEmitterTypes.toJS(),
@@ -315,7 +303,9 @@ module.exports = React.createClass({
                                 ))
                             }
                         }
-                    ),
+                    )
+                ),
+                React.DOM.div({id: 'sectionBodyTerritoryFiltersFilter03', className: 'sectionBodyTerritoryFiltersFilter'},
                     new BooleanFilter(
                         {
                             className: 'favorite',
@@ -329,11 +319,13 @@ module.exports = React.createClass({
                                     }
                                 ))
                             }
-                        }
-                    ),
+                        },
+                        React.DOM.i({className: 'fa fa-star'})
+                    )
+                ),
+                React.DOM.div({id: 'sectionBodyTerritoryFiltersFilter04', className: 'sectionBodyTerritoryFiltersFilter'},
                     new BooleanFilter(
                         {
-                            label: '☹',
                             className: 'sentiment',
                             value: state.filterValues.get('sentiment') === 'negative',
                             onChange: function(newValue){
@@ -345,10 +337,20 @@ module.exports = React.createClass({
                                     }
                                 ))
                             }
-                        }
+                        },
+                        '☹'
                     )
                 ),
-                
+                React.DOM.div({className: 'clear'})
+            ),
+            React.DOM.div(
+                {
+                    id: 'sectionBodyTerritoryPages',
+                    className: 'sectionBodyTerritoryPage on',
+                    style: {
+                        transform: 'translateY('+listStartIndex*listItemHeight+'px)'
+                    }
+                },
                 pageListItems && pageListItems
                     .slice(listStartIndex, listEndIndex)
                     .map(function(node){

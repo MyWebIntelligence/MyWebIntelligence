@@ -6,6 +6,7 @@ var React = require('react');
     A delete button asking for confirmation
     
 interface DeleteButtonProps{
+    className: string
     askForConfirmation: boolean // (defaults to true)
     onDelete: () => void
 }
@@ -37,7 +38,7 @@ module.exports = React.createClass({
                     }
                         
                 }
-            }, React.DOM.i({className: 'fa fa-remove'}, ''))
+            })
         ];
         
         if(state.pendingConfirmation){
@@ -63,8 +64,11 @@ module.exports = React.createClass({
         
         
         return React.DOM.div({
-            className: "delete",
-            title: "delete"
+            className: ["delete", props.className].join(' ').trim(),
+            title: "delete",
+            onClick: function(e){
+                e.stopPropagation();
+            }
         }, children);
     }
 });

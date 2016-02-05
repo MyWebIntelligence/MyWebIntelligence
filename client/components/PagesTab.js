@@ -229,8 +229,8 @@ module.exports = React.createClass({
         
         console.log('PagesTab', 'pageListItems', pageListItems && pageListItems.length)
 
-        var possibleMediaTypes = new ImmutableMap({'(Media type)': NO_FILTER});
-        var possibleEmitterTypes = new ImmutableMap({'(Emitter type)': NO_FILTER});
+        var possibleMediaTypes = new ImmutableMap({' -- Media type -- ': NO_FILTER});
+        var possibleEmitterTypes = new ImmutableMap({' -- Emitter type -- ': NO_FILTER});
         if(props.pageGraph){
             props.pageGraph.nodes.forEach(function(n){
                 var resourceId = n.id;

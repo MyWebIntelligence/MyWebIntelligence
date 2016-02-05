@@ -44,13 +44,16 @@ npm run watch
    * On Ubuntu, there is an [apt repository](https://docs.docker.com/engine/installation/ubuntulinux/)
       * (for steps 5 to 7, do `echo "deb https://apt.dockerproject.org/repo ubuntu-trusty main" > /etc/apt/sources.list.d/docker.list`)  
 
+* **Install** [Docker compose](https://docs.docker.com/compose/install/)
+
+* **Install** [Node.js](https://nodejs.org) 0.10
+  * For Ubuntu [see instructions](https://github.com/nodesource/distributions#installation-instructions)
+
+
 ````sh
 git clone https://github.com/MyWebIntelligence/MyWebIntelligence.git
 cd MyWebIntelligence
 ````
-
-* **Install** [Node.js](https://nodejs.org) 0.10
-  * For Ubuntu [see instructions](https://github.com/nodesource/distributions#installation-instructions)
 
 * **To get Google login**
     * Create a Google project in the [Google Console](https://console.developers.google.com)

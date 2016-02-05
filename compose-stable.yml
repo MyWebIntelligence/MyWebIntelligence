@@ -21,7 +21,7 @@ db:
       - /var/lib/postgresql
       - /var/lib/postgresql/data
    expose:
-      - 5432:5432
+      - 5432
 elasticanalysis: 
    image: elasticsearch:1.7
    environment:

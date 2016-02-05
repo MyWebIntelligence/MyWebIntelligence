@@ -48,6 +48,7 @@ npm run watch
 
 * **Install** [Node.js](https://nodejs.org) 0.10
   * For Ubuntu [see instructions](https://github.com/nodesource/distributions#installation-instructions)
+  * Install build-essential: `sudo apt-get install -y build-essential`
 
 
 ````sh

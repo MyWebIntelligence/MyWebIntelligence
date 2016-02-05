@@ -60,6 +60,7 @@ cd MyWebIntelligence
     * Create a Google project in the [Google Console](https://console.developers.google.com)
     * Activate Google+ API for your project
     * Create OAuth2 credentials
+        * Add `http://yourdomain.com:3333/auth/google/callback` to the allowed redirect URLs list
     * `cp config/google-credentials.sample.json config/google-credentials.json`
     * Fill in credentials in `config/google-credentials.json`
         * Set `"CALLBACK_URL"` to `http://yourdomain.com:3333/auth/google/callback`

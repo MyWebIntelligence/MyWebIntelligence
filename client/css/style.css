@@ -165,39 +165,33 @@ div, input, textarea, select{
 }
 
 #sectionConnect {
-	position:absolute;
-	top:0px; left:0px; right:0px; bottom:0px;
-	z-index:50;
 }
 
 #sectionConnectHeader {
-	position:fixed;
-	top:0px; left:0px; right:0px;
-	height:30px;
+	height: 3em;
 	background-color:rgb(71,71,73);
 	color:rgb(255,255,255);
 	text-align:right;
-	z-index:75;
+    
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
 }
 
 #sectionConnectHeaderPseudo {
-	float:right;
-	height:30px;
-	line-height:30px;
 	padding:0px 10px;
 }
 
 #sectionConnectHeaderOracle {
-	float:right;
-	height:30px;
-	line-height:30px;
 	padding:0px 10px;
 }
 
+#sectionConnectHeaderOracle:hover{
+    align-self: flex-start;
+}
+
 #sectionConnectHeaderLogout {
-	float:right;
-	height:30px;
-	line-height:30px;
 	padding:0px 10px;
 }
 
@@ -207,14 +201,14 @@ div, input, textarea, select{
 	background-color:rgb(255,255,255);
 	color:rgb(71,71,73);
 	text-transform:uppercase;
-	text-align: left;
 
+    margin-right: 1em;
 }
 
 #sectionConnectHeaderOracleBoxLabel{
-
-	padding:10px;
-	padding-top:15px;
+    padding: 1em 0;
+    line-height: 1em;
+    text-align: center;
 
 }
 
@@ -222,10 +216,16 @@ div, input, textarea, select{
 
 	background-color: rgb(71,71,73);
 	color:rgb(255,255,255);
-	padding:0px 10px;
+	
 	cursor:pointer;
-	margin-top:4px;
+    padding: 1em;
+    z-index: 1;
+}
 
+
+#sectionConnectHeaderOracleBoxGoogle form{
+    display: flex;
+    flex-direction: column;
 }
 
 .sectionConnectHeaderOracleBox.disable{
@@ -246,25 +246,25 @@ div, input, textarea, select{
 
 }
 
-#sectionConnectHeaderOracle:hover #sectionConnectHeaderOracleBox{
-	
-	display:inline-block;
-
+#sectionConnectHeaderOracle:hover #sectionConnectHeaderOracleBox,
+#sectionConnectHeaderOracleBox:hover{
+	display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
 }
 
 #sectionConnectContent {
-	position:absolute;
-	top:30px; left:0px; right:0px; bottom:0px;
-	z-index:25;
+    display: flex;
+    flex-direction: row;
+}
+#sectionConnectContent > *{
+    flex: 1;
 }
 
 #sectionNavigation {
-	position:absolute;
-	left:0px; top:0px; right:50%; bottom:0px;
-	margin-right:150px;
-	border-right:20px solid rgb(223,229,229);
+    flex: 1;
+    border-right:20px solid rgb(223,229,229);
 	text-transform:uppercase;
-	z-index:15;
 }
 
 
@@ -458,13 +458,7 @@ div, input, textarea, select{
 }
 
 #sectionBody {
-	position:absolute;
-	top:0px; left:50%; bottom:0px;
-	right:0px;
-	margin-left:-150px;
-	overflow:hidden;
-	overflow-y:scroll;
-	z-index:10;
+    flex: 2;
 }
 
 #sectionBodyCreateTerritory {
@@ -475,6 +469,13 @@ div, input, textarea, select{
 
 #sectionBodyTerritory {
 }
+
+#sectionBodyTerritory header{
+    background-color:rgb(223,229,229);
+    display: flex;
+    justify-content: space-between;
+}
+
 
 #sectionBodyView {
 
@@ -822,33 +823,46 @@ div, input, textarea, select{
 	margin-bottom:40px;
 }
 
+.sectionBodyTerritories header{
+    background-color:rgb(223,229,229);
+}
+.sectionBodyTerritories header .top-line{
+
+    display: flex;
+    justify-content: space-between;
+}
+
+.sectionBodyTerritories header .top-line > *{
+    flex: 1;
+}
+
+.sectionBodyTerritories header p.description{
+    color: grey;
+    padding: 1em;
+    margin: 0;
+}
+
 .sectionBodyTerritories:last-child{
 	margin-bottom:0px;
 }
 
 .sectionBodyTerritoriesLabel {
-	background-color:rgb(223,229,229);
-	float:left;
-	width:60%;
 	font-weight:700;
 	height:35px;
+    display: flex;
 }
 
 .sectionBodyTerritoriesLabelTitle {
-	float:left;
 	height:35px;
-	padding:5px;
+	padding: 5px 0;
 	line-height:25px;
 	font-size:20px;
 	font-weight:700;
-	margin-left:10px;
+    margin-left: 1em;
 }
 
 .sectionBodyTerritoriesLabelLogo {
-
-	float:left;
 	height:35px;
-
 }
 
 .sectionBodyTerritoriesInfos {
@@ -856,8 +870,6 @@ div, input, textarea, select{
 	display: flex;
     justify-content: flex-end;
     align-items: stretch;
-    
-	width: 40%;
 }
 
 .sectionBodyTerritoriesInfos > *{
@@ -1214,16 +1226,28 @@ background-color:rgb(223,229,229);
 }
 
 .sectionBodyTerritoryPagesLine {
-	padding:20px;
+	padding: 1.5em;
+    height: 20em;
+    
+    overflow: hidden;
+}
+.sectionBodyTerritoryPagesLine:nth-child(2n) {
+	background-color:rgb(239,239,240);
+}
+
+.sectionBodyTerritoryPagesLine:hover {
+	overflow: visible;
+    z-index: 1;
+    background-color:rgb(223,229,229);
+    height: auto;
+    min-height: 20em;
 }
 
 .sectionBodyTerritoryPagesLine.rejected {
 	opacity: 0.4;
 }
 
-.sectionBodyTerritoryPagesLine:nth-child(2n) {
-	background-color:rgb(239,239,240);
-}
+
 
 .sectionBodyTerritoryPagesLineHeader {
 }

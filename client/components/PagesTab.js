@@ -64,9 +64,9 @@ module.exports = React.createClass({
             var resourceId = n.id;
             
             var resourceAnnotations = resourceAnnotationByResourceId && resourceId ?
-                resourceAnnotationByResourceId[resourceId] : 
+                resourceAnnotationByResourceId[resourceId] || {} : 
                 {};
-
+            
             var expressionDomainId = resourceAnnotations.expression_domain_id;
             
             var expressionDomainAnnotations = expressionDomainId ? 
@@ -117,7 +117,9 @@ module.exports = React.createClass({
     componentWillReceiveProps: function(nextProps) {
         var props = this.props;
         var state = this.state;
-        var resourceSocialImpactIndexMap = makeResourceSocialImpactIndexMap(nextProps.resourceAnnotationByResourceId);
+        var resourceSocialImpactIndexMap = nextProps !== props ?
+            makeResourceSocialImpactIndexMap(nextProps.resourceAnnotationByResourceId) :
+            state.resourceSocialImpactIndexMap;
         
         var nodeToFilterInfos = (props.pageGraph !== nextProps.pageGraph || 
            props.resourceAnnotationByResourceId !== nextProps.resourceAnnotationByResourceId ||
@@ -145,11 +147,11 @@ module.exports = React.createClass({
         if(!this._listItemHeight){ // covers undefined, NaN and 0 
             var thisElement = this.getDOMNode();
             
-            var firstLi = thisElement.querySelector('main.territoire ul li');
+            var firstLi = thisElement.querySelector('#sectionBodyTerritoryPages > *:first-child');
 
             if(firstLi){
                 this._listItemHeight = parseInt( window.getComputedStyle(firstLi).height );
-                this._listTopOffset = documentOffset(thisElement.querySelector('main.territoire ul')).top;
+                this._listTopOffset = documentOffset(thisElement.querySelector('#sectionBodyTerritoryPages')).top;
             }
         }
     },
@@ -207,12 +209,16 @@ module.exports = React.createClass({
         
         var listItemHeight = this._listItemHeight || DEFAULT_LIST_ITEM_HEIGHT;
         var listTopOffset = this._listTopOffset || DEFAULT_LIST_TOP_OFFSET;
-        
+                
         var startOffset = state.pageY - listTopOffset;
         var listStartIndex = Math.max(0, Math.floor(startOffset/listItemHeight) - LIST_START_PADDING)
+        if(listStartIndex % 2 === 1) // CSS styles based on even-ness. Add an element if necessary
+            listStartIndex++;
         
         var numberOfDisplayedItems = Math.ceil(state.windowHeight/listItemHeight);
         var listEndIndex = listStartIndex + LIST_START_PADDING + numberOfDisplayedItems + LIST_END_PADDING;
+        
+        console.log('sizes', state.windowHeight, listItemHeight, listStartIndex)
         
         var pageListItems = this._makePageListItems(
             props, 
@@ -221,7 +227,7 @@ module.exports = React.createClass({
             state.nodeToFilterInfos
         );
         
-        console.log('PagesTab', 'pageListItems', pageListItems)
+        console.log('PagesTab', 'pageListItems', pageListItems && pageListItems.length)
 
         var possibleMediaTypes = new ImmutableMap({'(Media type)': NO_FILTER});
         var possibleEmitterTypes = new ImmutableMap({'(Emitter type)': NO_FILTER});
@@ -232,7 +238,7 @@ module.exports = React.createClass({
                 var expressionDomainAnnotationsByEDId = props.expressionDomainAnnotationsByEDId;
 
                 var resourceAnnotations = resourceAnnotationByResourceId && resourceId ?
-                    resourceAnnotationByResourceId[resourceId] : 
+                    resourceAnnotationByResourceId[resourceId] || {} : 
                     {};
 
                 var expressionDomainId = resourceAnnotations.expression_domain_id;
@@ -254,10 +260,10 @@ module.exports = React.createClass({
         
         return React.DOM.div(
             {
-                className: 'page-list-container'/*,
+                className: 'page-list-container',
                 style: {
-                    height: state.pageListItems ? state.pageListItems.length * listItemHeight + 'px' : '100%'
-                }*/
+                    height: pageListItems ? pageListItems.length * listItemHeight + 'px' : '100%'
+                }
             },
             React.DOM.div({id: 'sectionBodyTerritoryFilters'},
                 React.DOM.i({className: 'fa fa-filter', title: 'filters'}),
@@ -337,7 +343,14 @@ module.exports = React.createClass({
                 ),
                 React.DOM.div({className: 'clear'})
             ),
-            React.DOM.div({id: 'sectionBodyTerritoryPages', className: 'sectionBodyTerritoryPage on'},
+            React.DOM.div(
+                {
+                    id: 'sectionBodyTerritoryPages',
+                    className: 'sectionBodyTerritoryPage on',
+                    style: {
+                        transform: 'translateY('+listStartIndex*listItemHeight+'px)'
+                    }
+                },
                 pageListItems && pageListItems
                     .slice(listStartIndex, listEndIndex)
                     .map(function(node){

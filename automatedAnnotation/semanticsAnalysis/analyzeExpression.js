@@ -38,15 +38,15 @@ module.exports = function(expression, resourceId, territoireId){
             }
         })
         .then(function(){
-            console.log('Index', indexName, 'created');
+            //console.log('Index', indexName, 'created');
             return esapi.indexDocument(indexName, MYWI_EXPRESSION_DOCUMENT_TYPE, document, documentId)
         })
         .then(function(){
-            console.log('Document', documentId, 'indexed')
+            //console.log('Document', documentId, 'indexed')
             return esapi.refreshIndex(indexName);
         })
         .then(function(){
-            console.log('Index refreshed');
+            //console.log('Index refreshed');
             var docKeys = expressionProperties;
 
             var smallFields = docKeys.map(function(k){ return k+'.small' });

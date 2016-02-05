@@ -27,12 +27,7 @@ var data;
     popstate: true
 })*/
 page("/", function(){
-    var screenData = Object.assign(
-        {
-            oracleHref: '/oracles'
-        },
-        data
-    );
+    var screenData = data;
             
     React.render(new LoginScreen(screenData), document.body);
 });
@@ -119,7 +114,8 @@ page("/territoire/:id", function displayTerritoireViewScreen(context){
         var screenData = {
             refresh: refresh,
             territoire: terrViewData,
-            user: data.user
+            user: data.user,
+            oracles: data.oracles
         };
 
         React.render(new TerritoireViewScreen(screenData), document.body);

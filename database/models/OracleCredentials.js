@@ -71,7 +71,7 @@ module.exports = {
     create: function(oracleCredentialsData){
         if(!Array.isArray(oracleCredentialsData))
             oracleCredentialsData = [oracleCredentialsData];
-        
+
         return databaseP.then(function(db){
             var query = oracle_credentials
                 .insert(oracleCredentialsData)
@@ -91,11 +91,14 @@ module.exports = {
         })
     },
     
-    update: function(oracleCredentialsData){        
+    update: function(oracleCredentialsData){            
         return databaseP.then(function(db){
             var query = oracle_credentials
                 .update(oracleCredentialsData)
-                .where(oracle_credentials.id.equals(oracleCredentialsData.id))
+                .where(
+                    oracle_credentials.user_id.equals(oracleCredentialsData.user_id),
+                    oracle_credentials.oracle_id.equals(oracleCredentialsData.oracle_id)
+                )
                 .toQuery();
 
             //console.log('oracleCredentialsData update query', query);
@@ -109,8 +112,7 @@ module.exports = {
     },
     
     createOrUpdate: function(oracleCredentialsData){
-        var self = this;
-        
+        var self = this;        
         return databaseP.then(function(db){
             var query = oracle_credentials
                 .select(oracle_credentials.star())

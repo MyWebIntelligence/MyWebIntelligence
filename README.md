@@ -8,28 +8,7 @@ A more **high-level description** can be found on [slideshare](http://www.slides
 
 ## Architecture
 
-For now, everything will belong in this repo. Eventually, parts will be separated into their own repos (perhaps some parts will even be released as NPM modules).
-
 MyWI will be a project that can be installed on a server (dedicated machine) and accessed to via a web interface. MyWI needs crawling capabilities; as such, it needs to send HTTP requests all the time and throttle them (to be a good web citizen and not be blocked) as well as storage capabilities.
-
-
-### User/Project management
-
-* The database will a [PostgreSQL](http://www.postgresql.org/) database.
-* [Express](http://expressjs.com/)
-
-
-### Client-side
-
-Client-side is built with 
-* [React](http://facebook.github.io/react/) (without JSX)
-
-
-### Tooling
-
-* [Browserify](http://browserify.org/)
-* [ESLint](http://eslint.org/)
-* [Docker](https://www.docker.com/)
 
 
 ## As a developer
@@ -69,6 +48,9 @@ npm run watch
 git clone https://github.com/MyWebIntelligence/MyWebIntelligence.git
 cd MyWebIntelligence
 ````
+
+* **Install** [Node.js](https://nodejs.org)
+  * [For Ubuntu via apt](https://nodejs.org/en/download/package-manager/#debian-and-ubuntu-based-linux-distributions)
 
 * **To get Google login**
     * Create a Google project in the [Google Console](https://console.developers.google.com)

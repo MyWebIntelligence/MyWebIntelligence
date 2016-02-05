@@ -41,13 +41,13 @@ npm run watch
 ## Installing on your own server
 
 * **Install** [Docker](https://docs.docker.com/installation/#installation)
-   * On Ubuntu, there is an [apt repository](https://docs.docker.com/engine/installation/ubuntulinux/)
-      * (for steps 5 to 7, do `echo "deb https://apt.dockerproject.org/repo ubuntu-trusty main" > /etc/apt/sources.list.d/docker.list`)  
+  * On Ubuntu, there is an [apt repository](https://docs.docker.com/engine/installation/ubuntulinux/)
+    * (for steps 5 to 7, do `echo "deb https://apt.dockerproject.org/repo ubuntu-trusty main" > /etc/apt/sources.list.d/docker.list`)  
 
 * **Install** [Docker compose](https://docs.docker.com/compose/install/)
 
 * **Install** [Node.js](https://nodejs.org) 0.10
-   * For Ubuntu [see instructions](https://github.com/nodesource/distributions#installation-instructions)
+  * For Ubuntu [see instructions](https://github.com/nodesource/distributions#installation-instructions)
 
 
 ````sh

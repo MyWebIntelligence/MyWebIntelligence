@@ -18,6 +18,31 @@ var TerritoireViewScreen = React.createFactory(require('./components/TerritoireV
 */
 var data;
 
+function createTerritoire(territoireData){
+    var temporaryTerritoire = Object.assign({queries: []}, territoireData);
+
+    // add at the beginning of the array so it appears first
+    data.user.territoires.unshift(temporaryTerritoire);
+
+    // render new territoire list right now
+    page('/territoires');
+
+    return serverAPI.createTerritoire(territoireData).then(function(serverTerritoire){
+        var index = data.user.territoires.findIndex(function(t){
+            return t === temporaryTerritoire;
+        });
+
+        serverTerritoire.queries = serverTerritoire.queries || [];
+        data.user.territoires[index] = serverTerritoire;
+
+        // some element of the state.user.territoires array was mutated
+        page('/territoires');
+
+    }).catch(function(err){
+        console.error('Territoire creation error', err);
+    });
+}
+
 
 /*
     routes
@@ -47,30 +72,7 @@ page("/territoires", function(){
 
 page("/territoires/new", function(){
     var screenData = {
-        createTerritoire: function(territoireData){
-            var temporaryTerritoire = Object.assign({queries: []}, territoireData);
-
-            // add at the beginning of the array so it appears first
-            data.user.territoires.unshift(temporaryTerritoire);
-
-            // render new territoire list right now
-            page('/territoires');
-            
-            return serverAPI.createTerritoire(territoireData).then(function(serverTerritoire){
-                var index = data.user.territoires.findIndex(function(t){
-                    return t === temporaryTerritoire;
-                });
-
-                serverTerritoire.queries = serverTerritoire.queries || [];
-                data.user.territoires[index] = serverTerritoire;
-
-                // some element of the state.user.territoires array was mutated
-                page('/territoires');
-
-            }).catch(function(err){
-                console.error('Territoire creation error', err);
-            });
-        },
+        createTerritoire: createTerritoire,
         user: data.user,
         oracles: data.oracles
     };

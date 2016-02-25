@@ -264,6 +264,21 @@ div, input, textarea, select{
 	text-transform:uppercase;
 }
 
+#sectionNavigation a{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+    
+    color: black;
+    text-decoration: none;
+	height: 3.5em;
+	cursor: pointer;
+}
+
+#sectionNavigation a .fa{
+    font-size: 2em;
+}
 
 #sectionNavigation > *:nth-child(n+2) {
     border-top:1px solid rgb(71,71,73);
@@ -284,14 +299,6 @@ div, input, textarea, select{
 	width:auto;
 }
 
-#sectionNavigation > *:nth-child(n+2) {
-    color: black;
-	text-align:right;
-	height:40px;
-	padding:5px;
-	cursor:pointer;
-    display: block; 
-}
 
 #sectionNavigation > *:nth-child(n+2):hover{
 	background-color:rgb(239,239,240);
@@ -307,21 +314,16 @@ div, input, textarea, select{
 }
 
 #sectionNavigationTerritoryLabel {
-	height:30px;
-	line-height:30px;
 	font-size:14px;
-	float:right;
-	padding:0px 10px;
 }
 
 #sectionNavigationTerritoryImg {
-	float:right;
-	text-align:center;
-	width:50px;
+	text-align: center;
+	width: 4em;
 }
 #sectionNavigationTerritoryImg img{
-	height:28px;
-	width:auto;
+	height: 75%;
+	width: auto;
 }
 
 #sectionNavigationNewTerritoryLabel {

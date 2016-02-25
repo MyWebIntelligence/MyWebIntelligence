@@ -2,6 +2,7 @@
 
 var React = require('react');
 
+
 /*
 
 interface NavigationProps{
@@ -25,23 +26,22 @@ module.exports = React.createClass({
                     href: '/territoires',
                     className: props.activeScreen === 'territoire-list' ? 'on' : undefined
                 },
+                React.DOM.div({id: 'sectionNavigationTerritoryLabel'}, 'Territoires'),
                 React.DOM.div({id: 'sectionNavigationTerritoryImg'},
                     React.DOM.img({src: '/images/territory.png'})
-                ),
-                React.DOM.div({id: 'sectionNavigationTerritoryLabel'}, 'Territoires'),
-                React.DOM.div({className: 'clear'})
+                )
             ),
             React.DOM.a(
                 {
                     href: '/territoires/new',
                     className: props.activeScreen === 'new-territoire' ? 'on' : undefined
-                }, 
+                },
+                React.DOM.div({id: 'sectionNavigationTerritoryLabel'}, 'Create a new territoire'),
                 React.DOM.div({id: 'sectionNavigationTerritoryImg'},
                     React.DOM.img({src: '/images/newTerritory.png'})
-                ),
-                React.DOM.div({id: 'sectionNavigationTerritoryLabel'}, 'Create a new territoire'),
-                React.DOM.div({className: 'clear'})
+                )
             )
+                
             /*React.DOM.div({id: 'sectionNavigationNetworks'},
                 //props.user.name
             )*/

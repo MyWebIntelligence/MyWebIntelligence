@@ -8,7 +8,7 @@
   },
   "scripts": {
     "postinstall": "cp git-hooks/pre-commit .git/hooks/pre-commit; chmod a+x .git/hooks/pre-commit",
-    "test": "mocha test/automated/database/* test/automated/graph/test-cases/* test/automated/*",
+    "test": "mocha test/automated/*",
     "start": "node server/index.js",
     "start-test": "docker run -p=6666:3333 -e \"NODE_ENV=test\" --link mywi-test-db:mywi-test-db mywi/test node server/index.js",
     "build-dev": "docker-compose -p mywi -f compose-dev.yml build",

@@ -24,21 +24,6 @@ function onOracleCredentialsChange(formData){
     return serverAPI.updateOracleCredentials(formData);
 }
 
-/*
-
-serverAPI.getCurrentUserOraclesCredentials().then(function(credentials){
-    var credentialsByOracleId = Object.create(null);
-
-    credentials.forEach(function(c){
-        credentialsByOracleId[c.oracle_id] = c.credentials;
-    });
-
-    screenData.oracleCredentials = credentialsByOracleId;
-    React.render(new OraclesScreen(screenData), document.body);
-});
-
-React.render(new OraclesScreen(screenData), document.body);
-*/
 
 module.exports = React.createClass({
     displayName: 'Header',

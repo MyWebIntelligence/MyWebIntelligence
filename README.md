@@ -65,7 +65,7 @@ cd MyWebIntelligence
     * Fill in credentials in `config/google-credentials.json`
         * Set `"CALLBACK_URL"` to `http://yourdomain.com:3333/auth/google/callback`
 
-* **(Optional) Create a [Readability account](https://www.readability.com/login/?next=/settings/account)**
+* **(Recommanded but optional) Create a [Readability account](https://www.readability.com/login/?next=/settings/account)**
     * [Create API keys](https://www.readability.com/settings/account) (need to verify email for that)
     * `cp crawl/config.sample.json crawl/config.json`
     * add your Parser API key token in the `"Readability-parser-API-key"` field
@@ -87,7 +87,7 @@ docker exec mywistable_app_1 node tools/recreateSQLTables.js
 npm run up-stable
 ````
 
-* **(Optional) Make a copy of Alexa's top 1M**
+* **(Recommanded but optional) Make a copy of Alexa's top 1M**
 
 ````sh
 docker exec mywistable_app_1 node tools/cacheAlexaTop1M.js

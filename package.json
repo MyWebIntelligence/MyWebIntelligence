@@ -62,7 +62,7 @@
     "immutable": "^3.7.4",
     "ioredis": "^1.7.4",
     "jsdom": "3.x",
-    "langdetect": "^0.2.0",
+    "langdetect": "mathiasbynens/node-language-detection#19639278b261281fa551cc528e9164dc6e602127",
     "moment": "^2.10.2",
     "multer": "^0.1.7",
     "ngraph.graph": "^0.0.12",
